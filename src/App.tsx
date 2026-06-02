@@ -374,8 +374,8 @@ export default function App() {
       queijoCoalho: [14, 14, 14, 14, 14, 14, 14],
       queijoMucarela: [28, 28, 28, 28, 28, 28, 28],
       queijoBrie: [65, 65, 65, 65, 65, 65, 65],
-      carne: [150, 150, 150, 150, 150, 150, 150],
-      meat: [150, 150, 150, 150, 150, 150, 150]
+      // BUG 14 FIX: removida chave duplicada 'meat'; 'carne' é o padrão usado no restante do código
+      carne: [150, 150, 150, 150, 150, 150, 150]
     };
   });
 
@@ -537,6 +537,8 @@ export default function App() {
 
   // Sleep / Rest state
   const [isSleeping, setIsSleeping] = useState<boolean>(false);
+  // BUG 20 FIX: ref para evitar duplo-clique no botão Dormir
+  const isSleepingRef = useRef<boolean>(false);
 
   // Achievements states
   const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>(() => {
@@ -613,6 +615,9 @@ export default function App() {
     emoji: string;
     x: number;
     y: number;
+    // BUG 17 FIX: targetY/targetX calculados uma vez na criação para evitar Math.random() no JSX
+    targetY: number;
+    targetX: number;
     scale: number;
     angle: number;
   }
@@ -666,14 +671,21 @@ export default function App() {
     }
     
     const elements = ['🎉', '✨', '🏆', '💰', '🌟', '🍀', '❤️'];
-    const newParticles: ConfettiParticle[] = Array.from({ length: 25 }).map((_, i) => ({
-      id: Math.random().toString(36).substring(2, 9),
-      emoji: elements[Math.floor(Math.random() * elements.length)],
-      x: x + (Math.random() * 100 - 50),
-      y: y + (Math.random() * 40 - 20),
-      scale: 0.6 + Math.random() * 1.0,
-      angle: Math.random() * 360
-    }));
+    // BUG 17 FIX: targetY e targetX calculados na criação para evitar Math.random() no JSX durante re-render
+    const newParticles: ConfettiParticle[] = Array.from({ length: 25 }).map((_, i) => {
+      const px = x + (Math.random() * 100 - 50);
+      const py = y + (Math.random() * 40 - 20);
+      return {
+        id: Math.random().toString(36).substring(2, 9),
+        emoji: elements[Math.floor(Math.random() * elements.length)],
+        x: px,
+        y: py,
+        targetY: py - 180 - Math.random() * 100,
+        targetX: px + (Math.random() * 160 - 80),
+        scale: 0.6 + Math.random() * 1.0,
+        angle: Math.random() * 360
+      };
+    });
 
     setConfetti(prev => [...prev, ...newParticles]);
     setTimeout(() => {
@@ -712,8 +724,8 @@ export default function App() {
       queijoCoalho: [14, 14, 14, 14, 14, 14, 14],
       queijoMucarela: [28, 28, 28, 28, 28, 28, 28],
       queijoBrie: [65, 65, 65, 65, 65, 65, 65],
-      carne: [150, 150, 150, 150, 150, 150, 150],
-      meat: [150, 150, 150, 150, 150, 150, 150]
+      // BUG 14 FIX: removida chave duplicada 'meat'
+      carne: [150, 150, 150, 150, 150, 150, 150]
     });
     setQueijosEmMaturacao([]);
     setMaxPrateleiras(2);
@@ -1071,10 +1083,11 @@ export default function App() {
   }, [showLevelUpModal]);
 
   // Add a log entry dynamically
-  const addLog = (msg: string, type: LogMessage['type'] = 'info') => {
+  // BUG 18 FIX: parâmetro overrideDay permite registrar dia correto dentro de advanceDay
+  const addLog = (msg: string, type: LogMessage['type'] = 'info', overrideDay?: number) => {
     const newLog: LogMessage = {
       id: Math.random().toString(36).substring(2, 9),
-      day: currentDay,
+      day: overrideDay ?? currentDay,
       message: msg,
       type
     };
@@ -1692,6 +1705,13 @@ export default function App() {
   const craftQueijo = (tipo: 'coalho' | 'mucarela' | 'brie', event?: React.MouseEvent) => {
     if (event && event.preventDefault) event.preventDefault();
 
+    // BUG 19 FIX: queijaria artesanal exige nível 5
+    if (farmLevel < 5) {
+      addLog('A Queijaria Artesanal é desbloqueada no Nível 5!', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+
     if (queijosEmMaturacao.length >= maxPrateleiras) {
       addLog(`🧀 Suas prateleiras estão cheias! Amplie sua queijaria ou aguarde a maturação de outros queijos.`, 'error');
       triggerAudioResult(() => sfx.playSound('error'));
@@ -1720,6 +1740,8 @@ export default function App() {
     setQueijosEmMaturacao(prev => [...prev, { tipo, diasRestantes: diasMaturation }]);
 
     // Award statistics & achievements
+    // TODO BUG 11: mover setTotalQueijosFabricados e setStats(totalCheese) para quando o queijo ficar pronto
+    // (processarMaturacaoQueijos em advanceDay), pois a conquista deveria contar conclusão, não início da maturação
     setTotalQueijosFabricados(prev => prev + 1);
     setQueijosFabricadosTipos(prev => prev.includes(tipo) ? prev : [...prev, tipo]);
 
@@ -2252,7 +2274,8 @@ export default function App() {
       copy.consecutiveHappyDays = copy.consecutiveHappyDays || 0;
       copy.daysBelow80 = copy.daysBelow80 || 0;
 
-      if (copy.happiness >= 95) {
+      // BUG 6 FIX: alinha com UI que documenta 100% de felicidade para Melhor Amigo
+      if (copy.happiness >= 100) {
         copy.consecutiveHappyDays += 1;
         if (copy.consecutiveHappyDays >= 3 && !copy.isBestFriend) {
           copy.isBestFriend = true;
@@ -2550,7 +2573,8 @@ export default function App() {
 
       // Desliza o histórico de preço semanal adicionando a nova estimativa simulada de manhã
       setPriceHistory(prev => {
-        const keys = ['milk', 'wool', 'cheese', 'scarf', 'egg', 'mayo', 'queijoCoalho', 'queijoMucarela', 'queijoBrie', 'carne', 'meat'];
+        // BUG 14 FIX: removida chave duplicada 'meat'
+        const keys = ['milk', 'wool', 'cheese', 'scarf', 'egg', 'mayo', 'queijoCoalho', 'queijoMucarela', 'queijoBrie', 'carne'];
         const nextHist: Record<string, number[]> = {};
         keys.forEach((key) => {
           let currentP;
@@ -2685,7 +2709,8 @@ export default function App() {
     return <span className={`px-2 py-0.5 text-xs rounded-full ${color}`}>{text}</span>;
   };
 
-  const isGameOver = animals.length === 0 && gold < getAnimalPurchasePrice('ovelha');
+  // BUG 16 FIX: usa galinha (animal mais barato) como referência para game over
+  const isGameOver = animals.length === 0 && gold < getAnimalPurchasePrice('galinha');
 
   const { name: seasonName, bg: seasonBg, textColor: seasonTextColor } = (() => {
     const index = Math.floor(((currentDay - 1) % 120) / 30);
@@ -2746,12 +2771,13 @@ export default function App() {
             <motion.div
               key={p.id}
               initial={{ opacity: 1, x: p.x, y: p.y, scale: 0.5, rotate: p.angle }}
-              animate={{ 
-                opacity: 0, 
-                y: p.y - 180 - Math.random() * 100, 
-                x: p.x + (Math.random() * 160 - 80), 
+              animate={{
+                opacity: 0,
+                // BUG 17 FIX: usa targetY/targetX pré-calculados, não Math.random() no render
+                y: p.targetY,
+                x: p.targetX,
                 scale: p.scale * 1.5,
-                rotate: p.angle + 180 
+                rotate: p.angle + 180
               }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeOut" }}
@@ -3130,12 +3156,16 @@ export default function App() {
                 <button
                   type="button"
                   onClick={(e) => {
+                    // BUG 20 FIX: usa ref para evitar duplo-clique
                     e.preventDefault();
+                    if (isSleepingRef.current) return;
+                    isSleepingRef.current = true;
                     setIsSleeping(true);
                     triggerAudioResult(() => sfx.playSound('click'));
                     setTimeout(() => {
                       advanceDay(null as any);
                       setIsSleeping(false);
+                      isSleepingRef.current = false;
                     }, 1250);
                   }}
                   disabled={isGameOver || isSleeping}
