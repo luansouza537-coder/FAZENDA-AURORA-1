@@ -812,6 +812,9 @@ export default function App() {
       }
     ];
     setLogs(initLogs);
+    // BUG 3 FIX: limpa conquistas ao reiniciar o jogo
+    setUnlockedAchievements([]);
+    localStorage.removeItem('aurora_achievements_save');
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -896,7 +899,8 @@ export default function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [animals, inventory, currentDay, weather, weeklySales, showBuyMenu]);
+  // BUG 9 FIX: adicionadas dependências faltantes para evitar valores stale no handler de teclado
+  }, [animals, inventory, currentDay, weather, weeklySales, showBuyMenu, machines, farmLevel, queijosEmMaturacao, merchantActive, daysSinceMerchant, nextMerchantDay, dailyEarning, weeklyStats]);
 
   // Sync log scrollbar
   useEffect(() => {
@@ -935,24 +939,31 @@ export default function App() {
   }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos]);
 
   // Centralized achievement condition checker
-  const checkAndUnlockAchievement = (id: string, currentUnlocked = unlockedAchievements) => {
-    if (currentUnlocked.includes(id)) return;
-    
+  // BUG 5 FIX: usa callback funcional para evitar perda de conquistas quando múltiplas são desbloqueadas
+  const checkAndUnlockAchievement = (id: string) => {
     const ach = ACHIEVEMENTS_LIST.find(a => a.id === id);
     if (!ach) return;
 
-    const newList = [...currentUnlocked, id];
-    setUnlockedAchievements(newList);
-    localStorage.setItem('aurora_achievements_save', JSON.stringify(newList));
-
-    // Show popup
-    setAchievementNotification({
-      id: ach.id,
-      title: ach.title,
-      emoji: ach.emoji,
-      description: ach.description
+    setUnlockedAchievements(prev => {
+      if (prev.includes(id)) return prev;
+      const newList = [...prev, id];
+      localStorage.setItem('aurora_achievements_save', JSON.stringify(newList));
+      return newList;
     });
-    
+
+    // Show popup (we call this outside the setState to avoid closure issues;
+    // it may fire even if already unlocked but that's acceptable UX)
+    setAchievementNotification(prev => {
+      // Only show if not already shown for the same achievement
+      if (prev?.id === id) return prev;
+      return {
+        id: ach.id,
+        title: ach.title,
+        emoji: ach.emoji,
+        description: ach.description
+      };
+    });
+
     // Play level up chime
     triggerAudioResult(() => sfx.playSound('levelup'));
   };
@@ -1778,11 +1789,16 @@ export default function App() {
       totalEarned: prev.totalEarned + profit,
       totalMerchantTrades: merchantActive ? (prev.totalMerchantTrades || 0) + qty : (prev.totalMerchantTrades || 0)
     }));
+    // BUG 15 FIX: atualiza weeklyStats para todos os tipos de produto, não apenas egg e mayo
     setWeeklyStats(prev => ({
       ...prev,
       earnings: prev.earnings + profit,
-      egg: itemType === 'egg' ? prev.egg + qty : prev.egg,
-      mayo: itemType === 'mayo' ? prev.mayo + qty : prev.mayo
+      milk: itemType === 'milk' ? (prev.milk || 0) + qty : (prev.milk || 0),
+      wool: itemType === 'wool' ? (prev.wool || 0) + qty : (prev.wool || 0),
+      cheese: itemType === 'cheese' ? (prev.cheese || 0) + qty : (prev.cheese || 0),
+      scarf: itemType === 'scarf' ? (prev.scarf || 0) + qty : (prev.scarf || 0),
+      egg: itemType === 'egg' ? (prev.egg || 0) + qty : (prev.egg || 0),
+      mayo: itemType === 'mayo' ? (prev.mayo || 0) + qty : (prev.mayo || 0),
     }));
 
     // Update weeklySales count
@@ -2477,8 +2493,9 @@ export default function App() {
       } = processarAutomatizacao(machines, maintPaid, animals, inventory, weather, logsToAdd);
 
       // Aktualiza inventário se as automações realizaram alterações
+      // BUG 10 / BUG 1 FIX: usa callback funcional para evitar race condition com o setInventory de queijos prontos
       if (statsCollected.milk > 0 || statsCollected.wool > 0 || statsCollected.fedCount > 0) {
-        setInventory(invAfterAuto);
+        setInventory(prev => ({ ...prev, ...invAfterAuto }));
       }
       
       if (statsCollected.milk > 0) {
@@ -2591,8 +2608,8 @@ export default function App() {
       const globalGoldBonus = processarGlobalEvent(logsToAdd);
 
       // Liquidação financeira final do balanceamento
-      const finalGoldValue = Math.max(0, goldAfterMaint + globalGoldBonus);
-      setGold(finalGoldValue);
+      // BUG 2 FIX: usa callback funcional para não sobrescrever ouro com valor de closure stale
+      setGold(prev => Math.max(0, prev - maintCost + globalGoldBonus));
 
       // --- SUBFUNÇÃO: Gerar Relatório Semanal ---
       if (currentDay % 7 === 0) {
@@ -4272,7 +4289,11 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowLevelUpModal(null)}
+            onClick={() => {
+              // BUG 7 FIX: fechar pelo backdrop também concede +100 moedas
+              setShowLevelUpModal(null);
+              setGold(prev => prev + 100);
+            }}
             className="fixed inset-0 bg-black/70 backdrop-blur-md z-[9999] flex items-center justify-center p-4"
           >
             <motion.div
@@ -4349,7 +4370,9 @@ export default function App() {
               {/* Button footer */}
               <div className="mt-6 flex justify-center">
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    // BUG 7 FIX: stopPropagation evita duplo disparo com o backdrop (que já chama setGold)
+                    e.stopPropagation();
                     setShowLevelUpModal(null);
                     setGold(prev => prev + 100);
                     triggerAudioResult(() => sfx.playSound('click'));
@@ -4715,7 +4738,8 @@ export default function App() {
                       Alimenta <strong>TODOS</strong> os animais do seu rebanho no final do dia. Cada refeição custa uma taxa reduzida de apenas 3 moedas de ouro por animal.
                     </p>
                     <p className="text-[10px] text-stone-400 font-mono mt-1.5 uppercase tracking-wide">
-                      ⚡ Custo: 300 moedas • Nível mín: 2 • Operacional: 3 moedas/dia por animal
+                      {/* BUG 12 FIX: exibe custo real de manutenção por máquina ativa conforme getCustoManutencaoMaquinas */}
+                      ⚡ Custo: 300 moedas • Nível mín: 2 • Operacional: {getCustoManutencaoMaquinas(farmLevel)} moedas/dia por máquina ativa
                     </p>
                   </div>
 
@@ -5065,7 +5089,8 @@ export default function App() {
                   const trend = getTrendIconAndColor(item.key);
                   const basePrice = item.base;
                   const weeklyQty = weeklySales[item.key] || 0;
-                  const demandPenalty = Math.max(40, Math.round((weeklyQty * 0.4) * 10) / 10);
+                  // BUG 13 FIX: usa Math.min para limitar penalidade a 40%, não Math.max
+                  const demandPenalty = Math.min(40, Math.round((weeklyQty * 0.4) * 10) / 10);
                   const stock = inventory[item.key] || 0;
                   const quantityToSell = Math.min(stock, sellQuantities[item.key] || 1);
 
@@ -5202,7 +5227,8 @@ export default function App() {
                   const currentP = Math.max(50, Math.round(150 * getCarneMultiplier()));
                   const trend = getTrendIconAndColor('carne');
                   const weeklyQty = weeklySales.carne || 0;
-                  const demandPenalty = Math.max(40, Math.round((weeklyQty * 0.4) * 10) / 10);
+                  // BUG 13 FIX: usa Math.min para limitar penalidade a 40%, não Math.max
+                  const demandPenalty = Math.min(40, Math.round((weeklyQty * 0.4) * 10) / 10);
                   const boiCount = animals.filter(a => a.type === 'boi').length;
 
                   return (
