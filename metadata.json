@@ -1,0 +1,6 @@
+{
+  "name": "Fazenda Aurora",
+  "description": "Simulador de fazenda interativo em tempo real. Cuide de vacas, ovelhas e bois e lucre gerenciando recursos, alimentação e eventos diários!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
