@@ -1123,6 +1123,40 @@ export default function App() {
     }
   }, [showLevelUpModal]);
 
+  // --- FUNCIONALIDADE 1: Auto-avanço useEffect ---
+  // isGameOver derivado antecipado para uso no useEffect de auto-avanço (preço mínimo galinha = 40 moedas base)
+  const isGameOverForAutoAdvance = animals.length === 0 && gold < 40;
+  useEffect(() => {
+    if (!autoAdvance || isGameOverForAutoAdvance || isSleeping) return;
+    const anyModalOpen = showBuyMenu || showLevelUpModal !== null || showWeeklyReport || showTutorialModal || showAchievementsModal || showAutomationModal || showMarketModal || showSellAllConfirmModal || showQueijariaModal || showMissionsModal || showNotifications || showStatsModal;
+    if (anyModalOpen) return;
+
+    const interval = setInterval(() => {
+      if (!isSleepingRef.current) {
+        isSleepingRef.current = true;
+        setIsSleeping(true);
+        setTimeout(() => {
+          advanceDay(null as any);
+          setIsSleeping(false);
+          isSleepingRef.current = false;
+        }, 1000);
+      }
+    }, autoSpeed * 1000);
+
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoAdvance, autoSpeed, isGameOverForAutoAdvance, isSleeping, showBuyMenu, showLevelUpModal, showWeeklyReport, showTutorialModal, showAchievementsModal, showAutomationModal, showMarketModal, showSellAllConfirmModal, showQueijariaModal, showMissionsModal, showNotifications, showStatsModal]);
+
+  // Initialize missions on first load if empty
+  useEffect(() => {
+    if (missions.length === 0 && currentScreen === 'game') {
+      const dailies = generateDailyMissions(currentDay);
+      const weeklies = generateWeeklyMissions(currentDay);
+      setMissions([...dailies, ...weeklies]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScreen]);
+
   // Add a log entry dynamically
   // BUG 18 FIX: parâmetro overrideDay permite registrar dia correto dentro de advanceDay
   const addLog = (msg: string, type: LogMessage['type'] = 'info', overrideDay?: number) => {
@@ -1309,6 +1343,8 @@ export default function App() {
     addLog(`🌽 Você alimentou ${animal.name} com ${feedLabel}! +Fome +Felicidade.`, 'success');
     triggerAudioResult(() => sfx.playSound('feed'));
     spawnFeedback('🌽', '+Fome!', event);
+    // Missão: alimentar animais
+    updateMissionProgress('feed_animals', 1);
   };
 
   // Feed pricing helpers
@@ -1439,6 +1475,8 @@ export default function App() {
     addLog(`🥚 ${animal.name} produziu ${totalOvos} ovo(s) de quintal enviado(s) ao Armazém!${bandoTxt}`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥚', `+${totalOvos} Ovo`, event);
+    // Missão: coletar itens
+    updateMissionProgress('collect_items', totalOvos);
   };
 
   // Craft Mayonnaise in Atelier
@@ -1659,6 +1697,8 @@ export default function App() {
     addLog(`🥛 ${animal.name} produziu ${totalLeite} balde(s) de leite cru enviados ao Armazém!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥛', `+${totalLeite} Leite`, event);
+    // Missão: coletar itens
+    updateMissionProgress('collect_items', totalLeite);
   };
 
   // 4. Collect Wool (Ovelha)
@@ -1706,6 +1746,8 @@ export default function App() {
     addLog(`🧶 ${animal.name} foi tosquiada! Adicionado +${woolBonus} lã(s) crua(s) no Armazém.`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧶', `+${woolBonus} Lã`, event);
+    // Missão: coletar itens
+    updateMissionProgress('collect_items', woolBonus);
   };
 
   // 5. Sell Ox (Boi)
@@ -2001,9 +2043,13 @@ export default function App() {
     else if (itemType === 'mayo') label = 'Maionese';
 
     addLog(`💰 Venda realizada: ${qty} unidades de ${label} por +${profit} moedas!`, 'success');
-    
+
     triggerAudioResult(() => sfx.playSound('sell'));
     spawnFeedback('💰', `+${profit} 💰`, event);
+    // Missões: vender leite, vender qualquer coisa, ganhar ouro
+    if (itemType === 'milk') updateMissionProgress('sell_milk', qty);
+    updateMissionProgress('sell_any', qty);
+    updateMissionProgress('earn_gold', profit);
   };
 
   // --- AUTOMATION AND MASS SELLING SYSTEM ---
@@ -2514,6 +2560,8 @@ export default function App() {
         msg: `🧀 Seu fantástico ${label} terminou sua maturação e está pronto para venda!`,
         type: 'success'
       });
+      // Funcionalidade 4: notificação persistente de queijo pronto
+      setTimeout(() => addNotification(`🧀 ${label} terminou maturação e está pronto para vender!`, 'success'), 0);
     });
 
     return { remaining, readyQueijos };
@@ -2570,6 +2618,8 @@ export default function App() {
         msg: `🧙‍♂️ Um Comerciante Viajante chegou na fazenda! Ele compra todos os produtos e bois por 1.5x o preço hoje!`,
         type: 'event'
       });
+      // Funcionalidade 4: notificação persistente de comerciante
+      setTimeout(() => addNotification('🧙‍♂️ Comerciante Viajante chegou! Venda tudo por 1.5x hoje!', 'event'), 0);
     }
 
     return { isMerchantNextDay, newDaysSinceMerchant, newNextMerchantDay };
@@ -2765,6 +2815,7 @@ export default function App() {
       if (levelUpOccurred) {
         setFarmLevel(newLevel);
         setShowLevelUpModal(newLevel);
+        setTimeout(() => addNotification(`🏆 Fazenda subiu para o Nível ${newLevel}! +100 moedas de celebração!`, 'success'), 0);
       }
 
       // --- SUBFUNÇÃO 7: Processamento do Comerciante Viajante ---
@@ -2784,6 +2835,36 @@ export default function App() {
 
       // Logs financeiros de entrada
       registrarLogsDiaAnterior(currentDay, dailyEarning, logsToAdd);
+
+      // --- FUNCIONALIDADE 5: Atualizar histórico de ganhos ---
+      setEarningsHistory(prev => [...prev, dailyEarning].slice(-14));
+      setAllTimeStats(prev => ({
+        ...prev,
+        bestDay: Math.max(prev.bestDay, dailyEarning),
+        worstDay: prev.worstDay === 0 ? dailyEarning : Math.min(prev.worstDay, dailyEarning > 0 ? dailyEarning : prev.worstDay)
+      }));
+
+      // --- FUNCIONALIDADE 3: Renovar missões diárias ao avançar o dia ---
+      setMissions(prev => {
+        const nextDayMissions = prev.filter(m => m.expiresOnDay > currentDay + 1);
+        const hasDaily = nextDayMissions.some(m => m.type === 'daily' && m.expiresOnDay > currentDay + 1);
+        const hasWeekly = nextDayMissions.some(m => m.type === 'weekly' && m.expiresOnDay > currentDay + 1);
+        const newMissions = [...nextDayMissions];
+        if (!hasDaily) {
+          newMissions.push(...generateDailyMissions(currentDay + 1));
+        }
+        if (!hasWeekly) {
+          newMissions.push(...generateWeeklyMissions(currentDay + 1));
+        }
+        return newMissions;
+      });
+
+      // --- FUNCIONALIDADE 3: Verificar missão de animais felizes ---
+      const happyCount = animals.filter(a => a.happiness > 70).length;
+      if (animals.length > 0 && happyCount === animals.length) {
+        updateMissionProgress('happy_animals', 1);
+      }
+
       setDailyEarning(0);
 
       // --- SUBFUNÇÃO 4: Processamento de Fome, Felicidade e Produções Naturais ---
@@ -2795,6 +2876,13 @@ export default function App() {
         triggerAudioResult(() => sfx.playSound('error'));
       }
       setAnimals(survivors);
+
+      // Funcionalidade 4: notificação para animais muito infelizes
+      updatedAnimalsList.forEach(a => {
+        if (a.happiness < 20) {
+          setTimeout(() => addNotification(`⚠️ ${a.name} está muito infeliz (${Math.floor(a.happiness)}%)! Alimente-o urgentemente!`, 'warning'), 0);
+        }
+      });
 
       // --- SUBFUNÇÃO 9: Processamento do Evento Global Dinâmico ---
       const globalGoldBonus = processarGlobalEvent(logsToAdd);
@@ -3234,8 +3322,54 @@ export default function App() {
               🏆
             </button>
 
+            {/* 🔔 Notificações Button */}
+            <button
+              onClick={() => {
+                setShowNotifications(prev => !prev);
+                triggerAudioResult(() => sfx.playSound('click'));
+              }}
+              className="relative bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+              title="Notificações persistentes"
+            >
+              <Bell className="w-5 h-5" />
+              {notifications.filter(n => !n.read).length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                  {notifications.filter(n => !n.read).length}
+                </span>
+              )}
+            </button>
+
+            {/* 🎯 Missões Button */}
+            <button
+              onClick={() => {
+                setShowMissionsModal(true);
+                triggerAudioResult(() => sfx.playSound('click'));
+              }}
+              className="relative bg-purple-600 border-3 border-purple-400 hover:bg-purple-500 text-white p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#581c87] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+              title="Missões e objetivos"
+            >
+              <Target className="w-5 h-5" />
+              {missions.filter(m => m.completed && !m.claimed).length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                  !
+                </span>
+              )}
+            </button>
+
+            {/* 📊 Stats Button */}
+            <button
+              onClick={() => {
+                setShowStatsModal(true);
+                triggerAudioResult(() => sfx.playSound('click'));
+              }}
+              className="bg-teal-600 border-3 border-teal-400 hover:bg-teal-500 text-white p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#0f766e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+              title="Estatísticas históricas"
+            >
+              <BarChart2 className="w-5 h-5" />
+            </button>
+
             {/* Reset Game button */}
-            <button 
+            <button
               onClick={() => {
                 if (window.confirm('Tem certeza? Todo o progresso será perdido!')) {
                   initGame();
@@ -3342,6 +3476,33 @@ export default function App() {
                 >
                   😴 DORMIR
                 </button>
+
+                {/* AUTO-AVANÇO BUTTON */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setAutoAdvance(prev => !prev);
+                    triggerAudioResult(() => sfx.playSound('click'));
+                  }}
+                  disabled={isGameOver}
+                  className={`${autoAdvance ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-slate-600 border-slate-800 hover:bg-slate-500'} disabled:bg-stone-500 text-white border-b-4 px-3 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1`}
+                  title={autoAdvance ? 'Auto-avanço ativo — clique para pausar' : 'Ativar auto-avanço de dias'}
+                >
+                  {autoAdvance ? `▶ AUTO (${autoSpeed}s)` : '⏸ AUTO'}
+                </button>
+
+                {/* SELETOR DE VELOCIDADE */}
+                <select
+                  value={autoSpeed}
+                  onChange={(e) => setAutoSpeed(Number(e.target.value))}
+                  className="bg-slate-700 text-white border-2 border-slate-500 rounded-xl px-2 py-2 font-mono font-black text-xs cursor-pointer focus:outline-none"
+                  title="Velocidade do auto-avanço"
+                >
+                  <option value={10}>🐢 Lento (10s)</option>
+                  <option value={5}>🐇 Médio (5s)</option>
+                  <option value={3}>⚡ Rápido (3s)</option>
+                </select>
               </div>
             </div>
 
@@ -3543,6 +3704,18 @@ export default function App() {
                             <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
                               {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : '🐔 Galinha de Quintal'}
                             </span>
+                            {/* Trait badge */}
+                            {animal.trait && (() => {
+                              const t = getTraitInfo(animal.trait);
+                              return (
+                                <span
+                                  className="inline-flex items-center gap-1 mt-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 cursor-help"
+                                  title={t.description}
+                                >
+                                  {t.emoji} {t.label}
+                                </span>
+                              );
+                            })()}
                           </div>
 
                           {/* Avatar component with product context tooltip */}
@@ -5645,6 +5818,350 @@ export default function App() {
                   ⚠️ Nenhum produto armazenado disponível para venda!
                 </p>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🔔 NOTIFICAÇÕES PANEL (DRAWER) */}
+      <AnimatePresence>
+        {showNotifications && (
+          <motion.div
+            initial={{ opacity: 0, x: 300 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 300 }}
+            transition={{ type: 'spring', damping: 20 }}
+            className="fixed top-0 right-0 h-full w-80 bg-[#fffbeb] border-l-8 border-[#78350f] z-[95] flex flex-col shadow-2xl"
+          >
+            <div className="bg-[#78350f] p-4 border-b-4 border-[#92400e] flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-white font-display font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                  <Bell className="w-4 h-4" /> Notificações
+                </h3>
+                <p className="text-[#fcd57e] text-[9px] font-mono uppercase tracking-wider mt-0.5">
+                  {notifications.filter(n => !n.read).length} não lidas
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {notifications.some(n => !n.read) && (
+                  <button
+                    onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                    className="text-[9px] font-mono text-[#fcd57e] hover:text-white uppercase font-bold cursor-pointer"
+                  >
+                    Ler todas
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowNotifications(false)}
+                  className="text-[#fcd57e] hover:text-white bg-[#92400e] hover:bg-[#b45309] w-7 h-7 rounded-full flex items-center justify-center cursor-pointer text-sm font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ scrollbarWidth: 'thin' }}>
+              {notifications.length === 0 ? (
+                <div className="text-center text-[#92400e]/50 italic pt-8 text-xs font-bold uppercase">
+                  Nenhuma notificação ainda.
+                </div>
+              ) : (
+                notifications.map(notif => (
+                  <div
+                    key={notif.id}
+                    onClick={() => setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n))}
+                    className={`p-3 rounded-2xl border-2 cursor-pointer transition-all text-xs font-sans leading-relaxed ${
+                      !notif.read
+                        ? notif.type === 'success' ? 'bg-emerald-50 border-emerald-300 font-bold' : notif.type === 'warning' ? 'bg-red-50 border-red-300 font-bold' : notif.type === 'event' ? 'bg-yellow-50 border-yellow-300 font-bold' : 'bg-blue-50 border-blue-300 font-bold'
+                        : 'bg-stone-50 border-stone-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-1">
+                      <span className="flex-1 leading-snug">{notif.message}</span>
+                      {!notif.read && <span className="w-2 h-2 rounded-full bg-red-500 shrink-0 mt-1" />}
+                    </div>
+                    <div className="text-[9px] text-stone-400 font-mono mt-1">Dia {notif.day}</div>
+                  </div>
+                ))
+              )}
+            </div>
+            {notifications.length > 0 && (
+              <div className="p-3 border-t-2 border-[#fbbf24] shrink-0">
+                <button
+                  onClick={() => setNotifications([])}
+                  className="w-full bg-red-100 hover:bg-red-200 text-red-700 font-mono font-bold text-[10px] uppercase py-2 rounded-xl transition-all cursor-pointer"
+                >
+                  Limpar Tudo
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🎯 MISSÕES MODAL */}
+      <AnimatePresence>
+        {showMissionsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowMissionsModal(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[90] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fffbeb] border-8 border-purple-800 rounded-[36px] max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
+            >
+              <div className="bg-gradient-to-r from-purple-800 to-indigo-900 p-5 border-b-4 border-purple-950 text-center shrink-0">
+                <h3 className="text-white text-xl sm:text-2xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                  🎯 Missões &amp; Objetivos
+                </h3>
+                <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
+                  Complete tarefas para ganhar recompensas extras!
+                </p>
+                <button
+                  onClick={() => setShowMissionsModal(false)}
+                  className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-purple-950 hover:bg-purple-800 border-2 border-purple-900 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-4" style={{ scrollbarWidth: 'thin' }}>
+                <div>
+                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-purple-800 mb-2 flex items-center gap-1.5">📅 Missões Diárias</h4>
+                  <div className="space-y-3">
+                    {missions.filter(m => m.type === 'daily').length === 0 && (
+                      <p className="text-stone-500 text-xs italic text-center py-4">Nenhuma missão diária ativa. Avance o dia para gerar novas missões!</p>
+                    )}
+                    {missions.filter(m => m.type === 'daily').map(m => (
+                      <div key={m.id} className={`border-4 rounded-3xl p-4 flex flex-col gap-2 ${m.claimed ? 'bg-stone-100 border-stone-200 opacity-60' : m.completed ? 'bg-emerald-50 border-emerald-400' : 'bg-white border-purple-200'}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <h5 className="font-display font-black text-sm uppercase text-[#78350f]">{m.title}</h5>
+                            <p className="text-xs text-stone-500 mt-0.5">{m.description}</p>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-amber-600 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full shrink-0">
+                            🏆 {m.reward} moedas
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-stone-200 h-2.5 rounded-full overflow-hidden border border-stone-300">
+                            <div
+                              className={`h-full rounded-full transition-all ${m.completed ? 'bg-emerald-500' : 'bg-purple-500'}`}
+                              style={{ width: `${Math.min(100, (m.current / m.goal) * 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-mono font-bold text-stone-600 shrink-0">{m.current}/{m.goal}</span>
+                          {m.completed && !m.claimed && (
+                            <button
+                              onClick={() => {
+                                setMissions(prev => prev.map(mis => mis.id === m.id ? { ...mis, claimed: true } : mis));
+                                setGold(prev => prev + m.reward);
+                                addLog(`🎯 Missão "${m.title}" concluída! +${m.reward} moedas resgatadas!`, 'success');
+                                spawnFeedback('🎯', `+${m.reward} 💰`, { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as any);
+                              }}
+                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-black text-[10px] uppercase px-3 py-1 rounded-xl cursor-pointer transition-all active:scale-95 shrink-0"
+                            >
+                              Resgatar!
+                            </button>
+                          )}
+                          {m.claimed && <span className="text-[10px] font-mono text-stone-400 shrink-0">✓ Resgatado</span>}
+                        </div>
+                        <div className="text-[9px] text-stone-400 font-mono">Expira no Dia {m.expiresOnDay}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-indigo-800 mb-2 flex items-center gap-1.5 mt-2">📆 Missões Semanais</h4>
+                  <div className="space-y-3">
+                    {missions.filter(m => m.type === 'weekly').length === 0 && (
+                      <p className="text-stone-500 text-xs italic text-center py-4">Nenhuma missão semanal ativa. Avance o dia para gerar novas missões!</p>
+                    )}
+                    {missions.filter(m => m.type === 'weekly').map(m => (
+                      <div key={m.id} className={`border-4 rounded-3xl p-4 flex flex-col gap-2 ${m.claimed ? 'bg-stone-100 border-stone-200 opacity-60' : m.completed ? 'bg-emerald-50 border-emerald-400' : 'bg-white border-indigo-200'}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <h5 className="font-display font-black text-sm uppercase text-[#78350f]">{m.title}</h5>
+                            <p className="text-xs text-stone-500 mt-0.5">{m.description}</p>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-amber-600 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full shrink-0">
+                            🏆 {m.reward} moedas
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-stone-200 h-2.5 rounded-full overflow-hidden border border-stone-300">
+                            <div
+                              className={`h-full rounded-full transition-all ${m.completed ? 'bg-emerald-500' : 'bg-indigo-500'}`}
+                              style={{ width: `${Math.min(100, (m.current / m.goal) * 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-mono font-bold text-stone-600 shrink-0">{m.current}/{m.goal}</span>
+                          {m.completed && !m.claimed && (
+                            <button
+                              onClick={() => {
+                                setMissions(prev => prev.map(mis => mis.id === m.id ? { ...mis, claimed: true } : mis));
+                                setGold(prev => prev + m.reward);
+                                addLog(`🎯 Missão "${m.title}" concluída! +${m.reward} moedas resgatadas!`, 'success');
+                                spawnFeedback('🎯', `+${m.reward} 💰`, { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as any);
+                              }}
+                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-black text-[10px] uppercase px-3 py-1 rounded-xl cursor-pointer transition-all active:scale-95 shrink-0"
+                            >
+                              Resgatar!
+                            </button>
+                          )}
+                          {m.claimed && <span className="text-[10px] font-mono text-stone-400 shrink-0">✓ Resgatado</span>}
+                        </div>
+                        <div className="text-[9px] text-stone-400 font-mono">Expira no Dia {m.expiresOnDay}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-purple-50 p-4 border-t-2 border-purple-200 flex justify-end shrink-0">
+                <button
+                  onClick={() => setShowMissionsModal(false)}
+                  className="bg-purple-600 hover:bg-purple-500 text-white border-b-4 border-purple-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer"
+                >
+                  Voltar à Fazenda
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 📊 STATS / ANALYTICS MODAL */}
+      <AnimatePresence>
+        {showStatsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowStatsModal(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[90] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fffbeb] border-8 border-teal-800 rounded-[36px] max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
+            >
+              <div className="bg-gradient-to-r from-teal-800 to-teal-900 p-5 border-b-4 border-teal-950 text-center shrink-0">
+                <h3 className="text-white text-xl sm:text-2xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                  📊 Painel de Estatísticas
+                </h3>
+                <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
+                  Histórico de ganhos, produção e desempenho da fazenda
+                </p>
+                <button
+                  onClick={() => setShowStatsModal(false)}
+                  className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-teal-950 hover:bg-teal-800 border-2 border-teal-900 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{ scrollbarWidth: 'thin' }}>
+
+                {/* Resumo Geral */}
+                <div>
+                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-teal-800 mb-3 flex items-center gap-1.5">📋 Resumo Geral</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-3 text-center">
+                      <div className="text-[9px] font-mono text-emerald-700 uppercase font-black">Total Faturado</div>
+                      <div className="text-base font-black font-mono text-[#78350f] mt-1">💰 {stats.totalEarned}</div>
+                    </div>
+                    <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3 text-center">
+                      <div className="text-[9px] font-mono text-amber-700 uppercase font-black">Melhor Dia</div>
+                      <div className="text-base font-black font-mono text-[#78350f] mt-1">💰 {allTimeStats.bestDay}</div>
+                    </div>
+                    <div className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-3 text-center">
+                      <div className="text-[9px] font-mono text-blue-700 uppercase font-black">Total Coletado</div>
+                      <div className="text-base font-black font-mono text-[#78350f] mt-1">📦 {stats.totalCollected}</div>
+                    </div>
+                    <div className="bg-purple-50 border-2 border-purple-300 rounded-2xl p-3 text-center">
+                      <div className="text-[9px] font-mono text-purple-700 uppercase font-black">Total Alimentados</div>
+                      <div className="text-base font-black font-mono text-[#78350f] mt-1">🌽 {stats.totalFed}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gráfico de Ganhos Diários */}
+                <div>
+                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-teal-800 mb-3 flex items-center gap-1.5">📈 Ganhos Diários (últimos {earningsHistory.length} dias)</h4>
+                  {earningsHistory.length === 0 ? (
+                    <div className="text-xs text-stone-500 italic text-center py-4">Avance dias para ver o histórico de ganhos.</div>
+                  ) : (
+                    <div className="bg-white border-2 border-teal-200 rounded-2xl p-4">
+                      <div className="flex items-end gap-1.5 h-24 w-full">
+                        {earningsHistory.map((val, i) => {
+                          const maxVal = Math.max(...earningsHistory, 1);
+                          const heightPct = Math.max(5, (val / maxVal) * 100);
+                          return (
+                            <div key={i} className="flex-1 flex flex-col items-center gap-1 group/bar" title={`Dia ${currentDay - earningsHistory.length + i}: ${val} moedas`}>
+                              <div
+                                className="w-full bg-teal-500 rounded-t-md transition-all group-hover/bar:bg-teal-400"
+                                style={{ height: `${heightPct}%` }}
+                              />
+                              <span className="text-[7px] font-mono text-stone-400 leading-none">{val > 0 ? val : '-'}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-between text-[8px] text-stone-400 font-mono mt-1">
+                        <span>-{earningsHistory.length}d</span>
+                        <span>hoje</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Distribuição de Produtos */}
+                <div>
+                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-teal-800 mb-3 flex items-center gap-1.5">🥧 Produção por Tipo</h4>
+                  <div className="space-y-2">
+                    {[
+                      { label: '🥛 Leite Coletado', val: stats.totalMilk || 0, color: 'bg-blue-400' },
+                      { label: '🧶 Lã Coletada', val: stats.totalWool || 0, color: 'bg-purple-400' },
+                      { label: '🥚 Ovos Coletados', val: stats.totalEggs || 0, color: 'bg-amber-400' },
+                      { label: '🧀 Queijos Fabricados', val: stats.totalCheese || 0, color: 'bg-yellow-500' },
+                      { label: '🧣 Cachecóis Tecidos', val: stats.totalScarf || 0, color: 'bg-indigo-400' },
+                      { label: '🥣 Maioneses Feitas', val: stats.totalMayo || 0, color: 'bg-green-400' },
+                      { label: '🐂 Bois Vendidos', val: stats.totalOxSold || 0, color: 'bg-orange-400' },
+                    ].map(item => {
+                      const maxVal = Math.max(stats.totalMilk || 0, stats.totalWool || 0, stats.totalEggs || 0, stats.totalCheese || 0, stats.totalScarf || 0, stats.totalMayo || 0, stats.totalOxSold || 0, 1);
+                      const widthPct = Math.max(2, (item.val / maxVal) * 100);
+                      return (
+                        <div key={item.label} className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono text-stone-600 w-36 shrink-0">{item.label}</span>
+                          <div className="flex-1 bg-stone-200 h-4 rounded-full overflow-hidden border border-stone-300 flex items-center">
+                            <div className={`${item.color} h-full rounded-full transition-all`} style={{ width: `${widthPct}%` }} />
+                          </div>
+                          <span className="text-[10px] font-mono font-bold text-stone-700 w-8 text-right shrink-0">{item.val}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="bg-teal-50 p-4 border-t-2 border-teal-200 flex justify-end shrink-0">
+                <button
+                  onClick={() => setShowStatsModal(false)}
+                  className="bg-teal-600 hover:bg-teal-500 text-white border-b-4 border-teal-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer"
+                >
+                  Fechar Stats
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
