@@ -5,13 +5,16 @@
 
 export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha';
 
+export type AnimalTrait = 'gulosa' | 'preguicosa' | 'feliz' | 'estressada' | 'saudavel' | 'trabalhadora';
+
 export interface Animal {
   id: number;
   type: AnimalType;
   name: string;
   hunger: number;     // 0 to 100
   happiness: number;  // 0 to 100
-  
+  trait?: AnimalTrait; // Personality trait with mechanical effects
+
   // Custom new features
   consecutiveHappyDays?: number; // Days consecutive with 100 happiness
   daysBelow80?: number;          // Days consecutive with happiness < 80

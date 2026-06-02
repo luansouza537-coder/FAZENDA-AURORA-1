@@ -23,14 +23,17 @@ import {
   Utensils, 
   Volume2, 
   VolumeX, 
-  TrendingUp, 
+  TrendingUp,
   History,
   Trash2,
   CheckCircle,
   HelpCircle,
-  ChefHat
+  ChefHat,
+  Bell,
+  Target,
+  BarChart2
 } from 'lucide-react';
-import { Animal, AnimalType, FarmStats, LogMessage } from './types';
+import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage } from './types';
 import { getRandomName, getUniqueOxName } from './names';
 import { sfx } from './utils/audio';
 import SeasonalParticles from './components/SeasonalParticles';
@@ -604,6 +607,44 @@ export default function App() {
   const [showWeeklyReport, setShowWeeklyReport] = useState<boolean>(false);
   const [showLevelUpModal, setShowLevelUpModal] = useState<number | null>(null);
 
+  // --- FUNCIONALIDADE 1: Auto-avanço ---
+  const [autoAdvance, setAutoAdvance] = useState<boolean>(false);
+  const [autoSpeed, setAutoSpeed] = useState<number>(5); // segundos
+
+  // --- FUNCIONALIDADE 3: Missões ---
+  interface Mission {
+    id: string;
+    title: string;
+    description: string;
+    type: 'daily' | 'weekly';
+    goal: number;
+    current: number;
+    reward: number;
+    expiresOnDay: number;
+    completed: boolean;
+    claimed: boolean;
+    missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items';
+  }
+  const [missions, setMissions] = useState<Mission[]>([]);
+  const [showMissionsModal, setShowMissionsModal] = useState<boolean>(false);
+
+  // --- FUNCIONALIDADE 4: Notificações persistentes ---
+  interface GameNotification {
+    id: string;
+    message: string;
+    type: 'success' | 'event' | 'warning' | 'system';
+    day: number;
+    read: boolean;
+  }
+  const [notifications, setNotifications] = useState<GameNotification[]>([]);
+  const [showNotifications, setShowNotifications] = useState<boolean>(false);
+
+  // --- FUNCIONALIDADE 5: Histórico de ganhos ---
+  const [earningsHistory, setEarningsHistory] = useState<number[]>([]);
+  const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
+  const [productionByAnimal, setProductionByAnimal] = useState<Record<number, { name: string; type: string; produced: number }>>({});
+  const [allTimeStats, setAllTimeStats] = useState<{ totalSpentFeed: number; bestDay: number; worstDay: number }>({ totalSpentFeed: 0, bestDay: 0, worstDay: 0 });
+
   // Rename interface state
   const [editingId, setEditingId] = useState<number | null>(null);
   const [tempName, setTempName] = useState<string>('');
@@ -1092,6 +1133,124 @@ export default function App() {
       type
     };
     setLogs(prev => [...prev.slice(-25), newLog]); // Keep up to 25 logs
+  };
+
+  // --- FUNCIONALIDADE 4: Adicionar notificação persistente ---
+  const addNotification = (message: string, type: GameNotification['type'] = 'system') => {
+    setNotifications(prev => {
+      const newNotif: GameNotification = {
+        id: Math.random().toString(36).substr(2, 9),
+        message,
+        type,
+        day: currentDay,
+        read: false,
+      };
+      return [newNotif, ...prev].slice(0, 20);
+    });
+  };
+
+  // --- FUNCIONALIDADE 2: Traits dos animais ---
+  const TRAITS_LIST: AnimalTrait[] = ['gulosa', 'preguicosa', 'feliz', 'estressada', 'saudavel', 'trabalhadora'];
+  const getRandomTrait = (): AnimalTrait => TRAITS_LIST[Math.floor(Math.random() * TRAITS_LIST.length)];
+  const getTraitInfo = (trait: AnimalTrait): { emoji: string; label: string; description: string } => {
+    switch (trait) {
+      case 'gulosa': return { emoji: '🍽️', label: 'Gulosa', description: 'Consome +20% de ração por dia (fome cai mais rápido)' };
+      case 'preguicosa': return { emoji: '😴', label: 'Preguiçosa', description: 'Produz -15% (menos leite/lã/ovos)' };
+      case 'feliz': return { emoji: '😊', label: 'Feliz', description: '+5 de felicidade por dia sem custo extra' };
+      case 'estressada': return { emoji: '😰', label: 'Estressada', description: 'Perde -5 de felicidade por dia mesmo alimentada' };
+      case 'saudavel': return { emoji: '💪', label: 'Saudável', description: 'Imune a eventos negativos de saúde' };
+      case 'trabalhadora': return { emoji: '⚡', label: 'Trabalhadora', description: 'Produz +15%' };
+    }
+  };
+
+  // --- FUNCIONALIDADE 3: Geração de missões ---
+  const generateDailyMissions = (day: number): Mission[] => {
+    const missions: Mission[] = [
+      {
+        id: `daily_milk_${day}`,
+        title: 'Leiteiro Dedicado',
+        description: 'Venda 5 litros de leite hoje',
+        type: 'daily',
+        goal: 5,
+        current: 0,
+        reward: 30,
+        expiresOnDay: day + 1,
+        completed: false,
+        claimed: false,
+        missionKey: 'sell_milk'
+      },
+      {
+        id: `daily_collect_${day}`,
+        title: 'Colheita do Dia',
+        description: 'Colete 3 itens hoje (leite, lã ou ovos)',
+        type: 'daily',
+        goal: 3,
+        current: 0,
+        reward: 25,
+        expiresOnDay: day + 1,
+        completed: false,
+        claimed: false,
+        missionKey: 'collect_items'
+      },
+      {
+        id: `daily_happy_${day}`,
+        title: 'Fazenda Feliz',
+        description: 'Mantenha todos os animais com felicidade > 70%',
+        type: 'daily',
+        goal: 1,
+        current: 0,
+        reward: 50,
+        expiresOnDay: day + 1,
+        completed: false,
+        claimed: false,
+        missionKey: 'happy_animals'
+      }
+    ];
+    return missions;
+  };
+
+  const generateWeeklyMissions = (day: number): Mission[] => {
+    return [
+      {
+        id: `weekly_gold_${day}`,
+        title: 'Capitalista Semanal',
+        description: 'Ganhe 200 moedas esta semana',
+        type: 'weekly',
+        goal: 200,
+        current: 0,
+        reward: 100,
+        expiresOnDay: day + 7,
+        completed: false,
+        claimed: false,
+        missionKey: 'earn_gold'
+      },
+      {
+        id: `weekly_feed_${day}`,
+        title: 'Cuidador de Rebanho',
+        description: 'Alimente animais 10 vezes esta semana',
+        type: 'weekly',
+        goal: 10,
+        current: 0,
+        reward: 80,
+        expiresOnDay: day + 7,
+        completed: false,
+        claimed: false,
+        missionKey: 'feed_animals'
+      }
+    ];
+  };
+
+  const updateMissionProgress = (key: Mission['missionKey'], amount: number = 1) => {
+    setMissions(prev => prev.map(m => {
+      if (m.completed || m.claimed) return m;
+      if (m.missionKey !== key) return m;
+      const newCurrent = Math.min(m.goal, m.current + amount);
+      const nowCompleted = newCurrent >= m.goal;
+      if (nowCompleted && !m.completed) {
+        addNotification(`🎯 Missão "${m.title}" concluída! Clique em Missões para resgatar ${m.reward} moedas!`, 'success');
+      }
+      return { ...m, current: newCurrent, completed: nowCompleted };
+    }));
   };
 
   // --- ACTIONS ---
@@ -1654,6 +1813,7 @@ export default function App() {
       consecutiveHappyDays: 0,
       daysBelow80: 0,
       isBestFriend: false,
+      trait: getRandomTrait(),
       ...(type === 'vaca' && { hasProducedToday: false }),
       ...(type === 'ovelha' && { daysUntilWool: 3, daysSinceLastWool: 2, woolReady: false }),
       ...(type === 'galinha' && { hasProducedToday: false }),
@@ -2168,8 +2328,9 @@ export default function App() {
     return animalsList.map(animal => {
       const copy = { ...animal };
 
-      // Perda de fome diária: 12 + random 0-7
-      const hungerLoss = 12 + Math.floor(Math.random() * 8);
+      // Perda de fome diária: 12 + random 0-7 (gulosa consome +20%)
+      const baseHungerLoss = 12 + Math.floor(Math.random() * 8);
+      const hungerLoss = copy.trait === 'gulosa' ? Math.round(baseHungerLoss * 1.2) : baseHungerLoss;
       copy.hunger = Math.max(0, copy.hunger - hungerLoss);
 
       // Regras de felicidade baseadas na fome:
@@ -2187,8 +2348,15 @@ export default function App() {
         copy.happiness = Math.max(0, copy.happiness - 12);
       }
 
-      // Evento de humor aleatório por animal (15% chance)
-      if (Math.random() < 0.15) {
+      // Efeito de trait de felicidade
+      if (copy.trait === 'feliz') {
+        copy.happiness = Math.min(100, copy.happiness + 5);
+      } else if (copy.trait === 'estressada') {
+        copy.happiness = Math.max(0, copy.happiness - 5);
+      }
+
+      // Evento de humor aleatório por animal (15% chance - saudavel é imune)
+      if (Math.random() < 0.15 && copy.trait !== 'saudavel') {
         if (Math.random() > 0.5) {
           copy.happiness = Math.max(0, copy.happiness - 20);
           logs.push({
