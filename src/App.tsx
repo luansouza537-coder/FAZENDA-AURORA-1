@@ -569,7 +569,19 @@ export default function App() {
       queijoMucarela: [28, 28, 28, 28, 28, 28, 28],
       queijoBrie: [65, 65, 65, 65, 65, 65, 65],
       // BUG 14 FIX: removida chave duplicada 'meat'; 'carne' é o padrão usado no restante do código
-      carne: [150, 150, 150, 150, 150, 150, 150]
+      carne: [150, 150, 150, 150, 150, 150, 150],
+      // BUG FIX: novos produtos incluídos no histórico para que getPriceTrend funcione
+      goat_milk: [38, 38, 38, 38, 38, 38, 38],
+      llama_wool: [45, 45, 45, 45, 45, 45, 45],
+      duck_egg: [18, 18, 18, 18, 18, 18, 18],
+      goose_egg: [50, 50, 50, 50, 50, 50, 50],
+      buffalo_milk: [55, 55, 55, 55, 55, 55, 55],
+      buffalo_mozzarella: [120, 120, 120, 120, 120, 120, 120],
+      feather: [15, 15, 15, 15, 15, 15, 15],
+      peacock_feather: [80, 80, 80, 80, 80, 80, 80],
+      butter: [45, 45, 45, 45, 45, 45, 45],
+      yogurt: [35, 35, 35, 35, 35, 35, 35],
+      fertile_egg: [36, 36, 36, 36, 36, 36, 36],
     };
   });
 
@@ -1032,7 +1044,19 @@ export default function App() {
       queijoMucarela: [28, 28, 28, 28, 28, 28, 28],
       queijoBrie: [65, 65, 65, 65, 65, 65, 65],
       // BUG 14 FIX: removida chave duplicada 'meat'
-      carne: [150, 150, 150, 150, 150, 150, 150]
+      carne: [150, 150, 150, 150, 150, 150, 150],
+      // BUG FIX: novos produtos incluídos no histórico
+      goat_milk: [38, 38, 38, 38, 38, 38, 38],
+      llama_wool: [45, 45, 45, 45, 45, 45, 45],
+      duck_egg: [18, 18, 18, 18, 18, 18, 18],
+      goose_egg: [50, 50, 50, 50, 50, 50, 50],
+      buffalo_milk: [55, 55, 55, 55, 55, 55, 55],
+      buffalo_mozzarella: [120, 120, 120, 120, 120, 120, 120],
+      feather: [15, 15, 15, 15, 15, 15, 15],
+      peacock_feather: [80, 80, 80, 80, 80, 80, 80],
+      butter: [45, 45, 45, 45, 45, 45, 45],
+      yogurt: [35, 35, 35, 35, 35, 35, 35],
+      fertile_egg: [36, 36, 36, 36, 36, 36, 36],
     });
     setQueijosEmMaturacao([]);
     setMaxPrateleiras(2);
@@ -1853,6 +1877,8 @@ export default function App() {
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
 
     setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) + qty }));
+    // BUG FIX: reseta frescor ao coletar leite de cabra fresco
+    setProductFreshness(prev => ({ ...prev, goat_milk: 3 }));
     setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + qty }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false } : a));
     addLog(`🐐 ${animal.name} produziu ${qty} leite(s) de cabra!`, 'success');
@@ -1924,6 +1950,8 @@ export default function App() {
       duck_egg: (prev.duck_egg ?? 0) + qty,
       feather: (prev.feather ?? 0) + (gotFeather ? 1 : 0)
     }));
+    // BUG FIX: reseta frescor ao coletar ovos de pato frescos
+    if (qty > 0) setProductFreshness(prev => ({ ...prev, duck_egg: 3 }));
     setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + qty + (gotFeather ? 1 : 0) }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false, feathersReady: false } : a));
 
@@ -1952,6 +1980,8 @@ export default function App() {
         return;
       }
       setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) + 1 }));
+      // BUG FIX: reseta frescor ao coletar ovo de ganso fresco
+      setProductFreshness(prev => ({ ...prev, goose_egg: 3 }));
       setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + 1 }));
       setAnimals(prev => prev.map(a => a.id === id ? { ...a, daysSinceLastGooseEgg: 0 } : a));
       addLog(`🦢 ${animal.name} botou 1 ovo de ganso! (Vale 50 moedas!)`, 'success');
@@ -1995,6 +2025,8 @@ export default function App() {
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
 
     setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) + qty }));
+    // BUG FIX: reseta frescor ao coletar leite de búfala fresco
+    setProductFreshness(prev => ({ ...prev, buffalo_milk: 3 }));
     setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + qty }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false } : a));
     addLog(`🐃 ${animal.name} produziu ${qty} leite(s) de búfala${animal.heatStress ? ' (reduzido pelo calor!)' : ''}!`, 'success');
@@ -3704,7 +3736,10 @@ export default function App() {
       // Desliza o histórico de preço semanal adicionando a nova estimativa simulada de manhã
       setPriceHistory(prev => {
         // BUG 14 FIX: removida chave duplicada 'meat'
-        const keys = ['milk', 'wool', 'cheese', 'scarf', 'egg', 'mayo', 'queijoCoalho', 'queijoMucarela', 'queijoBrie', 'carne'];
+        // BUG FIX: novos produtos incluídos no slide de histórico
+        const keys = ['milk', 'wool', 'cheese', 'scarf', 'egg', 'mayo', 'queijoCoalho', 'queijoMucarela', 'queijoBrie', 'carne',
+          'goat_milk', 'llama_wool', 'duck_egg', 'goose_egg', 'buffalo_milk', 'buffalo_mozzarella',
+          'feather', 'peacock_feather', 'butter', 'yogurt', 'fertile_egg'];
         const nextHist: Record<string, number[]> = {};
         keys.forEach((key) => {
           let currentP;
@@ -3807,16 +3842,16 @@ export default function App() {
       }
 
       // --- GRUPO 4b: Imposto municipal (a cada 7 dias) ---
+      // BUG FIX: taxAmount calculado aqui mas deduzido no setGold consolidado final,
+      // evitando dois setGold separados que calculavam taxActual com gold stale do closure.
+      let taxAmount = 0;
       if (currentDay % 7 === 0) {
         const weekEarnings = weeklyStats.earnings;
         let tax = Math.round(weekEarnings * 0.05);
         tax = Math.max(10, Math.min(200, tax));
-        const taxActual = Math.min(tax, Math.floor(gold));
-        if (taxActual > 0) {
-          setGold(prev => Math.max(0, prev - taxActual));
-          setWeeklyTaxPaid(taxActual);
-          logsToAdd.push({ msg: `🏛️ Imposto municipal: -${taxActual} moedas (5% dos lucros da semana)`, type: 'system' });
-        }
+        taxAmount = tax; // será limitado ao ouro disponível no setGold consolidado abaixo
+        setWeeklyTaxPaid(tax);
+        logsToAdd.push({ msg: `🏛️ Imposto municipal: -${tax} moedas (5% dos lucros da semana)`, type: 'system' });
       }
 
       // --- GRUPO 4c: Caixinha de gorjeta ---
@@ -3895,9 +3930,10 @@ export default function App() {
         }
       });
 
-      // Liquidação financeira final do balanceamento (inclui multas de contratos vencidos)
+      // Liquidação financeira final do balanceamento (inclui multas de contratos vencidos e imposto)
       // BUG 2 FIX: usa callback funcional para não sobrescrever ouro com valor de closure stale
-      setGold(prev => Math.max(0, prev - maintCost + globalGoldBonus - contractPenaltyForGold));
+      // BUG FIX: taxAmount incluído aqui para evitar setGold duplo com gold stale no cálculo do imposto
+      setGold(prev => Math.max(0, prev - maintCost + globalGoldBonus - contractPenaltyForGold - taxAmount));
 
       // --- SUBFUNÇÃO: Gerar Relatório Semanal ---
       if (currentDay % 7 === 0) {
@@ -5659,7 +5695,7 @@ export default function App() {
                   onClick={() => setShowEmptyItems(prev => !prev)}
                   className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-lg border transition-all ${showEmptyItems ? 'bg-amber-200 border-amber-400 text-amber-900' : 'bg-stone-100 border-stone-300 text-stone-600'}`}
                 >
-                  {showEmptyItems ? '👁 Mostrar vazios' : '👁 Ocultar vazios'}
+                  {showEmptyItems ? '👁 Ocultar vazios' : '👁 Mostrar vazios'}
                 </button>
               </div>
 
