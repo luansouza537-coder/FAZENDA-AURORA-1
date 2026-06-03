@@ -20,16 +20,32 @@ export interface Animal {
   daysBelow80?: number;          // Days consecutive with happiness < 80
   isBestFriend?: boolean;        // Best Friend status indicator
 
+  // Funcionalidade 1 & 2: Ciclo de vida e idade
+  age?: number;    // dias de vida do animal
+  maxAge?: number; // idade máxima (morte de velhice)
+
   // Cow specific
   hasProducedToday?: boolean;
-  
+
   // Sheep specific
   daysUntilWool?: number;
   daysSinceLastWool?: number;
   woolReady?: boolean;
-  
+
   // Ox specific
   weightGain?: number; // 0.0 to 1.0 (0% to 100%)
+}
+
+// Funcionalidade 4: Contratos de fornecimento
+export interface Contract {
+  id: string;
+  product: 'milk' | 'wool' | 'egg' | 'cheese';
+  quantity: number;
+  delivered: number;
+  pricePerUnit: number;
+  deadline: number;
+  penalty: number;
+  active: boolean;
 }
 
 export interface LogMessage {

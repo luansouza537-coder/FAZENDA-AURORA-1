@@ -33,7 +33,7 @@ import {
   Target,
   BarChart2
 } from 'lucide-react';
-import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage } from './types';
+import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract } from './types';
 import { getRandomName, getUniqueOxName } from './names';
 import { sfx } from './utils/audio';
 import SeasonalParticles from './components/SeasonalParticles';
@@ -360,6 +360,107 @@ export default function App() {
   });
 
   const [showQueijariaModal, setShowQueijariaModal] = useState<boolean>(false);
+
+  // --- FUNCIONALIDADES 1-12: Novos estados ---
+
+  // F2: Sabedoria permanente de animais idosos falecidos
+  const [farmWisdomBonus, setFarmWisdomBonus] = useState<{ vaca: number; ovelha: number; boi: number; galinha: number }>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.farmWisdomBonus) return parsed.farmWisdomBonus;
+      }
+    } catch (e) {}
+    return { vaca: 0, ovelha: 0, boi: 0, galinha: 0 };
+  });
+
+  // F4: Contratos de fornecimento
+  const [contracts, setContracts] = useState<Contract[]>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.contracts)) return parsed.contracts;
+      }
+    } catch (e) {}
+    return [];
+  });
+  const [showContractsModal, setShowContractsModal] = useState<boolean>(false);
+
+  // F5: Seguro agrícola
+  const [insurance, setInsurance] = useState<{ active: boolean; premium: number; daysLeft: number }>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.insurance) return parsed.insurance;
+      }
+    } catch (e) {}
+    return { active: false, premium: 50, daysLeft: 0 };
+  });
+
+  // F7: Lotes de terreno
+  const [landLots, setLandLots] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.landLots !== undefined) return parsed.landLots;
+      }
+    } catch (e) {}
+    return 1;
+  });
+
+  // F8: Poço d'água
+  const [wellLevel, setWellLevel] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.wellLevel !== undefined) return parsed.wellLevel;
+      }
+    } catch (e) {}
+    return 0;
+  });
+
+  // F9: Gerador solar
+  const [solarLevel, setSolarLevel] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.solarLevel !== undefined) return parsed.solarLevel;
+      }
+    } catch (e) {}
+    return 0;
+  });
+
+  // F10: Irrigação
+  const [irrigationLevel, setIrrigationLevel] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.irrigationLevel !== undefined) return parsed.irrigationLevel;
+      }
+    } catch (e) {}
+    return 0;
+  });
+
+  // F11: Nível da queijaria (prateleiras)
+  const [queijariaNivel, setQueijariaNivel] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.queijariaNivel !== undefined) return parsed.queijariaNivel;
+      }
+    } catch (e) {}
+    return 1;
+  });
+
+  const [showUpgradesModal, setShowUpgradesModal] = useState<boolean>(false);
 
   const [priceHistory, setPriceHistory] = useState<Record<string, number[]>>(() => {
     try {
@@ -1042,7 +1143,16 @@ export default function App() {
         earningsHistory,
         allTimeStats,
         missions,
-        notifications
+        notifications,
+        // Novas funcionalidades
+        farmWisdomBonus,
+        contracts,
+        insurance,
+        landLots,
+        wellLevel,
+        solarLevel,
+        irrigationLevel,
+        queijariaNivel
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
