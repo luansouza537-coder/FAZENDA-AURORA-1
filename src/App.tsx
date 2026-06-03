@@ -1800,9 +1800,11 @@ export default function App() {
       ...prev,
       egg: (prev.egg ?? 0) + totalOvos
     }));
+    // BUG FIX: reseta frescor ao coletar ovos frescos
+    setProductFreshness(prev => ({ ...prev, egg: 3 }));
 
-    setStats(prev => ({ 
-      ...prev, 
+    setStats(prev => ({
+      ...prev,
       totalCollected: prev.totalCollected + totalOvos,
       totalEggs: (prev.totalEggs || 0) + totalOvos
     }));
@@ -2325,9 +2327,11 @@ export default function App() {
       ...prev,
       milk: prev.milk + totalLeite
     }));
+    // BUG FIX: reseta frescor ao coletar leite fresco
+    setProductFreshness(prev => ({ ...prev, milk: 3 }));
 
-    setStats(prev => ({ 
-      ...prev, 
+    setStats(prev => ({
+      ...prev,
       totalCollected: prev.totalCollected + totalLeite,
       totalMilk: (prev.totalMilk || 0) + totalLeite
     }));
@@ -3782,8 +3786,9 @@ export default function App() {
         updatedAnimalsList = updatedAnimalsList.map(a => {
           if (a.type === 'galinha' && a.hasProducedToday && a.happiness >= 95 && Math.random() < 0.20) {
             fertilEggsProduced++;
-            // Mark as produced but it will be a fertile egg instead
             logsToAdd.push({ msg: `✨ ${a.name} está super feliz e botou um ovo fértil especial!`, type: 'success' });
+            // BUG FIX: marca hasProducedToday=false para evitar coleta dupla (ovo fértil + ovo normal no mesmo dia)
+            return { ...a, hasProducedToday: false };
           }
           return a;
         });
@@ -6158,7 +6163,18 @@ export default function App() {
         {/* --- FARM REGULATORY FOOTER --- */}
         <footer className="bg-[#78350f] border-t-8 border-[#451a03] text-center p-4 text-[10px] sm:text-xs font-mono text-[#fcd57e] select-none flex flex-col sm:flex-row items-center justify-between px-6 gap-3 uppercase font-black">
           <span>🐮 Leite (🥛 Queijo) • 🐑 Tosquia (🧣 Cachecol) • 🐂 Peso (+5 moedas bônus no nível 5)</span>
-          <span className="text-[#fef3c7]/60 text-[9px]">Fazenda Aurora © 2026 - Cuide com carinho!</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[#fef3c7]/60 text-[9px]">Fazenda Aurora © 2026 - Cuide com carinho!</span>
+            <a
+              href="https://ko-fi.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 px-3 py-1 bg-[#FF5E5B] hover:bg-[#ff4845] text-white text-xs rounded-full transition-colors"
+              title="Apoiar o desenvolvimento"
+            >
+              ☕ Apoiar
+            </a>
+          </div>
         </footer>
 
       </div>
