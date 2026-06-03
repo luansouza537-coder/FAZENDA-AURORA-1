@@ -925,6 +925,7 @@ export default function App() {
 
   // Ref to follow the scroll in the logs panel
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const logsContainerRef = useRef<HTMLDivElement>(null);
 
   // --- AUDIO HELPER ---
   const triggerAudioResult = (action: () => void) => {
@@ -1276,10 +1277,10 @@ export default function App() {
   // BUG 9 FIX: adicionadas dependências faltantes para evitar valores stale no handler de teclado
   }, [animals, inventory, currentDay, weather, weeklySales, showBuyMenu, machines, farmLevel, queijosEmMaturacao, merchantActive, daysSinceMerchant, nextMerchantDay, dailyEarning, weeklyStats]);
 
-  // Sync log scrollbar
+  // Sync log scrollbar — scroll only inside the logs container, not the whole page
   useEffect(() => {
-    if (logsEndRef.current) {
-      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
     }
   }, [logs]);
 
@@ -6151,7 +6152,7 @@ export default function App() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto pr-1 text-xs space-y-2 font-mono divide-y divide-[#fbbf24]/30" style={{ scrollbarWidth: 'thin' }}>
+              <div ref={logsContainerRef} className="flex-1 overflow-y-auto pr-1 text-xs space-y-2 font-mono divide-y divide-[#fbbf24]/30" style={{ scrollbarWidth: 'thin' }}>
                 {logs.length === 0 ? (
                   <div className="text-center text-[#92400e]/50 italic pt-16 font-bold uppercase tracking-wider">
                     Nenhum registro ainda hoje.
