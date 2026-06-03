@@ -4827,6 +4827,42 @@ export default function App() {
                                 </span>
                               );
                             })()}
+                            {/* MECHANIC 3: Cabra — badge de lactação */}
+                            {animal.type === 'cabra' && (
+                              animal.isLactating ? (
+                                <span
+                                  className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-green-100 border border-green-400 text-green-800 cursor-help"
+                                  title="Produzindo leite de cabra"
+                                >
+                                  🍼 Lactando
+                                </span>
+                              ) : (
+                                <span
+                                  className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-help"
+                                  title={`Em período de secagem: ${animal.lactationCycle ?? 0} dias restantes para a próxima lactação`}
+                                >
+                                  ⏳ Secagem ({animal.lactationCycle ?? 0}d)
+                                </span>
+                              )
+                            )}
+                            {/* MECHANIC 4: Lhama — badge de lã acumulada */}
+                            {animal.type === 'lhama' && (
+                              <span
+                                className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-purple-100 border border-purple-300 text-purple-800 cursor-help"
+                                title={`Lã acumulada ao longo das estações. Colheita disponível na Primavera com mínimo 3.`}
+                              >
+                                🧶 Lã: {animal.woolAccumulated ?? 0}/3
+                              </span>
+                            )}
+                            {/* MECHANIC 5: Búfalo — badge de estresse térmico */}
+                            {animal.type === 'bufalo' && animal.heatStress && (
+                              <span
+                                className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-red-100 border border-red-400 text-red-800 cursor-help animate-pulse"
+                                title="Estresse térmico do verão: -3 felicidade/dia extra e produção de leite reduzida em 40%"
+                              >
+                                🌡️ Estresse Térmico
+                              </span>
+                            )}
                             {/* F1/F2: Idade e badge idoso */}
                             {animal.age !== undefined && animal.maxAge !== undefined && (() => {
                               const ratio = animal.age / animal.maxAge;
@@ -5234,7 +5270,7 @@ export default function App() {
                               onClick={(e) => { e.preventDefault(); collectGoatMilk(animal.id, e); }}
                               disabled={!animal.isLactating || !animal.hasProducedToday}
                               className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.isLactating && animal.hasProducedToday ? 'bg-[#3b82f6] hover:bg-[#2563eb] border-b-4 border-[#1d4ed8] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
-                              title="Coletar leite de cabra"
+                              title={!animal.isLactating ? `Em período de secagem — ${animal.lactationCycle ?? 0} dias restantes` : !animal.hasProducedToday ? 'Leite já coletado hoje' : 'Coletar leite de cabra'}
                             >
                               🥛 Leite Cabra
                             </button>
@@ -5247,7 +5283,7 @@ export default function App() {
                               onClick={(e) => { e.preventDefault(); collectLlamaWool(animal.id, e); }}
                               disabled={(animal.woolAccumulated ?? 0) < 3 || Math.floor(((currentDay - 1) % 120) / 30) !== 0}
                               className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${(animal.woolAccumulated ?? 0) >= 3 && Math.floor(((currentDay - 1) % 120) / 30) === 0 ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
-                              title="Coletar lã de lhama (apenas na Primavera, mín. 3u)"
+                              title={Math.floor(((currentDay - 1) % 120) / 30) !== 0 ? 'A lhama só pode ser tosquiada na primavera 🌸' : (animal.woolAccumulated ?? 0) < 3 ? `Lã acumulada: ${animal.woolAccumulated ?? 0}/3` : 'Coletar lã de lhama'}
                             >
                               🧶 Lã Lhama ({animal.woolAccumulated ?? 0}u)
                             </button>
