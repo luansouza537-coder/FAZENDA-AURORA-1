@@ -2315,6 +2315,9 @@ export default function App() {
         if (newDelivered >= c.quantity) {
           setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
           addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
+          // BUG FIX: marca contrato como inativo ao completar para evitar que fique
+          // acumulado como "ativo" indefinidamente e seja exibido desnecessariamente.
+          return { ...c, delivered: newDelivered, active: false };
         }
         return { ...c, delivered: newDelivered };
       }));
@@ -3221,7 +3224,8 @@ export default function App() {
       if (deceasedCount > 0) {
         triggerAudioResult(() => sfx.playSound('error'));
       }
-      setAnimals(survivors);
+      // NOTE: setAnimals(survivors) is deferred to after the age-cycle block below,
+      // which also calls setAnimals with the fully-processed list (age increments + elder deaths).
 
       // BUG 4 FIX: notificações de infelicidade agora usam `survivors` (sem animais
       // já mortos), evitando spam de aviso sobre animais que acabaram de falecer.
@@ -3234,9 +3238,17 @@ export default function App() {
       // --- SUBFUNÇÃO 9: Processamento do Evento Global Dinâmico ---
       const globalGoldBonus = processarGlobalEvent(logsToAdd);
 
-      // Liquidação financeira final do balanceamento
+      // --- F4: Pré-calcular multas de contratos vencidos (síncrono, para incluir no setGold final) ---
+      let contractPenaltyForGold = 0;
+      contracts.forEach(c => {
+        if (c.active && nextDayValue > c.deadline && c.delivered < c.quantity) {
+          contractPenaltyForGold += c.penalty;
+        }
+      });
+
+      // Liquidação financeira final do balanceamento (inclui multas de contratos vencidos)
       // BUG 2 FIX: usa callback funcional para não sobrescrever ouro com valor de closure stale
-      setGold(prev => Math.max(0, prev - maintCost + globalGoldBonus));
+      setGold(prev => Math.max(0, prev - maintCost + globalGoldBonus - contractPenaltyForGold));
 
       // --- SUBFUNÇÃO: Gerar Relatório Semanal ---
       if (currentDay % 7 === 0) {
@@ -3247,28 +3259,26 @@ export default function App() {
       }
 
       // --- F1/F2: Ciclo de vida dos animais (idade e morte por velhice) ---
+      // BUG FIX: calcula os animais que morrem de velhice de forma síncrona (fora do updater
+      // de setAnimals) para evitar side-effects (push em logsToAdd, wisdomBonusUpdates)
+      // sendo executados duas vezes no StrictMode do React.
       const wisdomBonusUpdates: { vaca: number; ovelha: number; boi: number; galinha: number } = { vaca: 0, ovelha: 0, boi: 0, galinha: 0 };
-      setAnimals(prev => {
-        return prev.map(a => {
-          const newAge = (a.age || 0) + 1;
-          return { ...a, age: newAge };
-        }).filter(a => {
-          const maxAge = a.maxAge || 999;
-          if ((a.age || 0) >= maxAge) {
-            // Animal morre de velhice
-            logsToAdd.push({
-              msg: `👴 ${a.name} (${a.type}) viveu ${a.age} dias e partiu de velhice. Sua sabedoria permanece no rebanho!`,
-              type: 'error'
-            });
-            // F2: bônus permanente de sabedoria (2% por idoso falecido, máx 10%)
-            const key = a.type as keyof typeof wisdomBonusUpdates;
-            wisdomBonusUpdates[key] = Math.min(0.1, (wisdomBonusUpdates[key] || 0) + 0.02);
-            setTimeout(() => addNotification(`👴 ${a.name} (${a.type}) viveu ${a.age} dias e deixou sua sabedoria!`, 'event', nextDayValue), 0);
-            return false;
-          }
-          return true;
-        });
+      const agedAnimals = survivors.map(a => ({ ...a, age: (a.age || 0) + 1 }));
+      const survivorsAfterAge = agedAnimals.filter(a => {
+        const maxAge = a.maxAge || 999;
+        if (a.age >= maxAge) {
+          logsToAdd.push({
+            msg: `👴 ${a.name} (${a.type}) viveu ${a.age} dias e partiu de velhice. Sua sabedoria permanece no rebanho!`,
+            type: 'error'
+          });
+          const key = a.type as keyof typeof wisdomBonusUpdates;
+          wisdomBonusUpdates[key] = Math.min(0.1, (wisdomBonusUpdates[key] || 0) + 0.02);
+          setTimeout(() => addNotification(`👴 ${a.name} (${a.type}) viveu ${a.age} dias e deixou sua sabedoria!`, 'event', nextDayValue), 0);
+          return false;
+        }
+        return true;
       });
+      setAnimals(survivorsAfterAge);
       // Apply accumulated wisdom bonuses
       if (Object.values(wisdomBonusUpdates).some(v => v > 0)) {
         setFarmWisdomBonus(prev => ({
@@ -3280,29 +3290,40 @@ export default function App() {
       }
 
       // --- F4: Verificar contratos vencidos ---
+      // BUG FIX: toda a lógica de log e notificação de contratos vencidos é executada
+      // de forma síncrona aqui (usando o array `contracts` da closure), e o setContracts
+      // abaixo apenas marca inativos — sem side-effects no updater.
+      contracts.forEach(c => {
+        if (c.active && nextDayValue > c.deadline && c.delivered < c.quantity) {
+          logsToAdd.push({ msg: `📋 Contrato vencido! Multa de -${c.penalty} moedas por não entregar ${c.quantity - c.delivered} un de ${c.product}!`, type: 'error' });
+          setTimeout(() => addNotification(`📋 Contrato expirou! Multa de -${c.penalty} moedas aplicada!`, 'warning', nextDayValue), 0);
+        }
+      });
       setContracts(prev => prev.map(c => {
         if (!c.active) return c;
         if (nextDayValue > c.deadline && c.delivered < c.quantity) {
-          const penalty = c.penalty;
-          setGold(g => Math.max(0, g - penalty));
-          logsToAdd.push({ msg: `📋 Contrato vencido! Multa de -${penalty} moedas por não entregar ${c.quantity - c.delivered} un de ${c.product}!`, type: 'error' });
-          setTimeout(() => addNotification(`📋 Contrato expirou! Multa de -${penalty} moedas aplicada!`, 'warning', nextDayValue), 0);
           return { ...c, active: false };
         }
         return c;
       }));
 
       // --- F5: Decrementar seguro agrícola ---
+      // BUG FIX: side-effects (log/notificação) extraídos para fora do updater,
+      // calculados com `insurance` da closure para evitar dupla execução em StrictMode.
+      if (insurance.active) {
+        const newDaysLeft = insurance.daysLeft - 1;
+        if (newDaysLeft <= 0) {
+          logsToAdd.push({ msg: `🛡️ Seu seguro agrícola expirou! Renove nas Melhorias para continuar protegido.`, type: 'event' });
+          setTimeout(() => addNotification(`🛡️ Seguro agrícola expirou!`, 'warning', nextDayValue), 0);
+        } else if (newDaysLeft === 2) {
+          setTimeout(() => addNotification(`⚠️ Seguro agrícola expira em 2 dias! Renove nas Melhorias.`, 'warning', nextDayValue), 0);
+        }
+      }
       setInsurance(prev => {
         if (!prev.active) return prev;
         const newDaysLeft = prev.daysLeft - 1;
         if (newDaysLeft <= 0) {
-          logsToAdd.push({ msg: `🛡️ Seu seguro agrícola expirou! Renove nas Melhorias para continuar protegido.`, type: 'event' });
-          setTimeout(() => addNotification(`🛡️ Seguro agrícola expirou!`, 'warning', nextDayValue), 0);
           return { ...prev, active: false, daysLeft: 0 };
-        }
-        if (newDaysLeft === 2) {
-          setTimeout(() => addNotification(`⚠️ Seguro agrícola expira em 2 dias! Renove nas Melhorias.`, 'warning', nextDayValue), 0);
         }
         return { ...prev, daysLeft: newDaysLeft };
       });
