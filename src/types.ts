@@ -88,4 +88,6 @@ export interface FarmStats {
   totalEggs?: number;
   totalMayo?: number;
   totalMerchantTrades?: number;
+  totalButter?: number;
+  totalYogurt?: number;
 }

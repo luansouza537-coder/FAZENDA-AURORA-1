@@ -283,6 +283,9 @@ export default function App() {
     buffalo_mozzarella: number;
     feather: number;
     peacock_feather: number;
+    butter: number;
+    yogurt: number;
+    fertile_egg: number;
   }>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -311,6 +314,9 @@ export default function App() {
           buffalo_mozzarella: inv.buffalo_mozzarella ?? 0,
           feather: inv.feather ?? 0,
           peacock_feather: inv.peacock_feather ?? 0,
+          butter: inv.butter ?? 0,
+          yogurt: inv.yogurt ?? 0,
+          fertile_egg: inv.fertile_egg ?? 0,
         };
       }
     } catch (e) {}
@@ -336,10 +342,13 @@ export default function App() {
       buffalo_mozzarella: 0,
       feather: 0,
       peacock_feather: 0,
+      butter: 0,
+      yogurt: 0,
+      fertile_egg: 0,
     };
   });
 
-  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella'; diasRestantes: number }[]>(() => {
+  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt'; diasRestantes: number }[]>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
       if (saved) {
@@ -485,6 +494,61 @@ export default function App() {
   });
 
   const [showUpgradesModal, setShowUpgradesModal] = useState<boolean>(false);
+
+  // Novos upgrades simples (Grupo 3)
+  const [hasStable, setHasStable] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).hasStable ?? false;
+    } catch (e) {}
+    return false;
+  });
+  const [hasSilo, setHasSilo] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).hasSilo ?? false;
+    } catch (e) {}
+    return false;
+  });
+  const [hasFridge, setHasFridge] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).hasFridge ?? false;
+    } catch (e) {}
+    return false;
+  });
+  const [hasTipBox, setHasTipBox] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).hasTipBox ?? false;
+    } catch (e) {}
+    return false;
+  });
+
+  // Grupo 4a: frescor dos produtos perecíveis
+  const [productFreshness, setProductFreshness] = useState<{
+    milk: number; egg: number; goat_milk: number; duck_egg: number;
+    goose_egg: number; buffalo_milk: number; fertile_egg: number;
+  }>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const pf = JSON.parse(saved).productFreshness;
+        if (pf) return {
+          milk: pf.milk ?? 3, egg: pf.egg ?? 3, goat_milk: pf.goat_milk ?? 3,
+          duck_egg: pf.duck_egg ?? 3, goose_egg: pf.goose_egg ?? 3,
+          buffalo_milk: pf.buffalo_milk ?? 3, fertile_egg: pf.fertile_egg ?? 3,
+        };
+      }
+    } catch (e) {}
+    return { milk: 3, egg: 3, goat_milk: 3, duck_egg: 3, goose_egg: 3, buffalo_milk: 3, fertile_egg: 3 };
+  });
+
+  // Grupo 4b: receita semanal para cálculo de imposto
+  const [weeklyTaxPaid, setWeeklyTaxPaid] = useState<number>(0);
+
+  // Ateliê: mostrar itens vazios toggle
+  const [showEmptyItems, setShowEmptyItems] = useState<boolean>(false);
 
   const [priceHistory, setPriceHistory] = useState<Record<string, number[]>>(() => {
     try {
@@ -947,7 +1011,16 @@ export default function App() {
       buffalo_mozzarella: 0,
       feather: 0,
       peacock_feather: 0,
+      butter: 0,
+      yogurt: 0,
+      fertile_egg: 0,
     });
+    setHasStable(false);
+    setHasSilo(false);
+    setHasFridge(false);
+    setHasTipBox(false);
+    setProductFreshness({ milk: 3, egg: 3, goat_milk: 3, duck_egg: 3, goose_egg: 3, buffalo_milk: 3, fertile_egg: 3 });
+    setWeeklyTaxPaid(0);
     setPriceHistory({
       milk: [5, 5, 5, 5, 5, 5, 5],
       wool: [12, 12, 12, 12, 12, 12, 12],
@@ -1224,12 +1297,17 @@ export default function App() {
         solarLevel,
         irrigationLevel,
         queijariaNivel,
-        nextDayEvent
+        nextDayEvent,
+        hasStable,
+        hasSilo,
+        hasFridge,
+        hasTipBox,
+        productFreshness,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent]);
+  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness]);
 
   // Centralized achievement condition checker
   // BUG 5 FIX: usa callback funcional para evitar perda de conquistas quando múltiplas são desbloqueadas
@@ -1640,11 +1718,15 @@ export default function App() {
     if (event) event.preventDefault();
     const pricePerUnit = getFeedPriceWithModifiers(type);
     let totalCost = pricePerUnit * quantity;
-    
+
     if (quantity === 10) {
       totalCost = Math.floor(totalCost * 0.95); // 5% discount
     } else if (quantity === 50) {
       totalCost = Math.floor(totalCost * 0.88); // 12% discount
+    }
+    // Silo de grãos: 15% desconto em todas as compras de ração
+    if (hasSilo) {
+      totalCost = Math.floor(totalCost * 0.85);
     }
     
     if (gold < totalCost) {
@@ -1975,6 +2057,54 @@ export default function App() {
     spawnFeedback('🥣', '+1 Maionese', event);
   };
 
+  // Craft Butter: 2 milk → 1 butter (instant, level 2+)
+  const craftButter = (event?: React.MouseEvent) => {
+    if (event && event.preventDefault) event.preventDefault();
+    if (farmLevel < 2) {
+      addLog('🧈 A manteiga requer Nível 2!', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+    if ((inventory.milk ?? 0) < 2) {
+      addLog('🥛 Leite insuficiente! Você precisa de 2 leites para fazer manteiga.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Falta Leite!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, milk: prev.milk - 2, butter: (prev.butter ?? 0) + 1 }));
+    setStats(prev => ({ ...prev, totalButter: (prev.totalButter || 0) + 1 }));
+    addLog('🧈 Você transformou 2 leites em 1 manteiga artesanal!', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    if (event) spawnFeedback('🧈', '+1 Manteiga', event);
+  };
+
+  // Craft Yogurt: 1 milk → 1 yogurt after 1 day (uses maturação system)
+  const craftYogurt = (event?: React.MouseEvent) => {
+    if (event && event.preventDefault) event.preventDefault();
+    if (farmLevel < 2) {
+      addLog('🥛 O iogurte requer Nível 2!', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+    if ((inventory.milk ?? 0) < 1) {
+      addLog('🥛 Leite insuficiente! Você precisa de 1 leite para fazer iogurte.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Falta Leite!', event);
+      return;
+    }
+    if (queijosEmMaturacao.length >= maxPrateleiras) {
+      addLog('Prateleiras cheias! Aguarde outros produtos fermentarem.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, milk: prev.milk - 1 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'yogurt', diasRestantes: 1 }]);
+    addLog('🥛 Iogurte em fermentação! Ficará pronto amanhã.', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    if (event) spawnFeedback('🥛', 'Fermentando...', event);
+  };
+
   // Prices for animals based on level 4 discount
   const getAnimalPurchasePrice = (type: AnimalType): number => {
     let basePrice = 80;
@@ -2036,7 +2166,7 @@ export default function App() {
   };
 
   // Base raw item prices (increases with levels)
-  const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather'): number => {
+  const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg'): number => {
     if (itemType === 'milk') {
       return farmLevel >= 2 ? 6 : 5;
     }
@@ -2072,15 +2202,18 @@ export default function App() {
     if (itemType === 'buffalo_mozzarella') return 120;
     if (itemType === 'feather') return 15;
     if (itemType === 'peacock_feather') return 80;
+    if (itemType === 'butter') return 45;
+    if (itemType === 'yogurt') return 35;
+    if (itemType === 'fertile_egg') return 36;
     return 0;
   };
 
   // Keep 1 decimal place precision for display
-  const getDynamicPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather', d = currentDay, w = weather, sales = weeklySales): number => {
+  const getDynamicPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg', d = currentDay, w = weather, sales = weeklySales): number => {
     const base = getItemBaseSellPrice(itemType);
-    const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType] || 0) / 100));
-    const seasonMult = getSeasonalityMultiplier(itemType, d);
-    const weatherMult = getWeatherMultiplier(itemType, w);
+    const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType as keyof typeof sales] || 0) / 100));
+    const seasonMult = getSeasonalityMultiplier(itemType as any, d);
+    const weatherMult = getWeatherMultiplier(itemType as any, w);
     let finalPrice = base * offerMult * seasonMult * weatherMult;
     if (merchantActive) {
       finalPrice *= 1.5;
@@ -2098,11 +2231,11 @@ export default function App() {
   };
 
   // Rounded to nearest integer for actual gold conversion
-  const getDynamicTransactionPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather', d = currentDay, w = weather, sales = weeklySales): number => {
+  const getDynamicTransactionPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg', d = currentDay, w = weather, sales = weeklySales): number => {
     const base = getItemBaseSellPrice(itemType);
-    const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType] || 0) / 100));
-    const seasonMult = getSeasonalityMultiplier(itemType, d);
-    const weatherMult = getWeatherMultiplier(itemType, w);
+    const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType as keyof typeof sales] || 0) / 100));
+    const seasonMult = getSeasonalityMultiplier(itemType as any, d);
+    const weatherMult = getWeatherMultiplier(itemType as any, w);
     let finalPrice = base * offerMult * seasonMult * weatherMult;
     if (merchantActive) {
       finalPrice *= 1.5;
@@ -2120,7 +2253,7 @@ export default function App() {
   };
 
   // Final processed sell prices including dynamic pricing equations
-  const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather'): number => {
+  const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg'): number => {
     return getDynamicTransactionPrice(itemType);
   };
 
@@ -2543,7 +2676,7 @@ export default function App() {
     spawnFeedback('🧣', '+1 Cachecol', event);
   };
 
-  const sellProduct = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather', qty: number, event: React.MouseEvent) => {
+  const sellProduct = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg', qty: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
     if ((inventory[itemType] ?? 0) < qty) {
       addLog(`📦 Estoque insuficiente deste produto no Armazém!`, 'error');
@@ -2627,6 +2760,9 @@ export default function App() {
     else if (itemType === 'buffalo_mozzarella') label = 'Muçarela de Búfala';
     else if (itemType === 'feather') label = 'Penas';
     else if (itemType === 'peacock_feather') label = 'Pena de Pavão';
+    else if (itemType === 'butter') label = 'Manteiga';
+    else if (itemType === 'yogurt') label = 'Iogurte';
+    else if (itemType === 'fertile_egg') label = 'Ovo Fértil';
 
     addLog(`💰 Venda realizada: ${qty} unidades de ${label} por +${profit} moedas!`, 'success');
 
@@ -2657,8 +2793,11 @@ export default function App() {
     const buffaloMozzQty = inventory.buffalo_mozzarella || 0;
     const featherQty = inventory.feather || 0;
     const peacockFeatherQty = inventory.peacock_feather || 0;
+    const butterQty = inventory.butter || 0;
+    const yogurtQty = inventory.yogurt || 0;
+    const fertileEggQty = inventory.fertile_egg || 0;
 
-    if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && featherQty === 0 && peacockFeatherQty === 0) {
+    if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && featherQty === 0 && peacockFeatherQty === 0 && butterQty === 0 && yogurtQty === 0 && fertileEggQty === 0) {
       if (!quietValue) {
         addLog(`📦 Seu Armazém está completamente vazio de mercadorias para vender!`, 'error');
         triggerAudioResult(() => sfx.playSound('error'));
@@ -2683,6 +2822,9 @@ export default function App() {
     const buffaloMozzPrice = getDynamicTransactionPrice('buffalo_mozzarella');
     const featherPrice = getDynamicTransactionPrice('feather');
     const peacockFeatherPrice = getDynamicTransactionPrice('peacock_feather');
+    const butterPrice = getDynamicTransactionPrice('butter');
+    const yogurtPrice = getDynamicTransactionPrice('yogurt');
+    const fertileEggPrice = getDynamicTransactionPrice('fertile_egg');
 
     const totalEarningCalculated =
       (milkQty * milkPrice) +
@@ -2701,7 +2843,10 @@ export default function App() {
       (buffaloMilkQty * buffaloMilkPrice) +
       (buffaloMozzQty * buffaloMozzPrice) +
       (featherQty * featherPrice) +
-      (peacockFeatherQty * peacockFeatherPrice);
+      (peacockFeatherQty * peacockFeatherPrice) +
+      (butterQty * butterPrice) +
+      (yogurtQty * yogurtPrice) +
+      (fertileEggQty * fertileEggPrice);
 
     if (totalEarningCalculated <= 0) return;
 
@@ -2726,7 +2871,10 @@ export default function App() {
       buffalo_milk: 0,
       buffalo_mozzarella: 0,
       feather: 0,
-      peacock_feather: 0
+      peacock_feather: 0,
+      butter: 0,
+      yogurt: 0,
+      fertile_egg: 0
     }));
 
     // Update weekly sales statistics
@@ -2743,7 +2891,7 @@ export default function App() {
       queijoBrie: (prev.queijoBrie ?? 0) + brieQty
     }));
 
-    const totalAllQty = milkQty + woolQty + cheeseQty + scarfQty + eggQty + mayoQty + coalhoQty + mucarelaQty + brieQty + goatMilkQty + llamaWoolQty + duckEggQty + gooseEggQty + buffaloMilkQty + buffaloMozzQty + featherQty + peacockFeatherQty;
+    const totalAllQty = milkQty + woolQty + cheeseQty + scarfQty + eggQty + mayoQty + coalhoQty + mucarelaQty + brieQty + goatMilkQty + llamaWoolQty + duckEggQty + gooseEggQty + buffaloMilkQty + buffaloMozzQty + featherQty + peacockFeatherQty + butterQty + yogurtQty + fertileEggQty;
     setStats(prev => ({
       ...prev,
       totalEarned: prev.totalEarned + totalEarningCalculated,
@@ -2783,6 +2931,9 @@ export default function App() {
     if (buffaloMozzQty > 0) messageParts.push(`${buffaloMozzQty} muç. de búfala`);
     if (featherQty > 0) messageParts.push(`${featherQty} penas`);
     if (peacockFeatherQty > 0) messageParts.push(`${peacockFeatherQty} penas de pavão`);
+    if (butterQty > 0) messageParts.push(`${butterQty} manteigas`);
+    if (yogurtQty > 0) messageParts.push(`${yogurtQty} iogurtes`);
+    if (fertileEggQty > 0) messageParts.push(`${fertileEggQty} ovos férteis`);
 
     addLog(`💰 Você vendeu tudo: ${messageParts.join(', ')} por ${totalEarningCalculated} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));
@@ -3284,7 +3435,7 @@ export default function App() {
     });
 
     readyQueijos.forEach(tipo => {
-      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : 'Queijo Brie';
+      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : 'Queijo Brie';
       logs.push({
         msg: `🧀 Seu fantástico ${label} terminou sua maturação e está pronto para venda!`,
         type: 'success'
@@ -3625,6 +3776,85 @@ export default function App() {
       // --- SUBFUNÇÃO 4: Processamento de Fome, Felicidade e Produções Naturais ---
       let updatedAnimalsList = processarFomeFelicidade(animalsAfterAuto, nextWeather, logsToAdd, nextDayValue);
 
+      // --- GRUPO 2c: Ovo Fértil — galinhas felizes (>=95) têm 20% chance de ovo fértil ---
+      {
+        let fertilEggsProduced = 0;
+        updatedAnimalsList = updatedAnimalsList.map(a => {
+          if (a.type === 'galinha' && a.hasProducedToday && a.happiness >= 95 && Math.random() < 0.20) {
+            fertilEggsProduced++;
+            // Mark as produced but it will be a fertile egg instead
+            logsToAdd.push({ msg: `✨ ${a.name} está super feliz e botou um ovo fértil especial!`, type: 'success' });
+          }
+          return a;
+        });
+        if (fertilEggsProduced > 0) {
+          setInventory(prev => ({ ...prev, fertile_egg: (prev.fertile_egg ?? 0) + fertilEggsProduced }));
+          setProductFreshness(prev => ({ ...prev, fertile_egg: 3 }));
+        }
+      }
+
+      // --- GRUPO 3a: Estábulo — no inverno, animais recuperam metade da felicidade perdida ---
+      if (hasStable && getEstacaoKey(nextDayValue) === 'inverno') {
+        updatedAnimalsList = updatedAnimalsList.map(a => ({
+          ...a,
+          happiness: Math.min(100, a.happiness + 5) // recupera ~metade do decay de inverno
+        }));
+      }
+
+      // --- GRUPO 4b: Imposto municipal (a cada 7 dias) ---
+      if (currentDay % 7 === 0) {
+        const weekEarnings = weeklyStats.earnings;
+        let tax = Math.round(weekEarnings * 0.05);
+        tax = Math.max(10, Math.min(200, tax));
+        const taxActual = Math.min(tax, Math.floor(gold));
+        if (taxActual > 0) {
+          setGold(prev => Math.max(0, prev - taxActual));
+          setWeeklyTaxPaid(taxActual);
+          logsToAdd.push({ msg: `🏛️ Imposto municipal: -${taxActual} moedas (5% dos lucros da semana)`, type: 'system' });
+        }
+      }
+
+      // --- GRUPO 4c: Caixinha de gorjeta ---
+      if (hasTipBox && Math.random() < 0.25) {
+        const tip = 5 + Math.floor(Math.random() * 21); // 5-25
+        setGold(prev => prev + tip);
+        logsToAdd.push({ msg: `🪙 Um visitante deixou uma gorjeta de ${tip} moedas!`, type: 'success' });
+      }
+
+      // --- GRUPO 4a: Frescor dos produtos perecíveis ---
+      {
+        type FreshnessKey = 'milk' | 'egg' | 'goat_milk' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'fertile_egg';
+        const perishables: FreshnessKey[] = ['milk', 'egg', 'goat_milk', 'duck_egg', 'goose_egg', 'buffalo_milk', 'fertile_egg'];
+        setProductFreshness(prev => {
+          const next = { ...prev };
+          perishables.forEach(key => {
+            const qty = (inventory as any)[key] ?? 0;
+            if (qty > 0) {
+              const decay = hasFridge ? 0.5 : 1;
+              next[key] = Math.max(0, prev[key] - decay);
+            }
+          });
+          return next;
+        });
+        // Check for spoilage and warnings (use current freshness before decrement)
+        perishables.forEach(key => {
+          const qty = (inventory as any)[key] ?? 0;
+          if (qty > 0) {
+            const newFresh = productFreshness[key] - (hasFridge ? 0.5 : 1);
+            if (newFresh <= 0) {
+              const lost = Math.floor(qty * 0.3);
+              if (lost > 0) {
+                setInventory(prev => ({ ...prev, [key]: Math.max(0, (prev as any)[key] - lost) }));
+                setProductFreshness(prev => ({ ...prev, [key]: 3 }));
+                logsToAdd.push({ msg: `🦠 Parte do ${key === 'milk' ? 'leite' : key === 'egg' ? 'ovo' : key} estragou! Venda mais rápido.`, type: 'error' });
+              }
+            } else if (Math.floor(newFresh) === 1 && newFresh > 0) {
+              setTimeout(() => addNotification(`⚠️ Seu(s) ${key === 'milk' ? 'leite' : key} vai estragar amanhã!`, 'warning', nextDayValue), 0);
+            }
+          }
+        });
+      }
+
       // --- FUNCIONALIDADE 3: Verificar missão de animais felizes ---
       // BUG 3 FIX: usa updatedAnimalsList (felicidade já processada) em vez de
       // animals stale (felicidade do dia anterior).
@@ -3670,6 +3900,7 @@ export default function App() {
         setShowWeeklyReport(true);
         setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0 });
         setWeeklySales({ milk: 0, wool: 0, cheese: 0, scarf: 0, carne: 0, egg: 0, mayo: 0, queijoCoalho: 0, queijoMucarela: 0, queijoBrie: 0 });
+        setWeeklyTaxPaid(0);
       }
 
       // --- F1/F2: Ciclo de vida dos animais (idade e morte por velhice) ---
@@ -3874,7 +4105,7 @@ export default function App() {
         setInventory(inv => {
           const nextInv = { ...inv };
           readyQueijos.forEach(tipo => {
-            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : 'queijoBrie';
+            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : 'queijoBrie';
             nextInv[key] = (nextInv[key] ?? 0) + 1;
           });
           return nextInv;
@@ -3933,6 +4164,29 @@ export default function App() {
       color = 'bg-blue-100 text-blue-800';
     }
     return <span className={`px-2 py-0.5 text-xs rounded-full ${color}`}>{text}</span>;
+  };
+
+  // Calcula tendência de preço baseada em priceHistory (últimos 3 vs 3 anteriores)
+  const getPriceTrend = (itemType: string): { symbol: string; color: string; pct: number } => {
+    const hist = priceHistory[itemType];
+    if (!hist || hist.length < 6) return { symbol: '→', color: 'text-yellow-500', pct: 0 };
+    const recent = hist.slice(-3);
+    const older = hist.slice(-6, -3);
+    const recentAvg = recent.reduce((a, b) => a + b, 0) / 3;
+    const olderAvg = older.reduce((a, b) => a + b, 0) / 3;
+    if (olderAvg === 0) return { symbol: '→', color: 'text-yellow-500', pct: 0 };
+    const pct = Math.round(((recentAvg - olderAvg) / olderAvg) * 100);
+    if (pct > 5) return { symbol: '▲', color: 'text-green-600 font-black', pct };
+    if (pct < -5) return { symbol: '▼', color: 'text-red-500 font-black', pct };
+    return { symbol: '→', color: 'text-yellow-500', pct };
+  };
+
+  // Indicador de frescor
+  const getFreshnessIndicator = (key: 'milk' | 'egg' | 'goat_milk' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'fertile_egg') => {
+    const f = productFreshness[key];
+    if (f >= 3) return <span className="text-[9px] text-green-600 font-black ml-1">●{f}d</span>;
+    if (f >= 2) return <span className="text-[9px] text-yellow-500 font-black ml-1">●{f}d</span>;
+    return <span className="text-[9px] text-red-500 font-black animate-pulse ml-1">●{Math.ceil(f)}d</span>;
   };
 
   // BUG 16 FIX: usa galinha (animal mais barato) como referência para game over
@@ -4767,6 +5021,13 @@ export default function App() {
                           </div>
                         )}
 
+                        {/* Badge de galinha super feliz (pode gerar ovo fértil) */}
+                        {animal.type === 'galinha' && animal.happiness >= 95 && !animal.isBestFriend && (
+                          <div className="absolute -top-3.5 -left-2.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-950 font-black text-[10px] px-2.5 py-1 rounded-full uppercase shadow-md flex items-center gap-1 animate-pulse" style={{ animationDuration: '2s' }}>
+                            ✨ Feliz
+                          </div>
+                        )}
+
                         {/* Animal header with edit rename */}
                         <div className="flex items-center justify-between gap-3 mb-4">
                           <div className="flex-1">
@@ -5386,93 +5647,110 @@ export default function App() {
                 </h3>
               </div>
               
-              {/* Resource grid totals */}
-              <div className="grid grid-cols-2 gap-2.5 mb-4">
-                <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                  <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🥛 Leite</span>
-                  <span className="font-mono font-black text-blue-700 text-sm bg-blue-50/60 px-2 py-0.5 rounded-md border border-blue-100">{inventory.milk}u</span>
-                </div>
-                <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                  <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🧶 Lã</span>
-                  <span className="font-mono font-black text-purple-700 text-sm bg-purple-50/60 px-2 py-0.5 rounded-md border border-purple-100">{inventory.wool}u</span>
-                </div>
-                <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                  <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🥚 Ovo</span>
-                  <span className="font-mono font-black text-amber-505 text-sm bg-amber-50/60 px-2 py-0.5 rounded-md border border-amber-100">{inventory.egg ?? 0}u</span>
-                </div>
-                <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                  <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🧀 Queijo Simp.</span>
-                  <span className="font-mono font-black text-amber-600 text-sm bg-amber-50/60 px-2 py-0.5 rounded-md border border-amber-100">{inventory.cheese}u</span>
-                </div>
-                <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                  <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🧣 Cachecol</span>
-                  <span className="font-mono font-black text-indigo-700 text-sm bg-indigo-50/60 px-2 py-0.5 rounded-md border border-indigo-100">{inventory.scarf}u</span>
-                </div>
-                <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                  <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🥣 Maio</span>
-                  <span className="font-mono font-black text-yellow-700 text-sm bg-yellow-50/60 px-2 py-0.5 rounded-md border border-yellow-100">{inventory.mayo ?? 0}u</span>
-                </div>
-                <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                  <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🧀 Q. Coalho</span>
-                  <span className="font-mono font-black text-amber-700 text-sm bg-amber-50/60 px-2 py-0.5 rounded-md border border-amber-100">{inventory.queijoCoalho ?? 0}u</span>
-                </div>
-                <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                  <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🧀 Muçarela</span>
-                  <span className="font-mono font-black text-yellow-800 text-sm bg-yellow-50/60 px-2 py-0.5 rounded-md border border-yellow-100">{inventory.queijoMucarela ?? 0}u</span>
-                </div>
-                <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner col-span-2">
-                  <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🧀 Queijo Brie</span>
-                  <span className="font-mono font-black text-orange-850 text-sm bg-orange-50/60 px-2 py-0.5 rounded-md border border-orange-100">{inventory.queijoBrie ?? 0}u</span>
-                </div>
-                {(inventory.goat_milk ?? 0) > 0 && (
-                  <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                    <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🥛 L. Cabra</span>
-                    <span className="font-mono font-black text-blue-700 text-sm bg-blue-50/60 px-2 py-0.5 rounded-md border border-blue-100">{inventory.goat_milk ?? 0}u</span>
-                  </div>
-                )}
-                {(inventory.llama_wool ?? 0) > 0 && (
-                  <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                    <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🧶 L. Lhama</span>
-                    <span className="font-mono font-black text-purple-700 text-sm bg-purple-50/60 px-2 py-0.5 rounded-md border border-purple-100">{inventory.llama_wool ?? 0}u</span>
-                  </div>
-                )}
-                {(inventory.duck_egg ?? 0) > 0 && (
-                  <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                    <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🥚 Ov. Pato</span>
-                    <span className="font-mono font-black text-amber-600 text-sm bg-amber-50/60 px-2 py-0.5 rounded-md border border-amber-100">{inventory.duck_egg ?? 0}u</span>
-                  </div>
-                )}
-                {(inventory.goose_egg ?? 0) > 0 && (
-                  <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                    <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🥚 Ov. Ganso</span>
-                    <span className="font-mono font-black text-amber-700 text-sm bg-amber-50/60 px-2 py-0.5 rounded-md border border-amber-100">{inventory.goose_egg ?? 0}u</span>
-                  </div>
-                )}
-                {(inventory.buffalo_milk ?? 0) > 0 && (
-                  <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                    <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🥛 L. Búfala</span>
-                    <span className="font-mono font-black text-blue-800 text-sm bg-blue-50/60 px-2 py-0.5 rounded-md border border-blue-100">{inventory.buffalo_milk ?? 0}u</span>
-                  </div>
-                )}
-                {(inventory.buffalo_mozzarella ?? 0) > 0 && (
-                  <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                    <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🧀 Muç. Búfala</span>
-                    <span className="font-mono font-black text-yellow-800 text-sm bg-yellow-50/60 px-2 py-0.5 rounded-md border border-yellow-100">{inventory.buffalo_mozzarella ?? 0}u</span>
-                  </div>
-                )}
-                {(inventory.feather ?? 0) > 0 && (
-                  <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                    <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🪶 Penas</span>
-                    <span className="font-mono font-black text-teal-700 text-sm bg-teal-50/60 px-2 py-0.5 rounded-md border border-teal-100">{inventory.feather ?? 0}u</span>
-                  </div>
-                )}
-                {(inventory.peacock_feather ?? 0) > 0 && (
-                  <div className="bg-white/80 p-2.5 rounded-xl border border-[#fbbf24] flex items-center justify-between shadow-inner">
-                    <span className="text-xs font-bold text-[#78350f] uppercase tracking-tight flex items-center gap-1">🪶 Pena Pavão</span>
-                    <span className="font-mono font-black text-emerald-700 text-sm bg-emerald-50/60 px-2 py-0.5 rounded-md border border-emerald-100">{inventory.peacock_feather ?? 0}u</span>
-                  </div>
-                )}
+              {/* Toggle mostrar vazios */}
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] text-[#92400e] font-mono font-bold uppercase tracking-wider">Estoque</span>
+                <button
+                  onClick={() => setShowEmptyItems(prev => !prev)}
+                  className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-lg border transition-all ${showEmptyItems ? 'bg-amber-200 border-amber-400 text-amber-900' : 'bg-stone-100 border-stone-300 text-stone-600'}`}
+                >
+                  {showEmptyItems ? '👁 Mostrar vazios' : '👁 Ocultar vazios'}
+                </button>
               </div>
+
+              {/* Resource grid totals — grouped by category */}
+              {(() => {
+                type InvItem = {
+                  key: string;
+                  label: string;
+                  qty: number;
+                  priceKey?: 'milk'|'wool'|'cheese'|'scarf'|'egg'|'mayo'|'queijoCoalho'|'queijoMucarela'|'queijoBrie'|'goat_milk'|'llama_wool'|'duck_egg'|'goose_egg'|'buffalo_milk'|'buffalo_mozzarella'|'feather'|'peacock_feather'|'butter'|'yogurt'|'fertile_egg';
+                  freshKey?: 'milk'|'egg'|'goat_milk'|'duck_egg'|'goose_egg'|'buffalo_milk'|'fertile_egg';
+                  colSpan?: boolean;
+                };
+                const groups: { title: string; bg: string; items: InvItem[] }[] = [
+                  {
+                    title: '🐄 Produção Animal',
+                    bg: 'bg-blue-50/60 border-blue-200',
+                    items: [
+                      { key: 'milk', label: '🥛 Leite', qty: inventory.milk, priceKey: 'milk', freshKey: 'milk' },
+                      { key: 'goat_milk', label: '🥛 L. Cabra', qty: inventory.goat_milk ?? 0, priceKey: 'goat_milk', freshKey: 'goat_milk' },
+                      { key: 'buffalo_milk', label: '🥛 L. Búfala', qty: inventory.buffalo_milk ?? 0, priceKey: 'buffalo_milk', freshKey: 'buffalo_milk' },
+                      { key: 'wool', label: '🧶 Lã', qty: inventory.wool, priceKey: 'wool' },
+                      { key: 'llama_wool', label: '🧶 Lã Lhama', qty: inventory.llama_wool ?? 0, priceKey: 'llama_wool' },
+                      { key: 'egg', label: '🥚 Ovo', qty: inventory.egg ?? 0, priceKey: 'egg', freshKey: 'egg' },
+                      { key: 'duck_egg', label: '🥚 Ov. Pato', qty: inventory.duck_egg ?? 0, priceKey: 'duck_egg', freshKey: 'duck_egg' },
+                      { key: 'goose_egg', label: '🥚 Ov. Ganso', qty: inventory.goose_egg ?? 0, priceKey: 'goose_egg', freshKey: 'goose_egg' },
+                      { key: 'fertile_egg', label: '✨ Ovo Fértil', qty: inventory.fertile_egg ?? 0, priceKey: 'fertile_egg', freshKey: 'fertile_egg' },
+                      { key: 'feather', label: '🪶 Penas', qty: inventory.feather ?? 0, priceKey: 'feather' },
+                      { key: 'peacock_feather', label: '🪶 P. Pavão', qty: inventory.peacock_feather ?? 0, priceKey: 'peacock_feather' },
+                    ]
+                  },
+                  {
+                    title: '🧀 Queijaria & Processados',
+                    bg: 'bg-amber-50/60 border-amber-200',
+                    items: [
+                      { key: 'cheese', label: '🧀 Queijo Simp.', qty: inventory.cheese, priceKey: 'cheese' },
+                      { key: 'queijoCoalho', label: '🧀 Q. Coalho', qty: inventory.queijoCoalho ?? 0, priceKey: 'queijoCoalho' },
+                      { key: 'queijoMucarela', label: '🧀 Muçarela', qty: inventory.queijoMucarela ?? 0, priceKey: 'queijoMucarela' },
+                      { key: 'queijoBrie', label: '🧀 Queijo Brie', qty: inventory.queijoBrie ?? 0, priceKey: 'queijoBrie' },
+                      { key: 'buffalo_mozzarella', label: '🧀 Muç. Búfala', qty: inventory.buffalo_mozzarella ?? 0, priceKey: 'buffalo_mozzarella' },
+                      { key: 'butter', label: '🧈 Manteiga', qty: inventory.butter ?? 0, priceKey: 'butter' },
+                      { key: 'yogurt', label: '🥛 Iogurte', qty: inventory.yogurt ?? 0, priceKey: 'yogurt' },
+                    ]
+                  },
+                  {
+                    title: '🧵 Artesanato',
+                    bg: 'bg-purple-50/60 border-purple-200',
+                    items: [
+                      { key: 'scarf', label: '🧣 Cachecol', qty: inventory.scarf, priceKey: 'scarf' },
+                      { key: 'mayo', label: '🥣 Maionese', qty: inventory.mayo ?? 0, priceKey: 'mayo' },
+                    ]
+                  }
+                ];
+
+                return (
+                  <div className="space-y-3 mb-4">
+                    {groups.map(group => {
+                      const visibleItems = group.items.filter(item => showEmptyItems || item.qty > 0);
+                      if (visibleItems.length === 0) return null;
+                      return (
+                        <div key={group.title}>
+                          <div className={`text-[10px] font-black uppercase tracking-wider text-[#78350f] mb-1.5 border-b border-[#fbbf24]/40 pb-0.5`}>{group.title}</div>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {visibleItems.map(item => {
+                              const trend = item.priceKey ? getPriceTrend(item.priceKey) : null;
+                              const price = item.priceKey ? getActualSellPrice(item.priceKey) : null;
+                              const isEmpty = item.qty === 0;
+                              return (
+                                <div key={item.key} className={`bg-white/80 p-2 rounded-xl border border-[#fbbf24] flex flex-col gap-0.5 shadow-inner ${isEmpty ? 'opacity-40' : ''}`}>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-[#78350f] uppercase tracking-tight leading-none flex items-center">
+                                      {item.label}
+                                      {item.freshKey && item.qty > 0 && getFreshnessIndicator(item.freshKey)}
+                                    </span>
+                                    <span className="font-mono font-black text-blue-700 text-xs bg-blue-50/60 px-1.5 py-0.5 rounded border border-blue-100">{item.qty}u</span>
+                                  </div>
+                                  {price !== null && (
+                                    <div className="flex items-center gap-1 mt-0.5">
+                                      <span className="text-[9px] text-stone-500 font-mono">{price}💰</span>
+                                      {trend && (
+                                        <span className={`text-[9px] font-black ${trend.color}`}>
+                                          {trend.symbol}{Math.abs(trend.pct) > 0 ? ` ${trend.pct > 0 ? '+' : ''}${trend.pct}%` : ''}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
 
               {/* Advanced Refining/Manufaturing recipes */}
               <div className="space-y-3 border-t border-dashed border-[#fbbf24]/50 pt-3">
@@ -5514,6 +5792,28 @@ export default function App() {
                   >
                     🥣 Maionese Cremosa (🥚x2) <span className="text-[9px] text-[#fef3c7] ml-1 opacity-80">[Atalho: 3]</span>
                   </button>
+
+                  {farmLevel >= 2 && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); craftButter(e); }}
+                      className="bg-yellow-500 hover:bg-yellow-400 text-white border-b-2 border-yellow-700 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider cursor-pointer active:translate-y-0.5 transition-all shadow-sm"
+                      title="Requer 2 Leites. Fabrica 1 Manteiga artesanal (45💰)."
+                    >
+                      🧈 Manteiga (🥛x2)
+                    </button>
+                  )}
+
+                  {farmLevel >= 2 && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); craftYogurt(e); }}
+                      className="bg-pink-500 hover:bg-pink-400 text-white border-b-2 border-pink-700 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider cursor-pointer active:translate-y-0.5 transition-all shadow-sm"
+                      title="Requer 1 Leite. Fermenta em 1 dia para 1 Iogurte (35💰)."
+                    >
+                      🥛 Iogurte (🥛x1, 1 dia)
+                    </button>
+                  )}
                 </div>
 
                 <h4 className="text-[11px] font-sans font-black uppercase text-[#92400e] tracking-wider pt-2 mb-2 border-t border-[#fbbf24]/30">Vendas Diretas p/ a Feira:</h4>
@@ -5552,7 +5852,7 @@ export default function App() {
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-350 disabled:opacity-40 text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
                     title="Vender Maionese Cremosa. Preço de venda: 10 moedas base."
                   >
-                    Vender Maio ({getActualSellPrice('mayo')}💰)
+                    Vender Maionese ({getActualSellPrice('mayo')}💰)
                   </button>
 
                   <button
@@ -5683,6 +5983,36 @@ export default function App() {
                     title="Vende 1 Pena de Pavão. Preço base: 80 moedas."
                   >
                     P. Pavão ({getActualSellPrice('peacock_feather')}💰)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => sellProduct('butter', 1, e)}
+                    disabled={(inventory.butter ?? 0) < 1}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    title="Vende 1 Manteiga. Preço base: 45 moedas."
+                  >
+                    Manteiga ({getActualSellPrice('butter')}💰)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => sellProduct('yogurt', 1, e)}
+                    disabled={(inventory.yogurt ?? 0) < 1}
+                    className="bg-pink-50 hover:bg-pink-100 border border-pink-300 disabled:opacity-40 text-pink-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    title="Vende 1 Iogurte. Preço base: 35 moedas."
+                  >
+                    Iogurte ({getActualSellPrice('yogurt')}💰)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => sellProduct('fertile_egg', 1, e)}
+                    disabled={(inventory.fertile_egg ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    title="Vende 1 Ovo Fértil. Preço base: 36 moedas."
+                  >
+                    ✨ Ov. Fértil ({getActualSellPrice('fertile_egg')}💰)
                   </button>
                 </div>
 
@@ -6348,6 +6678,12 @@ export default function App() {
                       <span>🐂 Bois Vendidos na Feira:</span>
                       <span className="font-bold text-[#78350f]">{weeklyReportData.oxSold} animais</span>
                     </div>
+                    {weeklyTaxPaid > 0 && (
+                      <div className="flex items-center gap-1.5 col-span-2 text-red-700">
+                        <span>🏛️ Imposto pago:</span>
+                        <span className="font-bold">-{weeklyTaxPaid} moedas</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -7126,6 +7462,94 @@ export default function App() {
                     className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${insurance.active ? 'bg-emerald-100 border-emerald-300 text-emerald-700' : gold >= 50 ? 'bg-emerald-500 hover:bg-emerald-400 text-white border-emerald-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                   >
                     {insurance.active ? `✅ Seguro Ativo (${insurance.daysLeft}d)` : 'Contratar Seguro (50💰 / 7 dias)'}
+                  </button>
+                </div>
+
+                {/* Grupo 3a: Estábulo */}
+                <div className="bg-white border-4 border-stone-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-stone-800 mb-1">🏠 Estábulo</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    No inverno, animais perdem 50% menos felicidade (recuperam +5 por dia). {hasStable ? '✅ Instalado' : 'Não instalado'}
+                  </p>
+                  <button
+                    disabled={hasStable || gold < 200}
+                    onClick={() => {
+                      if (!hasStable && gold >= 200) {
+                        setGold(prev => prev - 200);
+                        setHasStable(true);
+                        addLog('🏠 Estábulo construído! Animais mais confortáveis no inverno.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasStable ? 'bg-stone-100 border-stone-300 text-stone-700' : gold >= 200 ? 'bg-stone-500 hover:bg-stone-400 text-white border-stone-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {hasStable ? '✅ Estábulo Construído' : 'Construir Estábulo (200💰)'}
+                  </button>
+                </div>
+
+                {/* Grupo 3b: Silo de Grãos */}
+                <div className="bg-white border-4 border-orange-200 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-orange-800 mb-1">🏗️ Silo de Grãos</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    15% de desconto em todas as compras de ração. {hasSilo ? '✅ Instalado' : 'Não instalado'}
+                  </p>
+                  <button
+                    disabled={hasSilo || gold < 150}
+                    onClick={() => {
+                      if (!hasSilo && gold >= 150) {
+                        setGold(prev => prev - 150);
+                        setHasSilo(true);
+                        addLog('🏗️ Silo de grãos construído! 15% de desconto em rações.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasSilo ? 'bg-orange-100 border-orange-300 text-orange-700' : gold >= 150 ? 'bg-orange-500 hover:bg-orange-400 text-white border-orange-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {hasSilo ? '✅ Silo Instalado' : 'Instalar Silo (150💰)'}
+                  </button>
+                </div>
+
+                {/* Grupo 3c: Geladeira Industrial */}
+                <div className="bg-white border-4 border-sky-200 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-sky-800 mb-1">🧊 Geladeira Industrial</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Previne perda de qualidade dos produtos perecíveis (leite, ovos duram 50% mais). {hasFridge ? '✅ Instalada' : 'Não instalada'}
+                  </p>
+                  <button
+                    disabled={hasFridge || gold < 250}
+                    onClick={() => {
+                      if (!hasFridge && gold >= 250) {
+                        setGold(prev => prev - 250);
+                        setHasFridge(true);
+                        addLog('🧊 Geladeira industrial instalada! Produtos perecíveis duram mais.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasFridge ? 'bg-sky-100 border-sky-300 text-sky-700' : gold >= 250 ? 'bg-sky-500 hover:bg-sky-400 text-white border-sky-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {hasFridge ? '✅ Geladeira Instalada' : 'Instalar Geladeira (250💰)'}
+                  </button>
+                </div>
+
+                {/* Grupo 4c: Caixinha de Gorjeta */}
+                <div className="bg-white border-4 border-yellow-200 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-yellow-800 mb-1">🪙 Caixinha de Gorjeta</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    25% de chance por dia de receber gorjeta de 5-25 moedas de visitantes. {hasTipBox ? '✅ Instalada' : 'Não instalada'}
+                  </p>
+                  <button
+                    disabled={hasTipBox || gold < 50}
+                    onClick={() => {
+                      if (!hasTipBox && gold >= 50) {
+                        setGold(prev => prev - 50);
+                        setHasTipBox(true);
+                        addLog('🪙 Caixinha de gorjeta colocada! Visitantes poderão deixar gorjetas.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasTipBox ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : gold >= 50 ? 'bg-yellow-500 hover:bg-yellow-400 text-white border-yellow-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {hasTipBox ? '✅ Caixinha Instalada' : 'Instalar Caixinha (50💰)'}
                   </button>
                 </div>
 
