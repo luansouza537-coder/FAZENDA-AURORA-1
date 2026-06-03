@@ -1170,13 +1170,15 @@ export default function App() {
   };
 
   // --- FUNCIONALIDADE 4: Adicionar notificação persistente ---
-  const addNotification = (message: string, type: GameNotification['type'] = 'system') => {
+  // BUG FIX: aceita overrideDay para que notificações disparadas via setTimeout dentro de
+  // advanceDay (onde currentDay ainda não foi atualizado) registrem o dia correto.
+  const addNotification = (message: string, type: GameNotification['type'] = 'system', overrideDay?: number) => {
     setNotifications(prev => {
       const newNotif: GameNotification = {
         id: Math.random().toString(36).substr(2, 9),
         message,
         type,
-        day: currentDay,
+        day: overrideDay ?? currentDay,
         read: false,
       };
       return [newNotif, ...prev].slice(0, 20);
@@ -2540,6 +2542,7 @@ export default function App() {
    */
   const processarMaturacaoQueijos = (
     currentMaturacao: typeof queijosEmMaturacao,
+    nextDayVal: number,
     logs: { msg: string; type: LogMessage['type'] }[]
   ) => {
     const readyQueijos: string[] = [];
@@ -2560,8 +2563,8 @@ export default function App() {
         msg: `🧀 Seu fantástico ${label} terminou sua maturação e está pronto para venda!`,
         type: 'success'
       });
-      // Funcionalidade 4: notificação persistente de queijo pronto
-      setTimeout(() => addNotification(`🧀 ${label} terminou maturação e está pronto para vender!`, 'success'), 0);
+      // BUG FIX: passa nextDayVal para que a notificação mostre o dia correto
+      setTimeout(() => addNotification(`🧀 ${label} terminou maturação e está pronto para vender!`, 'success', nextDayVal), 0);
     });
 
     return { remaining, readyQueijos };
@@ -2602,6 +2605,7 @@ export default function App() {
   const processarComercianteViajante = (
     daysSinceMerc: number,
     nextMercDay: number,
+    nextDayVal: number,
     logs: { msg: string; type: LogMessage['type'] }[]
   ) => {
     let isMerchantNextDay = false;
@@ -2618,8 +2622,8 @@ export default function App() {
         msg: `🧙‍♂️ Um Comerciante Viajante chegou na fazenda! Ele compra todos os produtos e bois por 1.5x o preço hoje!`,
         type: 'event'
       });
-      // Funcionalidade 4: notificação persistente de comerciante
-      setTimeout(() => addNotification('🧙‍♂️ Comerciante Viajante chegou! Venda tudo por 1.5x hoje!', 'event'), 0);
+      // BUG FIX: passa nextDayVal para que a notificação mostre o dia correto
+      setTimeout(() => addNotification('🧙‍♂️ Comerciante Viajante chegou! Venda tudo por 1.5x hoje!', 'event', nextDayVal), 0);
     }
 
     return { isMerchantNextDay, newDaysSinceMerchant, newNextMerchantDay };
@@ -2815,11 +2819,11 @@ export default function App() {
       if (levelUpOccurred) {
         setFarmLevel(newLevel);
         setShowLevelUpModal(newLevel);
-        setTimeout(() => addNotification(`🏆 Fazenda subiu para o Nível ${newLevel}! +100 moedas de celebração!`, 'success'), 0);
+        setTimeout(() => addNotification(`🏆 Fazenda subiu para o Nível ${newLevel}! +100 moedas de celebração!`, 'success', nextDayValue), 0);
       }
 
       // --- SUBFUNÇÃO 7: Processamento do Comerciante Viajante ---
-      const { isMerchantNextDay, newDaysSinceMerchant, newNextMerchantDay } = processarComercianteViajante(daysSinceMerchant, nextMerchantDay, logsToAdd);
+      const { isMerchantNextDay, newDaysSinceMerchant, newNextMerchantDay } = processarComercianteViajante(daysSinceMerchant, nextMerchantDay, nextDayValue, logsToAdd);
       setMerchantActive(isMerchantNextDay);
       setDaysSinceMerchant(newDaysSinceMerchant);
       setNextMerchantDay(newNextMerchantDay);
@@ -2900,7 +2904,7 @@ export default function App() {
       }
 
       // --- SUBFUNÇÃO 5: Processamento da Maturação de Queijos ---
-      const { remaining: maturacaoRemaining, readyQueijos } = processarMaturacaoQueijos(queijosEmMaturacao, logsToAdd);
+      const { remaining: maturacaoRemaining, readyQueijos } = processarMaturacaoQueijos(queijosEmMaturacao, nextDayValue, logsToAdd);
       setQueijosEmMaturacao(maturacaoRemaining);
 
       if (readyQueijos.length > 0) {
