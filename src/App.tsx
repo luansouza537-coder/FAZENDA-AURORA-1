@@ -59,6 +59,8 @@ interface FloatingText {
   text: string;
   x: number;
   y: number;
+  // BUG 13 FIX: targetX pré-calculado na criação para evitar Math.random() no JSX durante re-render
+  targetX: number;
 }
 
 interface PriceChartProps {
@@ -625,7 +627,17 @@ export default function App() {
     claimed: boolean;
     missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items';
   }
-  const [missions, setMissions] = useState<Mission[]>([]);
+  // BUG 9 FIX: restaura missões do save (eram perdidas ao recarregar)
+  const [missions, setMissions] = useState<Mission[]>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.missions)) return parsed.missions;
+      }
+    } catch (e) {}
+    return [];
+  });
   const [showMissionsModal, setShowMissionsModal] = useState<boolean>(false);
 
   // --- FUNCIONALIDADE 4: Notificações persistentes ---
@@ -636,14 +648,43 @@ export default function App() {
     day: number;
     read: boolean;
   }
-  const [notifications, setNotifications] = useState<GameNotification[]>([]);
+  // BUG 9 FIX: restaura notificações do save (eram perdidas ao recarregar)
+  const [notifications, setNotifications] = useState<GameNotification[]>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.notifications)) return parsed.notifications;
+      }
+    } catch (e) {}
+    return [];
+  });
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
   // --- FUNCIONALIDADE 5: Histórico de ganhos ---
-  const [earningsHistory, setEarningsHistory] = useState<number[]>([]);
+  // BUG 9 FIX: restaura earningsHistory e allTimeStats do save persistido
+  const [earningsHistory, setEarningsHistory] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.earningsHistory)) return parsed.earningsHistory;
+      }
+    } catch (e) {}
+    return [];
+  });
   const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
   const [productionByAnimal, setProductionByAnimal] = useState<Record<number, { name: string; type: string; produced: number }>>({});
-  const [allTimeStats, setAllTimeStats] = useState<{ totalSpentFeed: number; bestDay: number; worstDay: number }>({ totalSpentFeed: 0, bestDay: 0, worstDay: 0 });
+  const [allTimeStats, setAllTimeStats] = useState<{ totalSpentFeed: number; bestDay: number; worstDay: number }>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.allTimeStats) return parsed.allTimeStats;
+      }
+    } catch (e) {}
+    return { totalSpentFeed: 0, bestDay: 0, worstDay: 0 };
+  });
 
   // Rename interface state
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -692,7 +733,9 @@ export default function App() {
       emoji,
       text,
       x,
-      y
+      y,
+      // BUG 13 FIX: targetX pré-calculado para evitar Math.random() no JSX
+      targetX: x + (Math.random() * 40 - 20)
     };
     
     setFloaters(prev => [...prev, newFloater]);
@@ -803,6 +846,7 @@ export default function App() {
       totalMerchantTrades: 0
     });
     
+    // BUG 5 FIX: animais iniciais agora recebem `trait` aleatório, igual aos comprados via buyAnimal.
     const initialAnimals: Animal[] = [
       {
         id: 1,
@@ -813,7 +857,8 @@ export default function App() {
         hasProducedToday: true,
         consecutiveHappyDays: 0,
         daysBelow80: 0,
-        isBestFriend: false
+        isBestFriend: false,
+        trait: getRandomTrait()
       },
       {
         id: 2,
@@ -826,7 +871,8 @@ export default function App() {
         woolReady: false,
         consecutiveHappyDays: 0,
         daysBelow80: 0,
-        isBestFriend: false
+        isBestFriend: false,
+        trait: getRandomTrait()
       },
       {
         id: 3,
@@ -837,7 +883,8 @@ export default function App() {
         weightGain: 0.15,
         consecutiveHappyDays: 0,
         daysBelow80: 0,
-        isBestFriend: false
+        isBestFriend: false,
+        trait: getRandomTrait()
       }
     ];
 
@@ -868,6 +915,11 @@ export default function App() {
     // BUG 3 FIX: limpa conquistas ao reiniciar o jogo
     setUnlockedAchievements([]);
     localStorage.removeItem('aurora_achievements_save');
+    // BUG 12 FIX: zera os campos das novas funcionalidades ao reiniciar
+    setEarningsHistory([]);
+    setAllTimeStats({ totalSpentFeed: 0, bestDay: 0, worstDay: 0 });
+    setMissions([]);
+    setNotifications([]);
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -985,11 +1037,16 @@ export default function App() {
         queijosEmMaturacao,
         maxPrateleiras,
         totalQueijosFabricados,
-        queijosFabricadosTipos
+        queijosFabricadosTipos,
+        // BUG 9 FIX: persiste histórico de ganhos e estatísticas all-time (eram perdidas ao recarregar)
+        earningsHistory,
+        allTimeStats,
+        missions,
+        notifications
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
-  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos]);
+  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications]);
 
   // Centralized achievement condition checker
   // BUG 5 FIX: usa callback funcional para evitar perda de conquistas quando múltiplas são desbloqueadas
@@ -1126,6 +1183,12 @@ export default function App() {
   // --- FUNCIONALIDADE 1: Auto-avanço useEffect ---
   // isGameOver derivado antecipado para uso no useEffect de auto-avanço (preço mínimo galinha = 40 moedas base)
   const isGameOverForAutoAdvance = animals.length === 0 && gold < 40;
+
+  // BUG 1 FIX: advanceDayRef é declarado logo após advanceDay (ver abaixo).
+  // Este ref será atribuído ali; o useEffect do auto-avanço o usa aqui.
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  const advanceDayRef = useRef<(e: React.MouseEvent) => void>(() => {});
+
   useEffect(() => {
     if (!autoAdvance || isGameOverForAutoAdvance || isSleeping) return;
     const anyModalOpen = showBuyMenu || showLevelUpModal !== null || showWeeklyReport || showTutorialModal || showAchievementsModal || showAutomationModal || showMarketModal || showSellAllConfirmModal || showQueijariaModal || showMissionsModal || showNotifications || showStatsModal;
@@ -1136,7 +1199,7 @@ export default function App() {
         isSleepingRef.current = true;
         setIsSleeping(true);
         setTimeout(() => {
-          advanceDay(null as any);
+          advanceDayRef.current(null as any);
           setIsSleeping(false);
           isSleepingRef.current = false;
         }, 1000);
@@ -1144,7 +1207,6 @@ export default function App() {
     }, autoSpeed * 1000);
 
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoAdvance, autoSpeed, isGameOverForAutoAdvance, isSleeping, showBuyMenu, showLevelUpModal, showWeeklyReport, showTutorialModal, showAchievementsModal, showAutomationModal, showMarketModal, showSellAllConfirmModal, showQueijariaModal, showMissionsModal, showNotifications, showStatsModal]);
 
   // Initialize missions on first load if empty
@@ -1276,14 +1338,16 @@ export default function App() {
     ];
   };
 
-  const updateMissionProgress = (key: Mission['missionKey'], amount: number = 1) => {
+  // BUG 11 FIX: aceita overrideDay para que notificações disparadas dentro de advanceDay
+  // (onde currentDay ainda não foi atualizado pelo React) registrem o dia correto.
+  const updateMissionProgress = (key: Mission['missionKey'], amount: number = 1, overrideDay?: number) => {
     setMissions(prev => prev.map(m => {
       if (m.completed || m.claimed) return m;
       if (m.missionKey !== key) return m;
       const newCurrent = Math.min(m.goal, m.current + amount);
       const nowCompleted = newCurrent >= m.goal;
       if (nowCompleted && !m.completed) {
-        addNotification(`🎯 Missão "${m.title}" concluída! Clique em Missões para resgatar ${m.reward} moedas!`, 'success');
+        addNotification(`🎯 Missão "${m.title}" concluída! Clique em Missões para resgatar ${m.reward} moedas!`, 'success', overrideDay);
       }
       return { ...m, current: newCurrent, completed: nowCompleted };
     }));
@@ -1433,6 +1497,12 @@ export default function App() {
 
     if (animal.isBestFriend) {
       totalOvos += 1;
+    }
+    // BUG 6 FIX: aplica efeito de trait de produção (trabalhadora +15%, preguicosa -15%)
+    if (animal.trait === 'trabalhadora') {
+      totalOvos = Math.max(1, Math.round(totalOvos * 1.15));
+    } else if (animal.trait === 'preguicosa') {
+      totalOvos = Math.max(1, Math.round(totalOvos * 0.85));
     }
     
     // Bônus de bando: cada 2 galinhas adicionais na fazenda além da primeira concede +1 ovo extra (distribuído de forma probabilística por coleta diária para evitar multiplicação)
@@ -1672,6 +1742,12 @@ export default function App() {
     if (weather === 'chuva') {
       totalLeite = Math.max(1, Math.round(totalLeite * 0.8));
     }
+    // BUG 6 FIX: aplica efeito de trait de produção (trabalhadora +15%, preguicosa -15%)
+    if (animal.trait === 'trabalhadora') {
+      totalLeite = Math.max(1, Math.round(totalLeite * 1.15));
+    } else if (animal.trait === 'preguicosa') {
+      totalLeite = Math.max(1, Math.round(totalLeite * 0.85));
+    }
 
     setInventory(prev => ({
       ...prev,
@@ -1717,6 +1793,12 @@ export default function App() {
 
     let quality = (animal.happiness / 100) * (animal.hunger / 100);
     let woolBonus = quality > 0.7 ? 2 : 1;
+    // BUG 6 FIX: aplica efeito de trait de produção (trabalhadora +15%, preguicosa -15%)
+    if (animal.trait === 'trabalhadora') {
+      woolBonus = Math.max(1, Math.round(woolBonus * 1.15));
+    } else if (animal.trait === 'preguicosa') {
+      woolBonus = Math.max(1, Math.round(woolBonus * 0.85));
+    }
 
     setInventory(prev => ({
       ...prev,
@@ -2136,9 +2218,14 @@ export default function App() {
         : (prev.totalMerchantTrades || 0)
     }));
 
+    // BUG 7 FIX: weeklyStats agora atualiza todos os produtos vendidos, não só egg/mayo
     setWeeklyStats(prev => ({
       ...prev,
       earnings: prev.earnings + totalEarningCalculated,
+      milk: (prev.milk || 0) + milkQty,
+      wool: (prev.wool || 0) + woolQty,
+      cheese: (prev.cheese || 0) + cheeseQty,
+      scarf: (prev.scarf || 0) + scarfQty,
       egg: prev.egg + eggQty,
       mayo: prev.mayo + mayoQty
     }));
@@ -2286,6 +2373,12 @@ export default function App() {
           if (currentWeather === 'chuva') {
             totalLeite = Math.max(1, Math.round(totalLeite * 0.8));
           }
+          // BUG 6 FIX: aplica trait de produção na ordenhadeira automática
+          if (a.trait === 'trabalhadora') {
+            totalLeite = Math.max(1, Math.round(totalLeite * 1.15));
+          } else if (a.trait === 'preguicosa') {
+            totalLeite = Math.max(1, Math.round(totalLeite * 0.85));
+          }
 
           statsCollected.milk += totalLeite;
           statsCollected.milkedCows++;
@@ -2301,6 +2394,12 @@ export default function App() {
         if (a.type === 'ovelha' && a.woolReady) {
           let quality = (a.happiness / 100) * (a.hunger / 100);
           let woolBonus = quality > 0.7 ? 2 : 1;
+          // BUG 6 FIX: aplica trait de produção na tosquiadeira automática
+          if (a.trait === 'trabalhadora') {
+            woolBonus = Math.max(1, Math.round(woolBonus * 1.15));
+          } else if (a.trait === 'preguicosa') {
+            woolBonus = Math.max(1, Math.round(woolBonus * 0.85));
+          }
 
           statsCollected.wool += woolBonus;
           statsCollected.shearedSheep++;
@@ -2842,17 +2941,21 @@ export default function App() {
 
       // --- FUNCIONALIDADE 5: Atualizar histórico de ganhos ---
       setEarningsHistory(prev => [...prev, dailyEarning].slice(-14));
+      // BUG 10 FIX: worstDay agora registra corretamente qualquer dia, incluindo dias de
+      // ganho zero. Só ignora o primeiro dia (worstDay===0 como sentinela de "nunca calculado").
       setAllTimeStats(prev => ({
         ...prev,
         bestDay: Math.max(prev.bestDay, dailyEarning),
-        worstDay: prev.worstDay === 0 ? dailyEarning : Math.min(prev.worstDay, dailyEarning > 0 ? dailyEarning : prev.worstDay)
+        worstDay: prev.worstDay === 0 && dailyEarning === 0 ? 0 : prev.worstDay === 0 ? dailyEarning : Math.min(prev.worstDay, dailyEarning)
       }));
 
       // --- FUNCIONALIDADE 3: Renovar missões diárias ao avançar o dia ---
+      // BUG 2 FIX: usa >= (não >) para que missões que expiram EXATAMENTE no próximo
+      // dia ainda apareçam nesse dia e possam ser resgatadas antes de sumir.
       setMissions(prev => {
-        const nextDayMissions = prev.filter(m => m.expiresOnDay > currentDay + 1);
-        const hasDaily = nextDayMissions.some(m => m.type === 'daily' && m.expiresOnDay > currentDay + 1);
-        const hasWeekly = nextDayMissions.some(m => m.type === 'weekly' && m.expiresOnDay > currentDay + 1);
+        const nextDayMissions = prev.filter(m => m.expiresOnDay >= currentDay + 1);
+        const hasDaily = nextDayMissions.some(m => m.type === 'daily' && m.expiresOnDay >= currentDay + 1);
+        const hasWeekly = nextDayMissions.some(m => m.type === 'weekly' && m.expiresOnDay >= currentDay + 1);
         const newMissions = [...nextDayMissions];
         if (!hasDaily) {
           newMissions.push(...generateDailyMissions(currentDay + 1));
@@ -2863,16 +2966,18 @@ export default function App() {
         return newMissions;
       });
 
-      // --- FUNCIONALIDADE 3: Verificar missão de animais felizes ---
-      const happyCount = animals.filter(a => a.happiness > 70).length;
-      if (animals.length > 0 && happyCount === animals.length) {
-        updateMissionProgress('happy_animals', 1);
-      }
-
       setDailyEarning(0);
 
       // --- SUBFUNÇÃO 4: Processamento de Fome, Felicidade e Produções Naturais ---
       let updatedAnimalsList = processarFomeFelicidade(animalsAfterAuto, nextWeather, logsToAdd);
+
+      // --- FUNCIONALIDADE 3: Verificar missão de animais felizes ---
+      // BUG 3 FIX: usa updatedAnimalsList (felicidade já processada) em vez de
+      // animals stale (felicidade do dia anterior).
+      const happyCount = updatedAnimalsList.filter(a => a.happiness > 70).length;
+      if (updatedAnimalsList.length > 0 && happyCount === updatedAnimalsList.length) {
+        updateMissionProgress('happy_animals', 1);
+      }
 
       // --- SUBFUNÇÃO 8: Verificação de Mortes Secundárias ---
       const { survivors, deceasedCount } = verificarMortesAnimais(updatedAnimalsList, logsToAdd);
@@ -2881,8 +2986,9 @@ export default function App() {
       }
       setAnimals(survivors);
 
-      // Funcionalidade 4: notificação para animais muito infelizes
-      updatedAnimalsList.forEach(a => {
+      // BUG 4 FIX: notificações de infelicidade agora usam `survivors` (sem animais
+      // já mortos), evitando spam de aviso sobre animais que acabaram de falecer.
+      survivors.forEach(a => {
         if (a.happiness < 20) {
           setTimeout(() => addNotification(`⚠️ ${a.name} está muito infeliz (${Math.floor(a.happiness)}%)! Alimente-o urgentemente!`, 'warning'), 0);
         }
@@ -2952,6 +3058,9 @@ export default function App() {
     }
   };
 
+  // BUG 1 FIX: mantém o ref sempre apontando para a versão mais recente de advanceDay
+  advanceDayRef.current = advanceDay;
+
   // --- RENDERING HANDLERS & BADGES ---
   const renderGrowthBadge = (weight: number) => {
     let text = 'Magro';
@@ -3012,7 +3121,7 @@ export default function App() {
             <motion.div
               key={f.id}
               initial={{ opacity: 1, y: f.y, x: f.x, scale: 0.8 }}
-              animate={{ opacity: 0, y: f.y - 120, x: f.x + (Math.random() * 40 - 20), scale: 1.2 }}
+              animate={{ opacity: 0, y: f.y - 120, x: f.targetX, scale: 1.2 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.2, ease: "easeOut" }}
               className="absolute text-sm font-bold bg-[#78350f] text-[#fef3c7] px-3 py-1.5 rounded-full border-2 border-[#fbbf24] shadow-lg flex items-center gap-1.5"
