@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha';
+export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao';
 
 export type AnimalTrait = 'gulosa' | 'preguicosa' | 'feliz' | 'estressada' | 'saudavel' | 'trabalhadora';
 
@@ -34,6 +34,25 @@ export interface Animal {
 
   // Ox specific
   weightGain?: number; // 0.0 to 1.0 (0% to 100%)
+
+  // Cabra
+  lactationCycle?: number;   // dias até próxima cria (0 = em lactação, conta regressiva)
+  isLactating?: boolean;     // se está em período de lactação
+
+  // Lhama
+  woolAccumulated?: number;  // lã acumulada (só pode colher na primavera)
+
+  // Pato
+  feathersReady?: boolean;   // penas prontas para coletar
+
+  // Ganso
+  inLayingSeason?: boolean;  // se está na época de postura
+  nextAlarmDay?: number;     // dia do próximo evento que o ganso vai alertar
+  daysSinceLastGooseEgg?: number; // dias desde o último ovo de ganso
+  daysSinceLastGooseFeather?: number; // dias desde a última pena de ganso
+
+  // Búfalo
+  heatStress?: boolean;      // se está sofrendo estresse térmico (verão)
 }
 
 // Funcionalidade 4: Contratos de fornecimento

@@ -275,6 +275,14 @@ export default function App() {
     queijoCoalho: number;
     queijoMucarela: number;
     queijoBrie: number;
+    goat_milk: number;
+    llama_wool: number;
+    duck_egg: number;
+    goose_egg: number;
+    buffalo_milk: number;
+    buffalo_mozzarella: number;
+    feather: number;
+    peacock_feather: number;
   }>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -295,6 +303,14 @@ export default function App() {
           queijoCoalho: inv.queijoCoalho ?? 0,
           queijoMucarela: inv.queijoMucarela ?? 0,
           queijoBrie: inv.queijoBrie ?? 0,
+          goat_milk: inv.goat_milk ?? 0,
+          llama_wool: inv.llama_wool ?? 0,
+          duck_egg: inv.duck_egg ?? 0,
+          goose_egg: inv.goose_egg ?? 0,
+          buffalo_milk: inv.buffalo_milk ?? 0,
+          buffalo_mozzarella: inv.buffalo_mozzarella ?? 0,
+          feather: inv.feather ?? 0,
+          peacock_feather: inv.peacock_feather ?? 0,
         };
       }
     } catch (e) {}
@@ -312,10 +328,18 @@ export default function App() {
       queijoCoalho: 0,
       queijoMucarela: 0,
       queijoBrie: 0,
+      goat_milk: 0,
+      llama_wool: 0,
+      duck_egg: 0,
+      goose_egg: 0,
+      buffalo_milk: 0,
+      buffalo_mozzarella: 0,
+      feather: 0,
+      peacock_feather: 0,
     };
   });
 
-  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie'; diasRestantes: number }[]>(() => {
+  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella'; diasRestantes: number }[]>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
       if (saved) {
