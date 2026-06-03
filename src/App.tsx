@@ -959,7 +959,9 @@ export default function App() {
         consecutiveHappyDays: 0,
         daysBelow80: 0,
         isBestFriend: false,
-        trait: getRandomTrait()
+        trait: getRandomTrait(),
+        age: 0,
+        maxAge: Math.round(120 * (1 + (Math.random() * 0.4 - 0.2)))
       },
       {
         id: 2,
@@ -973,7 +975,9 @@ export default function App() {
         consecutiveHappyDays: 0,
         daysBelow80: 0,
         isBestFriend: false,
-        trait: getRandomTrait()
+        trait: getRandomTrait(),
+        age: 0,
+        maxAge: Math.round(90 * (1 + (Math.random() * 0.4 - 0.2)))
       },
       {
         id: 3,
@@ -985,7 +989,9 @@ export default function App() {
         consecutiveHappyDays: 0,
         daysBelow80: 0,
         isBestFriend: false,
-        trait: getRandomTrait()
+        trait: getRandomTrait(),
+        age: 0,
+        maxAge: Math.round(150 * (1 + (Math.random() * 0.4 - 0.2)))
       }
     ];
 
@@ -1021,6 +1027,15 @@ export default function App() {
     setAllTimeStats({ totalSpentFeed: 0, bestDay: 0, worstDay: 0 });
     setMissions([]);
     setNotifications([]);
+    // Novas funcionalidades F1-F12
+    setFarmWisdomBonus({ vaca: 0, ovelha: 0, boi: 0, galinha: 0 });
+    setContracts([]);
+    setInsurance({ active: false, premium: 50, daysLeft: 0 });
+    setLandLots(1);
+    setWellLevel(0);
+    setSolarLevel(0);
+    setIrrigationLevel(0);
+    setQueijariaNivel(1);
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -1534,10 +1549,15 @@ export default function App() {
 
   const getFeedPriceWithModifiers = (type: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha', day = currentDay): number => {
     let base = getFeedBasePrice(type);
-    
+
     // Desconto de 10% no nível 4 ou superior
     if (farmLevel >= 4) {
       base = Math.max(1, Math.round(base * 0.9));
+    }
+
+    // F8: desconto do poço d'água (10% por nível)
+    if (wellLevel > 0) {
+      base = Math.max(1, Math.round(base * (1 - wellLevel * 0.1)));
     }
 
     const estacao = getEstacaoKey(day);
@@ -1656,6 +1676,8 @@ export default function App() {
     const bandoTxt = bandoBonus > 0 ? ` (com +${bandoBonus} ovos extras de bônus do efeito de bando!)` : '';
     addLog(`🥚 ${animal.name} produziu ${totalOvos} ovo(s) de quintal enviado(s) ao Armazém!${bandoTxt}`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
+    // F12: som de animal
+    if (soundEnabled) sfx.playAnimalSound('galinha');
     spawnFeedback('🥚', `+${totalOvos} Ovo`, event);
     // Missão: coletar itens
     updateMissionProgress('collect_items', totalOvos);
@@ -1710,15 +1732,24 @@ export default function App() {
     return 'inverno';
   };
 
+  // F6: multiplicadores sazonais de preço
   const getSeasonalityMultiplier = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie', day: number) => {
     const estacao = getEstacaoKey(day);
+    // Primavera: leite ×1.1, ovos ×1.2
+    if (itemType === 'milk' && estacao === 'primavera') return 1.1;
+    if (itemType === 'egg' && estacao === 'primavera') return 1.2;
+    // Verão: leite ×1.2, queijo ×1.1
+    if (itemType === 'milk' && estacao === 'verao') return 1.2;
+    if ((itemType === 'cheese' || itemType === 'queijoCoalho' || itemType === 'queijoMucarela' || itemType === 'queijoBrie') && estacao === 'verao') return 1.1;
+    // Outono: lã ×1.1, queijo artesanal ×1.2
+    if (itemType === 'wool' && estacao === 'outono') return 1.1;
+    if ((itemType === 'queijoCoalho' || itemType === 'queijoMucarela' || itemType === 'queijoBrie') && estacao === 'outono') return 1.2;
+    if (itemType === 'cheese' && estacao === 'outono') return 1.15;
+    // Inverno: lã ×1.3, cachecol ×1.4
     if (itemType === 'wool' && estacao === 'inverno') return 1.3;
-    if (itemType === 'milk' && estacao === 'verao') return 0.8;
-    if ((itemType === 'cheese' || itemType === 'queijoCoalho' || itemType === 'queijoMucarela' || itemType === 'queijoBrie') && estacao === 'outono') return 1.15;
-    if (itemType === 'scarf' && estacao === 'primavera') return 1.1;
-    if (itemType === 'egg' && estacao === 'primavera') return 1.25; // Eggs bountiful in spring!
-    if (itemType === 'egg' && estacao === 'inverno') return 0.75; // Chickens produce less in winter
-    if (itemType === 'mayo' && estacao === 'verao') return 1.15; // Picnic season
+    if (itemType === 'scarf' && estacao === 'inverno') return 1.4;
+    if (itemType === 'egg' && estacao === 'inverno') return 0.75;
+    if (itemType === 'mayo' && estacao === 'verao') return 1.15;
     return 1.0;
   };
 
@@ -1834,6 +1865,8 @@ export default function App() {
       spawnFeedback('⏳', 'Vazia', event);
       return;
     }
+    // F12: som de animal
+    if (soundEnabled) sfx.playAnimalSound('vaca');
 
     let efficiency = (animal.happiness / 100) * (1 - (Math.max(0, 100 - animal.hunger) / 200));
     efficiency = Math.max(0.3, Math.min(1.2, efficiency));
@@ -1858,6 +1891,14 @@ export default function App() {
     } else if (animal.trait === 'preguicosa') {
       totalLeite = Math.max(1, Math.round(totalLeite * 0.85));
     }
+    // F1: idoso produz 30% menos + F2: bônus de sabedoria permanente de animais falecidos
+    if (animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75) {
+      totalLeite = Math.max(1, Math.round(totalLeite * 0.7));
+    }
+    // F2: bônus de sabedoria de rebanho (de animais idosos vivos desta espécie)
+    const elderVacas = animals.filter(a => a.type === 'vaca' && a.id !== animal.id && a.age !== undefined && a.maxAge !== undefined && a.age >= a.maxAge * 0.75).length;
+    const elderBonus = Math.min(0.1, elderVacas * 0.02) + farmWisdomBonus.vaca;
+    if (elderBonus > 0) totalLeite = Math.max(1, Math.round(totalLeite * (1 + elderBonus)));
 
     setInventory(prev => ({
       ...prev,
@@ -1909,6 +1950,14 @@ export default function App() {
     } else if (animal.trait === 'preguicosa') {
       woolBonus = Math.max(1, Math.round(woolBonus * 0.85));
     }
+    // F1: idoso produz 30% menos
+    if (animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75) {
+      woolBonus = Math.max(1, Math.round(woolBonus * 0.7));
+    }
+    // F2: bônus de sabedoria de ovelhas idosas
+    const elderOvelhas = animals.filter(a => a.type === 'ovelha' && a.id !== animal.id && a.age !== undefined && a.maxAge !== undefined && a.age >= a.maxAge * 0.75).length;
+    const elderOvelhaBonus = Math.min(0.1, elderOvelhas * 0.02) + farmWisdomBonus.ovelha;
+    if (elderOvelhaBonus > 0) woolBonus = Math.max(1, Math.round(woolBonus * (1 + elderOvelhaBonus)));
 
     setInventory(prev => ({
       ...prev,
@@ -1939,6 +1988,8 @@ export default function App() {
 
     addLog(`🧶 ${animal.name} foi tosquiada! Adicionado +${woolBonus} lã(s) crua(s) no Armazém.`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
+    // F12: som de animal
+    if (soundEnabled) sfx.playAnimalSound('ovelha');
     spawnFeedback('🧶', `+${woolBonus} Lã`, event);
     // Missão: coletar itens
     updateMissionProgress('collect_items', woolBonus);
@@ -2016,12 +2067,13 @@ export default function App() {
   // 6. Buy Animal (Feira / Mercado)
   const buyAnimal = (type: AnimalType, event: React.MouseEvent) => {
     if (event) event.preventDefault();
-    
-    const maxAnimals = Math.min(farmLevel * 4, 20);
+
+    // F7: limite baseado em lotes de terreno
+    const maxAnimals = landLots * 5;
     if (animals.length >= maxAnimals) {
-      addLog(`❌ Limite de animais alcançado! Sua fazenda de Nível ${farmLevel} suporta no máximo ${maxAnimals} animais. Avance os dias para subir o nível!`, 'error');
+      addLog(`❌ Limite de animais alcançado! Seu terreno (${landLots} lote(s)) suporta no máximo ${maxAnimals} animais. Expanda o terreno nas Melhorias!`, 'error');
       triggerAudioResult(() => sfx.playSound('error'));
-      spawnFeedback('❌', 'Limite!', event);
+      spawnFeedback('❌', 'Expanda o terreno!', event);
       return;
     }
 
@@ -2040,6 +2092,11 @@ export default function App() {
     const hunger = Math.floor(Math.random() * 21) + 65; // between 65 and 85
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80
 
+    // F1: maxAge por tipo com variação ±20%
+    const baseMaxAge = type === 'vaca' ? 120 : type === 'ovelha' ? 90 : type === 'boi' ? 150 : 60;
+    const variation = 1 + (Math.random() * 0.4 - 0.2);
+    const maxAge = Math.round(baseMaxAge * variation);
+
     const newAnimal: Animal = {
       id: newId,
       type,
@@ -2050,6 +2107,8 @@ export default function App() {
       daysBelow80: 0,
       isBestFriend: false,
       trait: getRandomTrait(),
+      age: 0,
+      maxAge,
       ...(type === 'vaca' && { hasProducedToday: false }),
       ...(type === 'ovelha' && { daysUntilWool: 3, daysSinceLastWool: 2, woolReady: false }),
       ...(type === 'galinha' && { hasProducedToday: false }),
@@ -2224,6 +2283,27 @@ export default function App() {
       ...prev,
       [itemType]: (prev[itemType] || 0) + qty
     }));
+
+    // F4: deduzir da entrega de contratos ativos
+    const contractProductMap: Record<string, 'milk' | 'wool' | 'egg' | 'cheese'> = {
+      milk: 'milk', wool: 'wool', egg: 'egg',
+      cheese: 'cheese', queijoCoalho: 'cheese', queijoMucarela: 'cheese', queijoBrie: 'cheese'
+    };
+    const contractProduct = contractProductMap[itemType];
+    if (contractProduct) {
+      setContracts(prev => prev.map(c => {
+        if (!c.active || c.product !== contractProduct) return c;
+        const remaining = c.quantity - c.delivered;
+        if (remaining <= 0) return c;
+        const toDeliver = Math.min(qty, remaining);
+        const newDelivered = c.delivered + toDeliver;
+        if (newDelivered >= c.quantity) {
+          setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
+          addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
+        }
+        return { ...c, delivered: newDelivered };
+      }));
+    }
 
     let label = '';
     if (itemType === 'milk') label = 'Leite Cru';
@@ -2405,7 +2485,12 @@ export default function App() {
   // --- SUB-FUNÇÕES PURAS DO CICLO DIÁRIO (Refatoração de advanceDay) ---
 
   // Constante de custo de manutenção por máquina ativa (escalando de acordo com nível)
-  const getCustoManutencaoMaquinas = (level: number) => 4 + 2 * level;
+  // F9: desconto do gerador solar (15% por nível)
+  const getCustoManutencaoMaquinas = (level: number) => {
+    const base = 4 + 2 * level;
+    const solarDiscount = 1 - Math.min(solarLevel * 0.15, 0.45);
+    return Math.max(1, Math.round(base * solarDiscount));
+  };
 
   /**
    * 1. aplicarManutencaoMaquinas: Aplica ou falha manutenção diária caso haja máquinas ativas.
@@ -2808,6 +2893,24 @@ export default function App() {
     return { newLevel, levelUpOccurred };
   };
 
+  // F4: gerar contrato pelo comerciante
+  const generateMerchantContract = (nextDayVal: number) => {
+    if (contracts.filter(c => c.active).length >= 2) return; // Máx 2 contratos
+    const products: Array<'milk' | 'wool' | 'egg' | 'cheese'> = ['milk', 'wool', 'egg', 'cheese'];
+    const product = products[Math.floor(Math.random() * products.length)];
+    const basePrices: Record<string, number> = { milk: 5, wool: 12, egg: 4, cheese: 20 };
+    const pricePerUnit = Math.round(basePrices[product] * 1.15);
+    const quantity = 5 + Math.floor(Math.random() * 11); // 5-15
+    const deadline = nextDayVal + 5 + Math.floor(Math.random() * 6); // 5-10 dias
+    const penalty = pricePerUnit * Math.floor(quantity * 0.5);
+    const newContract: Contract = {
+      id: Math.random().toString(36).substring(2, 9),
+      product, quantity, delivered: 0, pricePerUnit, deadline, penalty, active: true
+    };
+    setContracts(prev => [...prev, newContract]);
+    setTimeout(() => addNotification(`📋 Comerciante ofereceu contrato: entregar ${quantity} un de ${product} até o dia ${deadline} por ${pricePerUnit} moedas/un!`, 'event', nextDayVal), 0);
+  };
+
   /**
    * 7. processarComercianteViajante: Lida com chance de comerciante aparecer e suas rotatividades.
    */
@@ -2833,6 +2936,10 @@ export default function App() {
       });
       // BUG FIX: passa nextDayVal para que a notificação mostre o dia correto
       setTimeout(() => addNotification('🧙‍♂️ Comerciante Viajante chegou! Venda tudo por 1.5x hoje!', 'event', nextDayVal), 0);
+      // F4: comerciante pode oferecer contrato
+      if (Math.random() < 0.6) {
+        setTimeout(() => generateMerchantContract(nextDayVal), 50);
+      }
     }
 
     return { isMerchantNextDay, newDaysSinceMerchant, newNextMerchantDay };
@@ -2877,7 +2984,12 @@ export default function App() {
           type: 'event'
         });
       } else {
-        const loss = 10 + Math.floor(Math.random() * 15);
+        let loss = 10 + Math.floor(Math.random() * 15);
+        // F5: seguro agrícola reduz impacto em 70%
+        if (insurance.active) {
+          loss = Math.round(loss * 0.3);
+          logs.push({ msg: `🛡️ Seguro agrícola ativo! Impacto do evento reduzido em 70%.`, type: 'info' });
+        }
         finalGoldBonus -= loss;
         logs.push({
           msg: `⚠️ Surto de resfriado bovino nos arredores da Aurora: taxa de higienização veterinária paga -${loss} moedas.`,
@@ -3118,6 +3230,67 @@ export default function App() {
         setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0 });
         setWeeklySales({ milk: 0, wool: 0, cheese: 0, scarf: 0, carne: 0, egg: 0, mayo: 0, queijoCoalho: 0, queijoMucarela: 0, queijoBrie: 0 });
       }
+
+      // --- F1/F2: Ciclo de vida dos animais (idade e morte por velhice) ---
+      const wisdomBonusUpdates: { vaca: number; ovelha: number; boi: number; galinha: number } = { vaca: 0, ovelha: 0, boi: 0, galinha: 0 };
+      setAnimals(prev => {
+        return prev.map(a => {
+          const newAge = (a.age || 0) + 1;
+          return { ...a, age: newAge };
+        }).filter(a => {
+          const maxAge = a.maxAge || 999;
+          if ((a.age || 0) >= maxAge) {
+            // Animal morre de velhice
+            logsToAdd.push({
+              msg: `👴 ${a.name} (${a.type}) viveu ${a.age} dias e partiu de velhice. Sua sabedoria permanece no rebanho!`,
+              type: 'error'
+            });
+            // F2: bônus permanente de sabedoria (2% por idoso falecido, máx 10%)
+            const key = a.type as keyof typeof wisdomBonusUpdates;
+            wisdomBonusUpdates[key] = Math.min(0.1, (wisdomBonusUpdates[key] || 0) + 0.02);
+            setTimeout(() => addNotification(`👴 ${a.name} (${a.type}) viveu ${a.age} dias e deixou sua sabedoria!`, 'event', nextDayValue), 0);
+            return false;
+          }
+          return true;
+        });
+      });
+      // Apply accumulated wisdom bonuses
+      if (Object.values(wisdomBonusUpdates).some(v => v > 0)) {
+        setFarmWisdomBonus(prev => ({
+          vaca: Math.min(0.1, prev.vaca + wisdomBonusUpdates.vaca),
+          ovelha: Math.min(0.1, prev.ovelha + wisdomBonusUpdates.ovelha),
+          boi: Math.min(0.1, prev.boi + wisdomBonusUpdates.boi),
+          galinha: Math.min(0.1, prev.galinha + wisdomBonusUpdates.galinha),
+        }));
+      }
+
+      // --- F4: Verificar contratos vencidos ---
+      setContracts(prev => prev.map(c => {
+        if (!c.active) return c;
+        if (nextDayValue > c.deadline && c.delivered < c.quantity) {
+          const penalty = c.penalty;
+          setGold(g => Math.max(0, g - penalty));
+          logsToAdd.push({ msg: `📋 Contrato vencido! Multa de -${penalty} moedas por não entregar ${c.quantity - c.delivered} un de ${c.product}!`, type: 'error' });
+          setTimeout(() => addNotification(`📋 Contrato expirou! Multa de -${penalty} moedas aplicada!`, 'warning', nextDayValue), 0);
+          return { ...c, active: false };
+        }
+        return c;
+      }));
+
+      // --- F5: Decrementar seguro agrícola ---
+      setInsurance(prev => {
+        if (!prev.active) return prev;
+        const newDaysLeft = prev.daysLeft - 1;
+        if (newDaysLeft <= 0) {
+          logsToAdd.push({ msg: `🛡️ Seu seguro agrícola expirou! Renove nas Melhorias para continuar protegido.`, type: 'event' });
+          setTimeout(() => addNotification(`🛡️ Seguro agrícola expirou!`, 'warning', nextDayValue), 0);
+          return { ...prev, active: false, daysLeft: 0 };
+        }
+        if (newDaysLeft === 2) {
+          setTimeout(() => addNotification(`⚠️ Seguro agrícola expira em 2 dias! Renove nas Melhorias.`, 'warning', nextDayValue), 0);
+        }
+        return { ...prev, daysLeft: newDaysLeft };
+      });
 
       // --- SUBFUNÇÃO 5: Processamento da Maturação de Queijos ---
       const { remaining: maturacaoRemaining, readyQueijos } = processarMaturacaoQueijos(queijosEmMaturacao, nextDayValue, logsToAdd);
@@ -3472,7 +3645,7 @@ export default function App() {
             </button>
 
             {/* 📊 Mercado Button */}
-            <button 
+            <button
               onClick={() => {
                 setShowMarketModal(true);
                 triggerAudioResult(() => sfx.playSound('click'));
@@ -3483,6 +3656,44 @@ export default function App() {
               <span>📊</span>
               <span>Mercado</span>
             </button>
+
+            {/* 📋 Contratos Button */}
+            <button
+              onClick={() => {
+                setShowContractsModal(true);
+                triggerAudioResult(() => sfx.playSound('click'));
+              }}
+              className="relative bg-violet-600 border-3 border-violet-400 hover:bg-violet-500 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#4c1d95] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
+              title="Contratos de fornecimento"
+            >
+              <span>📋</span>
+              <span>Contratos</span>
+              {contracts.filter(c => c.active).length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                  {contracts.filter(c => c.active).length}
+                </span>
+              )}
+            </button>
+
+            {/* 🔧 Melhorias Button */}
+            <button
+              onClick={() => {
+                setShowUpgradesModal(true);
+                triggerAudioResult(() => sfx.playSound('click'));
+              }}
+              className="bg-orange-600 border-3 border-orange-400 hover:bg-orange-500 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#7c2d12] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
+              title="Melhorias da Fazenda: poço, solar, irrigação, terreno"
+            >
+              <span>🔧</span>
+              <span>Melhorias</span>
+            </button>
+
+            {/* 🛡️ Seguro Status */}
+            {insurance.active && (
+              <div className="bg-green-700 border-3 border-green-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seguro ativo: ${insurance.daysLeft} dias restantes`}>
+                🛡️ {insurance.daysLeft}d
+              </div>
+            )}
 
             {/* 🧀 Queijaria Button */}
             <button 
@@ -3628,10 +3839,10 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <span className="text-2xl animate-spin" style={{ animationDuration: '6s' }}>🌾</span>
                 <h2 className="text-[#fef3c7] text-xl sm:text-2xl font-display font-black tracking-wide" style={{ textShadow: '1.5px 1.5px 0px #451a03' }}>
-                  CURRAL DA AURORA ({animals.length}/{Math.min(farmLevel * 4, 20)} Animais)
+                  CURRAL DA AURORA ({animals.length}/{landLots * 5} Animais)
                 </h2>
                 <span className="text-[10px] text-amber-200/90 font-mono font-bold block uppercase mt-0.5 tracking-wider leading-none">
-                  Capacidade Máxima: {Math.min(farmLevel * 4, 20)} · {farmLevel * 4 < 20 ? "Próximo nível expande +4 vagas" : "Limite Máximo Atingido"}
+                  🏡 Lote {landLots}/5 · Capacidade: {landLots * 5} animais {landLots < 5 ? '· Expanda o terreno!' : '· Máximo atingido'}
                 </span>
               </div>
               
@@ -3936,6 +4147,21 @@ export default function App() {
                                   title={t.description}
                                 >
                                   {t.emoji} {t.label}
+                                </span>
+                              );
+                            })()}
+                            {/* F1/F2: Idade e badge idoso */}
+                            {animal.age !== undefined && animal.maxAge !== undefined && (() => {
+                              const ratio = animal.age / animal.maxAge;
+                              const isElder = ratio >= 0.75;
+                              const lifeLabel = ratio < 0.33 ? 'Jovem' : ratio < 0.75 ? 'Adulto' : 'Idoso';
+                              const lifeColor = ratio < 0.33 ? 'bg-green-100 border-green-300 text-green-800' : ratio < 0.75 ? 'bg-blue-100 border-blue-300 text-blue-800' : 'bg-orange-100 border-orange-300 text-orange-800';
+                              return (
+                                <span
+                                  className={`inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full border cursor-help ${lifeColor}`}
+                                  title={isElder ? `Idoso: produz 30% menos, mas dá +2% de bônus para outros ${animal.type}s (stackable)` : `Dia ${animal.age} de ${animal.maxAge}`}
+                                >
+                                  {isElder ? '🧓 Idoso' : `📅 ${lifeLabel} (${animal.age}d)`}
                                 </span>
                               );
                             })()}
@@ -5440,25 +5666,13 @@ export default function App() {
                 <div className="text-xs text-[#78350f] leading-relaxed">
                   📦 <strong>Status das Prateleiras:</strong> <span className="bg-[#f59e0b]/20 px-2 py-0.5 rounded-md font-bold text-amber-955">{queijosEmMaturacao.length} / {maxPrateleiras} ocupadas</span>
                 </div>
-                {maxPrateleiras === 2 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (gold >= 500) {
-                        setGold(prev => prev - 500);
-                        setMaxPrateleiras(5);
-                        addLog(`🔧 Queijaria ampliada! Agora você possui 5 prateleiras para maturação de queijos.`, 'success');
-                        triggerAudioResult(() => sfx.playSound('levelup'));
-                        spawnFeedback('🔧', '-500 💰', e);
-                      }
-                    }}
-                    disabled={gold < 500}
-                    className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-mono font-black text-xs px-3.5 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#581c87] cursor-pointer transition-all hover:scale-102 flex items-center gap-1.5 focus:outline-none"
-                  >
-                    <span>🔧 Ampliar Queijaria (+3 vagas por 500 💰)</span>
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => { setShowQueijariaModal(false); setShowUpgradesModal(true); }}
+                  className="bg-purple-600 hover:bg-purple-500 text-white font-mono font-black text-xs px-3.5 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#581c87] cursor-pointer transition-all hover:scale-102 flex items-center gap-1.5 focus:outline-none"
+                >
+                  <span>🔧 Ampliar Queijaria (via Melhorias)</span>
+                </button>
               </div>
 
               {/* Core Content */}
@@ -5620,6 +5834,278 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* 📋 CONTRATOS MODAL */}
+      <AnimatePresence>
+        {showContractsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowContractsModal(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[99] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fffbeb] border-8 border-violet-800 rounded-[36px] max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
+            >
+              <div className="bg-gradient-to-r from-violet-800 to-purple-900 p-5 border-b-4 border-violet-950 text-center shrink-0">
+                <h3 className="text-white text-xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                  📋 Contratos de Fornecimento
+                </h3>
+                <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
+                  Acordos com o comerciante viajante — preços garantidos!
+                </p>
+                <button onClick={() => setShowContractsModal(false)} className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-violet-950 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {contracts.filter(c => c.active).length === 0 ? (
+                  <div className="text-center text-stone-500 py-8 font-mono text-sm">
+                    📋 Nenhum contrato ativo. O comerciante viajante oferece contratos quando visita a fazenda!
+                  </div>
+                ) : (
+                  contracts.filter(c => c.active).map(c => {
+                    const pct = Math.round((c.delivered / c.quantity) * 100);
+                    const daysLeft = c.deadline - currentDay;
+                    return (
+                      <div key={c.id} className={`border-4 rounded-3xl p-5 ${daysLeft <= 2 ? 'border-red-400 bg-red-50' : 'border-violet-300 bg-white'}`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-display font-black text-sm uppercase text-[#78350f]">
+                              {c.product === 'milk' ? '🥛 Leite Cru' : c.product === 'wool' ? '🧶 Lã Crua' : c.product === 'egg' ? '🥚 Ovos' : '🧀 Queijo'}
+                            </h4>
+                            <p className="text-xs text-stone-500 font-mono mt-0.5">{c.pricePerUnit} moedas/un (garantido)</p>
+                          </div>
+                          <span className={`text-xs font-mono font-bold px-2 py-1 rounded-full ${daysLeft <= 2 ? 'bg-red-500 text-white' : 'bg-violet-100 text-violet-800'}`}>
+                            {daysLeft > 0 ? `${daysLeft}d restante(s)` : 'VENCIDO!'}
+                          </span>
+                        </div>
+                        <div className="text-xs font-mono text-stone-600 mb-2">
+                          Entregue: {c.delivered}/{c.quantity} un • Multa se falhar: {c.penalty} moedas
+                        </div>
+                        <div className="w-full bg-stone-100 h-3 rounded-full overflow-hidden border border-stone-200">
+                          <div className="bg-gradient-to-r from-violet-400 to-purple-500 h-full transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                        <div className="text-[10px] font-mono text-center mt-1 text-stone-500">{pct}% entregue</div>
+                      </div>
+                    );
+                  })
+                )}
+                {contracts.filter(c => !c.active).length > 0 && (
+                  <div>
+                    <h4 className="font-display font-black text-xs uppercase text-stone-400 mb-2">Histórico (concluídos/expirados)</h4>
+                    {contracts.filter(c => !c.active).slice(-3).map(c => (
+                      <div key={c.id} className="text-xs text-stone-400 font-mono border border-stone-200 rounded-xl p-2 mb-1">
+                        {c.product} • {c.delivered}/{c.quantity} entregues
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="bg-violet-50 p-4 border-t border-violet-100 flex justify-end shrink-0">
+                <button onClick={() => setShowContractsModal(false)} className="bg-violet-600 hover:bg-violet-500 text-white border-b-4 border-violet-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider cursor-pointer">
+                  Fechar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🔧 MELHORIAS MODAL (F7 terreno, F8 poço, F9 solar, F10 irrigação, F5 seguro, F11 queijaria) */}
+      <AnimatePresence>
+        {showUpgradesModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowUpgradesModal(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[99] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fffbeb] border-8 border-orange-800 rounded-[36px] max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
+            >
+              <div className="bg-gradient-to-r from-orange-700 to-amber-800 p-5 border-b-4 border-orange-950 text-center shrink-0">
+                <h3 className="text-white text-xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                  🔧 Melhorias da Fazenda
+                </h3>
+                <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
+                  Expanda o terreno, instale infraestrutura e proteja sua fazenda
+                </p>
+                <button onClick={() => setShowUpgradesModal(false)} className="absolute top-4 right-4 text-[#fcd57e] bg-orange-950 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+
+                {/* F7: Expansão de Terreno */}
+                <div className="bg-white border-4 border-green-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-green-800 mb-1">🏡 Expansão de Terreno</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-3">Cada lote permite +5 animais. Atual: Lote {landLots}/5 ({landLots * 5} animais máx)</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { lot: 2, price: 200 }, { lot: 3, price: 400 }, { lot: 4, price: 800 }, { lot: 5, price: 1600 }
+                    ].map(({ lot, price }) => (
+                      <button
+                        key={lot}
+                        disabled={landLots >= lot || gold < price}
+                        onClick={() => {
+                          if (gold >= price && landLots < lot) {
+                            setGold(prev => prev - price);
+                            setLandLots(lot);
+                            addLog(`🏡 Terreno expandido! Agora você tem ${lot} lote(s) e pode ter até ${lot * 5} animais.`, 'success');
+                            triggerAudioResult(() => sfx.playSound('levelup'));
+                          }
+                        }}
+                        className={`text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${landLots >= lot ? 'bg-green-100 border-green-300 text-green-700' : gold >= price ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                      >
+                        {landLots >= lot ? `✅ Lote ${lot}` : `Lote ${lot} (${price}💰)`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* F8: Poço d'água */}
+                <div className="bg-white border-4 border-blue-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-blue-800 mb-1">💧 Poço d'Água</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">Reduz custo de ração em 10% por nível. Atual: Nível {wellLevel}/3 ({wellLevel * 10}% desconto)</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[{ lvl: 1, price: 150 }, { lvl: 2, price: 300 }, { lvl: 3, price: 500 }].map(({ lvl, price }) => (
+                      <button
+                        key={lvl}
+                        disabled={wellLevel >= lvl || gold < price}
+                        onClick={() => {
+                          if (gold >= price && wellLevel < lvl) {
+                            setGold(prev => prev - price);
+                            setWellLevel(lvl);
+                            addLog(`💧 Poço d'água nível ${lvl} instalado! Ração ${lvl * 10}% mais barata.`, 'success');
+                            triggerAudioResult(() => sfx.playSound('levelup'));
+                          }
+                        }}
+                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${wellLevel >= lvl ? 'bg-blue-100 border-blue-300 text-blue-700' : gold >= price ? 'bg-blue-500 hover:bg-blue-400 text-white border-blue-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                      >
+                        {wellLevel >= lvl ? `✅ Nv${lvl}` : `Nv${lvl} (${price}💰)`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* F9: Gerador Solar */}
+                <div className="bg-white border-4 border-yellow-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-yellow-800 mb-1">☀️ Gerador Solar</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">Reduz manutenção das máquinas em 15% por nível. Atual: Nível {solarLevel}/3 ({solarLevel * 15}% desconto)</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[{ lvl: 1, price: 200 }, { lvl: 2, price: 400 }, { lvl: 3, price: 700 }].map(({ lvl, price }) => (
+                      <button
+                        key={lvl}
+                        disabled={solarLevel >= lvl || gold < price}
+                        onClick={() => {
+                          if (gold >= price && solarLevel < lvl) {
+                            setGold(prev => prev - price);
+                            setSolarLevel(lvl);
+                            addLog(`☀️ Gerador solar nível ${lvl} instalado! Manutenção ${lvl * 15}% mais barata.`, 'success');
+                            triggerAudioResult(() => sfx.playSound('levelup'));
+                          }
+                        }}
+                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${solarLevel >= lvl ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : gold >= price ? 'bg-yellow-500 hover:bg-yellow-400 text-white border-yellow-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                      >
+                        {solarLevel >= lvl ? `✅ Nv${lvl}` : `Nv${lvl} (${price}💰)`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* F10: Irrigação */}
+                <div className="bg-white border-4 border-cyan-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-cyan-800 mb-1">🌊 Sistema de Irrigação</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Nv1: eventos de seca -40% impacto. Nv2: imunidade total a secas. Atual: Nível {irrigationLevel}/2
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[{ lvl: 1, price: 250 }, { lvl: 2, price: 500 }].map(({ lvl, price }) => (
+                      <button
+                        key={lvl}
+                        disabled={irrigationLevel >= lvl || gold < price}
+                        onClick={() => {
+                          if (gold >= price && irrigationLevel < lvl) {
+                            setGold(prev => prev - price);
+                            setIrrigationLevel(lvl);
+                            addLog(`🌊 Irrigação nível ${lvl} instalada! Eventos de seca ${lvl === 2 ? 'imunes' : '40% menos impacto'}.`, 'success');
+                            triggerAudioResult(() => sfx.playSound('levelup'));
+                          }
+                        }}
+                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${irrigationLevel >= lvl ? 'bg-cyan-100 border-cyan-300 text-cyan-700' : gold >= price ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                      >
+                        {irrigationLevel >= lvl ? `✅ Nv${lvl}` : `Nv${lvl} (${price}💰)`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* F5: Seguro Agrícola */}
+                <div className="bg-white border-4 border-emerald-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-emerald-800 mb-1">🛡️ Seguro Agrícola</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Reduz impacto de eventos negativos em 70% por 7 dias. {insurance.active ? `Ativo: ${insurance.daysLeft} dias restantes` : 'Inativo'}
+                  </p>
+                  <button
+                    disabled={insurance.active || gold < 50}
+                    onClick={() => {
+                      if (!insurance.active && gold >= 50) {
+                        setGold(prev => prev - 50);
+                        setInsurance({ active: true, premium: 50, daysLeft: 7 });
+                        addLog('🛡️ Seguro agrícola contratado por 7 dias por 50 moedas!', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${insurance.active ? 'bg-emerald-100 border-emerald-300 text-emerald-700' : gold >= 50 ? 'bg-emerald-500 hover:bg-emerald-400 text-white border-emerald-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {insurance.active ? `✅ Seguro Ativo (${insurance.daysLeft}d)` : 'Contratar Seguro (50💰 / 7 dias)'}
+                  </button>
+                </div>
+
+                {/* F11: Expansão da Queijaria */}
+                <div className="bg-white border-4 border-amber-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-amber-800 mb-1">🧀 Expansão da Queijaria</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Prateleiras atuais: {maxPrateleiras}. Mais prateleiras = mais queijos simultaneamente.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[{ slots: 4, price: 150 }, { slots: 6, price: 300 }, { slots: 8, price: 500 }].map(({ slots, price }) => (
+                      <button
+                        key={slots}
+                        disabled={maxPrateleiras >= slots || gold < price}
+                        onClick={() => {
+                          if (gold >= price && maxPrateleiras < slots) {
+                            setGold(prev => prev - price);
+                            setMaxPrateleiras(slots);
+                            addLog(`🧀 Queijaria ampliada para ${slots} prateleiras!`, 'success');
+                            triggerAudioResult(() => sfx.playSound('levelup'));
+                          }
+                        }}
+                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${maxPrateleiras >= slots ? 'bg-amber-100 border-amber-300 text-amber-700' : gold >= price ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                      >
+                        {maxPrateleiras >= slots ? `✅ ${slots} prateleiras` : `${slots} prateleiras (${price}💰)`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+              <div className="bg-orange-50 p-4 border-t border-orange-100 flex justify-end shrink-0">
+                <button onClick={() => setShowUpgradesModal(false)} className="bg-orange-600 hover:bg-orange-500 text-white border-b-4 border-orange-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider cursor-pointer">
+                  Fechar Melhorias
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 📊 COMMODITY MARKET BOARD MODAL */}
       <AnimatePresence>
         {showMarketModal && (
@@ -5687,14 +6173,18 @@ export default function App() {
                   const demandPenalty = Math.min(40, Math.round((weeklyQty * 0.4) * 10) / 10);
                   const stock = inventory[item.key] || 0;
                   const quantityToSell = Math.min(stock, sellQuantities[item.key] || 1);
+                  // F6: verificar alta temporada
+                  const seasonalMult = getSeasonalityMultiplier(item.key, currentDay);
+                  const isHighSeason = seasonalMult > 1.0;
 
                   return (
-                    <div key={item.key} className="bg-white border-3 border-stone-200 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xs">
-                      
+                    <div key={item.key} className={`border-3 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xs ${isHighSeason ? 'bg-amber-50 border-amber-300' : 'bg-white border-stone-200'}`}>
+
                       {/* Name of Product */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-display font-black text-sm uppercase text-[#78350f] tracking-wide">{item.label}</span>
+                          {isHighSeason && <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-amber-900 animate-pulse">🔥 Alta Temporada! +{Math.round((seasonalMult - 1) * 100)}%</span>}
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase bg-[#e0f1fc] text-sky-800 font-mono`}>
                             Estoque: {stock}u
                           </span>
