@@ -2089,8 +2089,9 @@ export default function App() {
       // Reputação pós-nível 5: +5% permanente de bônus por nível extra
       finalPrice *= (1.0 + (farmLevel - 5) * 0.05);
     }
-    // Pavão price bonus: +3% with 1 pavão, +5% with 2+
-    const pavaoCount = animals.filter(a => a.type === 'pavao').length;
+    // Pavão price bonus: +3% with 1 pavão (happiness>=80), +5% with 2+ (happiness>=80)
+    // BUG FIX: bônus só conta pavões com happiness >= 80, conforme especificação
+    const pavaoCount = animals.filter(a => a.type === 'pavao' && a.happiness >= 80).length;
     if (pavaoCount >= 2) finalPrice *= 1.05;
     else if (pavaoCount === 1) finalPrice *= 1.03;
     return Math.max(1, Math.round(finalPrice * 10) / 10);
@@ -2110,8 +2111,9 @@ export default function App() {
       // Reputação pós-nível 5: +5% permanente de bônus por nível extra
       finalPrice *= (1.0 + (farmLevel - 5) * 0.05);
     }
-    // Pavão price bonus: +3% with 1 pavão, +5% with 2+
-    const pavaoCount = animals.filter(a => a.type === 'pavao').length;
+    // Pavão price bonus: +3% with 1 pavão (happiness>=80), +5% with 2+ (happiness>=80)
+    // BUG FIX: bônus só conta pavões com happiness >= 80, conforme especificação
+    const pavaoCount = animals.filter(a => a.type === 'pavao' && a.happiness >= 80).length;
     if (pavaoCount >= 2) finalPrice *= 1.05;
     else if (pavaoCount === 1) finalPrice *= 1.03;
     return Math.max(1, Math.round(finalPrice));
@@ -3022,7 +3024,8 @@ export default function App() {
   const processarFomeFelicidade = (
     animalsList: Animal[],
     currentW: 'chuva' | 'sol' | 'nublado',
-    logs: { msg: string; type: LogMessage['type'] }[]
+    logs: { msg: string; type: LogMessage['type'] }[],
+    dayForSeason: number = currentDay
   ) => {
     return animalsList.map(animal => {
       const copy = { ...animal };
@@ -3143,6 +3146,7 @@ export default function App() {
           if ((copy.lactationCycle ?? 0) >= 20) {
             copy.isLactating = false;
             copy.lactationCycle = 15;
+            copy.hasProducedToday = false; // BUG FIX: garante que o botão de coleta fique desabilitado imediatamente ao entrar na secagem
             logs.push({ msg: `🐐 ${copy.name} entrou no período de secagem (15 dias).`, type: 'info' });
           } else {
             const canProduce = copy.hunger > 25 && copy.happiness > 30;
@@ -3177,7 +3181,7 @@ export default function App() {
         logs.push({ msg: `🦙 ${copy.name} acumulou lã (total: ${copy.woolAccumulated}). ${Math.floor(((copy.age ?? 0) + 1) % 120 / 30) === 0 && (copy.woolAccumulated ?? 0) >= 3 ? 'Pronta para colheita na Primavera!' : ''}`, type: 'info' });
       }
       else if (copy.type === 'pato') {
-        const currentSeason = Math.floor(((animalsList[0]?.age ?? 0) % 120) / 30); // approximation
+        const currentSeason = Math.floor(((dayForSeason - 1) % 120) / 30); // use actual current day for season
         const canProduce = copy.hunger > 25 && copy.happiness > 30;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
@@ -3619,7 +3623,7 @@ export default function App() {
       setDailyEarning(0);
 
       // --- SUBFUNÇÃO 4: Processamento de Fome, Felicidade e Produções Naturais ---
-      let updatedAnimalsList = processarFomeFelicidade(animalsAfterAuto, nextWeather, logsToAdd);
+      let updatedAnimalsList = processarFomeFelicidade(animalsAfterAuto, nextWeather, logsToAdd, nextDayValue);
 
       // --- FUNCIONALIDADE 3: Verificar missão de animais felizes ---
       // BUG 3 FIX: usa updatedAnimalsList (felicidade já processada) em vez de
@@ -5170,9 +5174,10 @@ export default function App() {
                           
                           {/* Alimentar (Dynamic feed count based on animal type) */}
                           {(() => {
-                            const feedType = animal.type === 'vaca' ? 'racaoLeite' : animal.type === 'ovelha' ? 'racaoOvelha' : animal.type === 'boi' ? 'racaoBoi' : 'racaoGalinha';
+                            // BUG FIX: novos animais usam a ração correta na UI (cabra/lhama→ovelha, búfalo→boi, pato/ganso/pavão→galinha)
+                            const feedType = animal.type === 'vaca' ? 'racaoLeite' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama') ? 'racaoOvelha' : (animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBoi' : 'racaoGalinha';
                             const feedQty = inventory[feedType] ?? 0;
-                            const label = animal.type === 'vaca' ? 'Ração Vaca' : animal.type === 'ovelha' ? 'Ração Ovelha' : animal.type === 'boi' ? 'Ração Boi' : 'Ração Galinha';
+                            const label = animal.type === 'vaca' ? 'Ração Vaca' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama') ? 'Ração Ovelha' : (animal.type === 'boi' || animal.type === 'bufalo') ? 'Ração Boi' : 'Ração Galinha';
                             return (
                               <button
                                 type="button"
