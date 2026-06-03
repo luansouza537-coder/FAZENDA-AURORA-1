@@ -502,7 +502,15 @@ export default function App() {
       const saved = localStorage.getItem('aurora_farm_save');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.animals && parsed.animals.length > 0) return parsed.animals;
+        if (parsed.animals && parsed.animals.length > 0) {
+          // BUG FIX: inicializa age/maxAge para animais de saves antigos que não tinham esses campos
+          const baseMaxAge: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60 };
+          return parsed.animals.map((a: Animal) => ({
+            ...a,
+            age: a.age ?? 0,
+            maxAge: a.maxAge ?? Math.round((baseMaxAge[a.type] ?? 90) * (1 + (Math.random() * 0.4 - 0.2)))
+          }));
+        }
       }
     } catch (e) {}
     return []; // Handled by useEffect mount if empty
@@ -1066,6 +1074,12 @@ export default function App() {
     }
   }, [currentScreen]);
 
+  // BUG FIX: sincroniza sfx.isMuted com o estado persistido ao montar o componente
+  useEffect(() => {
+    sfx.isMuted = !soundEnabled;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Unlocks audio context on user interaction to abide by modern browser policies
   useEffect(() => {
     const unlockAudio = () => {
@@ -1171,7 +1185,8 @@ export default function App() {
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
-  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications]);
+  // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
+  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel]);
 
   // Centralized achievement condition checker
   // BUG 5 FIX: usa callback funcional para evitar perda de conquistas quando múltiplas são desbloqueadas
