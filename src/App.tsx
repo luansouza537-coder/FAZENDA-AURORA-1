@@ -590,6 +590,15 @@ export default function App() {
 
   const [weather, setWeather] = useState<'chuva' | 'sol' | 'nublado'>('nublado');
   const [dailyEarning, setDailyEarning] = useState<number>(0);
+
+  // MECHANIC 2: Ganso alarm — pre-drawn event for next day
+  const [nextDayEvent, setNextDayEvent] = useState<string | null>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).nextDayEvent ?? null;
+    } catch (e) {}
+    return null;
+  });
   const [showBuyMenu, setShowBuyMenu] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
   const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>('splash');
@@ -1076,6 +1085,7 @@ export default function App() {
     setSolarLevel(0);
     setIrrigationLevel(0);
     setQueijariaNivel(1);
+    setNextDayEvent(null);
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -1213,12 +1223,13 @@ export default function App() {
         wellLevel,
         solarLevel,
         irrigationLevel,
-        queijariaNivel
+        queijariaNivel,
+        nextDayEvent
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel]);
+  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent]);
 
   // Centralized achievement condition checker
   // BUG 5 FIX: usa callback funcional para evitar perda de conquistas quando múltiplas são desbloqueadas
@@ -3741,10 +3752,64 @@ export default function App() {
         return copy;
       });
 
-      // Ganso: alarme de clima ruim — se o próximo clima for chuva e há ganso vivo
-      if (hasGoose && nextWeather === 'chuva') {
-        logsToAdd.push({ msg: `🦢 Os gansos estão agitados! Algo pode acontecer amanhã...`, type: 'event' });
-        setTimeout(() => addNotification('🦢 Os gansos estão agitados! Algo pode acontecer amanhã...', 'warning', nextDayValue), 0);
+      // MECHANIC 1: Sistema de Pragas (Pato reduz probabilidade)
+      {
+        const basePestChance = 0.08;
+        const hasDuckAlive = finalAnimals.some(a => a.type === 'pato');
+        const pestChance = hasDuckAlive ? basePestChance * 0.6 : basePestChance; // 40% redução com pato
+        if (Math.random() < pestChance) {
+          const pestItems: Array<keyof typeof inventory> = ['milk', 'goat_milk', 'egg', 'duck_egg', 'goose_egg'];
+          let totalLost = 0;
+          const lossMultiplier = insurance.active ? 0.3 : 1.0; // seguro reduz 70%
+          const pestLossFraction = (0.10 + Math.random() * 0.15) * lossMultiplier; // 10–25%, modificado pelo seguro
+          setInventory(prev => {
+            const next = { ...prev };
+            pestItems.forEach(key => {
+              const current = (prev[key] ?? 0) as number;
+              if (current > 0) {
+                const lost = Math.floor(current * pestLossFraction);
+                totalLost += lost;
+                (next as any)[key] = Math.max(0, current - lost);
+              }
+            });
+            return next;
+          });
+          const insuranceTxt = insurance.active ? ' (Seguro reduziu 70% das perdas!)' : '';
+          logsToAdd.push({ msg: `🐀 Pragas invadiram o celeiro! Perdeu itens perecíveis.${insuranceTxt}`, type: 'error' });
+          setTimeout(() => addNotification(`🐀 Pragas invadiram o celeiro! Itens perecíveis afetados.${insuranceTxt}`, 'warning', nextDayValue), 0);
+        }
+      }
+
+      // MECHANIC 2: Ganso — alarme de evento pré-sorteado
+      // Processar o evento pré-sorteado do dia atual (nextDayEvent) antes de sortear o próximo
+      // Sortear evento do próximo dia
+      {
+        const negativeEvents = ['praga', 'tempestade', 'seca', 'geada', 'predador'];
+        const positiveEvents = ['chuva_leve', 'sol_forte', 'vento_bom'];
+        const allEvents = [...negativeEvents, ...positiveEvents];
+        const nextEvent = allEvents[Math.floor(Math.random() * allEvents.length)];
+        setNextDayEvent(nextEvent);
+        const hasGooseAlive = finalAnimals.some(a => a.type === 'ganso');
+        if (hasGooseAlive && negativeEvents.includes(nextEvent)) {
+          logsToAdd.push({ msg: `🦢 Os gansos estão agitados! Prepare-se para amanhã...`, type: 'event' });
+          setTimeout(() => addNotification('🦢 Os gansos estão agitados! Prepare-se para amanhã...', 'warning', nextDayValue), 0);
+        }
+      }
+
+      // MECHANIC 5: Búfalo — log de estresse térmico no primeiro dia de verão
+      {
+        const prevSeasonIdx = Math.floor(((currentDay - 1) % 120) / 30);
+        const isFirstDayOfSummer = currentSeasonIdx === 1 && prevSeasonIdx !== 1;
+        const hasBuffalo = finalAnimals.some(a => a.type === 'bufalo');
+        if (isFirstDayOfSummer && hasBuffalo) {
+          logsToAdd.push({ msg: `🐃 O calor do verão está afetando seus búfalos! Produção reduzida.`, type: 'event' });
+          setTimeout(() => addNotification('🐃 Búfalos sob estresse térmico de verão! Produção reduzida em 40%.', 'warning', nextDayValue), 0);
+        }
+      }
+
+      // Ganso: alarme legado de clima ruim (mantém compatibilidade)
+      if (finalAnimals.some(a => a.type === 'ganso') && nextWeather === 'chuva') {
+        // já coberto pelo sistema de nextDayEvent acima — sem duplicidade
       }
 
       setAnimals(finalAnimals);
