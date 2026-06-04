@@ -381,6 +381,20 @@ export default function App() {
     butter: number;
     yogurt: number;
     fertile_egg: number;
+    quail_egg: number;
+    alpaca_wool: number;
+    humus: number;
+    muco: number;
+    angora_wool: number;
+    seda_bruta: number;
+    coxa_ra: number;
+    carne_avestruz: number;
+    pena_grande: number;
+    couro_avestruz: number;
+    carne_jacare: number;
+    couro_jacare: number;
+    folha_amoreira: number;
+    sal: number;
   }>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -412,6 +426,20 @@ export default function App() {
           butter: inv.butter ?? 0,
           yogurt: inv.yogurt ?? 0,
           fertile_egg: inv.fertile_egg ?? 0,
+          quail_egg: inv.quail_egg ?? 0,
+          alpaca_wool: inv.alpaca_wool ?? 0,
+          humus: inv.humus ?? 0,
+          muco: inv.muco ?? 0,
+          angora_wool: inv.angora_wool ?? 0,
+          seda_bruta: inv.seda_bruta ?? 0,
+          coxa_ra: inv.coxa_ra ?? 0,
+          carne_avestruz: inv.carne_avestruz ?? 0,
+          pena_grande: inv.pena_grande ?? 0,
+          couro_avestruz: inv.couro_avestruz ?? 0,
+          carne_jacare: inv.carne_jacare ?? 0,
+          couro_jacare: inv.couro_jacare ?? 0,
+          folha_amoreira: inv.folha_amoreira ?? 0,
+          sal: inv.sal ?? 0,
         };
       }
     } catch (e) {}
@@ -440,6 +468,20 @@ export default function App() {
       butter: 0,
       yogurt: 0,
       fertile_egg: 0,
+      quail_egg: 0,
+      alpaca_wool: 0,
+      humus: 0,
+      muco: 0,
+      angora_wool: 0,
+      seda_bruta: 0,
+      coxa_ra: 0,
+      carne_avestruz: 0,
+      pena_grande: 0,
+      couro_avestruz: 0,
+      carne_jacare: 0,
+      couro_jacare: 0,
+      folha_amoreira: 0,
+      sal: 0,
     };
   });
 
@@ -910,6 +952,22 @@ export default function App() {
   const [showMarketModal, setShowMarketModal] = useState<boolean>(false);
   const [showSellAllConfirmModal, setShowSellAllConfirmModal] = useState<boolean>(false);
 
+  // New animal state
+  const [licencaExotica, setLicencaExotica] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) { const parsed = JSON.parse(saved); return parsed.licencaExotica ?? false; }
+    } catch (e) {}
+    return false;
+  });
+  const [coelhoReproCount, setCoelhoReproCount] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) { const parsed = JSON.parse(saved); return parsed.coelhoReproCount ?? 0; }
+    } catch (e) {}
+    return 0;
+  });
+
   // Sleep / Rest state
   const [isSleeping, setIsSleeping] = useState<boolean>(false);
   // BUG 20 FIX: ref para evitar duplo-clique no botão Dormir
@@ -1186,7 +1244,23 @@ export default function App() {
       butter: 0,
       yogurt: 0,
       fertile_egg: 0,
+      quail_egg: 0,
+      alpaca_wool: 0,
+      humus: 0,
+      muco: 0,
+      angora_wool: 0,
+      seda_bruta: 0,
+      coxa_ra: 0,
+      carne_avestruz: 0,
+      pena_grande: 0,
+      couro_avestruz: 0,
+      carne_jacare: 0,
+      couro_jacare: 0,
+      folha_amoreira: 0,
+      sal: 0,
     });
+    setLicencaExotica(false);
+    setCoelhoReproCount(0);
     setHasStable(false);
     setHasSilo(false);
     setHasFridge(false);
@@ -1217,6 +1291,18 @@ export default function App() {
       butter: [45, 45, 45, 45, 45, 45, 45],
       yogurt: [35, 35, 35, 35, 35, 35, 35],
       fertile_egg: [36, 36, 36, 36, 36, 36, 36],
+      quail_egg: [22, 22, 22, 22, 22, 22, 22],
+      alpaca_wool: [65, 65, 65, 65, 65, 65, 65],
+      humus: [35, 35, 35, 35, 35, 35, 35],
+      muco: [120, 120, 120, 120, 120, 120, 120],
+      angora_wool: [90, 90, 90, 90, 90, 90, 90],
+      seda_bruta: [80, 80, 80, 80, 80, 80, 80],
+      coxa_ra: [70, 70, 70, 70, 70, 70, 70],
+      carne_avestruz: [180, 180, 180, 180, 180, 180, 180],
+      pena_grande: [60, 60, 60, 60, 60, 60, 60],
+      couro_avestruz: [300, 300, 300, 300, 300, 300, 300],
+      carne_jacare: [250, 250, 250, 250, 250, 250, 250],
+      couro_jacare: [400, 400, 400, 400, 400, 400, 400],
     });
     setQueijosEmMaturacao([]);
     setMaxPrateleiras(2);
@@ -2355,6 +2441,15 @@ export default function App() {
     if (type === 'ganso') basePrice = 100;
     if (type === 'bufalo') basePrice = 220;
     if (type === 'pavao') basePrice = 300;
+    if (type === 'codorna') basePrice = 40;
+    if (type === 'alpaca') basePrice = 280;
+    if (type === 'minhoca') basePrice = 80;
+    if (type === 'caracol') basePrice = 120;
+    if (type === 'coelho_angora') basePrice = 200;
+    if (type === 'bicho_seda') basePrice = 150;
+    if (type === 'ra') basePrice = 180;
+    if (type === 'avestruz') basePrice = 600;
+    if (type === 'jacare') basePrice = 800;
 
     // Specialization purchase penalty
     const purchasePenalty =

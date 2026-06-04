@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao';
+export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao' | 'codorna' | 'alpaca' | 'minhoca' | 'caracol' | 'coelho_angora' | 'bicho_seda' | 'ra' | 'avestruz' | 'jacare';
 
 export type AnimalTrait = 'gulosa' | 'preguicosa' | 'feliz' | 'estressada' | 'saudavel' | 'trabalhadora';
 
-export type FarmSpecialization = 'leiteira' | 'fibras' | 'avicultura' | 'diversificada' | null;
+export type FarmSpecialization = 'leiteira' | 'fibras' | 'avicultura' | 'diversificada' | 'organica' | 'exotica' | null;
 
 export interface FairResult {
   day: number;
