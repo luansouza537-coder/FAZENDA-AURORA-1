@@ -1052,9 +1052,9 @@ export default function App() {
   const [nextFeiraProdutosDay, setNextFeiraProdutosDay] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) return JSON.parse(saved).nextFeiraProdutosDay ?? 30;
+      if (saved) return JSON.parse(saved).nextFeiraProdutosDay ?? 33;
     } catch (e) {}
-    return 30;
+    return 33;
   });
   const [nextFeiraExoticaDay, setNextFeiraExoticaDay] = useState<number>(() => {
     try {
@@ -1707,8 +1707,9 @@ export default function App() {
     setFairResults([]);
     setLastEpidemicDay(0);
     setPrestigePoints(0);
+    prestigeNotifiedRef.current = [];
     setNextExposicaoDay(45);
-    setNextFeiraProdutosDay(30);
+    setNextFeiraProdutosDay(33);
     setNextFeiraExoticaDay(60);
     setNextFestivalDay(120);
     setDroughtDaysRemaining(0);
@@ -3252,6 +3253,8 @@ export default function App() {
     const pavaoCount = animals.filter(a => a.type === 'pavao' && a.happiness >= 80).length;
     if (pavaoCount >= 2) finalPrice *= 1.05;
     else if (pavaoCount === 1) finalPrice *= 1.03;
+    // Prestígio 300+: +5% permanente nos preços
+    if (prestigePoints >= 300) finalPrice *= 1.05;
     return Math.max(1, Math.round(finalPrice));
   };
 
@@ -3326,34 +3329,14 @@ export default function App() {
     // Bônus de especialização leiteira
     const specBonusMilk = specialization === 'leiteira' ? 1.2 : 1.0;
     totalLeite = Math.round(totalLeite * specBonusMilk);
-
-    setInventory(prev => ({
-      ...prev,
-      milk: prev.milk + totalLeite
-    }));
-    // BUG FIX: reseta frescor ao coletar leite fresco
-    setProductFreshness(prev => ({ ...prev, milk: 3 }));
-
-    setStats(prev => ({
-      ...prev,
-      totalCollected: prev.totalCollected + totalLeite,
-      totalMilk: (prev.totalMilk || 0) + totalLeite
-    }));
-
-    setWeeklyStats(prev => ({
-      ...prev,
-      milk: prev.milk + totalLeite
-    }));
-
-    // Apply champion bonus
+    // Bônus de campeão de raça (+10% produção)
     if (animal.isCampiao) totalLeite = Math.round(totalLeite * 1.1);
 
-    setAnimals(prev => prev.map(a => {
-      if (a.id === id) {
-        return { ...a, hasProducedToday: false, weeklyProduction: (a.weeklyProduction ?? 0) + totalLeite };
-      }
-      return a;
-    }));
+    setInventory(prev => ({ ...prev, milk: prev.milk + totalLeite }));
+    setProductFreshness(prev => ({ ...prev, milk: 3 }));
+    setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + totalLeite, totalMilk: (prev.totalMilk || 0) + totalLeite }));
+    setWeeklyStats(prev => ({ ...prev, milk: prev.milk + totalLeite }));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false, weeklyProduction: (a.weeklyProduction ?? 0) + totalLeite } : a));
 
     addLog(`🥛 ${animal.name} produziu ${totalLeite} balde(s) de leite cru enviados ao Armazém!`, 'success');
     setFarmXp(prev => prev + totalLeite);
@@ -4852,10 +4835,12 @@ export default function App() {
     let isMerchantNextDay = false;
     let newDaysSinceMerchant = daysSinceMerc + 1;
     let newNextMerchantDay = nextMercDay;
+    // Prestígio 150+: comerciante aparece com mais frequência (threshold reduzido de 3-7 para 2-5)
+    const merchantThreshold = prestigePoints >= 150 ? Math.floor(Math.random() * 4) + 2 : Math.floor(Math.random() * 5) + 3;
     if (newDaysSinceMerchant >= nextMercDay) {
       isMerchantNextDay = true;
       newDaysSinceMerchant = 0;
-      newNextMerchantDay = Math.floor(Math.random() * 5) + 3; // 3 to 7
+      newNextMerchantDay = merchantThreshold;
     }
 
     if (isMerchantNextDay) {
