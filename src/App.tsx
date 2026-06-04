@@ -832,6 +832,8 @@ export default function App() {
     setNextFeiraExoticaDay(60);
     setNextFestivalDay(120);
     setDroughtDaysRemaining(0);
+    setWorkers([]);
+    setLandBiomes([]);
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -7788,6 +7790,109 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* 👷 WORKERS MODAL */}
+      <AnimatePresence>
+        {showWorkersModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowWorkersModal(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[99] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#064e3b] border-8 border-[#fbbf24] rounded-[36px] max-w-lg w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
+            >
+              <div className="bg-[#065f46] p-5 border-b-4 border-[#fbbf24] text-center shrink-0">
+                <h3 className="text-[#fef3c7] text-xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                  👷 Peões da Fazenda
+                </h3>
+                <p className="text-[#fbbf24] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
+                  Contrate até 3 trabalhadores para automatizar tarefas
+                </p>
+                <button onClick={() => setShowWorkersModal(false)} className="absolute top-4 right-4 text-[#fef3c7] bg-[#022c22] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {workers.length > 0 && (
+                  <div className="bg-[#065f46] border-2 border-[#fbbf24]/40 rounded-2xl p-4">
+                    <h4 className="text-[#fbbf24] font-black text-xs uppercase mb-3">Peões Contratados</h4>
+                    <div className="space-y-2">
+                      {workers.map(w => {
+                        const wt = WORKER_TYPES.find(t => t.role === w.role);
+                        return (
+                          <div key={w.id} className="flex items-center justify-between bg-[#022c22] rounded-xl px-3 py-2">
+                            <span className="text-[#fef3c7] font-mono text-sm">{wt?.emoji} {w.name}</span>
+                            <span className="text-[#fbbf24] font-mono text-xs">-{w.dailyCost}💰/dia</span>
+                            <button onClick={() => {
+                              setWorkers(prev => prev.filter(x => x.id !== w.id));
+                              addLog(`👷 ${w.name} foi dispensado.`, 'info');
+                            }} className="text-red-400 text-xs font-black px-2 py-1 rounded-lg border border-red-400/40 hover:bg-red-400/20 cursor-pointer">
+                              Dispensar
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="text-[#fbbf24] font-mono text-xs mt-3 text-right">
+                      Custo total: -{workers.reduce((s, w) => s + w.dailyCost, 0)}💰/dia
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-3">
+                  <h4 className="text-[#fbbf24] font-black text-xs uppercase">Disponíveis para Contratar</h4>
+                  {WORKER_TYPES.map(wt => {
+                    const alreadyHired = workers.some(w => w.role === wt.role);
+                    const atMax = workers.length >= 3;
+                    const levelOk = farmLevel >= wt.minLevel;
+                    const canHire = !alreadyHired && !atMax && levelOk;
+                    return (
+                      <div key={wt.role} className={`bg-[#065f46] border-2 rounded-2xl p-4 ${alreadyHired ? 'border-[#10b981]' : 'border-[#fbbf24]/30'}`}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="text-[#fef3c7] font-black text-sm">{wt.emoji} {wt.name}</div>
+                            <div className="text-[#fef3c7]/70 text-xs font-mono mt-1">{wt.desc}</div>
+                            <div className="text-[#fbbf24] text-xs font-mono mt-1">
+                              -{wt.dailyCost}💰/dia · Nível {wt.minLevel}+ req.
+                            </div>
+                          </div>
+                          <button
+                            disabled={!canHire}
+                            onClick={() => {
+                              if (!canHire) return;
+                              const newWorker: FarmWorker = {
+                                id: Math.random().toString(36).substring(2, 9),
+                                role: wt.role,
+                                name: wt.name,
+                                dailyCost: wt.dailyCost,
+                                hiredDay: currentDay,
+                              };
+                              setWorkers(prev => [...prev, newWorker]);
+                              addLog(`👷 ${wt.name} foi contratado! Custo: -${wt.dailyCost}💰/dia`, 'success');
+                            }}
+                            className={`shrink-0 text-xs font-black uppercase px-3 py-2 rounded-xl border-2 cursor-pointer transition-all ${
+                              alreadyHired ? 'bg-[#10b981]/20 border-[#10b981] text-[#10b981]' :
+                              !levelOk ? 'bg-[#022c22] border-[#fbbf24]/20 text-[#fef3c7]/30 cursor-not-allowed' :
+                              atMax ? 'bg-[#022c22] border-[#fbbf24]/20 text-[#fef3c7]/30 cursor-not-allowed' :
+                              'bg-[#fbbf24] border-[#fbbf24] text-[#78350f] hover:bg-[#f59e0b]'
+                            }`}
+                          >
+                            {alreadyHired ? '✅ Contratado' : !levelOk ? `🔒 Nível ${wt.minLevel}` : atMax ? '🚫 Máx 3' : 'Contratar'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 🔧 MELHORIAS MODAL (F7 terreno, F8 poço, F9 solar, F10 irrigação, F5 seguro, F11 queijaria) */}
       <AnimatePresence>
         {showUpgradesModal && (
@@ -7816,11 +7921,11 @@ export default function App() {
               </div>
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
 
-                {/* F7: Expansão de Terreno */}
+                {/* F7: Expansão de Terreno + Biome Selection */}
                 <div className="bg-white border-4 border-green-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-green-800 mb-1">🏡 Expansão de Terreno</h4>
                   <p className="text-xs text-stone-500 font-mono mb-3">Cada lote permite +5 animais. Atual: Lote {landLots}/5 ({landLots * 5} animais máx)</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 mb-3">
                     {[
                       { lot: 2, price: 200 }, { lot: 3, price: 400 }, { lot: 4, price: 800 }, { lot: 5, price: 1600 }
                     ].map(({ lot, price }) => (
@@ -7840,6 +7945,54 @@ export default function App() {
                         {landLots >= lot ? `✅ Lote ${lot}` : `Lote ${lot} (${price}💰)`}
                       </button>
                     ))}
+                  </div>
+                  {/* Biome Selection */}
+                  <div className="border-t-2 border-green-200 pt-3">
+                    <h5 className="font-display font-black text-xs uppercase text-green-700 mb-2">🌿 Biomas de Terreno</h5>
+                    <p className="text-[10px] text-stone-500 font-mono mb-2">Atribua biomas aos lotes para bônus especiais</p>
+                    <div className="space-y-2">
+                      {[
+                        { biome: 'pasto' as BiomeType, emoji: '🌾', label: 'Pasto', price: 50, desc: 'Padrão', minLevel: 1 },
+                        { biome: 'lago' as BiomeType, emoji: '🌊', label: 'Lago', price: 120, desc: 'Rã 2x, Pato/Ganso +20%', minLevel: 8 },
+                        { biome: 'floresta' as BiomeType, emoji: '🌲', label: 'Floresta', price: 150, desc: 'Minhoca/Caracol +50%', minLevel: 10 },
+                        { biome: 'pomar' as BiomeType, emoji: '🍎', label: 'Pomar', price: 200, desc: 'Todos +2 felicidade/dia', minLevel: 12 },
+                      ].map(({ biome, emoji, label, price, desc, minLevel }) => {
+                        const owned = landBiomes.filter(b => b.biome === biome).length;
+                        const canBuy = farmLevel >= minLevel && gold >= price && landBiomes.length < landLots;
+                        return (
+                          <div key={biome} className="flex items-center justify-between bg-green-50 rounded-xl px-3 py-2">
+                            <div>
+                              <span className="font-mono font-black text-xs text-green-900">{emoji} {label}</span>
+                              <span className="text-[10px] text-stone-500 font-mono ml-2">{desc}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-stone-500 font-mono">×{owned}</span>
+                              <button
+                                disabled={!canBuy}
+                                onClick={() => {
+                                  if (!canBuy) return;
+                                  setGold(prev => prev - price);
+                                  setLandBiomes(prev => [...prev, { id: prev.length + 1, biome, purchasedDay: currentDay }]);
+                                  addLog(`🌿 Bioma ${label} adicionado ao terreno! (${price}💰)`, 'success');
+                                }}
+                                className={`text-[10px] font-black px-2 py-1 rounded-lg border cursor-pointer transition-all ${!canBuy ? 'bg-stone-100 border-stone-200 text-stone-400 cursor-not-allowed' : 'bg-green-500 border-green-700 text-white hover:bg-green-400'}`}
+                              >
+                                {farmLevel < minLevel ? `🔒 Nv${minLevel}` : `+${price}💰`}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {landBiomes.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {landBiomes.map((b, i) => (
+                          <span key={i} className="text-[10px] bg-green-100 text-green-800 border border-green-300 rounded-full px-2 py-0.5 font-mono">
+                            {b.biome === 'pasto' ? '🌾' : b.biome === 'lago' ? '🌊' : b.biome === 'floresta' ? '🌲' : '🍎'} {b.biome}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
