@@ -1255,7 +1255,7 @@ export default function App() {
     return 2;
   };
 
-  const getFeedPriceWithModifiers = (type: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha', day = currentDay): number => {
+  const getFeedPriceWithModifiers = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora', day = currentDay): number => {
     let base = getFeedBasePrice(type);
 
     // Desconto de 10% no nível 4 ou superior
@@ -1265,9 +1265,9 @@ export default function App() {
 
     // Desconto de especialização: -10% para animais focados na especialização
     const specFeedDiscount =
-      (specialization === 'leiteira' && (type === 'racaoLeite')) ? 0.9 :
-      (specialization === 'fibras' && type === 'racaoOvelha') ? 0.9 :
-      (specialization === 'avicultura' && type === 'racaoGalinha') ? 0.9 : 1.0;
+      (specialization === 'leiteira' && type === 'racaoBovina') ? 0.9 :
+      (specialization === 'fibras' && type === 'racaoOvinos') ? 0.9 :
+      (specialization === 'avicultura' && (type === 'racaoAves' || type === 'racaoAquatica')) ? 0.9 : 1.0;
     base = Math.max(1, Math.round(base * specFeedDiscount));
 
     // F8: desconto do poço d'água (10% por nível)
@@ -1284,7 +1284,7 @@ export default function App() {
 
   // Buy feed packages with bulk discounts
   const buyFeed = (
-    type: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha',
+    type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora',
     quantity: 1 | 10 | 50,
     event: React.MouseEvent
   ) => {
@@ -1319,7 +1319,7 @@ export default function App() {
       spending: prev.spending + totalCost
     }));
     
-    const feedLabel = type === 'racaoLeite' ? 'Ração de Vaca' : type === 'racaoOvelha' ? 'Ração de Ovelha' : type === 'racaoBoi' ? 'Ração de Boi' : 'Ração de Galinha';
+    const feedLabel = type === 'racaoBovina' ? 'Ração Bovina 🌾' : type === 'racaoOvinos' ? 'Ração de Ovinos 🐐' : type === 'racaoAves' ? 'Ração de Aves 🐔' : type === 'racaoAquatica' ? 'Ração Aquática 🦆' : type === 'racaoCoelho' ? 'Ração de Coelhos 🐰' : 'Ração Carnívora 🍖';
     addLog(`🛍️ Compra realizada: +${quantity}u de ${feedLabel} por ${totalCost} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🌽', `-${totalCost}💰`, event);
@@ -1999,14 +1999,14 @@ export default function App() {
     // C. Alimentador Automático
     if (machinesObj.feederPurchased && machinesObj.feederActive) {
       updatedAnimals = updatedAnimals.map(a => {
-        let feedType: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha' = 'racaoLeite';
-        let feedLabel = 'Ração de Vaca';
-        if (a.type === 'ovelha') { feedType = 'racaoOvelha'; feedLabel = 'Ração de Ovelha'; }
-        else if (a.type === 'boi') { feedType = 'racaoBoi'; feedLabel = 'Ração de Boi'; }
-        else if (a.type === 'galinha') { feedType = 'racaoGalinha'; feedLabel = 'Ração de Galinha'; }
-        else if (a.type === 'cabra' || a.type === 'lhama') { feedType = 'racaoOvelha'; feedLabel = 'Ração de Ovelha'; }
-        else if (a.type === 'pato' || a.type === 'ganso' || a.type === 'pavao') { feedType = 'racaoGalinha'; feedLabel = 'Ração de Galinha'; }
-        else if (a.type === 'bufalo') { feedType = 'racaoBoi'; feedLabel = 'Ração de Boi'; }
+        let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' = 'racaoBovina';
+        let feedLabel = 'Ração Bovina';
+        if (a.type === 'vaca' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+        else if (a.type === 'ovelha' || a.type === 'cabra' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
+        else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
+        else if (a.type === 'pato' || a.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
+        else if (a.type === 'coelho_angora') { feedType = 'racaoCoelho'; feedLabel = 'Ração de Coelhos'; }
+        else if (a.type === 'ra' || a.type === 'avestruz' || a.type === 'jacare') { feedType = 'racaoCarnivora'; feedLabel = 'Ração Carnívora'; }
         
         if ((nextInv[feedType] ?? 0) >= 1) {
           nextInv[feedType] -= 1;
@@ -5289,9 +5289,9 @@ export default function App() {
                               return <span className="text-[10px] text-stone-400 font-mono italic flex-1 flex items-center justify-center">Sem ração necessária 🌿</span>;
                             }
                             // BUG FIX: novos animais usam a ração correta na UI
-                            const feedType = animal.type === 'vaca' ? 'racaoLeite' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca' || animal.type === 'coelho_angora') ? 'racaoOvelha' : (animal.type === 'boi' || animal.type === 'bufalo' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoBoi' : 'racaoGalinha';
+                            const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
                             const feedQty = inventory[feedType] ?? 0;
-                            const label = feedType === 'racaoLeite' ? 'Ração Vaca' : feedType === 'racaoOvelha' ? 'Ração Ovelha' : feedType === 'racaoBoi' ? 'Ração Boi' : 'Ração Galinha';
+                            const label = feedType === 'racaoBovina' ? 'Ração Bovina' : feedType === 'racaoOvinos' ? 'Ração de Ovinos' : feedType === 'racaoAves' ? 'Ração de Aves' : feedType === 'racaoAquatica' ? 'Ração Aquática' : feedType === 'racaoCoelho' ? 'Ração de Coelhos' : 'Ração Carnívora';
                             return (
                               <button
                                 type="button"
@@ -6119,10 +6119,12 @@ export default function App() {
 
               <div className="space-y-4">
                 {([
-                  { key: 'racaoLeite', label: '🥦 Ração de Vaca', desc: 'Para vacas leiteiras.' },
-                  { key: 'racaoOvelha', label: '🍀 Ração de Ovelha', desc: 'Nutre ovelhas de pelo denso.' },
-                  { key: 'racaoBoi', label: '🌾 Ração de Boi', desc: 'Ração rica de engorda.' },
-                  { key: 'racaoGalinha', label: '🌽 Ração de Galinha', desc: 'Alimento de gramíneas fino.' }
+                  { key: 'racaoBovina', label: '🌾 Ração Bovina', desc: 'Para Vaca, Boi e Búfalo. 3💰/dia.' },
+                  { key: 'racaoOvinos', label: '🐐 Ração de Ovinos', desc: 'Para Ovelha, Cabra, Lhama e Alpaca. 3💰/dia.' },
+                  { key: 'racaoAves', label: '🐔 Ração de Aves', desc: 'Para Galinha, Codorna e Pavão. 2💰/dia.' },
+                  { key: 'racaoAquatica', label: '🦆 Ração Aquática', desc: 'Para Pato e Ganso. 4💰/dia.' },
+                  { key: 'racaoCoelho', label: '🐰 Ração de Coelhos', desc: 'Para Coelho Angorá. 2💰/dia.' },
+                  { key: 'racaoCarnivora', label: '🍖 Ração Carnívora', desc: 'Para Rã, Avestruz e Jacaré. 6💰/dia.' }
                 ] as const).map((feed) => {
                   const currentStock = inventory[feed.key] ?? 0;
                   const unitPrice = getFeedPriceWithModifiers(feed.key);
