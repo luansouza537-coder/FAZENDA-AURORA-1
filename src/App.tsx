@@ -495,6 +495,23 @@ export default function App() {
     couro_jacare: number;
     folha_amoreira: number;
     sal: number;
+    queijo_cabra: number;
+    iogurte_cabra: number;
+    leite_condensado: number;
+    tapete_lhama: number;
+    cachecol_angora: number;
+    tecido_alpaca: number;
+    fio_seda: number;
+    manta_premium: number;
+    pate_pato: number;
+    ovo_defumado: number;
+    conserva_codorna: number;
+    creme_cosmetico: number;
+    sabonete_natural: number;
+    almofada_penas: number;
+    colete_couro: number;
+    bolsa_exotica: number;
+    enfeite_pavao: number;
   }>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -540,6 +557,23 @@ export default function App() {
           couro_jacare: inv.couro_jacare ?? 0,
           folha_amoreira: inv.folha_amoreira ?? 0,
           sal: inv.sal ?? 0,
+          queijo_cabra: inv.queijo_cabra ?? 0,
+          iogurte_cabra: inv.iogurte_cabra ?? 0,
+          leite_condensado: inv.leite_condensado ?? 0,
+          tapete_lhama: inv.tapete_lhama ?? 0,
+          cachecol_angora: inv.cachecol_angora ?? 0,
+          tecido_alpaca: inv.tecido_alpaca ?? 0,
+          fio_seda: inv.fio_seda ?? 0,
+          manta_premium: inv.manta_premium ?? 0,
+          pate_pato: inv.pate_pato ?? 0,
+          ovo_defumado: inv.ovo_defumado ?? 0,
+          conserva_codorna: inv.conserva_codorna ?? 0,
+          creme_cosmetico: inv.creme_cosmetico ?? 0,
+          sabonete_natural: inv.sabonete_natural ?? 0,
+          almofada_penas: inv.almofada_penas ?? 0,
+          colete_couro: inv.colete_couro ?? 0,
+          bolsa_exotica: inv.bolsa_exotica ?? 0,
+          enfeite_pavao: inv.enfeite_pavao ?? 0,
         };
       }
     } catch (e) {}
@@ -582,6 +616,23 @@ export default function App() {
       couro_jacare: 0,
       folha_amoreira: 0,
       sal: 0,
+      queijo_cabra: 0,
+      iogurte_cabra: 0,
+      leite_condensado: 0,
+      tapete_lhama: 0,
+      cachecol_angora: 0,
+      tecido_alpaca: 0,
+      fio_seda: 0,
+      manta_premium: 0,
+      pate_pato: 0,
+      ovo_defumado: 0,
+      conserva_codorna: 0,
+      creme_cosmetico: 0,
+      sabonete_natural: 0,
+      almofada_penas: 0,
+      colete_couro: 0,
+      bolsa_exotica: 0,
+      enfeite_pavao: 0,
     };
   });
 
@@ -831,6 +882,23 @@ export default function App() {
       couro_avestruz: [300, 300, 300, 300, 300, 300, 300],
       carne_jacare: [250, 250, 250, 250, 250, 250, 250],
       couro_jacare: [400, 400, 400, 400, 400, 400, 400],
+      queijo_cabra: [90, 90, 90, 90, 90, 90, 90],
+      iogurte_cabra: [55, 55, 55, 55, 55, 55, 55],
+      leite_condensado: [100, 100, 100, 100, 100, 100, 100],
+      tapete_lhama: [110, 110, 110, 110, 110, 110, 110],
+      cachecol_angora: [160, 160, 160, 160, 160, 160, 160],
+      tecido_alpaca: [180, 180, 180, 180, 180, 180, 180],
+      fio_seda: [200, 200, 200, 200, 200, 200, 200],
+      manta_premium: [420, 420, 420, 420, 420, 420, 420],
+      pate_pato: [95, 95, 95, 95, 95, 95, 95],
+      ovo_defumado: [120, 120, 120, 120, 120, 120, 120],
+      conserva_codorna: [80, 80, 80, 80, 80, 80, 80],
+      creme_cosmetico: [220, 220, 220, 220, 220, 220, 220],
+      sabonete_natural: [140, 140, 140, 140, 140, 140, 140],
+      almofada_penas: [170, 170, 170, 170, 170, 170, 170],
+      colete_couro: [550, 550, 550, 550, 550, 550, 550],
+      bolsa_exotica: [800, 800, 800, 800, 800, 800, 800],
+      enfeite_pavao: [200, 200, 200, 200, 200, 200, 200],
     };
   });
 
@@ -1079,6 +1147,25 @@ export default function App() {
     } catch (e) {}
     return 0;
   });
+
+  // Buff states (persisted)
+  const [racaoOrganicaDays, setRacaoOrganicaDays] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) { const parsed = JSON.parse(saved); return parsed.racaoOrganicaDays ?? 0; }
+    } catch (e) {}
+    return 0;
+  });
+  const [fertilizanteDays, setFertilizanteDays] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) { const parsed = JSON.parse(saved); return parsed.fertilizanteDays ?? 0; }
+    } catch (e) {}
+    return 0;
+  });
+
+  // Ateliê tab state (UI-only, no persistence)
+  const [atelieTab, setAtelieTab] = useState<'queijaria' | 'tecelagem' | 'cozinha' | 'cosmeticos' | 'luxo'>('queijaria');
 
   // Sleep / Rest state
   const [isSleeping, setIsSleeping] = useState<boolean>(false);
@@ -1370,7 +1457,26 @@ export default function App() {
       couro_jacare: 0,
       folha_amoreira: 0,
       sal: 0,
+      queijo_cabra: 0,
+      iogurte_cabra: 0,
+      leite_condensado: 0,
+      tapete_lhama: 0,
+      cachecol_angora: 0,
+      tecido_alpaca: 0,
+      fio_seda: 0,
+      manta_premium: 0,
+      pate_pato: 0,
+      ovo_defumado: 0,
+      conserva_codorna: 0,
+      creme_cosmetico: 0,
+      sabonete_natural: 0,
+      almofada_penas: 0,
+      colete_couro: 0,
+      bolsa_exotica: 0,
+      enfeite_pavao: 0,
     });
+    setRacaoOrganicaDays(0);
+    setFertilizanteDays(0);
     setLicencaExotica(false);
     setCoelhoReproCount(0);
     setHasStable(false);
@@ -1415,6 +1521,23 @@ export default function App() {
       couro_avestruz: [300, 300, 300, 300, 300, 300, 300],
       carne_jacare: [250, 250, 250, 250, 250, 250, 250],
       couro_jacare: [400, 400, 400, 400, 400, 400, 400],
+      queijo_cabra: [90, 90, 90, 90, 90, 90, 90],
+      iogurte_cabra: [55, 55, 55, 55, 55, 55, 55],
+      leite_condensado: [100, 100, 100, 100, 100, 100, 100],
+      tapete_lhama: [110, 110, 110, 110, 110, 110, 110],
+      cachecol_angora: [160, 160, 160, 160, 160, 160, 160],
+      tecido_alpaca: [180, 180, 180, 180, 180, 180, 180],
+      fio_seda: [200, 200, 200, 200, 200, 200, 200],
+      manta_premium: [420, 420, 420, 420, 420, 420, 420],
+      pate_pato: [95, 95, 95, 95, 95, 95, 95],
+      ovo_defumado: [120, 120, 120, 120, 120, 120, 120],
+      conserva_codorna: [80, 80, 80, 80, 80, 80, 80],
+      creme_cosmetico: [220, 220, 220, 220, 220, 220, 220],
+      sabonete_natural: [140, 140, 140, 140, 140, 140, 140],
+      almofada_penas: [170, 170, 170, 170, 170, 170, 170],
+      colete_couro: [550, 550, 550, 550, 550, 550, 550],
+      bolsa_exotica: [800, 800, 800, 800, 800, 800, 800],
+      enfeite_pavao: [200, 200, 200, 200, 200, 200, 200],
     });
     setQueijosEmMaturacao([]);
     setMaxPrateleiras(2);
@@ -1702,11 +1825,13 @@ export default function App() {
         droughtDaysRemaining,
         licencaExotica,
         coelhoReproCount,
+        racaoOrganicaDays,
+        fertilizanteDays,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays]);
 
   // Ref para rastrear conquistas já desbloqueadas sem depender do estado React (evita stale closure e duplos no StrictMode)
   const unlockedAchievementsRef = useRef<string[]>(unlockedAchievements);
@@ -2608,6 +2733,260 @@ export default function App() {
     if (event) spawnFeedback('🥛', 'Fermentando...', event);
   };
 
+  // --- NEW CRAFT FUNCTIONS ---
+
+  // Laticínios
+  const craftQueijoCabra = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 3) { addLog('🧀 Queijo de Cabra requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.goat_milk ?? 0) < 3) { addLog('🐐 Falta Leite de Cabra! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Cabra!', event); return; }
+    setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 3, queijo_cabra: (prev.queijo_cabra ?? 0) + 1 }));
+    addLog('🧀 Você fabricou 1 Queijo de Cabra com 3 leites de cabra!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧀', '+1 Queijo Cabra', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftIogurteCabra = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 4) { addLog('🥛 Iogurte de Cabra requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.goat_milk ?? 0) < 2) { addLog('🐐 Falta Leite de Cabra! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Cabra!', event); return; }
+    setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 2, iogurte_cabra: (prev.iogurte_cabra ?? 0) + 1 }));
+    addLog('🥛 Você fabricou 1 Iogurte de Cabra com 2 leites de cabra!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥛', '+1 Iogurte Cabra', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftLeiteCondensado = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 6) { addLog('🥛 Leite Condensado requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.milk ?? 0) < 4) { addLog('🥛 Falta Leite! Precisa de 4.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Leite!', event); return; }
+    if ((inventory.butter ?? 0) < 1) { addLog('🧈 Falta Manteiga! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Manteiga!', event); return; }
+    setInventory(prev => ({ ...prev, milk: prev.milk - 4, butter: (prev.butter ?? 0) - 1, leite_condensado: (prev.leite_condensado ?? 0) + 1 }));
+    addLog('🥛 Você fabricou 1 Leite Condensado com 4 leites e 1 manteiga!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥛', '+1 L.Condensado', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  // Têxteis
+  const craftTapeteLhama = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 4) { addLog('🧶 Tapete de Lhama requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.llama_wool ?? 0) < 3) { addLog('🦙 Falta Lã de Lhama! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Lhama!', event); return; }
+    setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) - 3, tapete_lhama: (prev.tapete_lhama ?? 0) + 1 }));
+    addLog('🪢 Você teceu 1 Tapete de Lhama com 3 lãs de lhama!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🪢', '+1 Tapete Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftCachecolAngora = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 8) { addLog('🧣 Cachecol Angorá requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.angora_wool ?? 0) < 2) { addLog('🐇 Falta Lã Angorá! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Angorá!', event); return; }
+    setInventory(prev => ({ ...prev, angora_wool: (prev.angora_wool ?? 0) - 2, cachecol_angora: (prev.cachecol_angora ?? 0) + 1 }));
+    addLog('🧣 Você confeccionou 1 Cachecol Angorá com 2 lãs angorá!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧣', '+1 Cachecol Angorá', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftTecidoAlpaca = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 5) { addLog('🧶 Tecido de Alpaca requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.alpaca_wool ?? 0) < 3) { addLog('🦙 Falta Lã de Alpaca! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Alpaca!', event); return; }
+    setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) - 3, tecido_alpaca: (prev.tecido_alpaca ?? 0) + 1 }));
+    addLog('🧶 Você teceu 1 Tecido de Alpaca com 3 lãs de alpaca!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧶', '+1 Tecido Alpaca', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftFioSeda = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 10) { addLog('🪡 Fio de Seda requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.seda_bruta ?? 0) < 2) { addLog('🪲 Falta Seda Bruta! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Seda Bruta!', event); return; }
+    setInventory(prev => ({ ...prev, seda_bruta: (prev.seda_bruta ?? 0) - 2, fio_seda: (prev.fio_seda ?? 0) + 1 }));
+    addLog('🪡 Você fiou 1 Fio de Seda com 2 sedas brutas!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🪡', '+1 Fio de Seda', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftMantaPremium = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 13) { addLog('🧣 Manta Premium requer Nível 13!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.fio_seda ?? 0) < 1) { addLog('🪡 Falta Fio de Seda! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Fio Seda!', event); return; }
+    if ((inventory.cachecol_angora ?? 0) < 1) { addLog('🧣 Falta Cachecol Angorá! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Cachecol!', event); return; }
+    if ((inventory.tecido_alpaca ?? 0) < 1) { addLog('🧶 Falta Tecido de Alpaca! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Tecido!', event); return; }
+    setInventory(prev => ({ ...prev, fio_seda: (prev.fio_seda ?? 0) - 1, cachecol_angora: (prev.cachecol_angora ?? 0) - 1, tecido_alpaca: (prev.tecido_alpaca ?? 0) - 1, manta_premium: (prev.manta_premium ?? 0) + 1 }));
+    addLog('✨ Você criou 1 Manta Premium! Uma obra-prima têxtil!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('✨', '+1 Manta Premium', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  // Cozinha
+  const craftPatePato = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 5) { addLog('🍖 Patê de Pato requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.duck_egg ?? 0) < 2) { addLog('🦆 Falta Ovo de Pato! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ovo Pato!', event); return; }
+    if ((inventory.butter ?? 0) < 1) { addLog('🧈 Falta Manteiga! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Manteiga!', event); return; }
+    setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) - 2, butter: (prev.butter ?? 0) - 1, pate_pato: (prev.pate_pato ?? 0) + 1 }));
+    addLog('🍖 Você preparou 1 Patê de Pato gourmet!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🍖', '+1 Patê Pato', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftOvoDefumado = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 6) { addLog('🥚 Ovo Defumado requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.goose_egg ?? 0) < 1) { addLog('🪿 Falta Ovo de Ganso! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ov.Ganso!', event); return; }
+    setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) - 1, ovo_defumado: (prev.ovo_defumado ?? 0) + 1 }));
+    addLog('🥚 Você defumou 1 Ovo de Ganso com maestria!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥚', '+1 Ovo Defumado', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftConservaCodorna = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 4) { addLog('🥚 Conserva de Codorna requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.quail_egg ?? 0) < 6) { addLog('🐦 Falta Ovo de Codorna! Precisa de 6.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ov.Codorna!', event); return; }
+    setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) - 6, conserva_codorna: (prev.conserva_codorna ?? 0) + 1 }));
+    addLog('🥚 Você preparou 1 Conserva de Codorna com 6 ovos!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥚', '+1 Conserva Codorna', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftIncubarOvos = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 7) { addLog('🐣 Incubação requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.fertile_egg ?? 0) < 3) { addLog('🥚 Falta Ovo Fértil! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ov.Fértil!', event); return; }
+    setInventory(prev => ({ ...prev, fertile_egg: (prev.fertile_egg ?? 0) - 3 }));
+    const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
+    const newChicken: Animal = {
+      id: newId,
+      type: 'galinha',
+      name: getRandomName('galinha'),
+      hunger: 80,
+      happiness: 80,
+      hasProducedToday: false,
+      consecutiveHappyDays: 0,
+      daysBelow80: 0,
+      isBestFriend: false,
+      trait: getRandomTrait(),
+      age: 0,
+      maxAge: Math.round(60 * (1 + (Math.random() * 0.4 - 0.2))),
+    };
+    setAnimals(prev => [...prev, newChicken]);
+    addLog(`🐣 Você incubou 3 ovos férteis e nasceu uma nova galinha: ${newChicken.name}!`, 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🐣', `+1 Galinha!`, event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  // Cosméticos
+  const craftCremeCosmetico = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 7) { addLog('🧴 Creme Cosmético requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.muco ?? 0) < 2) { addLog('🐌 Falta Muco de Caracol! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Muco!', event); return; }
+    if ((inventory.goat_milk ?? 0) < 1) { addLog('🐐 Falta Leite de Cabra! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Cabra!', event); return; }
+    setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 2, goat_milk: (prev.goat_milk ?? 0) - 1, creme_cosmetico: (prev.creme_cosmetico ?? 0) + 1 }));
+    addLog('🧴 Você formulou 1 Creme Cosmético de luxo!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧴', '+1 Creme Cosmético', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftSaboneteNatural = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 9) { addLog('🧼 Sabonete Natural requer Nível 9!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.muco ?? 0) < 1) { addLog('🐌 Falta Muco de Caracol! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Muco!', event); return; }
+    if ((inventory.butter ?? 0) < 1) { addLog('🧈 Falta Manteiga! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Manteiga!', event); return; }
+    if ((inventory.milk ?? 0) < 1) { addLog('🥛 Falta Leite! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Leite!', event); return; }
+    setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 1, butter: (prev.butter ?? 0) - 1, milk: prev.milk - 1, sabonete_natural: (prev.sabonete_natural ?? 0) + 1 }));
+    addLog('🧼 Você produziu 1 Sabonete Natural artesanal!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧼', '+1 Sabonete Natural', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftRacaoOrganica = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 6) { addLog('🌿 Ração Orgânica requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.humus ?? 0) < 2) { addLog('🪱 Falta Húmus! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Húmus!', event); return; }
+    setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) - 2 }));
+    setRacaoOrganicaDays(prev => prev + 3);
+    addLog('🌿 Ração Orgânica ativa por 3 dias! Animais consomem 50% menos ração.', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🌿', 'Ração Orgânica +3d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftFertilizante = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 8) { addLog('🌱 Fertilizante requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.humus ?? 0) < 3) { addLog('🪱 Falta Húmus! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Húmus!', event); return; }
+    setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) - 3 }));
+    setFertilizanteDays(prev => prev + 5);
+    addLog('🌱 Fertilizante aplicado! +15% produção por 5 dias.', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🌱', 'Fertilizante +5d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  // Luxo
+  const craftAlmofadaPenas = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 8) { addLog('🪶 Almofada de Penas requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.feather ?? 0) < 3) { addLog('🪶 Falta Penas! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Penas!', event); return; }
+    if ((inventory.pena_grande ?? 0) < 2) { addLog('🦤 Falta Pena Grande! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta P.Grande!', event); return; }
+    setInventory(prev => ({ ...prev, feather: (prev.feather ?? 0) - 3, pena_grande: (prev.pena_grande ?? 0) - 2, almofada_penas: (prev.almofada_penas ?? 0) + 1 }));
+    addLog('🛋️ Você confeccionou 1 Almofada de Penas luxuosa!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🛋️', '+1 Almofada Penas', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftColeteCouro = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 15) { addLog('🦺 Colete de Couro requer Nível 15!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.couro_avestruz ?? 0) < 1) { addLog('🦤 Falta Couro de Avestruz! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Couro Avestruz!', event); return; }
+    setInventory(prev => ({ ...prev, couro_avestruz: (prev.couro_avestruz ?? 0) - 1, colete_couro: (prev.colete_couro ?? 0) + 1 }));
+    addLog('🦺 Você confeccionou 1 Colete de Couro de alta costura!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🦺', '+1 Colete Couro', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftBolsaExotica = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 18) { addLog('👜 Bolsa Exótica requer Nível 18!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.couro_jacare ?? 0) < 1) { addLog('🐊 Falta Couro de Jacaré! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Couro Jacaré!', event); return; }
+    setInventory(prev => ({ ...prev, couro_jacare: (prev.couro_jacare ?? 0) - 1, bolsa_exotica: (prev.bolsa_exotica ?? 0) + 1 }));
+    addLog('👜 Você criou 1 Bolsa Exótica de couro de jacaré!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('👜', '+1 Bolsa Exótica', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftEnfeitePavao = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 10) { addLog('🦚 Enfeite de Pavão requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.peacock_feather ?? 0) < 2) { addLog('🦚 Falta Pena de Pavão! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta P.Pavão!', event); return; }
+    if ((inventory.pena_grande ?? 0) < 1) { addLog('🦤 Falta Pena Grande! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta P.Grande!', event); return; }
+    setInventory(prev => ({ ...prev, peacock_feather: (prev.peacock_feather ?? 0) - 2, pena_grande: (prev.pena_grande ?? 0) - 1, enfeite_pavao: (prev.enfeite_pavao ?? 0) + 1 }));
+    addLog('🦚 Você criou 1 Enfeite de Pavão deslumbrante!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🦚', '+1 Enfeite Pavão', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
   // Prices for animals based on level 4 discount
   const getAnimalPurchasePrice = (type: AnimalType, specOverride?: FarmSpecialization): number => {
     const spec = specOverride !== undefined ? specOverride : specialization;
@@ -2687,7 +3066,7 @@ export default function App() {
   };
 
   // Base raw item prices (increases with levels)
-  const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare'): number => {
+  const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao'): number => {
     if (itemType === 'milk') {
       return farmLevel >= 2 ? 6 : 5;
     }
@@ -2738,11 +3117,28 @@ export default function App() {
     if (itemType === 'couro_avestruz') return 300;
     if (itemType === 'carne_jacare') return 250;
     if (itemType === 'couro_jacare') return 400;
+    if (itemType === 'queijo_cabra') return 90;
+    if (itemType === 'iogurte_cabra') return 55;
+    if (itemType === 'leite_condensado') return 100;
+    if (itemType === 'tapete_lhama') return 110;
+    if (itemType === 'cachecol_angora') return 160;
+    if (itemType === 'tecido_alpaca') return 180;
+    if (itemType === 'fio_seda') return 200;
+    if (itemType === 'manta_premium') return 420;
+    if (itemType === 'pate_pato') return 95;
+    if (itemType === 'ovo_defumado') return 120;
+    if (itemType === 'conserva_codorna') return 80;
+    if (itemType === 'creme_cosmetico') return 220;
+    if (itemType === 'sabonete_natural') return 140;
+    if (itemType === 'almofada_penas') return 170;
+    if (itemType === 'colete_couro') return 550;
+    if (itemType === 'bolsa_exotica') return 800;
+    if (itemType === 'enfeite_pavao') return 200;
     return 0;
   };
 
   // Keep 1 decimal place precision for display
-  const getDynamicPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare', d = currentDay, w = weather, sales = weeklySales): number => {
+  const getDynamicPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao', d = currentDay, w = weather, sales = weeklySales): number => {
     const base = getItemBaseSellPrice(itemType);
     const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType as keyof typeof sales] || 0) / 100));
     const seasonMult = getSeasonalityMultiplier(itemType as any, d);
@@ -2767,7 +3163,7 @@ export default function App() {
   };
 
   // Rounded to nearest integer for actual gold conversion
-  const getDynamicTransactionPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare', d = currentDay, w = weather, sales = weeklySales): number => {
+  const getDynamicTransactionPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao', d = currentDay, w = weather, sales = weeklySales): number => {
     const base = getItemBaseSellPrice(itemType);
     const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType as keyof typeof sales] || 0) / 100));
     const seasonMult = getSeasonalityMultiplier(itemType as any, d);
@@ -2792,7 +3188,7 @@ export default function App() {
   };
 
   // Final processed sell prices including dynamic pricing equations
-  const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare'): number => {
+  const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao'): number => {
     return getDynamicTransactionPrice(itemType);
   };
 
@@ -3385,7 +3781,7 @@ export default function App() {
     spawnFeedback('🧣', '+1 Cachecol', event);
   };
 
-  const sellProduct = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare', qty: number, event: React.MouseEvent) => {
+  const sellProduct = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao', qty: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
     if ((inventory[itemType] ?? 0) < qty) {
       addLog(`📦 Estoque insuficiente deste produto no Armazém!`, 'error');
@@ -3485,6 +3881,23 @@ export default function App() {
     else if (itemType === 'couro_avestruz') label = 'Couro de Avestruz';
     else if (itemType === 'carne_jacare') label = 'Carne de Jacaré';
     else if (itemType === 'couro_jacare') label = 'Couro de Jacaré';
+    else if (itemType === 'queijo_cabra') label = 'Queijo de Cabra';
+    else if (itemType === 'iogurte_cabra') label = 'Iogurte de Cabra';
+    else if (itemType === 'leite_condensado') label = 'Leite Condensado';
+    else if (itemType === 'tapete_lhama') label = 'Tapete de Lhama';
+    else if (itemType === 'cachecol_angora') label = 'Cachecol Angorá';
+    else if (itemType === 'tecido_alpaca') label = 'Tecido de Alpaca';
+    else if (itemType === 'fio_seda') label = 'Fio de Seda';
+    else if (itemType === 'manta_premium') label = 'Manta Premium';
+    else if (itemType === 'pate_pato') label = 'Patê de Pato';
+    else if (itemType === 'ovo_defumado') label = 'Ovo Defumado';
+    else if (itemType === 'conserva_codorna') label = 'Conserva de Codorna';
+    else if (itemType === 'creme_cosmetico') label = 'Creme Cosmético';
+    else if (itemType === 'sabonete_natural') label = 'Sabonete Natural';
+    else if (itemType === 'almofada_penas') label = 'Almofada de Penas';
+    else if (itemType === 'colete_couro') label = 'Colete de Couro';
+    else if (itemType === 'bolsa_exotica') label = 'Bolsa Exótica';
+    else if (itemType === 'enfeite_pavao') label = 'Enfeite de Pavão';
 
     addLog(`💰 Venda realizada: ${qty} unidades de ${label} por +${profit} moedas!`, 'success');
 
@@ -4578,6 +4991,18 @@ export default function App() {
       // --- SUBFUNÇÃO 1: Manutenção de Máquinas Ativas ---
       const { paid: maintPaidFinal, cost: maintCost, nextGold: goldAfterMaint } = aplicarManutencaoMaquinas(machines, gold, farmLevel, logsToAdd);
 
+      // --- Buff: Ração Orgânica ---
+      if (racaoOrganicaDays > 0) {
+        logsToAdd.push({ msg: '🌿 Ração Orgânica: consumo de ração reduzido hoje!', type: 'info' });
+        setRacaoOrganicaDays(prev => Math.max(0, prev - 1));
+      }
+
+      // --- Buff: Fertilizante ---
+      if (fertilizanteDays > 0) {
+        logsToAdd.push({ msg: '🌱 Fertilizante: produção +15% hoje!', type: 'info' });
+        setFertilizanteDays(prev => Math.max(0, prev - 1));
+      }
+
       // --- SUBFUNÇÃO 3: Processamento e Previsão do Clima ---
       const nextWeather = atualizarClimaEEventos(currentDay, logsToAdd);
       setWeather(nextWeather);
@@ -4592,7 +5017,10 @@ export default function App() {
           'goat_milk', 'llama_wool', 'duck_egg', 'goose_egg', 'buffalo_milk', 'buffalo_mozzarella',
           'feather', 'peacock_feather', 'butter', 'yogurt', 'fertile_egg',
           'quail_egg', 'alpaca_wool', 'humus', 'muco', 'angora_wool', 'seda_bruta',
-          'coxa_ra', 'carne_avestruz', 'pena_grande', 'couro_avestruz', 'carne_jacare', 'couro_jacare'];
+          'coxa_ra', 'carne_avestruz', 'pena_grande', 'couro_avestruz', 'carne_jacare', 'couro_jacare',
+          'queijo_cabra', 'iogurte_cabra', 'leite_condensado', 'tapete_lhama', 'cachecol_angora',
+          'tecido_alpaca', 'fio_seda', 'manta_premium', 'pate_pato', 'ovo_defumado', 'conserva_codorna',
+          'creme_cosmetico', 'sabonete_natural', 'almofada_penas', 'colete_couro', 'bolsa_exotica', 'enfeite_pavao'];
         const nextHist: Record<string, number[]> = {};
         keys.forEach((key) => {
           let currentP;
@@ -7627,6 +8055,109 @@ export default function App() {
                     🐊 Couro Jacaré ({getActualSellPrice('couro_jacare')}💰)
                   </button>
                   )}
+
+                  {(inventory.queijo_cabra ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('queijo_cabra', 1, e)} disabled={(inventory.queijo_cabra ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🧀 Q.Cabra ({getActualSellPrice('queijo_cabra')}💰)
+                  </button>
+                  )}
+                  {(inventory.iogurte_cabra ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('iogurte_cabra', 1, e)} disabled={(inventory.iogurte_cabra ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🥛 Iog.Cabra ({getActualSellPrice('iogurte_cabra')}💰)
+                  </button>
+                  )}
+                  {(inventory.leite_condensado ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('leite_condensado', 1, e)} disabled={(inventory.leite_condensado ?? 0) < 1}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🥛 L.Condensado ({getActualSellPrice('leite_condensado')}💰)
+                  </button>
+                  )}
+                  {(inventory.tapete_lhama ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('tapete_lhama', 1, e)} disabled={(inventory.tapete_lhama ?? 0) < 1}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🪢 Tapete Lhama ({getActualSellPrice('tapete_lhama')}💰)
+                  </button>
+                  )}
+                  {(inventory.cachecol_angora ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('cachecol_angora', 1, e)} disabled={(inventory.cachecol_angora ?? 0) < 1}
+                    className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 disabled:opacity-40 text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🧣 Cachecol Angorá ({getActualSellPrice('cachecol_angora')}💰)
+                  </button>
+                  )}
+                  {(inventory.tecido_alpaca ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('tecido_alpaca', 1, e)} disabled={(inventory.tecido_alpaca ?? 0) < 1}
+                    className="bg-violet-50 hover:bg-violet-100 border border-violet-300 disabled:opacity-40 text-violet-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🧶 Tecido Alpaca ({getActualSellPrice('tecido_alpaca')}💰)
+                  </button>
+                  )}
+                  {(inventory.fio_seda ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('fio_seda', 1, e)} disabled={(inventory.fio_seda ?? 0) < 1}
+                    className="bg-sky-50 hover:bg-sky-100 border border-sky-300 disabled:opacity-40 text-sky-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🪡 Fio de Seda ({getActualSellPrice('fio_seda')}💰)
+                  </button>
+                  )}
+                  {(inventory.manta_premium ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('manta_premium', 1, e)} disabled={(inventory.manta_premium ?? 0) < 1}
+                    className="bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm col-span-2">
+                    ✨ Manta Premium ({getActualSellPrice('manta_premium')}💰)
+                  </button>
+                  )}
+                  {(inventory.pate_pato ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('pate_pato', 1, e)} disabled={(inventory.pate_pato ?? 0) < 1}
+                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🍖 Patê Pato ({getActualSellPrice('pate_pato')}💰)
+                  </button>
+                  )}
+                  {(inventory.ovo_defumado ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('ovo_defumado', 1, e)} disabled={(inventory.ovo_defumado ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🥚 Ov.Defumado ({getActualSellPrice('ovo_defumado')}💰)
+                  </button>
+                  )}
+                  {(inventory.conserva_codorna ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('conserva_codorna', 1, e)} disabled={(inventory.conserva_codorna ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🥚 Conserva Codorna ({getActualSellPrice('conserva_codorna')}💰)
+                  </button>
+                  )}
+                  {(inventory.creme_cosmetico ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('creme_cosmetico', 1, e)} disabled={(inventory.creme_cosmetico ?? 0) < 1}
+                    className="bg-pink-50 hover:bg-pink-100 border border-pink-300 disabled:opacity-40 text-pink-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🧴 Creme Cosm. ({getActualSellPrice('creme_cosmetico')}💰)
+                  </button>
+                  )}
+                  {(inventory.sabonete_natural ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('sabonete_natural', 1, e)} disabled={(inventory.sabonete_natural ?? 0) < 1}
+                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🧼 Sabonete Nat. ({getActualSellPrice('sabonete_natural')}💰)
+                  </button>
+                  )}
+                  {(inventory.almofada_penas ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('almofada_penas', 1, e)} disabled={(inventory.almofada_penas ?? 0) < 1}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🛋️ Almofada Penas ({getActualSellPrice('almofada_penas')}💰)
+                  </button>
+                  )}
+                  {(inventory.colete_couro ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('colete_couro', 1, e)} disabled={(inventory.colete_couro ?? 0) < 1}
+                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🦺 Colete Couro ({getActualSellPrice('colete_couro')}💰)
+                  </button>
+                  )}
+                  {(inventory.bolsa_exotica ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('bolsa_exotica', 1, e)} disabled={(inventory.bolsa_exotica ?? 0) < 1}
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm col-span-2">
+                    👜 Bolsa Exótica ({getActualSellPrice('bolsa_exotica')}💰)
+                  </button>
+                  )}
+                  {(inventory.enfeite_pavao ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('enfeite_pavao', 1, e)} disabled={(inventory.enfeite_pavao ?? 0) < 1}
+                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🦚 Enfeite Pavão ({getActualSellPrice('enfeite_pavao')}💰)
+                  </button>
+                  )}
                 </div>
 
               </div>
@@ -8677,10 +9208,10 @@ export default function App() {
               {/* Wooden Accent Header */}
               <div className="bg-gradient-to-r from-amber-700 to-yellow-800 p-5 border-b-4 border-amber-950 text-center shrink-0">
                 <h3 className="text-white text-xl sm:text-2xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2" style={{ textShadow: '1.5px 1.5px 0px #451a03' }}>
-                  🧀 Queijaria Artesanal Aurora
+                  🏺 Ateliê Aurora
                 </h3>
                 <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-                  Inicie a maturação de queijos finos e amplie sua produção artesanal
+                  Transforme matérias-primas em produtos artesanais de valor
                 </p>
                 <button
                   type="button"
@@ -8695,193 +9226,246 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Prateleira HUD Bar */}
-              <div className="bg-[#fef3c7] px-6 py-4 border-b-2 border-yellow-250 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono">
-                <div className="text-xs text-[#78350f] leading-relaxed">
-                  📦 <strong>Status das Prateleiras:</strong> <span className="bg-[#f59e0b]/20 px-2 py-0.5 rounded-md font-bold text-amber-955">{queijosEmMaturacao.length} / {maxPrateleiras} ocupadas</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { setShowQueijariaModal(false); setShowUpgradesModal(true); }}
-                  className="bg-purple-600 hover:bg-purple-500 text-white font-mono font-black text-xs px-3.5 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#581c87] cursor-pointer transition-all hover:scale-102 flex items-center gap-1.5 focus:outline-none"
-                >
-                  <span>🔧 Ampliar Queijaria (via Melhorias)</span>
-                </button>
+              {/* Tab Navigation */}
+              <div className="bg-amber-50 px-4 pt-3 pb-0 border-b-2 border-amber-200 shrink-0 flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'thin' }}>
+                {([
+                  { key: 'queijaria', label: '🧀 Queijaria' },
+                  { key: 'tecelagem', label: '🧶 Tecelagem' },
+                  { key: 'cozinha', label: '🥣 Cozinha' },
+                  { key: 'cosmeticos', label: '🌿 Cosméticos' },
+                  { key: 'luxo', label: '🏺 Luxo' },
+                ] as const).map(tab => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setAtelieTab(tab.key)}
+                    className={`whitespace-nowrap text-[10px] font-mono font-black uppercase px-3 py-2 rounded-t-xl border-2 border-b-0 transition-all cursor-pointer focus:outline-none ${
+                      atelieTab === tab.key
+                        ? 'bg-[#fffbeb] border-amber-400 text-amber-900'
+                        : 'bg-amber-100/60 border-transparent text-amber-700 hover:bg-amber-100'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
 
-              {/* Core Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{ scrollbarWidth: 'thin' }}>
-                
-                {/* Seção 1: Maturômetro / Queijos Ativos */}
-                <div>
-                  <h4 className="font-display font-black text-xs sm:text-sm uppercase tracking-wider text-[#78350f] mb-3 flex items-center gap-1.5">
-                    ⏳ Maturômetro de Queijos ({queijosEmMaturacao.length} ativos)
-                  </h4>
-                  {queijosEmMaturacao.length === 0 ? (
-                    <div className="border-4 border-dashed border-stone-200 rounded-2xl p-6 text-center text-xs text-stone-500 bg-white/50">
-                      🥛 Nenhuma prateleira ocupada no momento. Escolha uma das receitas abaixo para começar a maturar leite cru fresco!
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-3">
-                      {queijosEmMaturacao.map((item, idx) => {
-                        const totalDays = item.tipo === 'coalho' ? 1 : item.tipo === 'mucarela' ? 3 : item.tipo === 'buffalo_mozzarella' ? 2 : 7;
-                        const elapsed = totalDays - item.diasRestantes;
-                        const progressPct = Math.min(100, Math.round((elapsed / totalDays) * 100));
-                        const label = item.tipo === 'coalho' ? 'Queijo Coalho' : item.tipo === 'mucarela' ? 'Queijo Muçarela' : item.tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : 'Queijo Brie';
-                        const emoji = '🧀';
-
-                        return (
-                          <div key={idx} className="bg-white border-3 border-amber-800/10 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 hover:border-amber-800/30 transition-all shadow-xs">
-                            <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center text-2xl border border-amber-250 select-none shrink-0">
-                              {emoji}
-                            </div>
-                            <div className="flex-1 w-full text-center sm:text-left">
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                                <span className="font-display font-black text-sm uppercase tracking-wider text-[#78350f]">
-                                  {label}
-                                </span>
-                                <span className="text-[10px] text-amber-800 font-mono font-bold uppercase tracking-wide bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
-                                  ⌛ Faltando {item.diasRestantes} dia(s)
-                                </span>
-                              </div>
-                              {/* Progress bar */}
-                              <div className="mt-2.5 w-full bg-stone-100 h-3 rounded-full overflow-hidden border border-stone-150 shadow-inner relative flex">
-                                <div 
-                                  className="bg-gradient-to-r from-amber-400 via-yellow-500 to-green-500 h-full transition-all duration-500"
-                                  style={{ width: `${progressPct}%` }}
-                                />
-                                <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono font-black text-stone-700">
-                                  {progressPct}% de maturação
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+              {/* Prateleira HUD Bar — visible in queijaria tab */}
+              {atelieTab === 'queijaria' && (
+              <div className="bg-[#fef3c7] px-6 py-3 border-b-2 border-yellow-200 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono">
+                <div className="text-xs text-[#78350f] leading-relaxed">
+                  📦 <strong>Prateleiras:</strong> <span className="bg-[#f59e0b]/20 px-2 py-0.5 rounded-md font-bold text-amber-900">{queijosEmMaturacao.length} / {maxPrateleiras} ocupadas</span>
+                  {racaoOrganicaDays > 0 && <span className="ml-2 text-green-700 font-bold">🌿 Ração Orgânica: {racaoOrganicaDays}d</span>}
+                  {fertilizanteDays > 0 && <span className="ml-2 text-emerald-700 font-bold">🌱 Fertilizante: {fertilizanteDays}d</span>}
                 </div>
+                <button type="button" onClick={() => { setShowQueijariaModal(false); setShowUpgradesModal(true); }}
+                  className="bg-purple-600 hover:bg-purple-500 text-white font-mono font-black text-xs px-3 py-1.5 rounded-xl cursor-pointer transition-all flex items-center gap-1 focus:outline-none">
+                  🔧 Ampliar Queijaria
+                </button>
+              </div>
+              )}
 
-                {/* Seção 2: Receitas */}
-                <div>
-                  <h4 className="font-display font-black text-xs sm:text-sm uppercase tracking-wider text-[#78350f] mb-3 flex items-center gap-1.5">
-                    📖 Receitas de Queijo Disponíveis
-                  </h4>
-                  <div className="grid grid-cols-1 gap-3">
-                    {/* 1. Coalho */}
-                    <div className="bg-white border-2 border-stone-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl bg-amber-50 border border-amber-100/50 p-2 rounded-xl">🧀</span>
-                        <div>
-                          <h5 className="font-display font-black text-xs uppercase tracking-wider text-amber-900">Queijo Coalho</h5>
-                          <p className="text-[10px] font-mono text-stone-500 mt-0.5">
-                            Fácil de fazer, textura firme, ótimo grelhado.
-                          </p>
-                          <div className="flex flex-wrap gap-2 mt-1 py-0.5 rounded-lg">
-                            <span className="text-[9px] font-mono font-bold bg-amber-50 text-amber-900 px-1.5 py-0.5 rounded border border-amber-100">🥛 Requer: 3 leite(s)</span>
-                            <span className="text-[9px] font-mono font-bold bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded border border-blue-100">⌛ Matura: 1 dia</span>
-                            <span className="text-[9px] font-mono font-bold bg-emerald-50 text-emerald-900 px-1.5 py-0.5 rounded border border-emerald-100">💰 Preço Base: 14 moedas</span>
-                          </div>
+              {/* Core Content */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4" style={{ scrollbarWidth: 'thin' }}>
+
+                {/* ===== TAB: QUEIJARIA ===== */}
+                {atelieTab === 'queijaria' && (
+                  <div className="space-y-4">
+                    {/* Maturômetro */}
+                    <div>
+                      <h4 className="font-display font-black text-xs uppercase tracking-wider text-[#78350f] mb-2 flex items-center gap-1.5">⏳ Maturômetro ({queijosEmMaturacao.length} ativos)</h4>
+                      {queijosEmMaturacao.length === 0 ? (
+                        <div className="border-4 border-dashed border-stone-200 rounded-2xl p-4 text-center text-xs text-stone-500 bg-white/50">🥛 Nenhuma prateleira ocupada. Escolha uma receita abaixo!</div>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-2">
+                          {queijosEmMaturacao.map((item, idx) => {
+                            const totalDays = item.tipo === 'coalho' ? 1 : item.tipo === 'mucarela' ? 3 : item.tipo === 'buffalo_mozzarella' ? 2 : item.tipo === 'yogurt' ? 1 : 7;
+                            const elapsed = totalDays - item.diasRestantes;
+                            const progressPct = Math.min(100, Math.round((elapsed / totalDays) * 100));
+                            const label = item.tipo === 'coalho' ? 'Queijo Coalho' : item.tipo === 'mucarela' ? 'Queijo Muçarela' : item.tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : item.tipo === 'yogurt' ? 'Iogurte' : 'Queijo Brie';
+                            return (
+                              <div key={idx} className="bg-white border-2 border-amber-100 rounded-xl p-3 flex items-center gap-3">
+                                <span className="text-2xl">🧀</span>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-display font-black text-xs uppercase text-[#78350f]">{label}</span>
+                                    <span className="text-[9px] text-amber-800 font-mono font-bold bg-amber-50 px-1.5 py-0.5 rounded">⌛ {item.diasRestantes}d</span>
+                                  </div>
+                                  <div className="mt-1.5 w-full bg-stone-100 h-2 rounded-full overflow-hidden relative">
+                                    <div className="bg-gradient-to-r from-amber-400 to-green-500 h-full transition-all duration-500" style={{ width: `${progressPct}%` }} />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                      </div>
-                      {/* BUG 4 FIX: inclui verificação farmLevel < 5 no disabled */}
-                      <button
-                        type="button"
-                        onClick={(e) => craftQueijo('coalho', e)}
-                        disabled={farmLevel < 5 || inventory.milk < 3 || queijosEmMaturacao.length >= maxPrateleiras}
-                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#7af00b] cursor-pointer transition-all"
-                        title={farmLevel < 5 ? 'Queijaria Artesanal desbloqueada no Nível 5!' : inventory.milk < 3 ? 'Precisa de 3 leites' : queijosEmMaturacao.length >= maxPrateleiras ? 'Prateleiras cheias' : 'Fabricar Queijo Coalho'}
-                      >
-                        {farmLevel < 5 ? '🔒 Nível 5+' : 'Fabricar'}
-                      </button>
+                      )}
                     </div>
-
-                    {/* 2. Mucarela */}
-                    <div className="bg-white border-2 border-stone-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl bg-amber-50 border border-amber-100/50 p-2 rounded-xl">🧀</span>
-                        <div>
-                          <h5 className="font-display font-black text-xs uppercase tracking-wider text-amber-900">Queijo Muçarela</h5>
-                          <p className="text-[10px] font-mono text-stone-500 mt-0.5">
-                            Uso geral, amanteigado e de alto derretimento.
-                          </p>
-                          <div className="flex flex-wrap gap-2 mt-1 py-0.5 rounded-lg">
-                            <span className="text-[9px] font-mono font-bold bg-amber-50 text-amber-900 px-1.5 py-0.5 rounded border border-amber-100">🥛 Requer: 5 leite(s)</span>
-                            <span className="text-[9px] font-mono font-bold bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded border border-blue-100">⌛ Matura: 3 dias</span>
-                            <span className="text-[9px] font-mono font-bold bg-emerald-50 text-emerald-900 px-1.5 py-0.5 rounded border border-emerald-100">💰 Preço Base: 28 moedas</span>
+                    {/* Receitas Queijaria */}
+                    <div>
+                      <h4 className="font-display font-black text-xs uppercase tracking-wider text-[#78350f] mb-2">📖 Receitas</h4>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { label: 'Queijo Coalho', emoji: '🧀', req: `🥛 3 leite (${inventory.milk}/3) • ⌛ 1d • Nv5`, canCraft: farmLevel >= 5 && inventory.milk >= 3 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 5, onClick: (e: React.MouseEvent) => craftQueijo('coalho', e) },
+                          { label: 'Queijo Muçarela', emoji: '🧀', req: `🥛 5 leite (${inventory.milk}/5) • ⌛ 3d • Nv5`, canCraft: farmLevel >= 5 && inventory.milk >= 5 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 5, onClick: (e: React.MouseEvent) => craftQueijo('mucarela', e) },
+                          { label: 'Queijo Brie', emoji: '🧀', req: `🥛 8 leite (${inventory.milk}/8) • ⌛ 7d • Nv5`, canCraft: farmLevel >= 5 && inventory.milk >= 8 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 5, onClick: (e: React.MouseEvent) => craftQueijo('brie', e) },
+                          { label: 'Muçarela Búfala', emoji: '🧀', req: `🥛 3 L.Búfala (${inventory.buffalo_milk ?? 0}/3) • ⌛ 2d • Nv4`, canCraft: farmLevel >= 4 && (inventory.buffalo_milk ?? 0) >= 3 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 4, onClick: (e: React.MouseEvent) => craftBuffaloMozzarella(e) },
+                          { label: 'Manteiga', emoji: '🧈', req: `🥛 2 leite (${inventory.milk}/2) • Nv2`, canCraft: farmLevel >= 2 && inventory.milk >= 2, reqLevel: 2, onClick: (e: React.MouseEvent) => craftButter(e) },
+                          { label: 'Iogurte', emoji: '🥛', req: `🥛 1 leite (${inventory.milk}/1) • ⌛ 1d • Nv2`, canCraft: farmLevel >= 2 && inventory.milk >= 1 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 2, onClick: (e: React.MouseEvent) => craftYogurt(e) },
+                          { label: 'Queijo de Cabra', emoji: '🧀', req: `🐐 3 L.Cabra (${inventory.goat_milk ?? 0}/3) • Nv3`, canCraft: farmLevel >= 3 && (inventory.goat_milk ?? 0) >= 3, reqLevel: 3, onClick: (e: React.MouseEvent) => craftQueijoCabra(e) },
+                          { label: 'Iogurte de Cabra', emoji: '🥛', req: `🐐 2 L.Cabra (${inventory.goat_milk ?? 0}/2) • Nv4`, canCraft: farmLevel >= 4 && (inventory.goat_milk ?? 0) >= 2, reqLevel: 4, onClick: (e: React.MouseEvent) => craftIogurteCabra(e) },
+                          { label: 'Leite Condensado', emoji: '🥛', req: `🥛 4 leite (${inventory.milk}/4) + 🧈 1 manteiga (${inventory.butter ?? 0}/1) • Nv6`, canCraft: farmLevel >= 6 && inventory.milk >= 4 && (inventory.butter ?? 0) >= 1, reqLevel: 6, onClick: (e: React.MouseEvent) => craftLeiteCondensado(e) },
+                        ].map((r, i) => (
+                          <div key={i} className="bg-white border-2 border-stone-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl">{r.emoji}</span>
+                              <div>
+                                <div className="font-display font-black text-xs uppercase text-amber-900 flex items-center gap-1">
+                                  {r.label}
+                                  {farmLevel < r.reqLevel && <span className="text-[8px] bg-stone-400 text-white px-1 py-0.5 rounded">🔒 Nv{r.reqLevel}+</span>}
+                                </div>
+                                <div className="text-[9px] font-mono text-stone-500 mt-0.5">{r.req}</div>
+                              </div>
+                            </div>
+                            <button type="button" onClick={r.onClick} disabled={!r.canCraft}
+                              className="shrink-0 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-mono font-black text-[10px] px-3 py-1.5 rounded-lg cursor-pointer transition-all">
+                              {farmLevel < r.reqLevel ? `🔒 Nv${r.reqLevel}` : 'Fabricar'}
+                            </button>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                      {/* BUG 4 FIX: inclui verificação farmLevel < 5 no disabled */}
-                      <button
-                        type="button"
-                        onClick={(e) => craftQueijo('mucarela', e)}
-                        disabled={farmLevel < 5 || inventory.milk < 5 || queijosEmMaturacao.length >= maxPrateleiras}
-                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#7af00b] cursor-pointer transition-all"
-                        title={farmLevel < 5 ? 'Queijaria Artesanal desbloqueada no Nível 5!' : inventory.milk < 5 ? 'Precisa de 5 leites' : queijosEmMaturacao.length >= maxPrateleiras ? 'Prateleiras cheias' : 'Fabricar Queijo Muçarela'}
-                      >
-                        {farmLevel < 5 ? '🔒 Nível 5+' : 'Fabricar'}
-                      </button>
-                    </div>
-
-                    {/* 3. Brie */}
-                    <div className="bg-white border-2 border-stone-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl bg-amber-50 border border-amber-100/50 p-2 rounded-xl">🧀</span>
-                        <div>
-                          <h5 className="font-display font-black text-xs uppercase tracking-wider text-amber-900">Queijo Brie</h5>
-                          <p className="text-[10px] font-mono text-stone-500 mt-0.5">
-                            Casca fofinha de fungo branco e textura muito cremosa.
-                          </p>
-                          <div className="flex flex-wrap gap-2 mt-1 py-0.5 rounded-lg">
-                            <span className="text-[9px] font-mono font-bold bg-amber-50 text-amber-900 px-1.5 py-0.5 rounded border border-amber-100">🥛 Requer: 8 leite(s)</span>
-                            <span className="text-[9px] font-mono font-bold bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded border border-blue-100">⌛ Matura: 7 dias</span>
-                            <span className="text-[9px] font-mono font-bold bg-emerald-50 text-emerald-900 px-1.5 py-0.5 rounded border border-emerald-100">💰 Preço Base: 65 moedas</span>
-                          </div>
-                        </div>
-                      </div>
-                      {/* BUG 4 FIX: inclui verificação farmLevel < 5 no disabled */}
-                      <button
-                        type="button"
-                        onClick={(e) => craftQueijo('brie', e)}
-                        disabled={farmLevel < 5 || inventory.milk < 8 || queijosEmMaturacao.length >= maxPrateleiras}
-                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#7af00b] cursor-pointer transition-all"
-                        title={farmLevel < 5 ? 'Queijaria Artesanal desbloqueada no Nível 5!' : inventory.milk < 8 ? 'Precisa de 8 leites' : queijosEmMaturacao.length >= maxPrateleiras ? 'Prateleiras cheias' : 'Fabricar Queijo Brie'}
-                      >
-                        {farmLevel < 5 ? '🔒 Nível 5+' : 'Fabricar'}
-                      </button>
-                    </div>
-
-                    {/* 4. Muçarela de Búfala (Nível 4+) */}
-                    <div className={`bg-white border-2 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 ${farmLevel >= 4 ? 'border-blue-200' : 'border-stone-200 opacity-70'}`}>
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl bg-blue-50 border border-blue-100/50 p-2 rounded-xl">🧀</span>
-                        <div>
-                          <h5 className="font-display font-black text-xs uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
-                            Muçarela de Búfala
-                            {farmLevel < 4 && <span className="text-[9px] bg-stone-400 text-white px-1.5 py-0.5 rounded font-mono uppercase">🔒 Nv4+</span>}
-                          </h5>
-                          <p className="text-[10px] font-mono text-stone-500 mt-0.5">
-                            Artesanal com leite de búfala, cremosa e premium.
-                          </p>
-                          <div className="flex flex-wrap gap-2 mt-1 py-0.5 rounded-lg">
-                            <span className="text-[9px] font-mono font-bold bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded border border-blue-100">🥛 Requer: 3 leite de búfala</span>
-                            <span className="text-[9px] font-mono font-bold bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded border border-blue-100">⌛ Matura: 2 dias</span>
-                            <span className="text-[9px] font-mono font-bold bg-emerald-50 text-emerald-900 px-1.5 py-0.5 rounded border border-emerald-100">💰 Preço Base: 120 moedas</span>
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => craftBuffaloMozzarella(e)}
-                        disabled={farmLevel < 4 || (inventory.buffalo_milk ?? 0) < 3 || queijosEmMaturacao.length >= maxPrateleiras}
-                        className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#1e3a8a] cursor-pointer transition-all"
-                      >
-                        Fabricar
-                      </button>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {/* ===== TAB: TECELAGEM ===== */}
+                {atelieTab === 'tecelagem' && (
+                  <div className="space-y-2">
+                    <h4 className="font-display font-black text-xs uppercase tracking-wider text-indigo-900 mb-2">🧶 Tecelagem & Fibras</h4>
+                    {[
+                      { label: 'Cachecol (Lã)', emoji: '🧣', req: `🧶 2 lã (${inventory.wool}/2) • Nv1`, canCraft: inventory.wool >= 2, reqLevel: 1, onClick: (e: React.MouseEvent) => craftScarf(e) },
+                      { label: 'Tapete de Lhama', emoji: '🪢', req: `🦙 3 Lã Lhama (${inventory.llama_wool ?? 0}/3) • Nv4`, canCraft: farmLevel >= 4 && (inventory.llama_wool ?? 0) >= 3, reqLevel: 4, onClick: (e: React.MouseEvent) => craftTapeteLhama(e) },
+                      { label: 'Cachecol Angorá', emoji: '🧣', req: `🐇 2 Lã Angorá (${inventory.angora_wool ?? 0}/2) • Nv8`, canCraft: farmLevel >= 8 && (inventory.angora_wool ?? 0) >= 2, reqLevel: 8, onClick: (e: React.MouseEvent) => craftCachecolAngora(e) },
+                      { label: 'Tecido de Alpaca', emoji: '🧶', req: `🦙 3 Lã Alpaca (${inventory.alpaca_wool ?? 0}/3) • Nv5`, canCraft: farmLevel >= 5 && (inventory.alpaca_wool ?? 0) >= 3, reqLevel: 5, onClick: (e: React.MouseEvent) => craftTecidoAlpaca(e) },
+                      { label: 'Fio de Seda', emoji: '🪡', req: `🪲 2 Seda Bruta (${inventory.seda_bruta ?? 0}/2) • Nv10`, canCraft: farmLevel >= 10 && (inventory.seda_bruta ?? 0) >= 2, reqLevel: 10, onClick: (e: React.MouseEvent) => craftFioSeda(e) },
+                      { label: 'Manta Premium', emoji: '✨', req: `🪡 1 Fio Seda (${inventory.fio_seda ?? 0}/1) + 🧣 1 Cachecol Angorá (${inventory.cachecol_angora ?? 0}/1) + 🧶 1 Tecido Alpaca (${inventory.tecido_alpaca ?? 0}/1) • Nv13`, canCraft: farmLevel >= 13 && (inventory.fio_seda ?? 0) >= 1 && (inventory.cachecol_angora ?? 0) >= 1 && (inventory.tecido_alpaca ?? 0) >= 1, reqLevel: 13, onClick: (e: React.MouseEvent) => craftMantaPremium(e) },
+                    ].map((r, i) => (
+                      <div key={i} className="bg-white border-2 border-indigo-100 rounded-xl p-3 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{r.emoji}</span>
+                          <div>
+                            <div className="font-display font-black text-xs uppercase text-indigo-900 flex items-center gap-1">
+                              {r.label}
+                              {farmLevel < r.reqLevel && <span className="text-[8px] bg-stone-400 text-white px-1 py-0.5 rounded">🔒 Nv{r.reqLevel}+</span>}
+                            </div>
+                            <div className="text-[9px] font-mono text-stone-500 mt-0.5">{r.req}</div>
+                          </div>
+                        </div>
+                        <button type="button" onClick={r.onClick} disabled={!r.canCraft}
+                          className="shrink-0 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-mono font-black text-[10px] px-3 py-1.5 rounded-lg cursor-pointer transition-all">
+                          {farmLevel < r.reqLevel ? `🔒 Nv${r.reqLevel}` : 'Fabricar'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* ===== TAB: COZINHA ===== */}
+                {atelieTab === 'cozinha' && (
+                  <div className="space-y-2">
+                    <h4 className="font-display font-black text-xs uppercase tracking-wider text-orange-900 mb-2">🥣 Cozinha & Processados</h4>
+                    {[
+                      { label: 'Maionese', emoji: '🥣', req: `🥚 2 ovos (${inventory.egg}/2) • Nv1`, canCraft: inventory.egg >= 2, reqLevel: 1, onClick: (e: React.MouseEvent) => craftMayonese(e) },
+                      { label: 'Patê de Pato', emoji: '🍖', req: `🦆 2 Ov.Pato (${inventory.duck_egg ?? 0}/2) + 🧈 1 Manteiga (${inventory.butter ?? 0}/1) • Nv5`, canCraft: farmLevel >= 5 && (inventory.duck_egg ?? 0) >= 2 && (inventory.butter ?? 0) >= 1, reqLevel: 5, onClick: (e: React.MouseEvent) => craftPatePato(e) },
+                      { label: 'Ovo Defumado', emoji: '🥚', req: `🪿 1 Ov.Ganso (${inventory.goose_egg ?? 0}/1) • Nv6`, canCraft: farmLevel >= 6 && (inventory.goose_egg ?? 0) >= 1, reqLevel: 6, onClick: (e: React.MouseEvent) => craftOvoDefumado(e) },
+                      { label: 'Conserva de Codorna', emoji: '🥚', req: `🐦 6 Ov.Codorna (${inventory.quail_egg ?? 0}/6) • Nv4`, canCraft: farmLevel >= 4 && (inventory.quail_egg ?? 0) >= 6, reqLevel: 4, onClick: (e: React.MouseEvent) => craftConservaCodorna(e) },
+                      { label: 'Incubar Ovos (Nova Galinha)', emoji: '🐣', req: `🥚 3 Ov.Férteis (${inventory.fertile_egg ?? 0}/3) • Nv7`, canCraft: farmLevel >= 7 && (inventory.fertile_egg ?? 0) >= 3, reqLevel: 7, onClick: (e: React.MouseEvent) => craftIncubarOvos(e) },
+                    ].map((r, i) => (
+                      <div key={i} className="bg-white border-2 border-orange-100 rounded-xl p-3 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{r.emoji}</span>
+                          <div>
+                            <div className="font-display font-black text-xs uppercase text-orange-900 flex items-center gap-1">
+                              {r.label}
+                              {farmLevel < r.reqLevel && <span className="text-[8px] bg-stone-400 text-white px-1 py-0.5 rounded">🔒 Nv{r.reqLevel}+</span>}
+                            </div>
+                            <div className="text-[9px] font-mono text-stone-500 mt-0.5">{r.req}</div>
+                          </div>
+                        </div>
+                        <button type="button" onClick={r.onClick} disabled={!r.canCraft}
+                          className="shrink-0 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-mono font-black text-[10px] px-3 py-1.5 rounded-lg cursor-pointer transition-all">
+                          {farmLevel < r.reqLevel ? `🔒 Nv${r.reqLevel}` : 'Fabricar'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* ===== TAB: COSMÉTICOS ===== */}
+                {atelieTab === 'cosmeticos' && (
+                  <div className="space-y-2">
+                    <h4 className="font-display font-black text-xs uppercase tracking-wider text-green-900 mb-2">🌿 Cosméticos & Orgânicos</h4>
+                    {[
+                      { label: 'Creme Cosmético', emoji: '🧴', req: `🐌 2 Muco (${inventory.muco ?? 0}/2) + 🐐 1 L.Cabra (${inventory.goat_milk ?? 0}/1) • Nv7`, canCraft: farmLevel >= 7 && (inventory.muco ?? 0) >= 2 && (inventory.goat_milk ?? 0) >= 1, reqLevel: 7, onClick: (e: React.MouseEvent) => craftCremeCosmetico(e) },
+                      { label: 'Sabonete Natural', emoji: '🧼', req: `🐌 1 Muco (${inventory.muco ?? 0}/1) + 🧈 1 Manteiga (${inventory.butter ?? 0}/1) + 🥛 1 Leite (${inventory.milk}/1) • Nv9`, canCraft: farmLevel >= 9 && (inventory.muco ?? 0) >= 1 && (inventory.butter ?? 0) >= 1 && inventory.milk >= 1, reqLevel: 9, onClick: (e: React.MouseEvent) => craftSaboneteNatural(e) },
+                      { label: 'Ração Orgânica (+3d buff)', emoji: '🌿', req: `🪱 2 Húmus (${inventory.humus ?? 0}/2) • Nv6`, canCraft: farmLevel >= 6 && (inventory.humus ?? 0) >= 2, reqLevel: 6, onClick: (e: React.MouseEvent) => craftRacaoOrganica(e) },
+                      { label: 'Fertilizante (+5d buff)', emoji: '🌱', req: `🪱 3 Húmus (${inventory.humus ?? 0}/3) • Nv8`, canCraft: farmLevel >= 8 && (inventory.humus ?? 0) >= 3, reqLevel: 8, onClick: (e: React.MouseEvent) => craftFertilizante(e) },
+                    ].map((r, i) => (
+                      <div key={i} className="bg-white border-2 border-green-100 rounded-xl p-3 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{r.emoji}</span>
+                          <div>
+                            <div className="font-display font-black text-xs uppercase text-green-900 flex items-center gap-1">
+                              {r.label}
+                              {farmLevel < r.reqLevel && <span className="text-[8px] bg-stone-400 text-white px-1 py-0.5 rounded">🔒 Nv{r.reqLevel}+</span>}
+                            </div>
+                            <div className="text-[9px] font-mono text-stone-500 mt-0.5">{r.req}</div>
+                          </div>
+                        </div>
+                        <button type="button" onClick={r.onClick} disabled={!r.canCraft}
+                          className="shrink-0 bg-green-600 hover:bg-green-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-mono font-black text-[10px] px-3 py-1.5 rounded-lg cursor-pointer transition-all">
+                          {farmLevel < r.reqLevel ? `🔒 Nv${r.reqLevel}` : 'Fabricar'}
+                        </button>
+                      </div>
+                    ))}
+                    {/* Buff status */}
+                    <div className="bg-green-50 border-2 border-green-200 rounded-xl p-3 text-xs text-green-800 font-mono">
+                      <div className="font-black mb-1">🌟 Buffs Ativos:</div>
+                      <div>🌿 Ração Orgânica: {racaoOrganicaDays > 0 ? `${racaoOrganicaDays} dias restantes` : 'Inativo'}</div>
+                      <div>🌱 Fertilizante: {fertilizanteDays > 0 ? `${fertilizanteDays} dias restantes` : 'Inativo'}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ===== TAB: LUXO ===== */}
+                {atelieTab === 'luxo' && (
+                  <div className="space-y-2">
+                    <h4 className="font-display font-black text-xs uppercase tracking-wider text-purple-900 mb-2">🏺 Produtos de Luxo</h4>
+                    {[
+                      { label: 'Almofada de Penas', emoji: '🛋️', req: `🪶 3 Penas (${inventory.feather ?? 0}/3) + 🦤 2 P.Grande (${inventory.pena_grande ?? 0}/2) • Nv8`, canCraft: farmLevel >= 8 && (inventory.feather ?? 0) >= 3 && (inventory.pena_grande ?? 0) >= 2, reqLevel: 8, onClick: (e: React.MouseEvent) => craftAlmofadaPenas(e) },
+                      { label: 'Colete de Couro', emoji: '🦺', req: `🦤 1 Couro Avestruz (${inventory.couro_avestruz ?? 0}/1) • Nv15`, canCraft: farmLevel >= 15 && (inventory.couro_avestruz ?? 0) >= 1, reqLevel: 15, onClick: (e: React.MouseEvent) => craftColeteCouro(e) },
+                      { label: 'Bolsa Exótica', emoji: '👜', req: `🐊 1 Couro Jacaré (${inventory.couro_jacare ?? 0}/1) • Nv18`, canCraft: farmLevel >= 18 && (inventory.couro_jacare ?? 0) >= 1, reqLevel: 18, onClick: (e: React.MouseEvent) => craftBolsaExotica(e) },
+                      { label: 'Enfeite de Pavão', emoji: '🦚', req: `🦚 2 P.Pavão (${inventory.peacock_feather ?? 0}/2) + 🦤 1 P.Grande (${inventory.pena_grande ?? 0}/1) • Nv10`, canCraft: farmLevel >= 10 && (inventory.peacock_feather ?? 0) >= 2 && (inventory.pena_grande ?? 0) >= 1, reqLevel: 10, onClick: (e: React.MouseEvent) => craftEnfeitePavao(e) },
+                    ].map((r, i) => (
+                      <div key={i} className={`bg-white border-2 rounded-xl p-3 flex items-center justify-between gap-3 ${farmLevel >= r.reqLevel ? 'border-purple-200' : 'border-stone-200 opacity-70'}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{r.emoji}</span>
+                          <div>
+                            <div className="font-display font-black text-xs uppercase text-purple-900 flex items-center gap-1">
+                              {r.label}
+                              {farmLevel < r.reqLevel && <span className="text-[8px] bg-stone-400 text-white px-1 py-0.5 rounded">🔒 Nv{r.reqLevel}+</span>}
+                            </div>
+                            <div className="text-[9px] font-mono text-stone-500 mt-0.5">{r.req}</div>
+                          </div>
+                        </div>
+                        <button type="button" onClick={r.onClick} disabled={!r.canCraft}
+                          className="shrink-0 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-mono font-black text-[10px] px-3 py-1.5 rounded-lg cursor-pointer transition-all">
+                          {farmLevel < r.reqLevel ? `🔒 Nv${r.reqLevel}` : 'Fabricar'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
               </div>
 
@@ -8895,7 +9479,7 @@ export default function App() {
                   }}
                   className="bg-amber-700 hover:bg-amber-600 text-white border-b-4 border-amber-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer focus:outline-none"
                 >
-                  Fechar Queijaria
+                  Fechar Ateliê
                 </button>
               </div>
             </motion.div>
