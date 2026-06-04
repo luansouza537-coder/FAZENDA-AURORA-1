@@ -273,8 +273,9 @@ export default function App() {
           title: "🧶 Fazenda Produtiva & Ateliê Liberados!",
           perks: [
             "Preço base da Lã Crua subiu de 12 para 15 moedas!",
-            "Desbloqueada a compra de Bois de Engorda no Mercado de Animais!",
-            "Desbloqueadas as Máquinas Automatizadas e o Ateliê de Queijos e Cachecóis!"
+            "Desbloqueada a compra de Bois de Engorda e Codornas no Mercado de Animais!",
+            "Desbloqueadas as Máquinas Automatizadas e o Ateliê de Queijos e Cachecóis!",
+            "🐦 Codorna: produz 6 ovos/dia, ocupa pouco espaço e consome meia ração!"
           ]
         };
       case 4:
@@ -292,16 +293,18 @@ export default function App() {
           perks: [
             "Bônus de +5 moedas extras na venda de qualquer Boizinho!",
             "Acesso total à Queijaria Artesanal: Queijo Coalho, Muçarela e Brie!",
-            "Animais exóticos disponíveis: Búfalo e Pavão!"
+            "Animais exóticos disponíveis: Búfalo, Pavão e Alpaca!",
+            "🦙 Alpaca: lã fina (65💰) a cada 4 dias — cuidado com o calor do verão!",
+            "🌿 Especialização Orgânica desbloqueada!"
           ]
         };
       case 6:
         return {
-          title: "🦆 Fazenda Diversificada: Novas Espécies!",
+          title: "🦆 Fazenda Diversificada: Novos Produtores!",
           perks: [
-            "Bônus de +5% em todos os produtos de aves!",
             "Poço d'Água e Sistema de Irrigação desbloqueados nas Melhorias!",
-            "Queijaria pode ser expandida para novas receitas!"
+            "Queijaria pode ser expandida para novas receitas!",
+            "🪱 Minhoca desbloqueada: produz húmus passivamente, nunca precisa de ração!"
           ]
         };
       case 7:
@@ -310,7 +313,8 @@ export default function App() {
           perks: [
             "Bônus de +10% nos preços de venda de produtos processados!",
             "Energia Solar disponível nas Melhorias — reduza custos de energia!",
-            "Turismo rural desbloqueado: receba visitantes na fazenda!"
+            "Turismo rural desbloqueado: receba visitantes na fazenda!",
+            "🐌 Caracol desbloqueado: produz muco cosmético (120💰) — 2x na chuva!"
           ]
         };
       case 8:
@@ -319,7 +323,8 @@ export default function App() {
           perks: [
             "Bônus de +15% em todos os produtos — sua reputação cresce!",
             "Seguro Agrícola Premium disponível com cobertura ampliada!",
-            "Feiras regionais com prêmios maiores!"
+            "🐇 Coelho Angorá desbloqueado: lã sedosa (90💰) + se reproduz sozinho!",
+            "🏆 Especialização Exótica desbloqueada — prepara-se para o jacaré!"
           ]
         };
       case 9:
@@ -335,20 +340,108 @@ export default function App() {
         return {
           title: "🌾 Fazenda Centenária: Marco Histórico!",
           perks: [
-            "Bônus de +25% em todos os produtos!",
-            "Milestone especial: +200 moedas de celebração!",
-            "Acesso a animais especiais: novas espécies em breve!"
+            "Bônus de +25% em todos os produtos! +200 moedas de celebração!",
+            "🪲 Bicho-da-seda desbloqueado: produz seda bruta (80💰) a cada 14 dias!",
+            "⚠️ Bicho-da-seda precisa de Folha de Amoreira diária — sem ela, morre!"
+          ]
+        };
+      case 11:
+        return {
+          title: "🗺️ Fazenda Regional: Reconhecimento Nacional!",
+          perks: [
+            `Bônus permanente de +${25 + 3}% em todos os produtos da Aurora!`,
+            "Turismo regional aumentado — mais visitantes por semana!",
+            "Preparando-se para criações exóticas..."
+          ]
+        };
+      case 12:
+        return {
+          title: "💎 Fazenda Premium: Produtos Raros!",
+          perks: [
+            `Bônus permanente de +${25 + 6}% em todos os produtos da Aurora!`,
+            "🐸 Rã desbloqueada: produz Coxas de Rã (70💰) — produção dobra na chuva!",
+            "Rã requer Poço d'Água (wellLevel >= 1) para sobreviver."
+          ]
+        };
+      case 13:
+        return {
+          title: "🏭 Fazenda Industrial: Escala Máxima!",
+          perks: [
+            `Bônus permanente de +${25 + 9}% em todos os produtos da Aurora!`,
+            "Capacidade da queijaria expandida — mais prateleiras disponíveis!",
+            "Preparando-se para aves de grande porte..."
+          ]
+        };
+      case 14:
+        return {
+          title: "🇧🇷 Fazenda Nacional: Orgulho do Brasil!",
+          perks: [
+            `Bônus permanente de +${25 + 12}% em todos os produtos da Aurora!`,
+            "Feiras nacionais com prêmios especiais!",
+            "Avestruz chegando no próximo nível — prepare espaço e recursos!"
+          ]
+        };
+      case 15:
+        return {
+          title: "🌟 Fazenda Famosa: Animais de Grande Porte!",
+          perks: [
+            `Bônus permanente de +${25 + 15}% em todos os produtos da Aurora!`,
+            "🦅 Avestruz desbloqueada: penas grandes (60💰) + couro nobre (300💰) ao morrer!",
+            "Avestruz come ração de boi — planeje bem o estoque!"
+          ]
+        };
+      case 16:
+        return {
+          title: "🏆 Fazenda Lendária: Referência Nacional!",
+          perks: [
+            `Bônus permanente de +${25 + 18}% em todos os produtos da Aurora!`,
+            "Turismo lendário — visitantes de todo o país!",
+            "2 níveis restantes para o animal mais raro do jogo..."
+          ]
+        };
+      case 17:
+        return {
+          title: "🌍 Fazenda Continental: Fama Internacional!",
+          perks: [
+            `Bônus permanente de +${25 + 21}% em todos os produtos da Aurora!`,
+            "Exportações premium — contratos internacionais disponíveis!",
+            "Adquira a Licença de Fauna Exótica (500💰) para criar o jacaré!"
+          ]
+        };
+      case 18:
+        return {
+          title: "👸 Fazenda Imperial: O Jacaré Chegou!",
+          perks: [
+            `Bônus permanente de +${25 + 24}% em todos os produtos da Aurora!`,
+            "🐊 Jacaré desbloqueado: couro exótico (400💰) + carne (250💰)!",
+            "⚠️ OBRIGATÓRIO: Licença de Fauna Exótica (500💰) — sem ela, multa de 300💰/dia!"
+          ]
+        };
+      case 19:
+        return {
+          title: "⚡ Fazenda Épica: Quase no Topo!",
+          perks: [
+            `Bônus permanente de +${25 + 27}% em todos os produtos da Aurora!`,
+            "Último nível antes da lenda máxima — consolide seu império!",
+            "Todos os animais e produtos do jogo desbloqueados!"
+          ]
+        };
+      case 20:
+        return {
+          title: "🌌 Império Aurora: Lenda Máxima!",
+          perks: [
+            `Bônus permanente de +${25 + 30}% em todos os produtos da Aurora!`,
+            "Você atingiu o nível máximo! Sua fazenda é uma lenda viva!",
+            "Continue expandindo seu império — o céu é o limite! 🚀"
           ]
         };
       default:
-        if (level > 10) {
-          const bonusPercent = 25 + (level - 10) * 3;
+        if (level > 20) {
           return {
-            title: `🌟 ${getFarmTitle(level)}: Lenda Viva!`,
+            title: `🌌 Além do Lendário: Nível ${level}!`,
             perks: [
-              `Bônus permanente de +${bonusPercent}% em todos os produtos da Aurora!`,
-              `Sua fazenda é conhecida em todo o território — turismo aumentado!`,
-              `Nível ${level} desbloqueado — continue expandindo seu império!`
+              `Bônus permanente de +${25 + 30 + (level - 20) * 2}% em todos os produtos!`,
+              "Sua fazenda transcendeu os limites conhecidos!"
             ]
           };
         }
@@ -1588,11 +1681,13 @@ export default function App() {
         fairResults,
         lastEpidemicDay,
         droughtDaysRemaining,
+        licencaExotica,
+        coelhoReproCount,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount]);
 
   // Ref para rastrear conquistas já desbloqueadas sem depender do estado React (evita stale closure e duplos no StrictMode)
   const unlockedAchievementsRef = useRef<string[]>(unlockedAchievements);
