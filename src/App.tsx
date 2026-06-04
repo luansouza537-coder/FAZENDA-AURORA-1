@@ -4632,7 +4632,17 @@ export default function App() {
                   {/* Minhoca (Nível 6+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 6 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv6+</span>}
-                    <span className="text-4xl">🪱</span>
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Minhoca">
+                      <ellipse cx="20" cy="28" rx="6" ry="8" fill="#c084fc"/>
+                      <ellipse cx="14" cy="22" rx="6" ry="7" fill="#d8b4fe"/>
+                      <ellipse cx="22" cy="16" rx="6" ry="7" fill="#c084fc"/>
+                      <ellipse cx="27" cy="10" rx="5" ry="6" fill="#e879f9"/>
+                      <circle cx="30" cy="7" r="4" fill="#f0abfc"/>
+                      <circle cx="28.5" cy="5.5" r="1" fill="#1e1b4b"/>
+                      <circle cx="31.5" cy="5.5" r="1" fill="#1e1b4b"/>
+                      <line x1="29" y1="4" x2="28" y2="2" stroke="#a21caf" strokeWidth="1" strokeLinecap="round"/>
+                      <line x1="31" y1="4" x2="32" y2="2" stroke="#a21caf" strokeWidth="1" strokeLinecap="round"/>
+                    </svg>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Minhoca</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Produz húmus 35💰/u a cada 3 dias. Não precisa de ração!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('minhoca')}</span>
@@ -4698,7 +4708,27 @@ export default function App() {
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 15 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv15+</span>}
                     {farmLevel >= 15 && <span className="absolute -top-2.5 -right-2 bg-purple-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">🌟 Raro</span>}
-                    <span className="text-4xl">🦤</span>
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Avestruz">
+                      {/* corpo */}
+                      <ellipse cx="20" cy="28" rx="9" ry="8" fill="#d97706"/>
+                      {/* pescoço */}
+                      <rect x="18" y="14" width="5" height="14" rx="2.5" fill="#fbbf24"/>
+                      {/* cabeça */}
+                      <ellipse cx="20" cy="12" rx="5" ry="4" fill="#fbbf24"/>
+                      {/* bico */}
+                      <polygon points="24,11 28,12 24,13" fill="#f59e0b"/>
+                      {/* olho */}
+                      <circle cx="22" cy="11" r="1.2" fill="#1c1917"/>
+                      <circle cx="22.4" cy="10.6" r="0.4" fill="white"/>
+                      {/* pernas */}
+                      <line x1="17" y1="35" x2="15" y2="40" stroke="#92400e" strokeWidth="2" strokeLinecap="round"/>
+                      <line x1="23" y1="35" x2="25" y2="40" stroke="#92400e" strokeWidth="2" strokeLinecap="round"/>
+                      {/* pés */}
+                      <line x1="15" y1="40" x2="12" y2="39" stroke="#92400e" strokeWidth="1.5" strokeLinecap="round"/>
+                      <line x1="25" y1="40" x2="28" y2="39" stroke="#92400e" strokeWidth="1.5" strokeLinecap="round"/>
+                      {/* asa */}
+                      <ellipse cx="13" cy="27" rx="5" ry="4" fill="#b45309" transform="rotate(-20 13 27)"/>
+                    </svg>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Avestruz</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Penas 60💰/u (7d), carne 180💰, couro 300💰 (na morte)!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('avestruz')}</span>
@@ -4985,7 +5015,7 @@ export default function App() {
                                   {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
                                 </>
                               )}
-                              {animal.type === 'minhoca' && <span className="select-none">🪱</span>}
+                              {animal.type === 'minhoca' && <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="20" cy="28" rx="6" ry="8" fill="#c084fc"/><ellipse cx="14" cy="22" rx="6" ry="7" fill="#d8b4fe"/><ellipse cx="22" cy="16" rx="6" ry="7" fill="#c084fc"/><ellipse cx="27" cy="10" rx="5" ry="6" fill="#e879f9"/><circle cx="30" cy="7" r="4" fill="#f0abfc"/><circle cx="28.5" cy="5.5" r="1" fill="#1e1b4b"/><circle cx="31.5" cy="5.5" r="1" fill="#1e1b4b"/></svg>}
                               {animal.type === 'caracol' && <span className="select-none">🐌</span>}
                               {animal.type === 'coelho_angora' && (
                                 <>
@@ -5002,7 +5032,7 @@ export default function App() {
                               )}
                               {animal.type === 'avestruz' && (
                                 <>
-                                  <span className="select-none">🦤</span>
+                                  <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="20" cy="28" rx="9" ry="8" fill="#d97706"/><rect x="18" y="14" width="5" height="14" rx="2.5" fill="#fbbf24"/><ellipse cx="20" cy="12" rx="5" ry="4" fill="#fbbf24"/><polygon points="24,11 28,12 24,13" fill="#f59e0b"/><circle cx="22" cy="11" r="1.2" fill="#1c1917"/><line x1="17" y1="35" x2="15" y2="40" stroke="#92400e" strokeWidth="2" strokeLinecap="round"/><line x1="23" y1="35" x2="25" y2="40" stroke="#92400e" strokeWidth="2" strokeLinecap="round"/><ellipse cx="13" cy="27" rx="5" ry="4" fill="#b45309" transform="rotate(-20 13 27)"/></svg>
                                   {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🪶</span>}
                                 </>
                               )}
