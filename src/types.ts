@@ -7,6 +7,15 @@ export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lham
 
 export type AnimalTrait = 'gulosa' | 'preguicosa' | 'feliz' | 'estressada' | 'saudavel' | 'trabalhadora';
 
+export type FarmSpecialization = 'leiteira' | 'fibras' | 'avicultura' | 'diversificada' | null;
+
+export interface FairResult {
+  day: number;
+  category: string;
+  winner: string;
+  earned: number;
+}
+
 export interface Animal {
   id: number;
   type: AnimalType;

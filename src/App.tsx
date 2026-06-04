@@ -33,7 +33,7 @@ import {
   Target,
   BarChart2
 } from 'lucide-react';
-import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract } from './types';
+import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract, FarmSpecialization, FairResult } from './types';
 import { getRandomName, getUniqueOxName } from './names';
 import { sfx } from './utils/audio';
 import SeasonalParticles from './components/SeasonalParticles';
@@ -170,9 +170,9 @@ export default function App() {
   const [gold, setGold] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) return JSON.parse(saved).gold ?? 120;
+      if (saved) return JSON.parse(saved).gold ?? 80;
     } catch (e) {}
-    return 120;
+    return 80;
   });
 
   const [currentDay, setCurrentDay] = useState<number>(() => {
@@ -1005,7 +1005,7 @@ export default function App() {
   // --- INITIALIZE GAME ---
   const initGame = () => {
     localStorage.removeItem('aurora_farm_save');
-    setGold(120);
+    setGold(80);
     setCurrentDay(1);
     setFarmLevel(1);
     setInventory({
@@ -1722,11 +1722,12 @@ export default function App() {
 
   // Feed pricing helpers
   const getFeedBasePrice = (type: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha'): number => {
-    if (type === 'racaoLeite') return 2;
-    if (type === 'racaoOvelha') return 2;
-    if (type === 'racaoBoi') return 3;
-    if (type === 'racaoGalinha') return 1;
-    return 2;
+    // +30% base prices (harder economy)
+    if (type === 'racaoLeite') return 3;   // was 2
+    if (type === 'racaoOvelha') return 3;  // was 2
+    if (type === 'racaoBoi') return 4;     // was 3
+    if (type === 'racaoGalinha') return 2; // was 1
+    return 3;
   };
 
   const getFeedPriceWithModifiers = (type: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha', day = currentDay): number => {
@@ -2156,17 +2157,26 @@ export default function App() {
   };
 
   // Prices for animals based on level 4 discount
-  const getAnimalPurchasePrice = (type: AnimalType): number => {
-    let basePrice = 80;
-    if (type === 'ovelha') basePrice = 70;
-    if (type === 'boi') basePrice = 100;
-    if (type === 'galinha') basePrice = 40;
-    if (type === 'cabra') basePrice = 90;
-    if (type === 'lhama') basePrice = 110;
-    if (type === 'pato') basePrice = 55;
-    if (type === 'ganso') basePrice = 80;
-    if (type === 'bufalo') basePrice = 180;
-    if (type === 'pavao') basePrice = 250;
+  const getAnimalPurchasePrice = (type: AnimalType, specOverride?: FarmSpecialization): number => {
+    const spec = specOverride !== undefined ? specOverride : specialization;
+    let basePrice = 120; // vaca
+    if (type === 'ovelha') basePrice = 80;
+    if (type === 'boi') basePrice = 180;
+    if (type === 'galinha') basePrice = 60;
+    if (type === 'cabra') basePrice = 110;
+    if (type === 'lhama') basePrice = 135;
+    if (type === 'pato') basePrice = 70;
+    if (type === 'ganso') basePrice = 100;
+    if (type === 'bufalo') basePrice = 220;
+    if (type === 'pavao') basePrice = 300;
+
+    // Specialization purchase penalty
+    const purchasePenalty =
+      (spec === 'leiteira' && ['galinha','pato','ganso','ovelha','lhama'].includes(type)) ? 1.1 :
+      (spec === 'fibras' && !['ovelha','lhama'].includes(type)) ? 1.1 :
+      (spec === 'avicultura' && !['galinha','pato','ganso','pavao'].includes(type)) ? 1.1 : 1.0;
+    basePrice = Math.round(basePrice * purchasePenalty);
+
     if (farmLevel >= 4) {
       return Math.round(basePrice * 0.9);
     }
@@ -3535,6 +3545,15 @@ export default function App() {
   /**
    * 6. verificarNivelFazenda: Avança e notifica mudança de nível a cada 10 dias.
    */
+  // Gold required to level up (on top of the day requirement)
+  const getLevelUpGoldCost = (toLevel: number): number => {
+    if (toLevel === 2) return 0;   // keep as-is
+    if (toLevel === 3) return 800;
+    if (toLevel === 4) return 1800;
+    if (toLevel >= 5) return 4000;
+    return 0;
+  };
+
   const verificarNivelFazenda = (
     nextDayVal: number,
     currentLevel: number,
@@ -3543,6 +3562,19 @@ export default function App() {
     const newLevel = Math.floor((nextDayVal - 1) / 10) + 1;
     let levelUpOccurred = false;
     if (newLevel > currentLevel) {
+      // Check gold requirement
+      const goldCost = getLevelUpGoldCost(newLevel);
+      if (goldCost > 0 && gold < goldCost) {
+        logs.push({
+          msg: `⚠️ Nível ${newLevel} requer ${goldCost} moedas! Você tem ${Math.floor(gold)} moedas. Acumule mais para subir de nível.`,
+          type: 'error'
+        });
+        return { newLevel: currentLevel, levelUpOccurred: false };
+      }
+      if (goldCost > 0) {
+        setGold(prev => prev - goldCost);
+        logs.push({ msg: `💰 Custo de evolução para Nível ${newLevel}: -${goldCost} moedas.`, type: 'system' });
+      }
       levelUpOccurred = true;
       logs.push({
         msg: `🏆 EXCELENTE! O nível da Fazenda Aurora subiu para o NÍVEL ${newLevel}!`,
