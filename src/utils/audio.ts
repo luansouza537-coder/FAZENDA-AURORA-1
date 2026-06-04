@@ -127,83 +127,48 @@ class SoundFXManager {
     this.playSound('click');
   }
 
-  // Funcionalidade 12: Sons de animais ao coletar
-  public playAnimalSound(animalType: 'vaca' | 'ovelha' | 'boi' | 'galinha') {
+  // Funcionalidade 12: Sons de animais ao coletar (expandido para todas as espécies)
+  public playAnimalSound(animalType: string) {
     if (this.isMuted) return;
     try {
       this.init();
       if (!this.ctx) return;
       const t = this.ctx.currentTime;
 
-      if (animalType === 'vaca') {
-        // Moo: onda senoidal grave ~150Hz por 0.4s com portamento descendente
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(160, t);
-        osc.frequency.exponentialRampToValueAtTime(120, t + 0.4);
-        gain.gain.setValueAtTime(0.12, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(t);
-        osc.stop(t + 0.45);
-      } else if (animalType === 'ovelha') {
-        // Baa: ~300Hz com vibrato por 0.3s
-        const osc = this.ctx.createOscillator();
-        const lfo = this.ctx.createOscillator();
-        const lfoGain = this.ctx.createGain();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(310, t);
-        lfo.type = 'sine';
-        lfo.frequency.setValueAtTime(10, t);
-        lfoGain.gain.setValueAtTime(20, t);
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc.frequency);
-        gain.gain.setValueAtTime(0.10, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        lfo.start(t);
-        lfo.stop(t + 0.35);
-        osc.start(t);
-        osc.stop(t + 0.35);
-      } else if (animalType === 'galinha') {
-        // Cluck: burst de ruído curto ~0.15s filtrado
-        const bufferSize = Math.floor((this.ctx.sampleRate || 44100) * 0.15);
-        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
-        }
-        const source = this.ctx.createBufferSource();
-        source.buffer = buffer;
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.value = 1800;
-        filter.Q.value = 3;
-        const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.18, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-        source.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.ctx.destination);
-        source.start(t);
-      } else if (animalType === 'boi') {
-        // Boi: similar à vaca mas mais grave ~100Hz
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(105, t);
-        osc.frequency.exponentialRampToValueAtTime(80, t + 0.5);
-        gain.gain.setValueAtTime(0.13, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(t);
-        osc.stop(t + 0.55);
-      }
+      const sounds: Record<string, { freq: number; type: OscillatorType; duration: number }> = {
+        vaca:    { freq: 150, type: 'sine',     duration: 0.4 },
+        ovelha:  { freq: 400, type: 'sine',     duration: 0.3 },
+        boi:     { freq: 120, type: 'sawtooth', duration: 0.5 },
+        galinha: { freq: 600, type: 'square',   duration: 0.15 },
+        cabra:   { freq: 350, type: 'sine',     duration: 0.3 },
+        lhama:   { freq: 300, type: 'sine',     duration: 0.4 },
+        pato:    { freq: 500, type: 'square',   duration: 0.2 },
+        ganso:   { freq: 450, type: 'sawtooth', duration: 0.3 },
+        bufalo:  { freq: 130, type: 'sine',     duration: 0.5 },
+        pavao:   { freq: 800, type: 'sine',     duration: 0.6 },
+        codorna: { freq: 700, type: 'sine',     duration: 0.1 },
+        alpaca:  { freq: 320, type: 'sine',     duration: 0.35 },
+        minhoca: { freq: 200, type: 'sine',     duration: 0.2 },
+        caracol: { freq: 180, type: 'sine',     duration: 0.3 },
+        coelho_angora: { freq: 650, type: 'sine', duration: 0.1 },
+        bicho_seda: { freq: 900, type: 'sine',  duration: 0.1 },
+        ra:      { freq: 250, type: 'square',   duration: 0.2 },
+        avestruz: { freq: 180, type: 'sawtooth', duration: 0.4 },
+        jacare:  { freq: 100, type: 'sawtooth', duration: 0.6 },
+      };
+
+      const s = sounds[animalType] ?? { freq: 440, type: 'sine' as OscillatorType, duration: 0.2 };
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.type = s.type;
+      osc.frequency.setValueAtTime(s.freq, t);
+      osc.frequency.exponentialRampToValueAtTime(s.freq * 0.8, t + s.duration);
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + s.duration);
+      osc.start(t);
+      osc.stop(t + s.duration);
     } catch (e) {
       // Ignored
     }

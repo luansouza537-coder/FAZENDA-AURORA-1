@@ -117,6 +117,9 @@ export function useInventory({
           colete_couro: inv.colete_couro ?? 0,
           bolsa_exotica: inv.bolsa_exotica ?? 0,
           enfeite_pavao: inv.enfeite_pavao ?? 0,
+          peixe: inv.peixe ?? 0,
+          mel: inv.mel ?? 0,
+          cogumelo: inv.cogumelo ?? 0,
         };
       }
     } catch (e) {}
@@ -178,6 +181,9 @@ export function useInventory({
       colete_couro: 0,
       bolsa_exotica: 0,
       enfeite_pavao: 0,
+      peixe: 0,
+      mel: 0,
+      cogumelo: 0,
     };
   });
 

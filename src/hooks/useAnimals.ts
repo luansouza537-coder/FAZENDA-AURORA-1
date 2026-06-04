@@ -67,6 +67,9 @@ export type InventoryState = {
   colete_couro: number;
   bolsa_exotica: number;
   enfeite_pavao: number;
+  peixe: number;
+  mel: number;
+  cogumelo: number;
 };
 
 export interface UseAnimalsProps {
@@ -314,6 +317,7 @@ export function useAnimals({
     setStats(prev => ({ ...prev, totalFed: prev.totalFed + 1 }));
     addLog(`🌽 Você alimentou ${animal.name} com ${feedLabel}! +Fome +Felicidade.`, 'success');
     triggerAudioResult(() => sfx.playSound('feed'));
+    if (soundEnabled) sfx.playAnimalSound(animal.type);
     spawnFeedback('🌽', '+Fome!', event);
     // Missão: alimentar animais
     updateMissionProgress('feed_animals', 1);
@@ -432,6 +436,7 @@ export function useAnimals({
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false } : a));
     addLog(`🐐 ${animal.name} produziu ${qty} leite(s) de cabra!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
+    if (soundEnabled) sfx.playAnimalSound('cabra');
     spawnFeedback('🥛', `+${qty} Leite Cabra`, event);
     updateMissionProgress('collect_items', qty);
   };
@@ -461,6 +466,7 @@ export function useAnimals({
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolAccumulated: 0 } : a));
     addLog(`🦙 ${animal.name} foi tosquiada! +${qty} lã de lhama no Armazém.`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
+    if (soundEnabled) sfx.playAnimalSound('lhama');
     spawnFeedback('🧶', `+${qty} Lã Lhama`, event);
     updateMissionProgress('collect_items', qty);
   };
@@ -508,6 +514,7 @@ export function useAnimals({
     const featherTxt = gotFeather ? ' + 🪶 1 pena!' : '';
     addLog(`🦆 ${animal.name} botou ${qty} ovo(s) de pato!${featherTxt}`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
+    if (soundEnabled) sfx.playAnimalSound('pato');
     spawnFeedback('🥚', `+${qty} Ovo Pato`, event);
     if (qty > 0) updateMissionProgress('collect_items', qty);
   };
@@ -536,6 +543,7 @@ export function useAnimals({
       setAnimals(prev => prev.map(a => a.id === id ? { ...a, daysSinceLastGooseEgg: 0 } : a));
       addLog(`🦢 ${animal.name} botou 1 ovo de ganso! (Vale 50 moedas!)`, 'success');
       triggerAudioResult(() => sfx.playSound('collect'));
+      if (soundEnabled) sfx.playAnimalSound('ganso');
       spawnFeedback('🥚', '+1 Ovo Ganso', event);
       updateMissionProgress('collect_items', 1);
     } else {
@@ -582,6 +590,7 @@ export function useAnimals({
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false } : a));
     addLog(`🐃 ${animal.name} produziu ${qty} leite(s) de búfala${animal.heatStress ? ' (reduzido pelo calor!)' : ''}!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
+    if (soundEnabled) sfx.playAnimalSound('bufalo');
     spawnFeedback('🥛', `+${qty} Leite Búfala`, event);
     updateMissionProgress('collect_items', qty);
   };

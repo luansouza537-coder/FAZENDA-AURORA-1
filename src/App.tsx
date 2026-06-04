@@ -184,6 +184,15 @@ const WORKER_TYPES = [
   { role: 'veterinario' as const, name: 'Veterinário', emoji: '💉', dailyCost: 15, desc: 'Previne epidemias e aumenta felicidade dos animais em 5/dia', minLevel: 12 },
 ];
 
+const MERCHANT_SPECIAL_ITEMS = [
+  { id: 'vacina', label: '💉 Vacina Veterinária', desc: 'Previne próxima epidemia garantido', price: 80, effect: 'prevent_epidemic' },
+  { id: 'adubo_especial', label: '🌱 Adubo Especial', desc: 'Equivale a 7 dias de fertilizante', price: 60, effect: 'fertilizante_7days' },
+  { id: 'racao_premium', label: '🥣 Ração Premium', desc: '10 rações de qualquer tipo com +20% eficiência por 3 dias', price: 40, effect: 'premium_feed' },
+  { id: 'bebedouro', label: '🪣 Bebedouro Automático', desc: 'Animais nunca ficam com sede, -5% epidemia', price: 150, effect: 'bebedouro', oneTime: true },
+  { id: 'cert_sanitario', label: '📜 Certificado Sanitário', desc: '+10% preço de venda de carne permanente', price: 200, effect: 'cert_sanitario', oneTime: true },
+  { id: 'licenca_exotica_item', label: '📋 Licença Exótica', desc: 'Permite criar Jacaré legalmente', price: 280, effect: 'licenca_exotica', oneTime: true },
+] as const;
+
 export default function App() {
   // --- STATE WITH LOCALSTORAGE INITIALIZATION ---
   // NOTE: gold, debt, dailyEarning, earningsHistory, weeklySales, weeklyStats,
@@ -297,6 +306,16 @@ export default function App() {
   });
 
   // merchantActive, daysSinceMerchant, nextMerchantDay moved to useEconomy
+
+  // --- EXPANDED MERCHANT SHOP ---
+  const [hasBebedouro, setHasBebedouro] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasBebedouro ?? false; } catch(e) {} return false;
+  });
+  const [hasCertSanitario, setHasCertSanitario] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasCertSanitario ?? false; } catch(e) {} return false;
+  });
+  const [epidemicPrevented, setEpidemicPrevented] = useState<boolean>(false);
+  const [merchantSpecialItems, setMerchantSpecialItems] = useState<string[]>([]);
 
   const [weather, setWeather] = useState<'chuva' | 'sol' | 'nublado'>('nublado');
   // dailyEarning moved to useEconomy
@@ -629,10 +648,17 @@ export default function App() {
       colete_couro: 0,
       bolsa_exotica: 0,
       enfeite_pavao: 0,
+      peixe: 0,
+      mel: 0,
+      cogumelo: 0,
     });
     setRacaoOrganicaDays(0);
     setFertilizanteDays(0);
     setLicencaExotica(false);
+    setHasBebedouro(false);
+    setHasCertSanitario(false);
+    setEpidemicPrevented(false);
+    setMerchantSpecialItems([]);
     setCoelhoReproCount(0);
     setHasStable(false);
     setHasSilo(false);
@@ -1483,6 +1509,9 @@ export default function App() {
     if (itemType === 'colete_couro') return 550;
     if (itemType === 'bolsa_exotica') return 800;
     if (itemType === 'enfeite_pavao') return 200;
+    if ((itemType as string) === 'peixe') return 45;
+    if ((itemType as string) === 'mel') return 80;
+    if ((itemType as string) === 'cogumelo') return 35;
     return 0;
   };
 
@@ -1537,6 +1566,9 @@ export default function App() {
     else if (pavaoCount === 1) finalPrice *= 1.03;
     // Prestígio 300+: +5% permanente nos preços
     if (prestigePoints >= 300) finalPrice *= 1.05;
+    // Certificado Sanitário: +10% para produtos de carne
+    const meatItems = ['coxa_ra', 'carne_avestruz', 'carne_jacare'] as string[];
+    if (hasCertSanitario && meatItems.includes(itemType as string)) finalPrice *= 1.1;
     return Math.max(1, Math.round(finalPrice));
   };
 
@@ -1864,11 +1896,13 @@ export default function App() {
         nextFestivalDay,
         workers,
         landBiomes,
+        hasBebedouro,
+        hasCertSanitario,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 500;
@@ -2824,6 +2858,18 @@ export default function App() {
       setMerchantActive(isMerchantNextDay);
       setDaysSinceMerchant(newDaysSinceMerchant);
       setNextMerchantDay(newNextMerchantDay);
+      // Generate merchant special items for this visit
+      if (isMerchantNextDay) {
+        const availableMerchItems = MERCHANT_SPECIAL_ITEMS.filter(item => {
+          if (!('oneTime' in item) || !item.oneTime) return true;
+          if (item.effect === 'bebedouro' && hasBebedouro) return false;
+          if (item.effect === 'cert_sanitario' && hasCertSanitario) return false;
+          if (item.effect === 'licenca_exotica' && licencaExotica) return false;
+          return true;
+        });
+        const shuffled = [...availableMerchItems].sort(() => Math.random() - 0.5);
+        setMerchantSpecialItems(shuffled.slice(0, 4).map(i => i.id));
+      }
 
       // Toques sonoros contextuais
       if (levelUpOccurred) {
@@ -3420,20 +3466,26 @@ export default function App() {
       salvarEstado();
 
       // --- SISTEMA DE CRISES ---
-      // Epidemia (3% por dia, max 1 a cada 30 dias)
-      if (Math.random() < 0.03 && (currentDay - lastEpidemicDay) >= 30) {
-        const affected = finalAnimals.filter(() => Math.random() < 0.3);
-        if (affected.length > 0) {
-          setLastEpidemicDay(nextDayValue);
-          setAnimals(prev => prev.map(a => {
-            if (affected.some(af => af.id === a.id)) {
-              return { ...a, happiness: Math.max(0, a.happiness - 30) };
-            }
-            return a;
-          }));
-          logsToAdd.push({ msg: `🦠 Epidemia! ${affected.length} animais foram afetados e perderam 30 de felicidade!`, type: 'error' });
-          setTimeout(() => addNotification(`🦠 Epidemia atingiu ${affected.length} animais da fazenda!`, 'warning', nextDayValue), 0);
-          triggerAudioResult(() => sfx.playSound('error'));
+      // Epidemia (3% por dia, max 1 a cada 30 dias, -5% se bebedouro)
+      const epidemicChance = hasBebedouro ? 0.025 : 0.03;
+      if (Math.random() < epidemicChance && (currentDay - lastEpidemicDay) >= 30) {
+        if (epidemicPrevented) {
+          setEpidemicPrevented(false);
+          logsToAdd.push({ msg: `💉 Vacina Veterinária bloqueou uma epidemia iminente!`, type: 'success' });
+        } else {
+          const affected = finalAnimals.filter(() => Math.random() < 0.3);
+          if (affected.length > 0) {
+            setLastEpidemicDay(nextDayValue);
+            setAnimals(prev => prev.map(a => {
+              if (affected.some(af => af.id === a.id)) {
+                return { ...a, happiness: Math.max(0, a.happiness - 30) };
+              }
+              return a;
+            }));
+            logsToAdd.push({ msg: `🦠 Epidemia! ${affected.length} animais foram afetados e perderam 30 de felicidade!`, type: 'error' });
+            setTimeout(() => addNotification(`🦠 Epidemia atingiu ${affected.length} animais da fazenda!`, 'warning', nextDayValue), 0);
+            triggerAudioResult(() => sfx.playSound('error'));
+          }
         }
       }
 
@@ -3819,6 +3871,27 @@ export default function App() {
         const hasPomar = landBiomes.some(b => b.biome === 'pomar');
         if (hasPomar) {
           setAnimals(prev => prev.map(a => ({ ...a, happiness: Math.min(100, (a.happiness ?? 0) + 2) })));
+        }
+
+        // Lago biome: produces 1 fish every 3 days
+        const lagoCount = landBiomes.filter(b => b.biome === 'lago').length;
+        if (lagoCount > 0 && nextDayValue % 3 === 0) {
+          const fishAmt = lagoCount;
+          setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) + fishAmt }));
+          logsToAdd.push({ msg: `🐟 Lago produziu ${fishAmt} peixe(s)!`, type: 'success' });
+        }
+
+        // Floresta biome: produces honey every 5 days, mushroom every 4 days
+        const florestaCount = landBiomes.filter(b => b.biome === 'floresta').length;
+        if (florestaCount > 0 && nextDayValue % 5 === 0) {
+          const melAmt = florestaCount;
+          setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) + melAmt }));
+          logsToAdd.push({ msg: `🍯 Floresta produziu ${melAmt} mel!`, type: 'success' });
+        }
+        if (florestaCount > 0 && nextDayValue % 4 === 0) {
+          const cogAmt = florestaCount;
+          setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) + cogAmt }));
+          logsToAdd.push({ msg: `🍄 Floresta produziu ${cogAmt} cogumelo(s)!`, type: 'success' });
         }
       }
 
@@ -4502,6 +4575,51 @@ export default function App() {
           </div>
         )}
 
+        {/* --- MERCHANT SPECIAL SHOP --- */}
+        {merchantActive && merchantSpecialItems.length > 0 && (
+          <div className="mx-6 mt-3 bg-[#064e3b]/90 border-4 border-[#fbbf24] rounded-2xl p-4 shadow-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">🧙‍♂️</span>
+              <h3 className="text-[#fef3c7] font-display font-black text-sm uppercase tracking-wider">Loja Especial do Mercador</h3>
+              <span className="text-[10px] text-[#fbbf24] font-mono ml-auto">Disponível hoje apenas!</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {merchantSpecialItems.map(itemId => {
+                const item = MERCHANT_SPECIAL_ITEMS.find(i => i.id === itemId);
+                if (!item) return null;
+                return (
+                  <div key={item.id} className="bg-[#022c22] border border-[#fbbf24]/50 rounded-xl p-3 flex flex-col gap-1">
+                    <span className="text-sm font-black text-[#fef3c7]">{item.label}</span>
+                    <span className="text-[10px] text-[#fef3c7]/70 font-mono">{item.desc}</span>
+                    <button
+                      onClick={() => {
+                        if (gold < item.price) { addLog(`💰 Moedas insuficientes! Precisa de ${item.price} moedas.`, 'error'); return; }
+                        setGold(prev => prev - item.price);
+                        addLog(`🧙‍♂️ Comprou ${item.label} por ${item.price}💰!`, 'success');
+                        if (item.effect === 'prevent_epidemic') { setEpidemicPrevented(true); addLog('💉 Próxima epidemia será prevenida!', 'success'); }
+                        else if (item.effect === 'fertilizante_7days') { setFertilizanteDays((prev: number) => prev + 7); addLog('🌱 +7 dias de fertilizante adicionados!', 'success'); }
+                        else if (item.effect === 'premium_feed') {
+                          setInventory((prev: any) => ({ ...prev, racaoBovina: (prev.racaoBovina ?? 0) + 10, racaoOvinos: (prev.racaoOvinos ?? 0) + 10, racaoAves: (prev.racaoAves ?? 0) + 10, racaoAquatica: (prev.racaoAquatica ?? 0) + 10, racaoCoelho: (prev.racaoCoelho ?? 0) + 10, racaoCarnivora: (prev.racaoCarnivora ?? 0) + 10 }));
+                          addLog('🥣 +10 de cada ração adicionadas ao Armazém!', 'success');
+                        }
+                        else if (item.effect === 'bebedouro') { setHasBebedouro(true); addLog('🪣 Bebedouro Automático instalado! Animais sempre hidratados.', 'success'); }
+                        else if (item.effect === 'cert_sanitario') { setHasCertSanitario(true); addLog('📜 Certificado Sanitário adquirido! +10% preço de carne permanente.', 'success'); }
+                        else if (item.effect === 'licenca_exotica') { setLicencaExotica(true); addLog('📋 Licença Exótica obtida! Agora pode criar Jacaré legalmente.', 'success'); }
+                        setMerchantSpecialItems(prev => prev.filter(id => id !== item.id));
+                        triggerAudioResult(() => sfx.playSound('sell'));
+                      }}
+                      disabled={gold < item.price}
+                      className="mt-auto bg-[#fbbf24] hover:bg-[#f59e0b] disabled:bg-stone-600 disabled:text-stone-400 text-[#78350f] font-black text-[10px] uppercase px-3 py-1.5 rounded-lg border-b-2 border-[#b45309] disabled:border-stone-700 transition-all cursor-pointer"
+                    >
+                      {item.price}💰 Comprar
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* --- MAIN GAMEBODY BENTO LAYOUT --- */}
         <div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 bg-transparent">
           
@@ -5003,6 +5121,22 @@ export default function App() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* Worker Visual Feedback Bar */}
+                {workers.length > 0 && (
+                  <div className="col-span-full flex flex-wrap gap-2 mb-3">
+                    {workers.map(worker => {
+                      const def = WORKER_TYPES.find(w => w.role === worker.role);
+                      return (
+                        <div key={worker.id} className="flex items-center gap-1.5 bg-[#064e3b]/80 border border-[#fbbf24]/60 rounded-full px-3 py-1">
+                          <span className="text-base">{def?.emoji ?? '👷'}</span>
+                          <span className="text-[10px] font-mono text-[#fef3c7] font-black">{worker.name}</span>
+                          <span className="text-[9px] text-[#fbbf24] font-mono">-{worker.dailyCost}💰/dia</span>
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 {/* Feature 1: Animal Filter Bar */}
                 <div className="col-span-full flex flex-wrap gap-2 mb-3">
                   <select value={animalFilter} onChange={e => setAnimalFilter(e.target.value)}
@@ -6377,6 +6511,31 @@ export default function App() {
                   <button type="button" onClick={(e) => sellProduct('enfeite_pavao', 1, e)} disabled={(inventory.enfeite_pavao ?? 0) < 1}
                     className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
                     🦚 Enfeite Pavão ({getActualSellPrice('enfeite_pavao')}💰)
+                  </button>
+                  )}
+
+                  {/* Biome exclusive products */}
+                  {(inventory.peixe ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('peixe' as any, 1, e)} disabled={(inventory.peixe ?? 0) < 1}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    title="Vende 1 Peixe do Lago. Preço base: 45 moedas.">
+                    🐟 Peixe ({getActualSellPrice('peixe' as any)}💰)
+                  </button>
+                  )}
+
+                  {(inventory.mel ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('mel' as any, 1, e)} disabled={(inventory.mel ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    title="Vende 1 Mel da Floresta. Preço base: 80 moedas.">
+                    🍯 Mel ({getActualSellPrice('mel' as any)}💰)
+                  </button>
+                  )}
+
+                  {(inventory.cogumelo ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('cogumelo' as any, 1, e)} disabled={(inventory.cogumelo ?? 0) < 1}
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    title="Vende 1 Cogumelo da Floresta. Preço base: 35 moedas.">
+                    🍄 Cogumelo ({getActualSellPrice('cogumelo' as any)}💰)
                   </button>
                   )}
                 </div>
@@ -8576,6 +8735,42 @@ export default function App() {
                           <PriceChart history={priceHistory[item.key] || [item.base, item.base, item.base, item.base, item.base, item.base, item.base]} basePrice={item.base} />
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Biome Exclusive Products */}
+                {((inventory.peixe ?? 0) > 0 || (inventory.mel ?? 0) > 0 || (inventory.cogumelo ?? 0) > 0 || landBiomes.some(b => b.biome === 'lago' || b.biome === 'floresta')) && (
+                  <div className="bg-[#064e3b]/10 border-2 border-[#fbbf24]/40 rounded-2xl p-4">
+                    <h4 className="font-display font-black text-xs uppercase text-[#78350f] mb-3">🌿 Produtos Exclusivos de Bioma</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {landBiomes.some(b => b.biome === 'lago') && (
+                        <div className="bg-white border border-blue-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                          <div>
+                            <div className="font-display font-black text-xs uppercase text-[#78350f]">🐟 Peixe (Lago)</div>
+                            <div className="text-stone-400 text-[9px] font-mono">Base: 45💰 | Atual: {getActualSellPrice('peixe' as any)}💰</div>
+                            <div className="text-[9px] text-stone-400 font-mono">Estoque: {inventory.peixe ?? 0}u · Produz a cada 3 dias</div>
+                          </div>
+                        </div>
+                      )}
+                      {landBiomes.some(b => b.biome === 'floresta') && (
+                        <>
+                          <div className="bg-white border border-amber-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                            <div>
+                              <div className="font-display font-black text-xs uppercase text-[#78350f]">🍯 Mel (Floresta)</div>
+                              <div className="text-stone-400 text-[9px] font-mono">Base: 80💰 | Atual: {getActualSellPrice('mel' as any)}💰</div>
+                              <div className="text-[9px] text-stone-400 font-mono">Estoque: {inventory.mel ?? 0}u · Produz a cada 5 dias</div>
+                            </div>
+                          </div>
+                          <div className="bg-white border border-emerald-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                            <div>
+                              <div className="font-display font-black text-xs uppercase text-[#78350f]">🍄 Cogumelo (Floresta)</div>
+                              <div className="text-stone-400 text-[9px] font-mono">Base: 35💰 | Atual: {getActualSellPrice('cogumelo' as any)}💰</div>
+                              <div className="text-[9px] text-stone-400 font-mono">Estoque: {inventory.cogumelo ?? 0}u · Produz a cada 4 dias</div>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
