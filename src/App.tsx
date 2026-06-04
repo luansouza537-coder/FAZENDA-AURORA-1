@@ -8,7 +8,7 @@ import { useAnimals } from './hooks/useAnimals';
 import { useInventory } from './hooks/useInventory';
 import { useFairs } from './hooks/useFairs';
 import { useEconomy } from './hooks/useEconomy';
-import { useFarm, getFarmTitle, getLevelUpDetails } from './hooks/useFarm';
+import { useFarm, getFarmTitle, getLevelUpDetails, getXpForLevel } from './hooks/useFarm';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Coins, 
@@ -841,122 +841,6 @@ export default function App() {
     };
   }, []);
 
-  // Keyboard Shortcuts (D, S, M, H, 1, 2, 3, Escape)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Prevent shortcut interference when typing inside input elements
-      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
-        if (e.key === 'Escape') {
-          setEditingId(null);
-        }
-        return;
-      }
-
-      const key = e.key.toLowerCase();
-
-      if (e.key === 'Escape') {
-        setShowTutorialModal(false);
-        setShowMarketModal(false);
-        setShowAutomationModal(false);
-        setShowAchievementsModal(false);
-        setShowWeeklyReport(false);
-        setShowSellAllConfirmModal(false);
-        setShowBuyMenu(false);
-      } else if (key === 'd' || key === 's') {
-        advanceDay(null as any);
-      } else if (key === 'm') {
-        setShowMarketModal(prev => !prev);
-      } else if (key === 'h') {
-        setShowTutorialModal(prev => !prev);
-      } else if (key === '1') {
-        craftCheese();
-      } else if (key === '2') {
-        craftScarf();
-      } else if (key === '3') {
-        craftMayonese(null as any);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  // BUG 9 FIX: adicionadas dependências faltantes para evitar valores stale no handler de teclado
-  }, [animals, inventory, currentDay, weather, weeklySales, showBuyMenu, machines, farmLevel, queijosEmMaturacao, merchantActive, daysSinceMerchant, nextMerchantDay, dailyEarning, weeklyStats]);
-
-  // Sync log scrollbar — scroll only inside the logs container, not the whole page
-  useEffect(() => {
-    if (logsContainerRef.current) {
-      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
-    }
-  }, [logs]);
-
-  // Persist State Updates Automatically to LocalStorage
-  useEffect(() => {
-    // Prevent wiping save if loaded empty
-    if (animals.length > 0 || currentDay > 1 || gold !== 80) {
-      const saveData = {
-        gold,
-        currentDay,
-        farmLevel,
-        farmXp,
-        inventory,
-        animals,
-        stats,
-        merchantActive,
-        daysSinceMerchant,
-        nextMerchantDay,
-        logs,
-        weeklyStats,
-        weeklySales,
-        previousPrices,
-        machines,
-        priceHistory,
-        queijosEmMaturacao,
-        maxPrateleiras,
-        totalQueijosFabricados,
-        queijosFabricadosTipos,
-        // BUG 9 FIX: persiste histórico de ganhos e estatísticas all-time (eram perdidas ao recarregar)
-        earningsHistory,
-        allTimeStats,
-        missions,
-        notifications,
-        // Novas funcionalidades
-        farmWisdomBonus,
-        contracts,
-        insurance,
-        landLots,
-        wellLevel,
-        solarLevel,
-        irrigationLevel,
-        queijariaNivel,
-        nextDayEvent,
-        hasStable,
-        hasSilo,
-        hasFridge,
-        hasTipBox,
-        productFreshness,
-        specialization,
-        debt,
-        hasTourism,
-        nextFairDay,
-        fairResults,
-        lastEpidemicDay,
-        droughtDaysRemaining,
-        licencaExotica,
-        coelhoReproCount,
-        racaoOrganicaDays,
-        fertilizanteDays,
-        prestigePoints,
-        nextExposicaoDay,
-        nextFeiraProdutosDay,
-        nextFeiraExoticaDay,
-        nextFestivalDay,
-      };
-      localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
-    }
-  // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay]);
-
   // Ref para rastrear conquistas já desbloqueadas sem depender do estado React (evita stale closure e duplos no StrictMode)
   const unlockedAchievementsRef = useRef<string[]>(unlockedAchievements);
   useEffect(() => {
@@ -995,6 +879,70 @@ export default function App() {
     });
     triggerAudioResult(() => sfx.playSound('levelup'));
   };
+
+  // --- useEconomy hook ---
+  // gold/setGold and other economy state are initialized from localStorage in useEconomy.
+  const {
+    gold,
+    setGold,
+    debt,
+    setDebt,
+    dailyEarning,
+    setDailyEarning,
+    earningsHistory,
+    setEarningsHistory,
+    weeklySales,
+    setWeeklySales,
+    weeklyStats,
+    setWeeklyStats,
+    previousPrices,
+    setPreviousPrices,
+    priceHistory,
+    setPriceHistory,
+    merchantActive,
+    setMerchantActive,
+    daysSinceMerchant,
+    setDaysSinceMerchant,
+    nextMerchantDay,
+    setNextMerchantDay,
+    insurance,
+    setInsurance,
+  } = useEconomy();
+
+  // --- useFarm hook ---
+  const {
+    farmLevel,
+    setFarmLevel,
+    farmXp,
+    setFarmXp,
+    specialization,
+    setSpecialization,
+    landLots,
+    setLandLots,
+    hasStable,
+    setHasStable,
+    hasSilo,
+    setHasSilo,
+    hasFridge,
+    setHasFridge,
+    hasTipBox,
+    setHasTipBox,
+    hasTourism,
+    setHasTourism,
+    wellLevel,
+    setWellLevel,
+    solarLevel,
+    setSolarLevel,
+    irrigationLevel,
+    setIrrigationLevel,
+    machines,
+    setMachines,
+    farmWisdomBonus,
+    setFarmWisdomBonus,
+    contracts,
+    setContracts,
+    verificarNivelFazenda,
+  } = useFarm({ gold, setGold, checkAndUnlockAchievement });
 
   const triggerAchievementCheck = (
     currentStats: FarmStats = stats,
@@ -1066,13 +1014,6 @@ export default function App() {
     }
   };
 
-  // Monitor states to unlock achievements dynamically
-  useEffect(() => {
-    if (currentScreen === 'game') {
-      triggerAchievementCheck(stats, gold, farmLevel, animals);
-    }
-  }, [stats, gold, farmLevel, animals, currentScreen, totalQueijosFabricados, queijosFabricadosTipos]);
-
   useEffect(() => {
     if (achievementNotification) {
       const t = setTimeout(() => {
@@ -1098,35 +1039,10 @@ export default function App() {
     }
   }, [showLevelUpModal]);
 
-  // --- FUNCIONALIDADE 1: Auto-avanço useEffect ---
-  // isGameOver derivado antecipado para uso no useEffect de auto-avanço (galinha = 60 moedas base)
-  // BUG FIX: usa 60 como referência correta (preço base da galinha sem especialização/nível)
-  const isGameOverForAutoAdvance = (animals.length === 0 && gold < 60) || debt > 1000;
-
   // BUG 1 FIX: advanceDayRef é declarado logo após advanceDay (ver abaixo).
   // Este ref será atribuído ali; o useEffect do auto-avanço o usa aqui.
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const advanceDayRef = useRef<(e: React.MouseEvent) => void>(() => {});
-
-  useEffect(() => {
-    if (!autoAdvance || isGameOverForAutoAdvance || isSleeping) return;
-    const anyModalOpen = showBuyMenu || showLevelUpModal !== null || showWeeklyReport || showTutorialModal || showAchievementsModal || showAutomationModal || showMarketModal || showSellAllConfirmModal || showQueijariaModal || showMissionsModal || showNotifications || showStatsModal;
-    if (anyModalOpen) return;
-
-    const interval = setInterval(() => {
-      if (!isSleepingRef.current) {
-        isSleepingRef.current = true;
-        setIsSleeping(true);
-        setTimeout(() => {
-          advanceDayRef.current(null as any);
-          setIsSleeping(false);
-          isSleepingRef.current = false;
-        }, 1000);
-      }
-    }, autoSpeed * 1000);
-
-    return () => clearInterval(interval);
-  }, [autoAdvance, autoSpeed, isGameOverForAutoAdvance, isSleeping, showBuyMenu, showLevelUpModal, showWeeklyReport, showTutorialModal, showAchievementsModal, showAutomationModal, showMarketModal, showSellAllConfirmModal, showQueijariaModal, showMissionsModal, showNotifications, showStatsModal]);
 
   // Initialize missions on first load if empty
   useEffect(() => {
@@ -1676,6 +1592,236 @@ export default function App() {
     triggerAudioResult,
     updateMissionProgress,
   });
+
+  // --- useAnimals hook ---
+  const {
+    animals,
+    setAnimals,
+    licencaExotica,
+    setLicencaExotica,
+    coelhoReproCount,
+    setCoelhoReproCount,
+    getRandomTrait,
+    getTraitInfo,
+    getAnimalFeedType,
+    getAnimalPurchasePrice,
+    getCarneMultiplier,
+    calculateBoiValue,
+    calcFairScore,
+    feedAnimal,
+    collectEgg,
+    collectGoatMilk,
+    collectLlamaWool,
+    collectDuckEgg,
+    collectGooseProduct,
+    collectBuffaloMilk,
+    collectMilk,
+    collectWool,
+    collectAlpacaWool,
+    collectCoelhoWool,
+    collectRa,
+    collectAvestruzPena,
+    sellAvestruz,
+    sellJacare,
+    sellOx,
+    buyAnimal,
+  } = useAnimals({
+    gold,
+    setGold,
+    farmLevel,
+    setFarmXp,
+    inventory,
+    setInventory,
+    setStats,
+    setWeeklyStats,
+    setWeeklySales,
+    setProductFreshness,
+    setDailyEarning,
+    setMissions,
+    debt,
+    landLots,
+    specialization,
+    farmWisdomBonus,
+    weather,
+    currentDay,
+    merchantActive,
+    weeklySales,
+    soundEnabled,
+    addLog,
+    addNotification,
+    spawnFeedback,
+    triggerAudioResult,
+    updateMissionProgress,
+    checkAndUnlockAchievement,
+    triggerConfetti,
+  });
+
+  // --- useFairs hook ---
+  const {
+    nextFairDay,
+    setNextFairDay,
+    fairResults,
+    setFairResults,
+    prestigePoints,
+    setPrestigePoints,
+    nextExposicaoDay,
+    setNextExposicaoDay,
+    nextFeiraProdutosDay,
+    setNextFeiraProdutosDay,
+    nextFeiraExoticaDay,
+    setNextFeiraExoticaDay,
+    nextFestivalDay,
+    setNextFestivalDay,
+    prestigeNotifiedRef,
+  } = useFairs({ addNotification });
+
+  // Monitor states to unlock achievements dynamically
+  useEffect(() => {
+    if (currentScreen === 'game') {
+      triggerAchievementCheck(stats, gold, farmLevel, animals);
+    }
+  }, [stats, gold, farmLevel, animals, currentScreen, totalQueijosFabricados, queijosFabricadosTipos]);
+
+  // --- FUNCIONALIDADE 1: Auto-avanço useEffect ---
+  // isGameOver derivado antecipado para uso no useEffect de auto-avanço (galinha = 60 moedas base)
+  // BUG FIX: usa 60 como referência correta (preço base da galinha sem especialização/nível)
+  const isGameOverForAutoAdvance = (animals.length === 0 && gold < 60) || debt > 1000;
+
+  useEffect(() => {
+    if (!autoAdvance || isGameOverForAutoAdvance || isSleeping) return;
+    const anyModalOpen = showBuyMenu || showLevelUpModal !== null || showWeeklyReport || showTutorialModal || showAchievementsModal || showAutomationModal || showMarketModal || showSellAllConfirmModal || showQueijariaModal || showMissionsModal || showNotifications || showStatsModal;
+    if (anyModalOpen) return;
+
+    const interval = setInterval(() => {
+      if (!isSleepingRef.current) {
+        isSleepingRef.current = true;
+        setIsSleeping(true);
+        setTimeout(() => {
+          advanceDayRef.current(null as any);
+          setIsSleeping(false);
+          isSleepingRef.current = false;
+        }, 1000);
+      }
+    }, autoSpeed * 1000);
+
+    return () => clearInterval(interval);
+  }, [autoAdvance, autoSpeed, isGameOverForAutoAdvance, isSleeping, showBuyMenu, showLevelUpModal, showWeeklyReport, showTutorialModal, showAchievementsModal, showAutomationModal, showMarketModal, showSellAllConfirmModal, showQueijariaModal, showMissionsModal, showNotifications, showStatsModal]);
+
+  // Keyboard Shortcuts (D, S, M, H, 1, 2, 3, Escape)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent shortcut interference when typing inside input elements
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+        if (e.key === 'Escape') {
+          setEditingId(null);
+        }
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+
+      if (e.key === 'Escape') {
+        setShowTutorialModal(false);
+        setShowMarketModal(false);
+        setShowAutomationModal(false);
+        setShowAchievementsModal(false);
+        setShowWeeklyReport(false);
+        setShowSellAllConfirmModal(false);
+        setShowBuyMenu(false);
+      } else if (key === 'd' || key === 's') {
+        advanceDay(null as any);
+      } else if (key === 'm') {
+        setShowMarketModal(prev => !prev);
+      } else if (key === 'h') {
+        setShowTutorialModal(prev => !prev);
+      } else if (key === '1') {
+        craftCheese();
+      } else if (key === '2') {
+        craftScarf();
+      } else if (key === '3') {
+        craftMayonese(null as any);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  // BUG 9 FIX: adicionadas dependências faltantes para evitar valores stale no handler de teclado
+  }, [animals, inventory, currentDay, weather, weeklySales, showBuyMenu, machines, farmLevel, queijosEmMaturacao, merchantActive, daysSinceMerchant, nextMerchantDay, dailyEarning, weeklyStats]);
+
+  // Sync log scrollbar — scroll only inside the logs container, not the whole page
+  useEffect(() => {
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+    }
+  }, [logs]);
+
+  // Persist State Updates Automatically to LocalStorage
+  useEffect(() => {
+    // Prevent wiping save if loaded empty
+    if (animals.length > 0 || currentDay > 1 || gold !== 80) {
+      const saveData = {
+        gold,
+        currentDay,
+        farmLevel,
+        farmXp,
+        inventory,
+        animals,
+        stats,
+        merchantActive,
+        daysSinceMerchant,
+        nextMerchantDay,
+        logs,
+        weeklyStats,
+        weeklySales,
+        previousPrices,
+        machines,
+        priceHistory,
+        queijosEmMaturacao,
+        maxPrateleiras,
+        totalQueijosFabricados,
+        queijosFabricadosTipos,
+        // BUG 9 FIX: persiste histórico de ganhos e estatísticas all-time (eram perdidas ao recarregar)
+        earningsHistory,
+        allTimeStats,
+        missions,
+        notifications,
+        // Novas funcionalidades
+        farmWisdomBonus,
+        contracts,
+        insurance,
+        landLots,
+        wellLevel,
+        solarLevel,
+        irrigationLevel,
+        queijariaNivel,
+        nextDayEvent,
+        hasStable,
+        hasSilo,
+        hasFridge,
+        hasTipBox,
+        productFreshness,
+        specialization,
+        debt,
+        hasTourism,
+        nextFairDay,
+        fairResults,
+        lastEpidemicDay,
+        droughtDaysRemaining,
+        licencaExotica,
+        coelhoReproCount,
+        racaoOrganicaDays,
+        fertilizanteDays,
+        prestigePoints,
+        nextExposicaoDay,
+        nextFeiraProdutosDay,
+        nextFeiraExoticaDay,
+        nextFestivalDay,
+      };
+      localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
+    }
+  // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 500;
@@ -2425,155 +2571,6 @@ export default function App() {
       type: 'system'
     });
   };
-  // --- useEconomy hook ---
-  // gold/setGold and other economy state are initialized from localStorage in useEconomy.
-  // animals/prestigePoints default to [] and 0; subsequent renders use correct values via
-  // the variables declared after useAnimals/useFairs calls below.
-  const {
-    gold,
-    setGold,
-    debt,
-    setDebt,
-    dailyEarning,
-    setDailyEarning,
-    earningsHistory,
-    setEarningsHistory,
-    weeklySales,
-    setWeeklySales,
-    weeklyStats,
-    setWeeklyStats,
-    previousPrices,
-    setPreviousPrices,
-    priceHistory,
-    setPriceHistory,
-    merchantActive,
-    setMerchantActive,
-    daysSinceMerchant,
-    setDaysSinceMerchant,
-    nextMerchantDay,
-    setNextMerchantDay,
-    insurance,
-    setInsurance,
-  } = useEconomy();
-
-  // --- useFarm hook ---
-  const {
-    farmLevel,
-    setFarmLevel,
-    farmXp,
-    setFarmXp,
-    specialization,
-    setSpecialization,
-    landLots,
-    setLandLots,
-    hasStable,
-    setHasStable,
-    hasSilo,
-    setHasSilo,
-    hasFridge,
-    setHasFridge,
-    hasTipBox,
-    setHasTipBox,
-    hasTourism,
-    setHasTourism,
-    wellLevel,
-    setWellLevel,
-    solarLevel,
-    setSolarLevel,
-    irrigationLevel,
-    setIrrigationLevel,
-    machines,
-    setMachines,
-    farmWisdomBonus,
-    setFarmWisdomBonus,
-    contracts,
-    setContracts,
-    verificarNivelFazenda,
-  } = useFarm({ gold, setGold, checkAndUnlockAchievement });
-
-  // --- useAnimals hook ---
-  const {
-    animals,
-    setAnimals,
-    licencaExotica,
-    setLicencaExotica,
-    coelhoReproCount,
-    setCoelhoReproCount,
-    getRandomTrait,
-    getTraitInfo,
-    getAnimalFeedType,
-    getAnimalPurchasePrice,
-    getCarneMultiplier,
-    calculateBoiValue,
-    calcFairScore,
-    feedAnimal,
-    collectEgg,
-    collectGoatMilk,
-    collectLlamaWool,
-    collectDuckEgg,
-    collectGooseProduct,
-    collectBuffaloMilk,
-    collectMilk,
-    collectWool,
-    collectAlpacaWool,
-    collectCoelhoWool,
-    collectRa,
-    collectAvestruzPena,
-    sellAvestruz,
-    sellJacare,
-    sellOx,
-    buyAnimal,
-  } = useAnimals({
-    gold,
-    setGold,
-    farmLevel,
-    setFarmXp,
-    inventory,
-    setInventory,
-    setStats,
-    setWeeklyStats,
-    setWeeklySales,
-    setProductFreshness,
-    setDailyEarning,
-    setMissions,
-    debt,
-    landLots,
-    specialization,
-    farmWisdomBonus,
-    weather,
-    currentDay,
-    merchantActive,
-    weeklySales,
-    soundEnabled,
-    addLog,
-    addNotification,
-    spawnFeedback,
-    triggerAudioResult,
-    updateMissionProgress,
-    checkAndUnlockAchievement,
-    triggerConfetti,
-  });
-
-  // --- useFairs hook ---
-  const {
-    nextFairDay,
-    setNextFairDay,
-    fairResults,
-    setFairResults,
-    prestigePoints,
-    setPrestigePoints,
-    nextExposicaoDay,
-    setNextExposicaoDay,
-    nextFeiraProdutosDay,
-    setNextFeiraProdutosDay,
-    nextFeiraExoticaDay,
-    setNextFeiraExoticaDay,
-    nextFestivalDay,
-    setNextFestivalDay,
-    prestigeNotifiedRef,
-  } = useFairs({ addNotification });
-
-
   // craftIncubarOvos needs setAnimals/getRandomTrait from useAnimals, so defined here
   const craftIncubarOvos = (event?: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -3662,7 +3659,7 @@ export default function App() {
             exoticLog.push({ msg: `🦎 Feira Exótica: Não foi desta vez. NPC teve ${npcExoticScore} pontos.`, type: 'info' });
           }
         } else {
-          exoticLog.push({ msg: `🦎 Feira Exótica: Sem animais exóticos para competir! (Avestruz, Jacaré, etc.)`, type: 'warning' });
+          exoticLog.push({ msg: `🦎 Feira Exótica: Sem animais exóticos para competir! (Avestruz, Jacaré, etc.)`, type: 'event' });
         }
 
         if (exoticGold > 0) {

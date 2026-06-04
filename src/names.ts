@@ -23,7 +23,7 @@ export const OX_NAMES = [
   'Guerreiro', 'Barão', 'Gigante', 'Hércules', 'Xerife', 'Urso'
 ];
 
-export function getRandomName(type: 'vaca' | 'ovelha' | 'boi' | 'galinha'): string {
+export function getRandomName(type: string): string {
   if (type === 'galinha') {
     return CHICKEN_NAMES[Math.floor(Math.random() * CHICKEN_NAMES.length)];
   }
