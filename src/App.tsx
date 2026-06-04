@@ -3680,8 +3680,16 @@ export default function App() {
 
       // Aktualiza inventário se as automações realizaram alterações
       // BUG 10 / BUG 1 FIX: usa callback funcional para evitar race condition com o setInventory de queijos prontos
+      // BUG CRITICAL FIX: invAfterAuto contém apenas as deduções de ração do alimentador (feeder).
+      // Leite e lã coletados pelas máquinas são rastreados em statsCollected e precisam ser adicionados
+      // explicitamente ao inventário; sem isso os produtos automáticos são registrados nos logs mas nunca aparecem no armazém.
       if (statsCollected.milk > 0 || statsCollected.wool > 0 || statsCollected.fedCount > 0) {
-        setInventory(prev => ({ ...prev, ...invAfterAuto }));
+        setInventory(prev => ({
+          ...prev,
+          ...invAfterAuto,
+          milk: (invAfterAuto.milk ?? prev.milk) + statsCollected.milk,
+          wool: (invAfterAuto.wool ?? prev.wool) + statsCollected.wool,
+        }));
       }
       
       if (statsCollected.milk > 0) {
