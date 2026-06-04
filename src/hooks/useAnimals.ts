@@ -16,10 +16,12 @@ export type InventoryState = {
   scarf: number;
   egg: number;
   mayo: number;
-  racaoLeite: number;
-  racaoOvelha: number;
-  racaoBoi: number;
-  racaoGalinha: number;
+  racaoBovina: number;
+  racaoOvinos: number;
+  racaoAves: number;
+  racaoAquatica: number;
+  racaoCoelho: number;
+  racaoCarnivora: number;
   queijoCoalho: number;
   queijoMucarela: number;
   queijoBrie: number;
@@ -179,15 +181,17 @@ export function useAnimals({
   };
 
   // Helper: get feed type and label for an animal type
-  const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha'; feedLabel: string } => {
-    if (type === 'ovelha' || type === 'lhama' || type === 'alpaca' || type === 'coelho_angora') return { feedType: 'racaoOvelha', feedLabel: 'Ração de Ovelha' };
-    if (type === 'boi' || type === 'avestruz' || type === 'jacare') return { feedType: 'racaoBoi', feedLabel: 'Ração de Boi' };
-    if (type === 'galinha' || type === 'pato' || type === 'ganso' || type === 'pavao' || type === 'codorna' || type === 'ra') return { feedType: 'racaoGalinha', feedLabel: 'Ração de Galinha' };
-    if (type === 'bufalo') return { feedType: 'racaoBoi', feedLabel: 'Ração de Boi' };
-    // minhoca, caracol, bicho_seda: eat nothing — but buyAnimal still checks feedType; we use racaoLeite as dummy and override qty check below
-    if (type === 'minhoca' || type === 'caracol' || type === 'bicho_seda') return { feedType: 'racaoLeite', feedLabel: 'Nenhuma ração necessária' };
-    // vaca, cabra → racaoLeite
-    return { feedType: 'racaoLeite', feedLabel: 'Ração de Vaca' };
+  const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora'; feedLabel: string } => {
+    if (type === 'vaca' || type === 'boi' || type === 'bufalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
+    if (type === 'ovelha' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return { feedType: 'racaoOvinos', feedLabel: 'Ração de Ovinos' };
+    if (type === 'galinha' || type === 'codorna' || type === 'pavao') return { feedType: 'racaoAves', feedLabel: 'Ração de Aves' };
+    if (type === 'pato' || type === 'ganso') return { feedType: 'racaoAquatica', feedLabel: 'Ração Aquática' };
+    if (type === 'coelho_angora') return { feedType: 'racaoCoelho', feedLabel: 'Ração de Coelhos' };
+    if (type === 'ra' || type === 'avestruz' || type === 'jacare') return { feedType: 'racaoCarnivora', feedLabel: 'Ração Carnívora' };
+    // minhoca, caracol, bicho_seda: eat nothing — but buyAnimal still checks feedType; we use racaoBovina as dummy and override qty check below
+    if (type === 'minhoca' || type === 'caracol' || type === 'bicho_seda') return { feedType: 'racaoBovina', feedLabel: 'Nenhuma ração necessária' };
+    // fallback
+    return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
   };
 
   const getAnimalPurchasePrice = (type: AnimalType, specOverride?: FarmSpecialization): number => {
@@ -273,17 +277,14 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal) return;
 
-    let feedType: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha' = 'racaoLeite';
-    let feedLabel = 'Ração de Vaca';
-    if (animal.type === 'ovelha') { feedType = 'racaoOvelha'; feedLabel = 'Ração de Ovelha'; }
-    else if (animal.type === 'boi') { feedType = 'racaoBoi'; feedLabel = 'Ração de Boi'; }
-    else if (animal.type === 'galinha') { feedType = 'racaoGalinha'; feedLabel = 'Ração de Galinha'; }
-    else if (animal.type === 'cabra') { feedType = 'racaoOvelha'; feedLabel = 'Ração de Ovelha (Cabra)'; }
-    else if (animal.type === 'lhama') { feedType = 'racaoOvelha'; feedLabel = 'Ração de Ovelha (Lhama)'; }
-    else if (animal.type === 'pato') { feedType = 'racaoGalinha'; feedLabel = 'Ração de Galinha (Pato)'; }
-    else if (animal.type === 'ganso') { feedType = 'racaoGalinha'; feedLabel = 'Ração de Galinha (Ganso)'; }
-    else if (animal.type === 'bufalo') { feedType = 'racaoBoi'; feedLabel = 'Ração de Boi (Búfalo)'; }
-    else if (animal.type === 'pavao') { feedType = 'racaoGalinha'; feedLabel = 'Ração de Galinha (Pavão)'; }
+    let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' = 'racaoBovina';
+    let feedLabel = 'Ração Bovina';
+    if (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+    else if (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
+    else if (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
+    else if (animal.type === 'pato' || animal.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
+    else if (animal.type === 'coelho_angora') { feedType = 'racaoCoelho'; feedLabel = 'Ração de Coelhos'; }
+    else if (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') { feedType = 'racaoCarnivora'; feedLabel = 'Ração Carnívora'; }
 
     if ((inventory[feedType] ?? 0) < 1) {
       addLog(`🌽 Ração insuficiente para alimentar ${animal.name}! Compre mais ${feedLabel} no Silo de Rações.`, 'error');

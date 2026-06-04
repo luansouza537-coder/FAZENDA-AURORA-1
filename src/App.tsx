@@ -538,10 +538,12 @@ export default function App() {
       scarf: 0,
       egg: 0,
       mayo: 0,
-      racaoLeite: 5,
-      racaoOvelha: 5,
-      racaoBoi: 5,
-      racaoGalinha: 5,
+      racaoBovina: 5,
+      racaoOvinos: 5,
+      racaoAves: 5,
+      racaoAquatica: 0,
+      racaoCoelho: 0,
+      racaoCarnivora: 0,
       queijoCoalho: 0,
       queijoMucarela: 0,
       queijoBrie: 0,
@@ -1243,13 +1245,14 @@ export default function App() {
   // feedAnimal moved to useAnimals hook
 
   // Feed pricing helpers
-  const getFeedBasePrice = (type: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha'): number => {
-    // +30% base prices (harder economy)
-    if (type === 'racaoLeite') return 3;   // was 2
-    if (type === 'racaoOvelha') return 3;  // was 2
-    if (type === 'racaoBoi') return 4;     // was 3
-    if (type === 'racaoGalinha') return 2; // was 1
-    return 3;
+  const getFeedBasePrice = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora'): number => {
+    if (type === 'racaoBovina') return 3;
+    if (type === 'racaoOvinos') return 3;
+    if (type === 'racaoAves') return 2;
+    if (type === 'racaoAquatica') return 4;
+    if (type === 'racaoCoelho') return 2;
+    if (type === 'racaoCarnivora') return 6;
+    return 2;
   };
 
   const getFeedPriceWithModifiers = (type: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha', day = currentDay): number => {
