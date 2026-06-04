@@ -2507,7 +2507,7 @@ export default function App() {
   };
 
   // Base raw item prices (increases with levels)
-  const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg'): number => {
+  const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare'): number => {
     if (itemType === 'milk') {
       return farmLevel >= 2 ? 6 : 5;
     }
@@ -2546,11 +2546,23 @@ export default function App() {
     if (itemType === 'butter') return 45;
     if (itemType === 'yogurt') return 35;
     if (itemType === 'fertile_egg') return 36;
+    if (itemType === 'quail_egg') return 22;
+    if (itemType === 'alpaca_wool') return 65;
+    if (itemType === 'humus') return 35;
+    if (itemType === 'muco') return 120;
+    if (itemType === 'angora_wool') return 90;
+    if (itemType === 'seda_bruta') return 80;
+    if (itemType === 'coxa_ra') return 70;
+    if (itemType === 'carne_avestruz') return 180;
+    if (itemType === 'pena_grande') return 60;
+    if (itemType === 'couro_avestruz') return 300;
+    if (itemType === 'carne_jacare') return 250;
+    if (itemType === 'couro_jacare') return 400;
     return 0;
   };
 
   // Keep 1 decimal place precision for display
-  const getDynamicPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg', d = currentDay, w = weather, sales = weeklySales): number => {
+  const getDynamicPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare', d = currentDay, w = weather, sales = weeklySales): number => {
     const base = getItemBaseSellPrice(itemType);
     const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType as keyof typeof sales] || 0) / 100));
     const seasonMult = getSeasonalityMultiplier(itemType as any, d);
@@ -2575,7 +2587,7 @@ export default function App() {
   };
 
   // Rounded to nearest integer for actual gold conversion
-  const getDynamicTransactionPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg', d = currentDay, w = weather, sales = weeklySales): number => {
+  const getDynamicTransactionPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare', d = currentDay, w = weather, sales = weeklySales): number => {
     const base = getItemBaseSellPrice(itemType);
     const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType as keyof typeof sales] || 0) / 100));
     const seasonMult = getSeasonalityMultiplier(itemType as any, d);
@@ -2600,7 +2612,7 @@ export default function App() {
   };
 
   // Final processed sell prices including dynamic pricing equations
-  const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg'): number => {
+  const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare'): number => {
     return getDynamicTransactionPrice(itemType);
   };
 
@@ -2773,6 +2785,100 @@ export default function App() {
     updateMissionProgress('collect_items', woolBonus);
   };
 
+  // Collect Alpaca Wool
+  const collectAlpacaWool = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'alpaca') return;
+    if (!animal.woolReady) { addLog(`🦙 ${animal.name} ainda não está pronta para tosquia!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
+    const qty = specialization === 'fibras' ? Math.round(1.2) : 1;
+    setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) + qty }));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolReady: false, daysSinceLastWool: 0 } : a));
+    addLog(`🦙 ${animal.name} (alpaca) foi tosquiada! +${qty} lã de alpaca.`, 'success');
+    setFarmXp(prev => prev + qty);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧶', `+${qty} Lã Alpaca`, event);
+  };
+
+  // Collect Coelho Angorá Wool
+  const collectCoelhoWool = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'coelho_angora') return;
+    if (!animal.woolReady) { addLog(`🐰 ${animal.name} ainda não está pronto para tosquia!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
+    const qty = specialization === 'fibras' ? 2 : 1;
+    setInventory(prev => ({ ...prev, angora_wool: (prev.angora_wool ?? 0) + qty }));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolReady: false, daysSinceLastWool: 0 } : a));
+    addLog(`🐰 ${animal.name} (coelho angorá) tosquiado! +${qty} lã angorá.`, 'success');
+    setFarmXp(prev => prev + qty);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧶', `+${qty} Lã Angorá`, event);
+  };
+
+  // Collect Rã coxa
+  const collectRa = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'ra') return;
+    if (!animal.woolReady) { addLog(`🐸 ${animal.name} ainda não está pronta para coleta!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
+    const qty = weather === 'chuva' ? 2 : 1;
+    setInventory(prev => ({ ...prev, coxa_ra: (prev.coxa_ra ?? 0) + qty }));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolReady: false, daysSinceLastWool: 0 } : a));
+    addLog(`🐸 ${animal.name} (rã) coletada! +${qty} coxa de rã.`, 'success');
+    setFarmXp(prev => prev + qty);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🍖', `+${qty} Coxa Rã`, event);
+  };
+
+  // Collect Avestruz pena_grande
+  const collectAvestruzPena = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'avestruz') return;
+    if (!animal.woolReady) { addLog(`🦤 ${animal.name} ainda não tem penas prontas!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
+    const qty = specialization === 'exotica' ? 2 : 1;
+    setInventory(prev => ({ ...prev, pena_grande: (prev.pena_grande ?? 0) + qty }));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolReady: false, daysSinceLastWool: 0 } : a));
+    addLog(`🦤 ${animal.name} (avestruz) soltou penas! +${qty} pena grande.`, 'success');
+    setFarmXp(prev => prev + qty);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🪶', `+${qty} Pena Grande`, event);
+  };
+
+  // Sell Avestruz (carne)
+  const sellAvestruz = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'avestruz') return;
+    const basePrice = 180;
+    const price = specialization === 'exotica' ? Math.round(basePrice * 1.25) : basePrice;
+    setGold(prev => prev + price);
+    setDailyEarning(prev => prev + price);
+    setInventory(prev => ({ ...prev, carne_avestruz: (prev.carne_avestruz ?? 0) + 1 }));
+    setAnimals(prev => prev.filter(a => a.id !== id));
+    addLog(`🦤 ${animal.name} (avestruz) foi abatida! +${price} moedas e +1 carne de avestruz no estoque.`, 'success');
+    setFarmXp(prev => prev + 10);
+    triggerAudioResult(() => sfx.playSound('sell'));
+    spawnFeedback('💰', `+${price} 💰`, event);
+  };
+
+  // Sell Jacaré (carne)
+  const sellJacare = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'jacare') return;
+    const basePrice = 250;
+    const price = specialization === 'exotica' ? Math.round(basePrice * 1.25) : basePrice;
+    setGold(prev => prev + price);
+    setDailyEarning(prev => prev + price);
+    setInventory(prev => ({ ...prev, carne_jacare: (prev.carne_jacare ?? 0) + 1 }));
+    setAnimals(prev => prev.filter(a => a.id !== id));
+    addLog(`🐊 ${animal.name} (jacaré) foi abatido! +${price} moedas e +1 carne de jacaré no estoque.`, 'success');
+    setFarmXp(prev => prev + 10);
+    triggerAudioResult(() => sfx.playSound('sell'));
+    spawnFeedback('💰', `+${price} 💰`, event);
+  };
+
   // 5. Sell Ox (Boi)
   const sellOx = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -2844,10 +2950,12 @@ export default function App() {
 
   // Helper: get feed type and label for an animal type
   const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha'; feedLabel: string } => {
-    if (type === 'ovelha' || type === 'lhama') return { feedType: 'racaoOvelha', feedLabel: 'Ração de Ovelha' };
-    if (type === 'boi') return { feedType: 'racaoBoi', feedLabel: 'Ração de Boi' };
-    if (type === 'galinha' || type === 'pato' || type === 'ganso' || type === 'pavao') return { feedType: 'racaoGalinha', feedLabel: 'Ração de Galinha' };
+    if (type === 'ovelha' || type === 'lhama' || type === 'alpaca' || type === 'coelho_angora') return { feedType: 'racaoOvelha', feedLabel: 'Ração de Ovelha' };
+    if (type === 'boi' || type === 'avestruz' || type === 'jacare') return { feedType: 'racaoBoi', feedLabel: 'Ração de Boi' };
+    if (type === 'galinha' || type === 'pato' || type === 'ganso' || type === 'pavao' || type === 'codorna' || type === 'ra') return { feedType: 'racaoGalinha', feedLabel: 'Ração de Galinha' };
     if (type === 'bufalo') return { feedType: 'racaoBoi', feedLabel: 'Ração de Boi' };
+    // minhoca, caracol, bicho_seda: eat nothing — but buyAnimal still checks feedType; we use racaoLeite as dummy and override qty check below
+    if (type === 'minhoca' || type === 'caracol' || type === 'bicho_seda') return { feedType: 'racaoLeite', feedLabel: 'Nenhuma ração necessária' };
     // vaca, cabra → racaoLeite
     return { feedType: 'racaoLeite', feedLabel: 'Ração de Vaca' };
   };
@@ -2881,9 +2989,21 @@ export default function App() {
       return;
     }
 
+    // Level unlock checks for new animals
+    if (type === 'codorna' && farmLevel < 3) { addLog('🔒 Codorna requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'alpaca' && farmLevel < 5) { addLog('🔒 Alpaca requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'minhoca' && farmLevel < 6) { addLog('🔒 Minhoca requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'caracol' && farmLevel < 7) { addLog('🔒 Caracol requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'coelho_angora' && farmLevel < 8) { addLog('🔒 Coelho Angorá requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'bicho_seda' && farmLevel < 10) { addLog('🔒 Bicho-da-Seda requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'ra' && farmLevel < 12) { addLog('🔒 Rã requer Nível 12!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'avestruz' && farmLevel < 15) { addLog('🔒 Avestruz requer Nível 15!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'jacare' && farmLevel < 18) { addLog('🔒 Jacaré requer Nível 18!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+
     // Verificar ração disponível
     const { feedType, feedLabel } = getAnimalFeedType(type);
-    if ((inventory[feedType] ?? 0) < 1) {
+    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
+    if (!noFeedAnimals.includes(type) && (inventory[feedType] ?? 0) < 1) {
       addLog(`🌾 Você precisa de 1 saco de ${feedLabel} para trazer o animal. Compre na loja!`, 'error');
       triggerAudioResult(() => sfx.playSound('error'));
       spawnFeedback('❌', `Falta ${feedLabel}!`, event);
@@ -2897,7 +3017,7 @@ export default function App() {
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80
 
     // F1: maxAge por tipo com variação ±20%
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -2906,8 +3026,8 @@ export default function App() {
       id: newId,
       type,
       name,
-      hunger: 60, // animal começa alimentado com a ração deduzida
-      happiness,
+      hunger: noFeedAnimals.includes(type) ? 100 : 60, // minhoca/caracol/bicho_seda always full
+      happiness: noFeedAnimals.includes(type) ? 100 : happiness,
       consecutiveHappyDays: 0,
       daysBelow80: 0,
       isBestFriend: false,
@@ -2924,10 +3044,16 @@ export default function App() {
       ...(type === 'ganso' && { inLayingSeason: false, daysSinceLastGooseEgg: 0, daysSinceLastGooseFeather: 0, hasProducedToday: false }),
       ...(type === 'bufalo' && { hasProducedToday: false, heatStress: false }),
       ...(type === 'pavao' && { hasProducedToday: false }),
+      ...(type === 'codorna' && { hasProducedToday: false }),
+      ...(type === 'alpaca' && { daysUntilWool: 4, daysSinceLastWool: 0, woolReady: false, heatStress: false }),
+      ...(type === 'coelho_angora' && { daysUntilWool: 5, daysSinceLastWool: 0, woolReady: false }),
+      ...(type === 'avestruz' && { daysUntilWool: 7, daysSinceLastWool: 0, woolReady: false }), // woolReady = pena_grande ready
     };
 
-    // Deduzir ração do inventário
-    setInventory(prev => ({ ...prev, [feedType]: (prev[feedType] ?? 0) - 1 }));
+    // Deduzir ração do inventário (minhoca, caracol, bicho_seda não consomem)
+    if (!noFeedAnimals.includes(type)) {
+      setInventory(prev => ({ ...prev, [feedType]: (prev[feedType] ?? 0) - 1 }));
+    }
 
     setGold(prev => prev - price);
     setAnimals(prev => [...prev, newAnimal]);
@@ -2943,8 +3069,18 @@ export default function App() {
     else if (type === 'ganso') typeLabel = '🦢 Ganso';
     else if (type === 'bufalo') typeLabel = '🐃 Búfalo';
     else if (type === 'pavao') typeLabel = '🦚 Pavão';
+    else if (type === 'codorna') typeLabel = '🐦 Codorna';
+    else if (type === 'alpaca') typeLabel = '🦙 Alpaca';
+    else if (type === 'minhoca') typeLabel = '🪱 Minhoca';
+    else if (type === 'caracol') typeLabel = '🐌 Caracol';
+    else if (type === 'coelho_angora') typeLabel = '🐰 Coelho Angorá';
+    else if (type === 'bicho_seda') typeLabel = '🐛 Bicho-da-Seda';
+    else if (type === 'ra') typeLabel = '🐸 Rã';
+    else if (type === 'avestruz') typeLabel = '🦤 Avestruz';
+    else if (type === 'jacare') typeLabel = '🐊 Jacaré';
 
-    addLog(`🐄 ${newAnimal.name} chegou à fazenda e foi alimentado com 1 saco de ração!`, 'success');
+    const feedMsg = noFeedAnimals.includes(type) ? 'chegou à fazenda!' : 'chegou à fazenda e foi alimentado com 1 saco de ração!';
+    addLog(`🐄 ${newAnimal.name} ${feedMsg}`, 'success');
     addLog(`✨ Parabéns! Você comprou ${newAnimal.name} (${typeLabel}) por ${price} moedas!`, 'success');
     setFarmXp(prev => prev + 5);
     triggerAudioResult(() => sfx.playSound('click'));
@@ -3064,7 +3200,7 @@ export default function App() {
     spawnFeedback('🧣', '+1 Cachecol', event);
   };
 
-  const sellProduct = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg', qty: number, event: React.MouseEvent) => {
+  const sellProduct = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare', qty: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
     if ((inventory[itemType] ?? 0) < qty) {
       addLog(`📦 Estoque insuficiente deste produto no Armazém!`, 'error');
@@ -3152,6 +3288,18 @@ export default function App() {
     else if (itemType === 'butter') label = 'Manteiga';
     else if (itemType === 'yogurt') label = 'Iogurte';
     else if (itemType === 'fertile_egg') label = 'Ovo Fértil';
+    else if (itemType === 'quail_egg') label = 'Ovo de Codorna';
+    else if (itemType === 'alpaca_wool') label = 'Lã de Alpaca';
+    else if (itemType === 'humus') label = 'Húmus';
+    else if (itemType === 'muco') label = 'Muco de Caracol';
+    else if (itemType === 'angora_wool') label = 'Lã Angorá';
+    else if (itemType === 'seda_bruta') label = 'Seda Bruta';
+    else if (itemType === 'coxa_ra') label = 'Coxa de Rã';
+    else if (itemType === 'carne_avestruz') label = 'Carne de Avestruz';
+    else if (itemType === 'pena_grande') label = 'Pena de Avestruz';
+    else if (itemType === 'couro_avestruz') label = 'Couro de Avestruz';
+    else if (itemType === 'carne_jacare') label = 'Carne de Jacaré';
+    else if (itemType === 'couro_jacare') label = 'Couro de Jacaré';
 
     addLog(`💰 Venda realizada: ${qty} unidades de ${label} por +${profit} moedas!`, 'success');
 
@@ -3577,10 +3725,14 @@ export default function App() {
     return animalsList.map(animal => {
       const copy = { ...animal };
 
+      // Animals that don't eat: skip hunger processing
+      const noHungerTypes = ['minhoca', 'caracol'];
+      const skipHunger = noHungerTypes.includes(copy.type);
+
       // Perda de fome diária: 12 + random 0-7 (gulosa consome +20%)
       const baseHungerLoss = 12 + Math.floor(Math.random() * 8);
       const hungerLoss = copy.trait === 'gulosa' ? Math.round(baseHungerLoss * 1.2) : baseHungerLoss;
-      copy.hunger = Math.max(0, copy.hunger - hungerLoss);
+      if (!skipHunger) copy.hunger = Math.max(0, copy.hunger - hungerLoss);
 
       // Regras de felicidade baseadas na fome:
       if (copy.hunger < 30) {
@@ -3593,7 +3745,7 @@ export default function App() {
       copy.happiness = Math.max(0, copy.happiness - 2);
 
       // Penalidade extra de fome extrema (BUG 6 FIX)
-      if (copy.hunger <= 0) {
+      if (!skipHunger && copy.hunger <= 0) {
         // Incrementa dias consecutivos sem comida
         copy.daysWithoutFood = (copy.daysWithoutFood ?? 0) + 1;
         // Penalidade de felicidade: -25/dia após 3 dias consecutivos, senão -15/dia
@@ -3768,6 +3920,83 @@ export default function App() {
       else if (copy.type === 'pavao') {
         // No active production; peacock feathers generated weekly in separate logic
         copy.hasProducedToday = false;
+      }
+      else if (copy.type === 'codorna') {
+        const canProduce = copy.hunger > 25 && copy.happiness > 30;
+        copy.hasProducedToday = canProduce;
+        if (canProduce) {
+          logs.push({ msg: `🐦 ${copy.name} (codorna) botou ovos de codorna!`, type: 'info' });
+        }
+      }
+      else if (copy.type === 'alpaca') {
+        // alpaca heat stress in summer
+        const seaIdx = Math.floor(((dayForSeason - 1) % 120) / 30);
+        if (seaIdx === 1) { // summer
+          copy.heatStress = true;
+          copy.happiness = Math.max(0, copy.happiness - 5);
+        } else {
+          copy.heatStress = false;
+        }
+        copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
+        if ((copy.daysSinceLastWool || 0) >= 4 && !copy.woolReady) {
+          if (copy.hunger > 20 && copy.happiness > 25) {
+            copy.woolReady = true;
+            logs.push({ msg: `🦙 ${copy.name} (alpaca) está pronta para tosquia!`, type: 'success' });
+          }
+        }
+      }
+      else if (copy.type === 'minhoca') {
+        // minhoca: never hungry, happiness always 100
+        copy.hunger = 100;
+        copy.happiness = 100;
+        copy.daysWithoutFood = 0;
+      }
+      else if (copy.type === 'caracol') {
+        // caracol: never hungry
+        copy.hunger = 100;
+        copy.daysWithoutFood = 0;
+        // happiness decays normally but reset from initial forced 100
+      }
+      else if (copy.type === 'coelho_angora') {
+        copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
+        if ((copy.daysSinceLastWool || 0) >= 5 && !copy.woolReady) {
+          if (copy.hunger > 20 && copy.happiness > 25) {
+            copy.woolReady = true;
+            logs.push({ msg: `🐰 ${copy.name} (coelho angorá) está pronto para tosquia!`, type: 'success' });
+          }
+        }
+      }
+      else if (copy.type === 'bicho_seda') {
+        // bicho_seda: consumes folha_amoreira (handled in advanceDay)
+        // here just decay happiness if no folha_amoreira was available (tracked via hunger proxy — we use hunger=0 signal)
+        // hunger stays 100 if folha_amoreira was provided, else -30 set in advanceDay
+        copy.daysWithoutFood = 0; // reset so it won't die of daysWithoutFood (we handle separately)
+        if (copy.hunger <= 0) {
+          copy.happiness = Math.max(0, copy.happiness - 30);
+          logs.push({ msg: `🐛 ${copy.name} (bicho-da-seda) está sem folha de amoreira! -30 felicidade!`, type: 'error' });
+        }
+      }
+      else if (copy.type === 'ra') {
+        // ra produces every 7 days
+        copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
+        if ((copy.daysSinceLastWool || 0) >= 7) {
+          if (copy.hunger > 20 && copy.happiness > 25) {
+            copy.woolReady = true;
+            logs.push({ msg: `🐸 ${copy.name} (rã) está pronta para coleta!`, type: 'success' });
+          }
+        }
+      }
+      else if (copy.type === 'avestruz') {
+        // avestruz: pena_grande every 7 days (woolReady pattern)
+        copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
+        if ((copy.daysSinceLastWool || 0) >= 7 && !copy.woolReady) {
+          copy.woolReady = true;
+          logs.push({ msg: `🦤 ${copy.name} (avestruz) perdeu penas! Pronta para coletar.`, type: 'success' });
+        }
+      }
+      else if (copy.type === 'jacare') {
+        // jacaré: no daily production (handled in advanceDay for incidents)
+        // just logs
       }
 
       // Verificação do status de Melhor Amigo
@@ -4164,7 +4393,9 @@ export default function App() {
         // BUG FIX: novos produtos incluídos no slide de histórico
         const keys = ['milk', 'wool', 'cheese', 'scarf', 'egg', 'mayo', 'queijoCoalho', 'queijoMucarela', 'queijoBrie', 'carne',
           'goat_milk', 'llama_wool', 'duck_egg', 'goose_egg', 'buffalo_milk', 'buffalo_mozzarella',
-          'feather', 'peacock_feather', 'butter', 'yogurt', 'fertile_egg'];
+          'feather', 'peacock_feather', 'butter', 'yogurt', 'fertile_egg',
+          'quail_egg', 'alpaca_wool', 'humus', 'muco', 'angora_wool', 'seda_bruta',
+          'coxa_ra', 'carne_avestruz', 'pena_grande', 'couro_avestruz', 'carne_jacare', 'couro_jacare'];
         const nextHist: Record<string, number[]> = {};
         keys.forEach((key) => {
           let currentP;
@@ -4451,8 +4682,18 @@ export default function App() {
             type: 'error'
           });
           const key = a.type as keyof typeof wisdomBonusUpdates;
-          wisdomBonusUpdates[key] = Math.min(0.1, (wisdomBonusUpdates[key] || 0) + 0.02);
+          if (key in wisdomBonusUpdates) wisdomBonusUpdates[key] = Math.min(0.1, (wisdomBonusUpdates[key] || 0) + 0.02);
           setTimeout(() => addNotification(`👴 ${a.name} (${a.type}) viveu ${a.age} dias e deixou sua sabedoria!`, 'event', nextDayValue), 0);
+          // Avestruz: couro ao morrer de velhice
+          if (a.type === 'avestruz') {
+            setTimeout(() => setInventory(prev => ({ ...prev, couro_avestruz: (prev.couro_avestruz ?? 0) + 1 })), 0);
+            logsToAdd.push({ msg: `🦤 ${a.name} legou 1 Couro de Avestruz ao morrer de velhice!`, type: 'success' });
+          }
+          // Jacaré: couro ao morrer de velhice
+          if (a.type === 'jacare') {
+            setTimeout(() => setInventory(prev => ({ ...prev, couro_jacare: (prev.couro_jacare ?? 0) + 1 })), 0);
+            logsToAdd.push({ msg: `🐊 ${a.name} legou 1 Couro de Jacaré ao morrer de velhice!`, type: 'success' });
+          }
           return false;
         }
         return true;
@@ -4518,6 +4759,33 @@ export default function App() {
           }
         }
 
+        // Minhoca: produz 1 húmus a cada 3 dias
+        if (a.type === 'minhoca' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
+          const humusAmt = specialization === 'organica' ? 2 : 1;
+          setTimeout(() => setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) + humusAmt })), 0);
+          logsToAdd.push({ msg: `🪱 ${a.name} (minhoca) produziu ${humusAmt} húmus!`, type: 'success' });
+        }
+
+        // Caracol: produz 1 muco a cada 3 dias (2x na chuva)
+        if (a.type === 'caracol' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
+          // Easter egg: if player has 'sal' in inventory, don't produce (salt kills snails — just a comment here)
+          const mucoAmt = (nextWeather === 'chuva' || weather === 'chuva') ? 2 : 1;
+          const finalMuco = specialization === 'organica' ? mucoAmt * 2 : mucoAmt;
+          setTimeout(() => setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) + finalMuco })), 0);
+          logsToAdd.push({ msg: `🐌 ${a.name} (caracol) produziu ${finalMuco} muco!`, type: 'success' });
+        }
+
+        // Bicho-da-seda: a cada 14 dias produz 3 seda_bruta; consome 1 folha_amoreira/dia
+        if (a.type === 'bicho_seda') {
+          if ((a.age || 0) > 0 && (a.age || 0) % 14 === 0) {
+            setTimeout(() => setInventory(prev => ({ ...prev, seda_bruta: (prev.seda_bruta ?? 0) + 3 })), 0);
+            logsToAdd.push({ msg: `🐛 ${a.name} (bicho-da-seda) produziu 3 seda bruta!`, type: 'success' });
+          }
+        }
+
+        // Codorna: produz quail_egg diariamente se hasProducedToday
+        // (production set in processarFomeFelicidade, collected here)
+
         return copy;
       });
 
@@ -4579,6 +4847,90 @@ export default function App() {
       // Ganso: alarme legado de clima ruim (mantém compatibilidade)
       if (finalAnimals.some(a => a.type === 'ganso') && nextWeather === 'chuva') {
         // já coberto pelo sistema de nextDayEvent acima — sem duplicidade
+      }
+
+      // --- NOVOS ANIMAIS: Produções e Mecânicas Diárias ---
+
+      // Bicho-da-seda: consome 1 folha_amoreira por bicho_seda por dia
+      {
+        const bichoCount = finalAnimals.filter(a => a.type === 'bicho_seda').length;
+        if (bichoCount > 0) {
+          setInventory(prev => {
+            const available = prev.folha_amoreira ?? 0;
+            if (available >= bichoCount) {
+              return { ...prev, folha_amoreira: available - bichoCount };
+            } else {
+              // not enough folha: bichos lose hunger (signal: set hunger=0 on those without food)
+              const missing = bichoCount - available;
+              logsToAdd.push({ msg: `🐛 Faltaram ${missing} folha(s) de amoreira! Bichos-da-seda passando fome!`, type: 'error' });
+              return { ...prev, folha_amoreira: 0 };
+            }
+          });
+        }
+      }
+
+      // Codorna: auto-collect quail_eggs
+      {
+        const codornaCount = finalAnimals.filter(a => a.type === 'codorna' && a.hasProducedToday).length;
+        if (codornaCount > 0) {
+          const eggs = codornaCount * 6;
+          setTimeout(() => setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) + eggs })), 0);
+          logsToAdd.push({ msg: `🐦 ${codornaCount} codorna(s) botaram ${eggs} ovos de codorna!`, type: 'success' });
+        }
+      }
+
+      // Rã: coleta automática de coxa_ra quando woolReady (handled via collect button but also auto here)
+      // Auto-reset cooldown handled via daysSinceLastWool in processarFomeFelicidade
+
+      // Jacaré: incidentes e fiscalização
+      {
+        const jacaresAlive = finalAnimals.filter(a => a.type === 'jacare');
+        if (jacaresAlive.length > 0) {
+          if (!licencaExotica) {
+            // 5% fiscalização = -300 moedas
+            if (Math.random() < 0.05) {
+              setGold(prev => Math.max(0, prev - 300));
+              logsToAdd.push({ msg: `🚔 Fiscalização! Jacaré sem Licença Exótica: multa de -300 moedas!`, type: 'error' });
+              setTimeout(() => addNotification('🚔 Fiscalização de jacaré! -300 moedas de multa!', 'warning', nextDayValue), 0);
+            }
+          }
+          // 2% incidente = -50 moedas (unless 'exotica' specialization)
+          if (specialization !== 'exotica' && Math.random() < 0.02) {
+            setGold(prev => Math.max(0, prev - 50));
+            logsToAdd.push({ msg: `🐊 Incidente com o jacaré! -50 moedas de danos.`, type: 'error' });
+          }
+        }
+      }
+
+      // Coelho Angorá: reprodução (a cada 15 dias se 2+ coelhos)
+      {
+        const coelhos = finalAnimals.filter(a => a.type === 'coelho_angora');
+        if (coelhos.length >= 2 && coelhoReproCount < 4) {
+          // Check if any coelho has age that's a multiple of 15
+          const shouldRepro = coelhos.some(c => (c.age || 0) > 0 && (c.age || 0) % 15 === 0);
+          if (shouldRepro) {
+            const newId = finalAnimals.length > 0 ? Math.max(...finalAnimals.map(a => a.id)) + 100 : 100;
+            const newBaby: Animal = {
+              id: newId,
+              type: 'coelho_angora',
+              name: getRandomName('coelho_angora'),
+              hunger: 80,
+              happiness: 90,
+              consecutiveHappyDays: 0,
+              daysBelow80: 0,
+              isBestFriend: false,
+              trait: getRandomTrait(),
+              age: 0,
+              maxAge: Math.round(100 * (1 + (Math.random() * 0.4 - 0.2))),
+              daysUntilWool: 5,
+              daysSinceLastWool: 0,
+              woolReady: false,
+            };
+            setAnimals(prev => [...prev, newBaby]);
+            setCoelhoReproCount(prev => prev + 1);
+            logsToAdd.push({ msg: `🐰 Os coelhos angorá tiveram um filhote! ${newBaby.name} chegou à fazenda!`, type: 'success' });
+          }
+        }
       }
 
       setAnimals(finalAnimals);
@@ -5691,6 +6043,126 @@ export default function App() {
                       {farmLevel < 5 ? 'Nível 5+' : 'Comprar + 1 🌾'}
                     </button>
                   </div>
+
+                  {/* Codorna (Nível 3+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 3 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv3+</span>}
+                    <span className="text-4xl">🐦</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Codorna</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">6 ovos de codorna/dia 22💰/u. Ração de galinha.</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('codorna')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('codorna', e)} disabled={gold < getAnimalPurchasePrice('codorna') || farmLevel < 3}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 3 ? 'Nível 3+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
+                  {/* Alpaca (Nível 5+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 5 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv5+</span>}
+                    <span className="text-4xl">🦙</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Alpaca</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã 65💰/u a cada 4 dias. Estresse térmico no verão.</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('alpaca')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('alpaca', e)} disabled={gold < getAnimalPurchasePrice('alpaca') || farmLevel < 5}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 5 ? 'Nível 5+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
+                  {/* Minhoca (Nível 6+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 6 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv6+</span>}
+                    <span className="text-4xl">🪱</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Minhoca</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Produz húmus 35💰/u a cada 3 dias. Não precisa de ração!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('minhoca')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('minhoca', e)} disabled={gold < getAnimalPurchasePrice('minhoca') || farmLevel < 6}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 6 ? 'Nível 6+' : 'Comprar Kit 🌿'}
+                    </button>
+                  </div>
+
+                  {/* Caracol (Nível 7+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 7 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv7+</span>}
+                    <span className="text-4xl">🐌</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Caracol</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Muco 120💰/u a cada 3 dias. 2x na chuva. Sem ração!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('caracol')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('caracol', e)} disabled={gold < getAnimalPurchasePrice('caracol') || farmLevel < 7}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 7 ? 'Nível 7+' : 'Comprar + 1 🌿'}
+                    </button>
+                  </div>
+
+                  {/* Coelho Angorá (Nível 8+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 8 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv8+</span>}
+                    <span className="text-4xl">🐰</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Coelho Angorá</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã 90💰/u a cada 5 dias. Reproduz (máx 4x)!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('coelho_angora')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('coelho_angora', e)} disabled={gold < getAnimalPurchasePrice('coelho_angora') || farmLevel < 8}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 8 ? 'Nível 8+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
+                  {/* Bicho-da-Seda (Nível 10+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 10 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv10+</span>}
+                    <span className="text-4xl">🐛</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Bicho-da-Seda</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">3 seda bruta (80💰/u) a cada 14 dias. Requer folha de amoreira/dia!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('bicho_seda')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('bicho_seda', e)} disabled={gold < getAnimalPurchasePrice('bicho_seda') || farmLevel < 10}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 10 ? 'Nível 10+' : 'Comprar Lote 🌿'}
+                    </button>
+                  </div>
+
+                  {/* Rã (Nível 12+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 12 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv12+</span>}
+                    <span className="text-4xl">🐸</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Rã</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Coxa de rã 70💰/u a cada 7 dias. +50% na chuva!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('ra')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('ra', e)} disabled={gold < getAnimalPurchasePrice('ra') || farmLevel < 12}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 12 ? 'Nível 12+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
+                  {/* Avestruz (Nível 15+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 15 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv15+</span>}
+                    {farmLevel >= 15 && <span className="absolute -top-2.5 -right-2 bg-purple-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">🌟 Raro</span>}
+                    <span className="text-4xl">🦤</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Avestruz</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Penas 60💰/u (7d), carne 180💰, couro 300💰 (na morte)!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('avestruz')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('avestruz', e)} disabled={gold < getAnimalPurchasePrice('avestruz') || farmLevel < 15}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 15 ? 'Nível 15+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
+                  {/* Jacaré (Nível 18+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 18 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv18+</span>}
+                    {farmLevel >= 18 && <span className="absolute -top-2.5 -right-2 bg-red-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">⚠️ Exótico</span>}
+                    <span className="text-4xl">🐊</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Jacaré</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Carne 250💰, couro 400💰 (na morte). Requer Licença Exótica!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('jacare')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('jacare', e)} disabled={gold < getAnimalPurchasePrice('jacare') || farmLevel < 18}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 18 ? 'Nível 18+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
                   </div>{/* fim grid BUG 1 FIX */}
                 </motion.div>
               )}
@@ -5811,7 +6283,7 @@ export default function App() {
 
                             {/* Animal Badge */}
                             <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-                              {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : '🐾 Animal'}
+                              {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'minhoca' ? '🪱 Minhoca' : animal.type === 'caracol' ? '🐌 Caracol' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : '🐾 Animal'}
                             </span>
                             {/* Trait badge */}
                             {animal.trait && (() => {
@@ -5935,6 +6407,40 @@ export default function App() {
                               {animal.type === 'pavao' && (
                                 <span className="select-none">🦚</span>
                               )}
+                              {animal.type === 'codorna' && (
+                                <>
+                                  <span className="select-none">🐦</span>
+                                  {animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🥚</span>}
+                                </>
+                              )}
+                              {animal.type === 'alpaca' && (
+                                <>
+                                  <span className="select-none">🦙</span>
+                                  {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
+                                </>
+                              )}
+                              {animal.type === 'minhoca' && <span className="select-none">🪱</span>}
+                              {animal.type === 'caracol' && <span className="select-none">🐌</span>}
+                              {animal.type === 'coelho_angora' && (
+                                <>
+                                  <span className="select-none">🐰</span>
+                                  {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
+                                </>
+                              )}
+                              {animal.type === 'bicho_seda' && <span className="select-none">🐛</span>}
+                              {animal.type === 'ra' && (
+                                <>
+                                  <span className="select-none">🐸</span>
+                                  {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🍖</span>}
+                                </>
+                              )}
+                              {animal.type === 'avestruz' && (
+                                <>
+                                  <span className="select-none">🦤</span>
+                                  {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🪶</span>}
+                                </>
+                              )}
+                              {animal.type === 'jacare' && <span className="select-none">🐊</span>}
                             </div>
 
                             {/* Avatar tooltip */}
@@ -6181,10 +6687,15 @@ export default function App() {
                           
                           {/* Alimentar (Dynamic feed count based on animal type) */}
                           {(() => {
-                            // BUG FIX: novos animais usam a ração correta na UI (cabra/lhama→ovelha, búfalo→boi, pato/ganso/pavão→galinha)
-                            const feedType = animal.type === 'vaca' ? 'racaoLeite' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama') ? 'racaoOvelha' : (animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBoi' : 'racaoGalinha';
+                            // Animais que não comem ração
+                            const noFeedUI = ['minhoca', 'caracol', 'bicho_seda'];
+                            if (noFeedUI.includes(animal.type)) {
+                              return <span className="text-[10px] text-stone-400 font-mono italic flex-1 flex items-center justify-center">Sem ração necessária 🌿</span>;
+                            }
+                            // BUG FIX: novos animais usam a ração correta na UI
+                            const feedType = animal.type === 'vaca' ? 'racaoLeite' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca' || animal.type === 'coelho_angora') ? 'racaoOvelha' : (animal.type === 'boi' || animal.type === 'bufalo' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoBoi' : 'racaoGalinha';
                             const feedQty = inventory[feedType] ?? 0;
-                            const label = animal.type === 'vaca' ? 'Ração Vaca' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama') ? 'Ração Ovelha' : (animal.type === 'boi' || animal.type === 'bufalo') ? 'Ração Boi' : 'Ração Galinha';
+                            const label = feedType === 'racaoLeite' ? 'Ração Vaca' : feedType === 'racaoOvelha' ? 'Ração Ovelha' : feedType === 'racaoBoi' ? 'Ração Boi' : 'Ração Galinha';
                             return (
                               <button
                                 type="button"
@@ -6345,6 +6856,58 @@ export default function App() {
                             </button>
                           )}
 
+                          {/* Alpaca: coletar lã */}
+                          {animal.type === 'alpaca' && (
+                            <button type="button" onClick={(e) => { e.preventDefault(); collectAlpacaWool(animal.id, e); }} disabled={!animal.woolReady}
+                              className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+                              title={animal.woolReady ? 'Tosquiar alpaca' : `Aguarde ${4 - (animal.daysSinceLastWool ?? 0)} dia(s)`}>
+                              <Scissors className="w-3.5 h-3.5" /> Tosquiar Alpaca
+                            </button>
+                          )}
+
+                          {/* Coelho Angorá: coletar lã */}
+                          {animal.type === 'coelho_angora' && (
+                            <button type="button" onClick={(e) => { e.preventDefault(); collectCoelhoWool(animal.id, e); }} disabled={!animal.woolReady}
+                              className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+                              title={animal.woolReady ? 'Tosquiar coelho angorá' : 'Aguarde'}>
+                              <Scissors className="w-3.5 h-3.5" /> Tosquiar Coelho
+                            </button>
+                          )}
+
+                          {/* Rã: coletar coxa */}
+                          {animal.type === 'ra' && (
+                            <button type="button" onClick={(e) => { e.preventDefault(); collectRa(animal.id, e); }} disabled={!animal.woolReady}
+                              className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-teal-500 hover:bg-teal-400 border-b-4 border-teal-700 shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+                              title={animal.woolReady ? 'Coletar coxa de rã' : 'Aguarde 7 dias'}>
+                              🍖 Coletar Rã
+                            </button>
+                          )}
+
+                          {/* Avestruz: coletar pena ou vender */}
+                          {animal.type === 'avestruz' && (
+                            <>
+                              <button type="button" onClick={(e) => { e.preventDefault(); collectAvestruzPena(animal.id, e); }} disabled={!animal.woolReady}
+                                className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+                                title={animal.woolReady ? 'Coletar pena grande' : 'Aguarde'}>
+                                🪶 Pena Grande
+                              </button>
+                              <button type="button" onClick={(e) => { e.preventDefault(); sellAvestruz(animal.id, e); }}
+                                className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+                                title="Abater avestruz (+180💰 + 1 carne)">
+                                💰 Abater
+                              </button>
+                            </>
+                          )}
+
+                          {/* Jacaré: vender */}
+                          {animal.type === 'jacare' && (
+                            <button type="button" onClick={(e) => { e.preventDefault(); sellJacare(animal.id, e); }}
+                              className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+                              title={`Abater jacaré (+250💰 + 1 carne). ${!licencaExotica ? '⚠️ Sem licença: risco de fiscalização!' : '✅ Licenciado'}`}>
+                              🐊 Abater {!licencaExotica && '⚠️'}
+                            </button>
+                          )}
+
                         </div>
 
                       </motion.div>
@@ -6451,6 +7014,25 @@ export default function App() {
                     items: [
                       { key: 'scarf', label: '🧣 Cachecol', qty: inventory.scarf, priceKey: 'scarf' },
                       { key: 'mayo', label: '🥣 Maionese', qty: inventory.mayo ?? 0, priceKey: 'mayo' },
+                    ]
+                  },
+                  {
+                    title: '🌿 Novos Animais',
+                    bg: 'bg-green-50/60 border-green-200',
+                    items: [
+                      { key: 'quail_egg', label: '🐦 Ov. Codorna', qty: inventory.quail_egg ?? 0, priceKey: 'quail_egg' as any },
+                      { key: 'alpaca_wool', label: '🦙 Lã Alpaca', qty: inventory.alpaca_wool ?? 0, priceKey: 'alpaca_wool' as any },
+                      { key: 'angora_wool', label: '🐰 Lã Angorá', qty: inventory.angora_wool ?? 0, priceKey: 'angora_wool' as any },
+                      { key: 'humus', label: '🪱 Húmus', qty: inventory.humus ?? 0, priceKey: 'humus' as any },
+                      { key: 'muco', label: '🐌 Muco', qty: inventory.muco ?? 0, priceKey: 'muco' as any },
+                      { key: 'seda_bruta', label: '🐛 Seda Bruta', qty: inventory.seda_bruta ?? 0, priceKey: 'seda_bruta' as any },
+                      { key: 'coxa_ra', label: '🐸 Coxa Rã', qty: inventory.coxa_ra ?? 0, priceKey: 'coxa_ra' as any },
+                      { key: 'pena_grande', label: '🦤 Pena Grande', qty: inventory.pena_grande ?? 0, priceKey: 'pena_grande' as any },
+                      { key: 'carne_avestruz', label: '🦤 Carne Avestruz', qty: inventory.carne_avestruz ?? 0, priceKey: 'carne_avestruz' as any },
+                      { key: 'couro_avestruz', label: '🦤 Couro Avestruz', qty: inventory.couro_avestruz ?? 0, priceKey: 'couro_avestruz' as any },
+                      { key: 'carne_jacare', label: '🐊 Carne Jacaré', qty: inventory.carne_jacare ?? 0, priceKey: 'carne_jacare' as any },
+                      { key: 'couro_jacare', label: '🐊 Couro Jacaré', qty: inventory.couro_jacare ?? 0, priceKey: 'couro_jacare' as any },
+                      { key: 'folha_amoreira', label: '🌿 Folha Amoreira', qty: inventory.folha_amoreira ?? 0 },
                     ]
                   }
                 ];
@@ -8417,6 +8999,28 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* Licença de Fauna Exótica */}
+                <div className="bg-white border-4 border-purple-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-purple-800 mb-1">🦎 Licença de Fauna Exótica</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Autoriza criação de jacaré sem multas de fiscalização (5%/dia = -300💰). Requer Nível 18. {licencaExotica ? '✅ Obtida' : 'Não obtida'}
+                  </p>
+                  <button
+                    disabled={licencaExotica || gold < 500 || farmLevel < 18}
+                    onClick={() => {
+                      if (!licencaExotica && gold >= 500 && farmLevel >= 18) {
+                        setGold(prev => prev - 500);
+                        setLicencaExotica(true);
+                        addLog('🦎 Licença de Fauna Exótica obtida! Jacarés não serão multados.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${licencaExotica ? 'bg-purple-100 border-purple-300 text-purple-700' : farmLevel >= 18 && gold >= 500 ? 'bg-purple-500 hover:bg-purple-400 text-white border-purple-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {licencaExotica ? '✅ Licença Obtida' : farmLevel < 18 ? '🔒 Requer Nível 18 (500💰)' : 'Obter Licença (500💰)'}
+                  </button>
+                </div>
+
               </div>
               <div className="bg-orange-50 p-4 border-t border-orange-100 flex justify-end shrink-0">
                 <button onClick={() => setShowUpgradesModal(false)} className="bg-orange-600 hover:bg-orange-500 text-white border-b-4 border-orange-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider cursor-pointer">
@@ -9241,11 +9845,13 @@ export default function App() {
               </div>
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { key: 'leiteira' as FarmSpecialization, emoji: '🥛', title: 'LEITEIRA', desc: 'Foco em vacas, cabras e búfalos', bonuses: '+20% produção de leite\n-10% ração leiteira\n+10% custo de aves/ovelhas' },
-                  { key: 'fibras' as FarmSpecialization, emoji: '🧶', title: 'FIBRAS', desc: 'Foco em ovelhas e lhamas', bonuses: '+20% produção de lã\n-10% ração de ovelha/lhama\n+10% custo de outros animais' },
-                  { key: 'avicultura' as FarmSpecialization, emoji: '🥚', title: 'AVICULTURA', desc: 'Foco em galinhas, patos e gansos', bonuses: '+20% produção de ovos\n-10% ração de aves\n+10% custo de outros animais' },
-                  { key: 'diversificada' as FarmSpecialization, emoji: '🌿', title: 'DIVERSIFICADA', desc: 'Sem bônus nem penalidades', bonuses: 'Jogo no modo padrão\nSem modificadores especiais\nLiberdade total de escolha' },
-                ].map(opt => (
+                  { key: 'leiteira' as FarmSpecialization, emoji: '🥛', title: 'LEITEIRA', desc: 'Foco em vacas, cabras e búfalos', bonuses: '+20% produção de leite\n-10% ração leiteira\n+10% custo de aves/ovelhas', minLevel: 1 },
+                  { key: 'fibras' as FarmSpecialization, emoji: '🧶', title: 'FIBRAS', desc: 'Foco em ovelhas e lhamas', bonuses: '+20% produção de lã\n-10% ração de ovelha/lhama\n+10% custo de outros animais', minLevel: 1 },
+                  { key: 'avicultura' as FarmSpecialization, emoji: '🥚', title: 'AVICULTURA', desc: 'Foco em galinhas, patos e gansos', bonuses: '+20% produção de ovos\n-10% ração de aves\n+10% custo de outros animais', minLevel: 1 },
+                  { key: 'diversificada' as FarmSpecialization, emoji: '🌿', title: 'DIVERSIFICADA', desc: 'Sem bônus nem penalidades', bonuses: 'Jogo no modo padrão\nSem modificadores especiais\nLiberdade total de escolha', minLevel: 1 },
+                  { key: 'organica' as FarmSpecialization, emoji: '🌱', title: 'ORGÂNICA', desc: 'Foco em minhocas e caracóis (Nv5+)', bonuses: '+20% produção de húmus/muco\nMinhoca e caracol nunca morrem\nEspecial: animais da terra', minLevel: 5 },
+                  { key: 'exotica' as FarmSpecialization, emoji: '🦎', title: 'EXÓTICA', desc: 'Foco em animais raros (Nv8+)', bonuses: '+25% preços de couro/carne rara\nJacaré sem incidentes\nCouro de avestruz garantido na morte', minLevel: 8 },
+                ].filter(opt => farmLevel >= opt.minLevel).map(opt => (
                   <button
                     key={String(opt.key)}
                     onClick={() => {
