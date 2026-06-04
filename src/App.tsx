@@ -675,6 +675,63 @@ export default function App() {
     } catch (e) {}
     return null;
   });
+
+  // --- NOVOS SISTEMAS: Especialização, Dívida, Turismo, Feiras, Crises ---
+  const [specialization, setSpecialization] = useState<FarmSpecialization>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).specialization ?? null;
+    } catch (e) {}
+    return null;
+  });
+  const [showSpecializationModal, setShowSpecializationModal] = useState<boolean>(false);
+
+  const [debt, setDebt] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).debt ?? 0;
+    } catch (e) {}
+    return 0;
+  });
+
+  const [hasTourism, setHasTourism] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).hasTourism ?? false;
+    } catch (e) {}
+    return false;
+  });
+
+  const [nextFairDay, setNextFairDay] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).nextFairDay ?? 30;
+    } catch (e) {}
+    return 30;
+  });
+  const [fairResults, setFairResults] = useState<FairResult[]>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).fairResults ?? [];
+    } catch (e) {}
+    return [];
+  });
+  const [showFairResultModal, setShowFairResultModal] = useState<FairResult | null>(null);
+
+  const [lastEpidemicDay, setLastEpidemicDay] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).lastEpidemicDay ?? 0;
+    } catch (e) {}
+    return 0;
+  });
+  const [droughtDaysRemaining, setDroughtDaysRemaining] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).droughtDaysRemaining ?? 0;
+    } catch (e) {}
+    return 0;
+  });
   const [showBuyMenu, setShowBuyMenu] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
   const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>('splash');
@@ -1190,6 +1247,13 @@ export default function App() {
     setIrrigationLevel(0);
     setQueijariaNivel(1);
     setNextDayEvent(null);
+    setSpecialization(null);
+    setDebt(0);
+    setHasTourism(false);
+    setNextFairDay(30);
+    setFairResults([]);
+    setLastEpidemicDay(0);
+    setDroughtDaysRemaining(0);
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -1293,7 +1357,7 @@ export default function App() {
   // Persist State Updates Automatically to LocalStorage
   useEffect(() => {
     // Prevent wiping save if loaded empty
-    if (animals.length > 0 || currentDay > 1 || gold !== 120) {
+    if (animals.length > 0 || currentDay > 1 || gold !== 80) {
       const saveData = {
         gold,
         currentDay,
@@ -1334,11 +1398,18 @@ export default function App() {
         hasFridge,
         hasTipBox,
         productFreshness,
+        specialization,
+        debt,
+        hasTourism,
+        nextFairDay,
+        fairResults,
+        lastEpidemicDay,
+        droughtDaysRemaining,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness]);
+  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining]);
 
   // Ref para rastrear conquistas já desbloqueadas sem depender do estado React (evita stale closure e duplos no StrictMode)
   const unlockedAchievementsRef = useRef<string[]>(unlockedAchievements);
@@ -1696,6 +1767,8 @@ export default function App() {
       return;
     }
 
+    // Desconto de especialização no custo de ração (não afeta consumo de inventário, aplica desconto de preço)
+    // (o consumo de ração é sempre 1 unidade; o desconto é refletido no preço de compra via getFeedPriceWithModifiers)
     setInventory(prev => ({
       ...prev,
       [feedType]: prev[feedType] - 1
@@ -1737,6 +1810,13 @@ export default function App() {
     if (farmLevel >= 4) {
       base = Math.max(1, Math.round(base * 0.9));
     }
+
+    // Desconto de especialização: -10% para animais focados na especialização
+    const specFeedDiscount =
+      (specialization === 'leiteira' && (type === 'racaoLeite')) ? 0.9 :
+      (specialization === 'fibras' && type === 'racaoOvelha') ? 0.9 :
+      (specialization === 'avicultura' && type === 'racaoGalinha') ? 0.9 : 1.0;
+    base = Math.max(1, Math.round(base * specFeedDiscount));
 
     // F8: desconto do poço d'água (10% por nível)
     if (wellLevel > 0) {
@@ -1836,6 +1916,9 @@ export default function App() {
     if (weather === 'chuva') {
       totalOvos = Math.max(1, Math.round(totalOvos * 0.8));
     }
+    // Bônus de especialização avicultura
+    const specBonusEgg = specialization === 'avicultura' ? 1.2 : 1.0;
+    totalOvos = Math.round(totalOvos * specBonusEgg);
 
     setInventory(prev => ({
       ...prev,
@@ -1892,6 +1975,7 @@ export default function App() {
     let qty = 2;
     if (animal.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
+    qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
 
     setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) + qty }));
     // BUG FIX: reseta frescor ao coletar leite de cabra fresco
@@ -1922,7 +2006,8 @@ export default function App() {
       return;
     }
 
-    const qty = animal.woolAccumulated ?? 0;
+    const llamaSpecBonus = specialization === 'fibras' ? 1.2 : 1.0;
+    const qty = Math.round((animal.woolAccumulated ?? 0) * llamaSpecBonus);
     setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) + qty }));
     setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + qty }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolAccumulated: 0 } : a));
@@ -2040,6 +2125,7 @@ export default function App() {
 
     if (animal.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
+    qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
 
     setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) + qty }));
     // BUG FIX: reseta frescor ao coletar leite de búfala fresco
@@ -2380,6 +2466,9 @@ export default function App() {
     const elderVacas = animals.filter(a => a.type === 'vaca' && a.id !== animal.id && a.age !== undefined && a.maxAge !== undefined && a.age >= a.maxAge * 0.75).length;
     const elderBonus = Math.min(0.1, elderVacas * 0.02) + farmWisdomBonus.vaca;
     if (elderBonus > 0) totalLeite = Math.max(1, Math.round(totalLeite * (1 + elderBonus)));
+    // Bônus de especialização leiteira
+    const specBonusMilk = specialization === 'leiteira' ? 1.2 : 1.0;
+    totalLeite = Math.round(totalLeite * specBonusMilk);
 
     setInventory(prev => ({
       ...prev,
@@ -2441,6 +2530,9 @@ export default function App() {
     const elderOvelhas = animals.filter(a => a.type === 'ovelha' && a.id !== animal.id && a.age !== undefined && a.maxAge !== undefined && a.age >= a.maxAge * 0.75).length;
     const elderOvelhaBonus = Math.min(0.1, elderOvelhas * 0.02) + farmWisdomBonus.ovelha;
     if (elderOvelhaBonus > 0) woolBonus = Math.max(1, Math.round(woolBonus * (1 + elderOvelhaBonus)));
+    // Bônus de especialização fibras
+    const specBonusWool = specialization === 'fibras' ? 1.2 : 1.0;
+    woolBonus = Math.round(woolBonus * specBonusWool);
 
     setInventory(prev => ({
       ...prev,
@@ -2560,6 +2652,14 @@ export default function App() {
   // 6. Buy Animal (Feira / Mercado)
   const buyAnimal = (type: AnimalType, event: React.MouseEvent) => {
     if (event) event.preventDefault();
+
+    // Verificar dívida (não pode comprar animais com dívida > 200)
+    if (debt > 200) {
+      addLog(`💳 Você tem uma dívida de ${debt} moedas! Quite a dívida antes de comprar animais.`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Dívida Alta!', event);
+      return;
+    }
 
     // F7: limite baseado em lotes de terreno
     const maxAnimals = landLots * 5;
@@ -3620,6 +3720,10 @@ export default function App() {
     nextDayVal: number,
     logs: { msg: string; type: LogMessage['type'] }[]
   ) => {
+    // Com dívida > 500, comerciante não aparece
+    if (debt > 500) {
+      return { isMerchantNextDay: false, newDaysSinceMerchant: daysSinceMerc + 1, newNextMerchantDay: nextMercDay };
+    }
     let isMerchantNextDay = false;
     let newDaysSinceMerchant = daysSinceMerc + 1;
     let newNextMerchantDay = nextMercDay;
@@ -3654,10 +3758,20 @@ export default function App() {
   ) => {
     let deceasedCount = 0;
     const survivors = animalsList.filter(animal => {
+      // Morte por fome extrema (3 dias consecutivos sem comer)
+      if ((animal.daysWithoutFood ?? 0) >= 3) {
+        logs.push({
+          msg: `💀 ${animal.name} morreu de fome após 3 dias sem alimentação! Alimente seus animais regularmente!`,
+          type: 'error'
+        });
+        setTimeout(() => addNotification(`💀 ${animal.name} morreu de fome após 3 dias sem comer!`, 'warning'), 0);
+        deceasedCount++;
+        return false;
+      }
       if (animal.hunger <= 0 || animal.happiness <= 0) {
-        logs.push({ 
-          msg: `💀 Infelizmente, o animal ${animal.name} não resistiu à fome extrema ou tristeza e faleceu.`, 
-          type: 'error' 
+        logs.push({
+          msg: `💀 Infelizmente, o animal ${animal.name} não resistiu à fome extrema ou tristeza e faleceu.`,
+          type: 'error'
         });
         deceasedCount++;
         return false;
@@ -3852,6 +3966,10 @@ export default function App() {
         setFarmLevel(newLevel);
         setShowLevelUpModal(newLevel);
         setTimeout(() => addNotification(`🏆 Fazenda subiu para o Nível ${newLevel}! +100 moedas de celebração!`, 'success', nextDayValue), 0);
+        // Mostrar modal de especialização ao atingir nível 2 pela primeira vez
+        if (newLevel === 2 && specialization === null) {
+          setTimeout(() => setShowSpecializationModal(true), 800);
+        }
       }
 
       // --- SUBFUNÇÃO 7: Processamento do Comerciante Viajante ---
@@ -4063,7 +4181,25 @@ export default function App() {
       // Liquidação financeira final do balanceamento (inclui multas de contratos vencidos e imposto)
       // BUG 2 FIX: usa callback funcional para não sobrescrever ouro com valor de closure stale
       // BUG FIX: taxAmount incluído aqui para evitar setGold duplo com gold stale no cálculo do imposto
-      setGold(prev => Math.max(0, prev - maintCost + globalGoldBonus - contractPenaltyForGold - taxAmount - waterCost - energyCost));
+      setGold(prev => {
+        const totalCosts = maintCost + contractPenaltyForGold + taxAmount + waterCost + energyCost;
+        const newGold = prev - totalCosts + globalGoldBonus;
+        if (newGold < 0) {
+          // Acumular dívida em vez de ir para negativo
+          const newDebtAmount = Math.abs(newGold);
+          setDebt(d => Math.round((d + newDebtAmount) * 1.05));
+          return 0;
+        }
+        // Se tem dívida e ouro sobrando, abater parte da dívida
+        if (debt > 0 && newGold > 0) {
+          const payment = Math.min(debt, Math.floor(newGold * 0.3));
+          if (payment > 0) {
+            setDebt(d => Math.max(0, d - payment));
+            return newGold - payment;
+          }
+        }
+        return newGold;
+      });
 
       // --- SUBFUNÇÃO: Gerar Relatório Semanal ---
       if (currentDay % 7 === 0) {
@@ -4289,6 +4425,155 @@ export default function App() {
       // --- SUBFUNÇÃO 11: Salvar Estado ---
       salvarEstado();
 
+      // --- SISTEMA DE CRISES ---
+      // Epidemia (3% por dia, max 1 a cada 30 dias)
+      if (Math.random() < 0.03 && (currentDay - lastEpidemicDay) >= 30) {
+        const affected = finalAnimals.filter(() => Math.random() < 0.3);
+        if (affected.length > 0) {
+          setLastEpidemicDay(nextDayValue);
+          setAnimals(prev => prev.map(a => {
+            if (affected.some(af => af.id === a.id)) {
+              return { ...a, happiness: Math.max(0, a.happiness - 30) };
+            }
+            return a;
+          }));
+          logsToAdd.push({ msg: `🦠 Epidemia! ${affected.length} animais foram afetados e perderam 30 de felicidade!`, type: 'error' });
+          setTimeout(() => addNotification(`🦠 Epidemia atingiu ${affected.length} animais da fazenda!`, 'warning', nextDayValue), 0);
+          triggerAudioResult(() => sfx.playSound('error'));
+        }
+      }
+
+      // Seca prolongada (5% no verão)
+      {
+        let currentDrought = droughtDaysRemaining;
+        if (currentDrought > 0) {
+          logsToAdd.push({ msg: `🏜️ Seca prolongada! Custo de água triplicado este dia.`, type: 'error' });
+          setDroughtDaysRemaining(prev => prev - 1);
+          // Additional water cost handled below via extra gold deduction
+          setGold(prev => Math.max(0, prev - waterCost * 2)); // extra 2x cost (total 3x)
+        } else if (currentSeasonIdx === 1 && Math.random() < 0.05) {
+          logsToAdd.push({ msg: `🏜️ Uma seca prolongada começou! Custo de água será triplicado por 3 dias!`, type: 'error' });
+          setTimeout(() => addNotification('🏜️ Seca prolongada por 3 dias! Custo de água triplicado!', 'warning', nextDayValue), 0);
+          setDroughtDaysRemaining(3);
+        }
+      }
+
+      // Roubo noturno (4% de chance)
+      if (Math.random() < 0.04) {
+        const stolenPercent = 0.2 + Math.random() * 0.2;
+        setInventory(prev => ({
+          ...prev,
+          milk: Math.floor(prev.milk * (1 - stolenPercent)),
+          wool: Math.floor(prev.wool * (1 - stolenPercent)),
+          egg: Math.floor(prev.egg * (1 - stolenPercent)),
+          cheese: Math.floor(prev.cheese * (1 - stolenPercent)),
+          goat_milk: Math.floor(prev.goat_milk * (1 - stolenPercent)),
+          buffalo_milk: Math.floor(prev.buffalo_milk * (1 - stolenPercent)),
+          duck_egg: Math.floor(prev.duck_egg * (1 - stolenPercent)),
+          goose_egg: Math.floor(prev.goose_egg * (1 - stolenPercent)),
+        }));
+        logsToAdd.push({ msg: `🦹 Roubo noturno! Perdeu ${Math.round(stolenPercent * 100)}% do inventário de produtos!`, type: 'error' });
+        setTimeout(() => addNotification(`🦹 Roubo noturno! Perdeu ${Math.round(stolenPercent * 100)}% do inventário!`, 'warning', nextDayValue), 0);
+      }
+
+      // --- SISTEMA DE TURISMO ---
+      if (hasTourism && nextDayValue % 7 === 0) {
+        const pavaoCount = finalAnimals.filter(a => a.type === 'pavao').length;
+        let tourismRevenue = (farmLevel * 20) + (finalAnimals.length * 5) + (pavaoCount * 30);
+        const happyAnimalsBonus = finalAnimals.filter(a => a.happiness >= 90).length * 3;
+        tourismRevenue += happyAnimalsBonus;
+        const allHappy = finalAnimals.length > 0 && finalAnimals.every(a => a.happiness >= 80);
+        if (allHappy) tourismRevenue = Math.round(tourismRevenue * 1.5);
+        setGold(prev => prev + tourismRevenue);
+        logsToAdd.push({ msg: `🏕️ Turistas visitaram sua fazenda! +${tourismRevenue} moedas de receita de turismo!`, type: 'success' });
+        setTimeout(() => addNotification(`🏕️ Visita de turistas! +${tourismRevenue} moedas!`, 'success', nextDayValue), 0);
+      }
+
+      // --- SISTEMA DE FEIRAS E CONCURSOS (a cada 30 dias) ---
+      if (nextDayValue >= nextFairDay) {
+        const fairLogEntries: { msg: string; type: LogMessage['type'] }[] = [];
+        let fairGold = 0;
+        let fairWins = 0;
+        const npcScore = () => 50 + Math.floor(Math.random() * 36); // 50-85
+
+        // Melhor Leite (vaca, cabra, búfalo)
+        const milkAnimals = finalAnimals.filter(a => ['vaca', 'cabra', 'bufalo'].includes(a.type));
+        if (milkAnimals.length > 0) {
+          const best = milkAnimals.reduce((a, b) => (a.happiness > b.happiness ? a : b));
+          const playerScore = Math.round(best.happiness * (best.happiness / 100));
+          const npc = npcScore();
+          if (playerScore > npc) {
+            fairGold += 150;
+            fairWins++;
+            fairLogEntries.push({ msg: `🥛 Feira: ${best.name} venceu a categoria Melhor Leite! +150 moedas!`, type: 'success' });
+          } else {
+            fairLogEntries.push({ msg: `🥛 Feira: Perdeu a categoria Melhor Leite (${playerScore} vs ${npc}).`, type: 'info' });
+          }
+        }
+
+        // Melhor Lã (ovelha, lhama)
+        const woolAnimals = finalAnimals.filter(a => ['ovelha', 'lhama'].includes(a.type));
+        if (woolAnimals.length > 0) {
+          const best = woolAnimals.reduce((a, b) => (a.happiness > b.happiness ? a : b));
+          const playerScore = best.happiness;
+          const npc = npcScore();
+          if (playerScore > npc) {
+            fairGold += 150;
+            fairWins++;
+            fairLogEntries.push({ msg: `🧶 Feira: ${best.name} venceu a categoria Melhor Lã! +150 moedas!`, type: 'success' });
+          } else {
+            fairLogEntries.push({ msg: `🧶 Feira: Perdeu a categoria Melhor Lã (${Math.round(playerScore)} vs ${npc}).`, type: 'info' });
+          }
+        }
+
+        // Melhor Ave (galinha, pato, ganso)
+        const birdAnimals = finalAnimals.filter(a => ['galinha', 'pato', 'ganso'].includes(a.type));
+        if (birdAnimals.length > 0) {
+          const best = birdAnimals.reduce((a, b) => (a.happiness > b.happiness ? a : b));
+          const playerScore = best.happiness;
+          const npc = npcScore();
+          if (playerScore > npc) {
+            fairGold += 150;
+            fairWins++;
+            fairLogEntries.push({ msg: `🥚 Feira: ${best.name} venceu a categoria Melhor Ave! +150 moedas!`, type: 'success' });
+          } else {
+            fairLogEntries.push({ msg: `🥚 Feira: Perdeu a categoria Melhor Ave (${Math.round(playerScore)} vs ${npc}).`, type: 'info' });
+          }
+        }
+
+        if (fairWins === 3) {
+          fairGold += 500;
+          fairLogEntries.push({ msg: `🏆 CAMPEÃO DA FEIRA! Venceu todas as categorias! +500 moedas de bônus!`, type: 'success' });
+        }
+
+        if (fairGold > 0) {
+          setGold(prev => prev + fairGold);
+          logsToAdd.push(...fairLogEntries);
+          const newResult: FairResult = { day: nextDayValue, category: `${fairWins} categorias`, winner: 'Fazenda Aurora', earned: fairGold };
+          setFairResults(prev => [...prev, newResult]);
+          setTimeout(() => {
+            setShowFairResultModal(newResult);
+            addNotification(`🎪 Feira do Dia ${nextDayValue}: ganhou ${fairGold} moedas em ${fairWins} categorias!`, 'event', nextDayValue);
+          }, 500);
+        } else {
+          logsToAdd.push(...fairLogEntries);
+          logsToAdd.push({ msg: `🎪 A Feira do Dia ${nextDayValue} terminou sem vitórias desta vez.`, type: 'info' });
+        }
+        setNextFairDay(nextDayValue + 30);
+      }
+
+      // --- SISTEMA DE DÍVIDA ---
+      // Verificar se a dívida passa de 1000 (game over)
+      if (debt > 1000) {
+        logsToAdd.push({ msg: `💸 FALÊNCIA! Sua fazenda acumulou uma dívida impagável de ${debt} moedas. Fim de jogo!`, type: 'error' });
+        setTimeout(() => addNotification(`💸 FALÊNCIA! Dívida de ${debt} moedas. Sua fazenda faliu!`, 'warning', nextDayValue), 0);
+      }
+      // Aplicar juros de 5% sobre dívida existente
+      if (debt > 0) {
+        setDebt(prev => Math.round(prev * 1.05));
+        logsToAdd.push({ msg: `💳 Juros de 5% sobre dívida: ${Math.round(debt * 0.05)} moedas adicionados.`, type: 'error' });
+      }
+
       // Próximo dia
       setCurrentDay(prev => prev + 1);
 
@@ -4335,6 +4620,21 @@ export default function App() {
       color = 'bg-blue-100 text-blue-800';
     }
     return <span className={`px-2 py-0.5 text-xs rounded-full ${color}`}>{text}</span>;
+  };
+
+  // Previsão de preço para os próximos dias baseada na tendência histórica
+  const getPriceForecast = (itemType: string): { day1: number; day2: number; day3: number; trend: number } => {
+    const hist = priceHistory[itemType];
+    if (!hist || hist.length < 3) return { day1: 0, day2: 0, day3: 0, trend: 0 };
+    const last = hist.slice(-7);
+    const avgChange = last.length >= 2 ? last.reduce((acc, v, i) => i === 0 ? acc : acc + (v - last[i - 1]), 0) / (last.length - 1) : 0;
+    const lastPrice = last[last.length - 1];
+    return {
+      day1: Math.max(1, Math.round(lastPrice + avgChange)),
+      day2: Math.max(1, Math.round(lastPrice + avgChange * 2)),
+      day3: Math.max(1, Math.round(lastPrice + avgChange * 3)),
+      trend: avgChange,
+    };
   };
 
   // Calcula tendência de preço baseada em priceHistory (últimos 3 vs 3 anteriores)
@@ -4622,6 +4922,11 @@ export default function App() {
               <span className="text-xl sm:text-2xl">💰</span>
               <span>{Math.floor(gold)}</span>
               <span className="text-xs uppercase font-bold tracking-wide text-[#b45309] ml-1">moedas</span>
+              {debt > 0 && (
+                <span className="text-red-600 font-bold text-xs ml-2" title={`Dívida acumulada com juros de 5%/dia. ${debt > 200 ? 'Não pode comprar animais!' : ''} ${debt > 500 ? 'Comerciante não aparece!' : ''} ${debt > 1000 ? 'FALÊNCIA!' : ''}`}>
+                  💳 -{debt}
+                </span>
+              )}
             </div>
 
             {/* Day display */}
@@ -5919,11 +6224,21 @@ export default function App() {
                                     <span className="font-mono font-black text-blue-700 text-xs bg-blue-50/60 px-1.5 py-0.5 rounded border border-blue-100">{item.qty}u</span>
                                   </div>
                                   {price !== null && (
-                                    <div className="flex items-center gap-1 mt-0.5">
+                                    <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                                       <span className="text-[9px] text-stone-500 font-mono">{price}💰</span>
                                       {trend && (
                                         <span className={`text-[9px] font-black ${trend.color}`}>
                                           {trend.symbol}{Math.abs(trend.pct) > 0 ? ` ${trend.pct > 0 ? '+' : ''}${trend.pct}%` : ''}
+                                        </span>
+                                      )}
+                                      {trend && trend.pct >= 15 && (
+                                        <span className="text-[8px] font-black px-1 py-0.5 rounded bg-amber-400 text-amber-900 animate-pulse" title="Preço subindo! Pode valer a pena esperar para vender">
+                                          📈 Alta!
+                                        </span>
+                                      )}
+                                      {trend && trend.pct <= -15 && (
+                                        <span className="text-[8px] font-black px-1 py-0.5 rounded bg-red-400 text-white" title="Preço caindo! Melhor vender agora">
+                                          📉 Vender já!
                                         </span>
                                       )}
                                     </div>
@@ -7799,6 +8114,28 @@ export default function App() {
                   </button>
                 </div>
 
+                {/* 🏕️ Área de Visitantes (Turismo Rural) */}
+                <div className="bg-white border-4 border-teal-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-teal-800 mb-1">🏕️ Área de Visitantes (Turismo Rural)</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Receba turistas semanalmente! Receita = (nível×20) + (animais×5) + (pavões×30) moedas. Requer Nível 4+. {hasTourism ? '✅ Instalada' : 'Não instalada'}
+                  </p>
+                  <button
+                    disabled={hasTourism || gold < 400 || farmLevel < 4}
+                    onClick={() => {
+                      if (!hasTourism && gold >= 400 && farmLevel >= 4) {
+                        setGold(prev => prev - 400);
+                        setHasTourism(true);
+                        addLog('🏕️ Área de Visitantes construída! Turistas virão toda semana.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasTourism ? 'bg-teal-100 border-teal-300 text-teal-700' : farmLevel >= 4 && gold >= 400 ? 'bg-teal-500 hover:bg-teal-400 text-white border-teal-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {hasTourism ? '✅ Área de Visitantes Instalada' : farmLevel < 4 ? '🔒 Requer Nível 4 (400💰)' : 'Construir Área de Visitantes (400💰)'}
+                  </button>
+                </div>
+
                 {/* F11: Expansão da Queijaria */}
                 <div className="bg-white border-4 border-amber-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-amber-800 mb-1">🧀 Expansão da Queijaria</h4>
@@ -8011,6 +8348,24 @@ export default function App() {
                             MÁX
                           </button>
                         </div>
+
+                        {/* Previsão de preço para os próximos 3 dias */}
+                        {(() => {
+                          const forecast = getPriceForecast(item.key);
+                          if (!forecast.day1) return null;
+                          return (
+                            <div className="bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-[9px] font-mono w-full">
+                              <div className="text-stone-400 font-bold uppercase tracking-wider mb-1">📅 Previsão:</div>
+                              <div className="flex gap-2">
+                                <span>Amanhã: ~{forecast.day1}💰 {forecast.trend > 0 ? '▲' : forecast.trend < 0 ? '▼' : '→'}</span>
+                                <span>|</span>
+                                <span>+2d: ~{forecast.day2}💰</span>
+                                <span>|</span>
+                                <span>+3d: ~{forecast.day3}💰</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
 
                         <button
                           type="button"
@@ -8604,6 +8959,93 @@ export default function App() {
                   className="bg-teal-600 hover:bg-teal-500 text-white border-b-4 border-teal-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer"
                 >
                   Fechar Stats
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🌟 MODAL DE ESPECIALIZAÇÃO */}
+      <AnimatePresence>
+        {showSpecializationModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-xs z-[200] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-[#fffbeb] border-8 border-emerald-700 rounded-[36px] max-w-lg w-full shadow-2xl overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-emerald-700 to-teal-800 p-5 border-b-4 border-emerald-900 text-center">
+                <h3 className="text-white text-xl font-display font-black uppercase tracking-wider">🌟 Escolha sua Especialização!</h3>
+                <p className="text-emerald-200 text-xs font-mono mt-1">Sua fazenda atingiu nível 2! Escolha um foco permanente.</p>
+              </div>
+              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { key: 'leiteira' as FarmSpecialization, emoji: '🥛', title: 'LEITEIRA', desc: 'Foco em vacas, cabras e búfalos', bonuses: '+20% produção de leite\n-10% ração leiteira\n+10% custo de aves/ovelhas' },
+                  { key: 'fibras' as FarmSpecialization, emoji: '🧶', title: 'FIBRAS', desc: 'Foco em ovelhas e lhamas', bonuses: '+20% produção de lã\n-10% ração de ovelha/lhama\n+10% custo de outros animais' },
+                  { key: 'avicultura' as FarmSpecialization, emoji: '🥚', title: 'AVICULTURA', desc: 'Foco em galinhas, patos e gansos', bonuses: '+20% produção de ovos\n-10% ração de aves\n+10% custo de outros animais' },
+                  { key: 'diversificada' as FarmSpecialization, emoji: '🌿', title: 'DIVERSIFICADA', desc: 'Sem bônus nem penalidades', bonuses: 'Jogo no modo padrão\nSem modificadores especiais\nLiberdade total de escolha' },
+                ].map(opt => (
+                  <button
+                    key={String(opt.key)}
+                    onClick={() => {
+                      setSpecialization(opt.key);
+                      setShowSpecializationModal(false);
+                      addLog(`🌟 Você escolheu a especialização ${opt.title}!`, 'success');
+                      addNotification(`🌟 Especialização ${opt.title} ativa! Seus bônus estão aplicados.`, 'event');
+                      triggerAudioResult(() => sfx.playSound('levelup'));
+                    }}
+                    className="bg-white border-4 border-emerald-200 hover:border-emerald-500 rounded-2xl p-3 text-left cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
+                  >
+                    <div className="text-2xl mb-1">{opt.emoji}</div>
+                    <div className="font-display font-black text-sm text-emerald-800 uppercase">{opt.title}</div>
+                    <div className="text-xs text-stone-500 font-mono mb-1">{opt.desc}</div>
+                    <pre className="text-[9px] text-stone-400 font-mono whitespace-pre-line leading-relaxed">{opt.bonuses}</pre>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🎪 MODAL RESULTADO DA FEIRA */}
+      <AnimatePresence>
+        {showFairResultModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowFairResultModal(null)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[199] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 30 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fffbeb] border-8 border-amber-600 rounded-[36px] max-w-md w-full shadow-2xl overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-amber-600 to-yellow-700 p-5 text-center">
+                <div className="text-5xl mb-2">🎪</div>
+                <h3 className="text-white text-xl font-display font-black uppercase">Resultado da Feira!</h3>
+                <p className="text-amber-200 text-xs font-mono mt-1">Dia {showFairResultModal.day}</p>
+              </div>
+              <div className="p-6 text-center">
+                <div className="text-4xl font-black text-amber-700 mb-2">+{showFairResultModal.earned} 💰</div>
+                <div className="text-stone-600 font-mono text-sm mb-1">Categoria: {showFairResultModal.category}</div>
+                <div className="text-stone-500 font-mono text-xs mb-4">{showFairResultModal.winner}</div>
+                <button
+                  onClick={() => setShowFairResultModal(null)}
+                  className="bg-amber-500 hover:bg-amber-400 text-white border-b-4 border-amber-700 px-8 py-3 rounded-2xl font-display font-black uppercase text-sm cursor-pointer transition-all hover:scale-105"
+                >
+                  Fechar 🎉
                 </button>
               </div>
             </motion.div>
