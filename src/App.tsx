@@ -199,16 +199,62 @@ export default function App() {
     return 1;
   });
 
+  const [farmXp, setFarmXp] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).farmXp ?? 0;
+    } catch (e) {}
+    return 0;
+  });
+
+  // XP cumulativo necessário para ATINGIR cada nível
+  const XP_THRESHOLDS: Record<number, number> = {
+    1: 0,
+    2: 100,
+    3: 280,
+    4: 550,
+    5: 950,
+    6: 1500,
+    7: 2200,
+    8: 3100,
+    9: 4200,
+    10: 5600,
+    11: 7300,
+    12: 9400,
+    13: 11900,
+    14: 14900,
+    15: 18500,
+    16: 22800,
+    17: 27800,
+    18: 33800,
+    19: 40800,
+    20: 49000,
+  };
+
+  const getXpForLevel = (level: number): number => XP_THRESHOLDS[level] ?? (49000 + (level - 20) * 10000);
+
   const getFarmTitle = (level: number): string => {
     if (level === 1) return "Fazenda Iniciante 🧑‍🌾";
     if (level === 2) return "Fazenda em Família 🥛";
     if (level === 3) return "Fazenda Produtiva 🧶";
     if (level === 4) return "Fazenda Automatizada ⚙️";
     if (level === 5) return "Fazenda Nobre 👑";
-    if (level === 6) return "Fazenda Reconhecida ✨";
-    if (level === 7) return "Fazenda Famosa 🌟";
-    if (level === 8) return "Fazenda Lendária 🏆";
-    return `Império Aurora ${'🌌'.repeat(Math.min(3, level - 8))}`;
+    if (level === 6) return "Fazenda Diversificada 🦆";
+    if (level === 7) return "Fazenda Especializada 🏅";
+    if (level === 8) return "Fazenda Reconhecida ✨";
+    if (level === 9) return "Fazenda Exportadora 📦";
+    if (level === 10) return "Fazenda Centenária 🌾";
+    if (level === 11) return "Fazenda Regional 🗺️";
+    if (level === 12) return "Fazenda Premium 💎";
+    if (level === 13) return "Fazenda Industrial 🏭";
+    if (level === 14) return "Fazenda Nacional 🇧🇷";
+    if (level === 15) return "Fazenda Famosa 🌟";
+    if (level === 16) return "Fazenda Lendária 🏆";
+    if (level === 17) return "Fazenda Continental 🌍";
+    if (level === 18) return "Fazenda Imperial 👸";
+    if (level === 19) return "Fazenda Épica ⚡";
+    if (level === 20) return "Império Aurora 🌌";
+    return `Além do Lendário ${'🌌'.repeat(Math.min(3, level - 20))}`;
   };
 
   const getLevelUpDetails = (level: number): { title: string; perks: string[] } => {
@@ -218,7 +264,8 @@ export default function App() {
           title: "🥛 Fazenda em Família: Novas Fronteiras!",
           perks: [
             "Preço base do Leite Cru subiu de 5 para 6 moedas!",
-            "Você já pode comprar Ovelhas fofinhas no Mercado de Animais!"
+            "Você já pode comprar Ovelhas fofinhas no Mercado de Animais!",
+            "Sistema de Especialização desbloqueado — escolha seu caminho!"
           ]
         };
       case 3:
@@ -235,7 +282,8 @@ export default function App() {
           title: "⚙️ Fazenda Automatizada e Parcerias Firmadas!",
           perks: [
             "Desconto permanente de 10% na compra de TODOS os Animais!",
-            "Desconto permanente de 10% na ração para cuidar do bando!"
+            "Desconto permanente de 10% na ração para cuidar do bando!",
+            "Contratos de fornecimento disponíveis com o Comerciante Viajante!"
           ]
         };
       case 5:
@@ -243,17 +291,64 @@ export default function App() {
           title: "👑 Fazendário Real & Maturação Artesanal!",
           perks: [
             "Bônus de +5 moedas extras na venda de qualquer Boizinho!",
-            "Acesso total à Queijaria Artesanal: Queijo Coalho, Muçarela e Brie!"
+            "Acesso total à Queijaria Artesanal: Queijo Coalho, Muçarela e Brie!",
+            "Animais exóticos disponíveis: Búfalo e Pavão!"
+          ]
+        };
+      case 6:
+        return {
+          title: "🦆 Fazenda Diversificada: Novas Espécies!",
+          perks: [
+            "Bônus de +5% em todos os produtos de aves!",
+            "Poço d'Água e Sistema de Irrigação desbloqueados nas Melhorias!",
+            "Queijaria pode ser expandida para novas receitas!"
+          ]
+        };
+      case 7:
+        return {
+          title: "🏅 Fazenda Especializada: Rumo ao Topo!",
+          perks: [
+            "Bônus de +10% nos preços de venda de produtos processados!",
+            "Energia Solar disponível nas Melhorias — reduza custos de energia!",
+            "Turismo rural desbloqueado: receba visitantes na fazenda!"
+          ]
+        };
+      case 8:
+        return {
+          title: "✨ Fazenda Reconhecida: Mercados Abertos!",
+          perks: [
+            "Bônus de +15% em todos os produtos — sua reputação cresce!",
+            "Seguro Agrícola Premium disponível com cobertura ampliada!",
+            "Feiras regionais com prêmios maiores!"
+          ]
+        };
+      case 9:
+        return {
+          title: "📦 Fazenda Exportadora: Além das Fronteiras!",
+          perks: [
+            "Bônus de +20% em todos os produtos vendidos!",
+            "Contratos de exportação com pagamento dobrado!",
+            "Limite de animais expandido: até 30 animais na fazenda!"
+          ]
+        };
+      case 10:
+        return {
+          title: "🌾 Fazenda Centenária: Marco Histórico!",
+          perks: [
+            "Bônus de +25% em todos os produtos!",
+            "Milestone especial: +200 moedas de celebração!",
+            "Acesso a animais especiais: novas espécies em breve!"
           ]
         };
       default:
-        if (level > 5) {
-          const bonusPercent = (level - 5) * 5;
+        if (level > 10) {
+          const bonusPercent = 25 + (level - 10) * 3;
           return {
-            title: `✨ Reputação Avançada: Nível ${level}!`,
+            title: `🌟 ${getFarmTitle(level)}: Lenda Viva!`,
             perks: [
-              `Sua reputação cresceu! Agora você tem o título de ${getFarmTitle(level)}!`,
-              `Bônus permanente de +${bonusPercent}% em todos os produtos vendidos na Aurora!`
+              `Bônus permanente de +${bonusPercent}% em todos os produtos da Aurora!`,
+              `Sua fazenda é conhecida em todo o território — turismo aumentado!`,
+              `Nível ${level} desbloqueado — continue expandindo seu império!`
             ]
           };
         }
@@ -1065,6 +1160,7 @@ export default function App() {
     setGold(80);
     setCurrentDay(1);
     setFarmLevel(1);
+    setFarmXp(0);
     setInventory({
       milk: 0,
       wool: 0,
@@ -1362,6 +1458,7 @@ export default function App() {
         gold,
         currentDay,
         farmLevel,
+        farmXp,
         inventory,
         animals,
         stats,
@@ -1409,7 +1506,7 @@ export default function App() {
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining]);
 
   // Ref para rastrear conquistas já desbloqueadas sem depender do estado React (evita stale closure e duplos no StrictMode)
   const unlockedAchievementsRef = useRef<string[]>(unlockedAchievements);
@@ -2368,8 +2465,11 @@ export default function App() {
       finalPrice *= 1.5;
     }
     if (farmLevel > 5) {
-      // Reputação pós-nível 5: +5% permanente de bônus por nível extra
-      finalPrice *= (1.0 + (farmLevel - 5) * 0.05);
+      // Reputação: +5% por nível 6-10, +3% por nível 11-20
+      const bonusPct = farmLevel <= 10
+        ? (farmLevel - 5) * 0.05
+        : 0.25 + (farmLevel - 10) * 0.03;
+      finalPrice *= (1.0 + bonusPct);
     }
     // Pavão price bonus: +3% with 1 pavão (happiness>=80), +5% with 2+ (happiness>=80)
     // BUG FIX: bônus só conta pavões com happiness >= 80, conforme especificação
@@ -2390,8 +2490,11 @@ export default function App() {
       finalPrice *= 1.5;
     }
     if (farmLevel > 5) {
-      // Reputação pós-nível 5: +5% permanente de bônus por nível extra
-      finalPrice *= (1.0 + (farmLevel - 5) * 0.05);
+      // Reputação: +5% por nível 6-10, +3% por nível 11-20
+      const bonusPct = farmLevel <= 10
+        ? (farmLevel - 5) * 0.05
+        : 0.25 + (farmLevel - 10) * 0.03;
+      finalPrice *= (1.0 + bonusPct);
     }
     // Pavão price bonus: +3% with 1 pavão (happiness>=80), +5% with 2+ (happiness>=80)
     // BUG FIX: bônus só conta pavões com happiness >= 80, conforme especificação
@@ -2499,6 +2602,7 @@ export default function App() {
     }));
 
     addLog(`🥛 ${animal.name} produziu ${totalLeite} balde(s) de leite cru enviados ao Armazém!`, 'success');
+    setFarmXp(prev => prev + totalLeite);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥛', `+${totalLeite} Leite`, event);
     // Missão: coletar itens
@@ -2565,6 +2669,7 @@ export default function App() {
     }));
 
     addLog(`🧶 ${animal.name} foi tosquiada! Adicionado +${woolBonus} lã(s) crua(s) no Armazém.`, 'success');
+    setFarmXp(prev => prev + woolBonus);
     triggerAudioResult(() => sfx.playSound('collect'));
     // F12: som de animal
     if (soundEnabled) sfx.playAnimalSound('ovelha');
@@ -2746,6 +2851,7 @@ export default function App() {
 
     addLog(`🐄 ${newAnimal.name} chegou à fazenda e foi alimentado com 1 saco de ração!`, 'success');
     addLog(`✨ Parabéns! Você comprou ${newAnimal.name} (${typeLabel}) por ${price} moedas!`, 'success');
+    setFarmXp(prev => prev + 5);
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🎁', `-${price} 💰`, event);
   };
@@ -2921,6 +3027,7 @@ export default function App() {
         if (newDelivered >= c.quantity) {
           setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
           addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
+          setFarmXp(prev => prev + 20);
           // BUG FIX: marca contrato como inativo ao completar para evitar que fique
           // acumulado como "ativo" indefinidamente e seja exibido desnecessariamente.
           return { ...c, delivered: newDelivered, active: false };
@@ -3124,7 +3231,11 @@ export default function App() {
 
     addLog(`💰 Você vendeu tudo: ${messageParts.join(', ')} por ${totalEarningCalculated} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));
-    
+
+    // XP por venda: 1 XP por item vendido, bônus por processados
+    const xpEarned = totalAllQty + (coalhoQty + mucarelaQty + brieQty + scarfQty + butterQty + yogurtQty + buffaloMozzQty) * 2;
+    if (xpEarned > 0) setFarmXp(prev => prev + xpEarned);
+
     // Custom feedback
     spawnFeedback('💰', `+${totalEarningCalculated} 💰`, { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as any);
   };
@@ -3157,6 +3268,7 @@ export default function App() {
     }));
 
     addLog(`🏭 Parabéns! Você comprou e ativou: ${label}!`, 'success');
+    setFarmXp(prev => prev + 15);
     triggerAudioResult(() => sfx.playSound('levelup'));
   };
 
@@ -3652,50 +3764,57 @@ export default function App() {
    */
   // Gold required to level up (on top of the day requirement)
   const getLevelUpGoldCost = (toLevel: number): number => {
-    if (toLevel === 2) return 0;   // keep as-is
-    if (toLevel === 3) return 800;
-    if (toLevel === 4) return 1800;
-    if (toLevel >= 5) return 4000;
-    return 0;
+    if (toLevel <= 3) return 0;
+    if (toLevel === 4) return 500;
+    if (toLevel === 5) return 1200;
+    if (toLevel <= 8) return 2000 + (toLevel - 6) * 500;
+    if (toLevel <= 12) return 4000 + (toLevel - 9) * 800;
+    return 7200 + (toLevel - 13) * 1200;
   };
 
   const verificarNivelFazenda = (
-    nextDayVal: number,
+    _nextDayVal: number,
     currentLevel: number,
+    currentXp: number,
     logs: { msg: string; type: LogMessage['type'] }[]
   ) => {
-    const newLevel = Math.floor((nextDayVal - 1) / 10) + 1;
-    let levelUpOccurred = false;
-    if (newLevel > currentLevel) {
-      // Check gold requirement
-      const goldCost = getLevelUpGoldCost(newLevel);
-      if (goldCost > 0 && gold < goldCost) {
-        logs.push({
-          msg: `⚠️ Nível ${newLevel} requer ${goldCost} moedas! Você tem ${Math.floor(gold)} moedas. Acumule mais para subir de nível.`,
-          type: 'error'
-        });
-        return { newLevel: currentLevel, levelUpOccurred: false };
-      }
-      if (goldCost > 0) {
-        setGold(prev => prev - goldCost);
-        logs.push({ msg: `💰 Custo de evolução para Nível ${newLevel}: -${goldCost} moedas.`, type: 'system' });
-      }
-      levelUpOccurred = true;
+    if (currentLevel >= 20) return { newLevel: currentLevel, levelUpOccurred: false };
+    const xpNeeded = getXpForLevel(currentLevel + 1);
+    if (currentXp < xpNeeded) return { newLevel: currentLevel, levelUpOccurred: false };
+
+    const newLevel = currentLevel + 1;
+    const goldCost = getLevelUpGoldCost(newLevel);
+    if (goldCost > 0 && gold < goldCost) {
       logs.push({
-        msg: `🏆 EXCELENTE! O nível da Fazenda Aurora subiu para o NÍVEL ${newLevel}!`,
-        type: 'success'
+        msg: `⚠️ XP suficiente para Nível ${newLevel}, mas faltam moedas! Precisa de ${goldCost} moedas para subir.`,
+        type: 'error'
       });
-      if (newLevel === 2) {
-        logs.push({ msg: `🥛 Benefício Desbloqueado: Preço de venda base do Leite Cru subiu para 6 moedas!`, type: 'system' });
-      } else if (newLevel === 3) {
-        logs.push({ msg: `🧶 Benefício Desbloqueado: Preço de venda base da Lã Crua subiu para 15 moedas!`, type: 'system' });
-      } else if (newLevel === 4) {
-        logs.push({ msg: `🏷️ Benefício Desbloqueado: Desconto permanente de 10% na compra de novos animais!`, type: 'system' });
-      } else if (newLevel >= 5) {
-        logs.push({ msg: `🐂 Benefício Desbloqueado: Ganhe +5 moedas extras de bônus na venda de qualquer Boi!`, type: 'system' });
-      }
+      return { newLevel: currentLevel, levelUpOccurred: false };
     }
-    return { newLevel, levelUpOccurred };
+    if (goldCost > 0) {
+      setGold(prev => prev - goldCost);
+      logs.push({ msg: `💰 Custo de evolução para Nível ${newLevel}: -${goldCost} moedas.`, type: 'system' });
+    }
+    logs.push({
+      msg: `🏆 EXCELENTE! O nível da Fazenda Aurora subiu para o NÍVEL ${newLevel}!`,
+      type: 'success'
+    });
+    if (newLevel === 2) {
+      logs.push({ msg: `🥛 Benefício: Preço do Leite Cru subiu para 6 moedas! Especialização disponível!`, type: 'system' });
+    } else if (newLevel === 3) {
+      logs.push({ msg: `🧶 Benefício: Preço da Lã Crua subiu para 15 moedas! Ateliê desbloqueado!`, type: 'system' });
+    } else if (newLevel === 4) {
+      logs.push({ msg: `🏷️ Benefício: Desconto de 10% na compra de animais e ração!`, type: 'system' });
+    } else if (newLevel === 5) {
+      logs.push({ msg: `👑 Benefício: +5 moedas por Boi! Queijaria Artesanal e Búfalo/Pavão disponíveis!`, type: 'system' });
+    } else if (newLevel === 10) {
+      setGold(prev => prev + 200);
+      logs.push({ msg: `🌾 Marco Histórico! Nível 10 atingido! +200 moedas de celebração!`, type: 'success' });
+    } else {
+      const bonusPercent = newLevel <= 10 ? (newLevel - 5) * 5 : 25 + (newLevel - 10) * 3;
+      logs.push({ msg: `✨ Bônus: +${bonusPercent}% em todos os produtos da fazenda!`, type: 'system' });
+    }
+    return { newLevel, levelUpOccurred: true };
   };
 
   // F4: gerar contrato pelo comerciante
@@ -3968,12 +4087,17 @@ export default function App() {
         return nextHist;
       });
 
+      // --- XP DIÁRIO: animais vivos + dia sobrevivido ---
+      const dailyXp = 2 + Math.floor(animals.length * 0.5);
+      const newFarmXp = farmXp + dailyXp;
+      setFarmXp(newFarmXp);
+
       // --- SUBFUNÇÃO 6: Verificação de Nível da Fazenda ---
-      const { newLevel, levelUpOccurred } = verificarNivelFazenda(nextDayValue, farmLevel, logsToAdd);
+      const { newLevel, levelUpOccurred } = verificarNivelFazenda(nextDayValue, farmLevel, newFarmXp, logsToAdd);
       if (levelUpOccurred) {
         setFarmLevel(newLevel);
         setShowLevelUpModal(newLevel);
-        setTimeout(() => addNotification(`🏆 Fazenda subiu para o Nível ${newLevel}! +100 moedas de celebração!`, 'success', nextDayValue), 0);
+        setTimeout(() => addNotification(`🏆 Fazenda subiu para o Nível ${newLevel}! (${newFarmXp} XP total)`, 'success', nextDayValue), 0);
         // Mostrar modal de especialização ao atingir nível 2 pela primeira vez
         if (newLevel === 2 && specialization === null) {
           setTimeout(() => setShowSpecializationModal(true), 800);
@@ -4893,21 +5017,36 @@ export default function App() {
                   🌾 Nível {farmLevel} ({getFarmTitle(farmLevel)}) • Clima: {weather === 'chuva' ? '🌧️ Chuva' : weather === 'sol' ? '☀️ Sol Forte' : '☁️ Nublado'} • Estação: {seasonName}
                 </span>
                 
-                {/* Indicador de progresso do nível */}
-                <div className="flex items-center gap-1.5 mt-1" title={`Cada nível requer 10 dias. Faltam ${10 - ((currentDay - 1) % 10)} dias para o Nível ${farmLevel + 1}`}>
-                  <span className="text-[10px] text-white/90 font-mono font-bold uppercase tracking-wider shrink-0">
-                    ⬆️ Próximo nível em {10 - ((currentDay - 1) % 10)} {10 - ((currentDay - 1) % 10) === 1 ? 'dia' : 'dias'}
-                  </span>
-                  <div className="w-16 sm:w-24 bg-black/40 h-2 rounded-full overflow-hidden border border-[#92400e] shadow-inner flex shrink-0">
-                    <div 
-                      className="bg-gradient-to-r from-yellow-400 to-amber-500 h-full transition-all duration-500" 
-                      style={{ width: `${((currentDay - 1) % 10) * 10}%` }}
-                    />
+                {/* Indicador de progresso XP */}
+                {farmLevel < 20 ? (() => {
+                  const xpCurrent = getXpForLevel(farmLevel);
+                  const xpNext = getXpForLevel(farmLevel + 1);
+                  const xpProgress = farmXp - xpCurrent;
+                  const xpNeeded = xpNext - xpCurrent;
+                  const pct = Math.min(100, Math.round((xpProgress / xpNeeded) * 100));
+                  return (
+                    <div className="flex items-center gap-1.5 mt-1" title={`${farmXp} XP total • Faltam ${xpNext - farmXp} XP para Nível ${farmLevel + 1}`}>
+                      <span className="text-[10px] text-white/90 font-mono font-bold uppercase tracking-wider shrink-0">
+                        ⭐ {xpNext - farmXp} XP p/ Nv.{farmLevel + 1}
+                      </span>
+                      <div className="w-16 sm:w-24 bg-black/40 h-2 rounded-full overflow-hidden border border-[#92400e] shadow-inner flex shrink-0">
+                        <div
+                          className="bg-gradient-to-r from-yellow-400 to-amber-500 h-full transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-[#fcd57e] font-mono font-bold shrink-0">
+                        {pct}%
+                      </span>
+                    </div>
+                  );
+                })() : (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-[10px] text-yellow-300 font-mono font-bold uppercase tracking-wider">
+                      🌌 Nível Máximo Atingido! ({farmXp} XP)
+                    </span>
                   </div>
-                  <span className="text-[10px] text-[#fcd57e] font-mono font-bold shrink-0">
-                    {((currentDay - 1) % 10)}/10 dias
-                  </span>
-                </div>
+                )}
               </div>
             </div>
           </div>
