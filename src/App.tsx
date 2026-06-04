@@ -790,6 +790,8 @@ export default function App() {
     scarf: number;
     egg: number;
     mayo: number;
+    waterCost: number;
+    energyCost: number;
   }>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -805,12 +807,14 @@ export default function App() {
             cheese: parsed.weeklyStats.cheese ?? 0,
             scarf: parsed.weeklyStats.scarf ?? 0,
             egg: parsed.weeklyStats.egg ?? 0,
-            mayo: parsed.weeklyStats.mayo ?? 0
+            mayo: parsed.weeklyStats.mayo ?? 0,
+            waterCost: parsed.weeklyStats.waterCost ?? 0,
+            energyCost: parsed.weeklyStats.energyCost ?? 0,
           };
         }
       }
     } catch (e) {}
-    return { earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0 };
+    return { earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0, waterCost: 0, energyCost: 0 };
   });
 
   const [weeklyReportData, setWeeklyReportData] = useState<{
@@ -823,6 +827,8 @@ export default function App() {
     scarf: number;
     egg: number;
     mayo: number;
+    waterCost: number;
+    energyCost: number;
   } | null>(null);
   const [showWeeklyReport, setShowWeeklyReport] = useState<boolean>(false);
   const [showLevelUpModal, setShowLevelUpModal] = useState<number | null>(null);
@@ -1068,7 +1074,7 @@ export default function App() {
     setNextMerchantDay(Math.floor(Math.random() * 5) + 3);
     setWeather('nublado');
     setDailyEarning(0);
-    setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0 });
+    setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0, waterCost: 0, energyCost: 0 });
     setWeeklySales({ milk: 0, wool: 0, cheese: 0, scarf: 0, carne: 0, egg: 0, mayo: 0, queijoCoalho: 0, queijoMucarela: 0, queijoBrie: 0 });
     setPreviousPrices({ milk: 5, wool: 12, cheese: 20, scarf: 30, carne: 150, egg: 4, mayo: 16, queijoCoalho: 14, queijoMucarela: 28, queijoBrie: 65 });
     setMachines({
@@ -2531,6 +2537,16 @@ export default function App() {
     return Math.max(20, Math.round(finalValueBase * getCarneMultiplier()));
   };
 
+  // Helper: get feed type and label for an animal type
+  const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoLeite' | 'racaoOvelha' | 'racaoBoi' | 'racaoGalinha'; feedLabel: string } => {
+    if (type === 'ovelha' || type === 'lhama') return { feedType: 'racaoOvelha', feedLabel: 'Ração de Ovelha' };
+    if (type === 'boi') return { feedType: 'racaoBoi', feedLabel: 'Ração de Boi' };
+    if (type === 'galinha' || type === 'pato' || type === 'ganso' || type === 'pavao') return { feedType: 'racaoGalinha', feedLabel: 'Ração de Galinha' };
+    if (type === 'bufalo') return { feedType: 'racaoBoi', feedLabel: 'Ração de Boi' };
+    // vaca, cabra → racaoLeite
+    return { feedType: 'racaoLeite', feedLabel: 'Ração de Vaca' };
+  };
+
   // 6. Buy Animal (Feira / Mercado)
   const buyAnimal = (type: AnimalType, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -2552,11 +2568,19 @@ export default function App() {
       return;
     }
 
+    // Verificar ração disponível
+    const { feedType, feedLabel } = getAnimalFeedType(type);
+    if ((inventory[feedType] ?? 0) < 1) {
+      addLog(`🌾 Você precisa de 1 saco de ${feedLabel} para trazer o animal. Compre na loja!`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', `Falta ${feedLabel}!`, event);
+      return;
+    }
+
     const name = type === 'boi' ? getUniqueOxName(animals) : getRandomName(type);
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
-    
+
     // Custom initial stats
-    const hunger = Math.floor(Math.random() * 21) + 65; // between 65 and 85
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80
 
     // F1: maxAge por tipo com variação ±20%
@@ -2569,7 +2593,7 @@ export default function App() {
       id: newId,
       type,
       name,
-      hunger,
+      hunger: 60, // animal começa alimentado com a ração deduzida
       happiness,
       consecutiveHappyDays: 0,
       daysBelow80: 0,
@@ -2589,6 +2613,9 @@ export default function App() {
       ...(type === 'pavao' && { hasProducedToday: false }),
     };
 
+    // Deduzir ração do inventário
+    setInventory(prev => ({ ...prev, [feedType]: (prev[feedType] ?? 0) - 1 }));
+
     setGold(prev => prev - price);
     setAnimals(prev => [...prev, newAnimal]);
     setWeeklyStats(prev => ({ ...prev, spending: prev.spending + price }));
@@ -2603,7 +2630,8 @@ export default function App() {
     else if (type === 'ganso') typeLabel = '🦢 Ganso';
     else if (type === 'bufalo') typeLabel = '🐃 Búfalo';
     else if (type === 'pavao') typeLabel = '🦚 Pavão';
-    
+
+    addLog(`🐄 ${newAnimal.name} chegou à fazenda e foi alimentado com 1 saco de ração!`, 'success');
     addLog(`✨ Parabéns! Você comprou ${newAnimal.name} (${typeLabel}) por ${price} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🎁', `-${price} 💰`, event);
@@ -3959,16 +3987,57 @@ export default function App() {
         }
       });
 
+      // --- FUNCIONALIDADE 1: Custos fixos de água e energia ---
+      // Cálculo da conta de água
+      const baseWaterCost = 10 + (animals.length * 2);
+      const waterDiscount = wellLevel >= 1 ? 0.8 : 0;
+      const waterCost = Math.round(baseWaterCost * (1 - waterDiscount));
+
+      // Cálculo da conta de energia
+      const activeMachinesCount = (machines.milkerPurchased && machines.milkerActive ? 1 : 0)
+        + (machines.shearerPurchased && machines.shearerActive ? 1 : 0)
+        + (machines.feederPurchased && machines.feederActive ? 1 : 0);
+      const baseEnergyCost = 15 + (activeMachinesCount * 3);
+      const energyDiscount = solarLevel === 1 ? 0.4 : solarLevel === 2 ? 0.7 : solarLevel >= 3 ? 1.0 : 0;
+      const energyCost = Math.round(baseEnergyCost * (1 - energyDiscount));
+
+      // Acumular no weeklyStats
+      setWeeklyStats(prev => ({
+        ...prev,
+        waterCost: (prev.waterCost || 0) + waterCost,
+        energyCost: (prev.energyCost || 0) + energyCost,
+      }));
+
+      // Verificar se pode pagar água e energia (usando gold atual da closure)
+      const canAffordWater = gold >= waterCost;
+      const canAffordEnergy = gold >= energyCost;
+
+      if (!canAffordWater) {
+        logsToAdd.push({ msg: '💧 Sem água suficiente! Animais sofrendo.', type: 'error' });
+        // debuff: -8 felicidade extra para todos os animais
+        setTimeout(() => {
+          setAnimals(al => al.map(a => ({ ...a, happiness: Math.max(0, a.happiness - 8) })));
+        }, 0);
+      } else {
+        logsToAdd.push({ msg: `💧 Conta de água paga: -${waterCost} moedas.`, type: 'system' });
+      }
+
+      if (!canAffordEnergy && energyCost > 0) {
+        logsToAdd.push({ msg: '⚡ Sem energia! Máquinas paradas hoje.', type: 'error' });
+      } else if (energyCost > 0) {
+        logsToAdd.push({ msg: `⚡ Conta de energia paga: -${energyCost} moedas.`, type: 'system' });
+      }
+
       // Liquidação financeira final do balanceamento (inclui multas de contratos vencidos e imposto)
       // BUG 2 FIX: usa callback funcional para não sobrescrever ouro com valor de closure stale
       // BUG FIX: taxAmount incluído aqui para evitar setGold duplo com gold stale no cálculo do imposto
-      setGold(prev => Math.max(0, prev - maintCost + globalGoldBonus - contractPenaltyForGold - taxAmount));
+      setGold(prev => Math.max(0, prev - maintCost + globalGoldBonus - contractPenaltyForGold - taxAmount - waterCost - energyCost));
 
       // --- SUBFUNÇÃO: Gerar Relatório Semanal ---
       if (currentDay % 7 === 0) {
         setWeeklyReportData({ ...weeklyStats });
         setShowWeeklyReport(true);
-        setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0 });
+        setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0, waterCost: 0, energyCost: 0 });
         setWeeklySales({ milk: 0, wool: 0, cheese: 0, scarf: 0, carne: 0, egg: 0, mayo: 0, queijoCoalho: 0, queijoMucarela: 0, queijoBrie: 0 });
         setWeeklyTaxPaid(0);
       }
@@ -4864,7 +4933,7 @@ export default function App() {
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                       title="Compra uma Vaca leiteira. Gera leite diário no Armazém após o primeiro dia."
                     >
-                      Comprar
+                      Comprar + 1 🌾
                     </button>
                   </div>
                   
@@ -4883,7 +4952,7 @@ export default function App() {
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                       title="Compra uma Ovelha. Fornece lã a cada 3 dias (a cada 2 dias se for melhor amigo)."
                     >
-                      Comprar
+                      Comprar + 1 🌾
                     </button>
                   </div>
                   
@@ -4902,7 +4971,7 @@ export default function App() {
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                       title="Compra um Boi. Acumula peso de corte diariamente e vende na feira por alto retorno."
                     >
-                      Comprar
+                      Comprar + 1 🌾
                     </button>
                   </div>
                   
@@ -4921,7 +4990,7 @@ export default function App() {
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                       title="Compra uma Galinha. Fornece ovos saudáveis diariamente se alimentada."
                     >
-                      Comprar
+                      Comprar + 1 🌾
                     </button>
                   </div>
 
@@ -4939,7 +5008,7 @@ export default function App() {
                       disabled={gold < getAnimalPurchasePrice('cabra') || farmLevel < 2}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                     >
-                      {farmLevel < 2 ? 'Nível 2+' : 'Comprar'}
+                      {farmLevel < 2 ? 'Nível 2+' : 'Comprar + 1 🌾'}
                     </button>
                   </div>
 
@@ -4956,7 +5025,7 @@ export default function App() {
                       disabled={gold < getAnimalPurchasePrice('pato')}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                     >
-                      Comprar
+                      Comprar + 1 🌾
                     </button>
                   </div>
 
@@ -4974,7 +5043,7 @@ export default function App() {
                       disabled={gold < getAnimalPurchasePrice('lhama') || farmLevel < 2}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                     >
-                      {farmLevel < 2 ? 'Nível 2+' : 'Comprar'}
+                      {farmLevel < 2 ? 'Nível 2+' : 'Comprar + 1 🌾'}
                     </button>
                   </div>
 
@@ -4992,7 +5061,7 @@ export default function App() {
                       disabled={gold < getAnimalPurchasePrice('ganso') || farmLevel < 3}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                     >
-                      {farmLevel < 3 ? 'Nível 3+' : 'Comprar'}
+                      {farmLevel < 3 ? 'Nível 3+' : 'Comprar + 1 🌾'}
                     </button>
                   </div>
 
@@ -5010,7 +5079,7 @@ export default function App() {
                       disabled={gold < getAnimalPurchasePrice('bufalo') || farmLevel < 4}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                     >
-                      {farmLevel < 4 ? 'Nível 4+' : 'Comprar'}
+                      {farmLevel < 4 ? 'Nível 4+' : 'Comprar + 1 🌾'}
                     </button>
                   </div>
 
@@ -5028,7 +5097,7 @@ export default function App() {
                       disabled={gold < getAnimalPurchasePrice('pavao') || farmLevel < 5}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                     >
-                      {farmLevel < 5 ? 'Nível 5+' : 'Comprar'}
+                      {farmLevel < 5 ? 'Nível 5+' : 'Comprar + 1 🌾'}
                     </button>
                   </div>
                   </div>{/* fim grid BUG 1 FIX */}
@@ -6804,6 +6873,14 @@ export default function App() {
                         <span className="font-bold">-{weeklyTaxPaid} moedas</span>
                       </div>
                     )}
+                    <div className="flex items-center gap-1.5 col-span-2 text-blue-700">
+                      <span>💧 Água gasta:</span>
+                      <span className="font-bold">-{weeklyReportData.waterCost || 0} moedas</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 col-span-2 text-amber-700">
+                      <span>⚡ Energia gasta:</span>
+                      <span className="font-bold">-{weeklyReportData.energyCost || 0} moedas</span>
+                    </div>
                   </div>
                 </div>
 
@@ -7520,25 +7597,36 @@ export default function App() {
                 {/* F9: Gerador Solar */}
                 <div className="bg-white border-4 border-yellow-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-yellow-800 mb-1">☀️ Gerador Solar</h4>
-                  <p className="text-xs text-stone-500 font-mono mb-2">Reduz manutenção das máquinas em 15% por nível. Atual: Nível {solarLevel}/3 ({solarLevel * 15}% desconto)</p>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Reduz manutenção e conta de energia das máquinas. Atual: Nível {solarLevel}/3<br/>
+                    Nv1: -15% manutenção de máquinas, -40% conta de energia<br/>
+                    Nv2: -30% manutenção, -70% conta de energia<br/>
+                    Nv3: -45% manutenção, energia GRATUITA 🆓 (Nv5+ da fazenda)
+                  </p>
                   <div className="grid grid-cols-3 gap-2">
-                    {[{ lvl: 1, price: 200 }, { lvl: 2, price: 400 }, { lvl: 3, price: 700 }].map(({ lvl, price }) => (
-                      <button
-                        key={lvl}
-                        disabled={solarLevel >= lvl || gold < price}
-                        onClick={() => {
-                          if (gold >= price && solarLevel < lvl) {
-                            setGold(prev => prev - price);
-                            setSolarLevel(lvl);
-                            addLog(`☀️ Gerador solar nível ${lvl} instalado! Manutenção ${lvl * 15}% mais barata.`, 'success');
-                            triggerAudioResult(() => sfx.playSound('levelup'));
-                          }
-                        }}
-                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${solarLevel >= lvl ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : gold >= price ? 'bg-yellow-500 hover:bg-yellow-400 text-white border-yellow-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
-                      >
-                        {solarLevel >= lvl ? `✅ Nv${lvl}` : `Nv${lvl} (${price}💰)`}
-                      </button>
-                    ))}
+                    {[{ lvl: 1, price: 200 }, { lvl: 2, price: 400 }, { lvl: 3, price: 700 }].map(({ lvl, price }) => {
+                      const requiresFarmLevel5 = lvl === 3 && farmLevel < 5;
+                      const canAfford = gold >= price && solarLevel < lvl && !requiresFarmLevel5;
+                      return (
+                        <button
+                          key={lvl}
+                          disabled={solarLevel >= lvl || !canAfford}
+                          onClick={() => {
+                            if (canAfford) {
+                              setGold(prev => prev - price);
+                              setSolarLevel(lvl);
+                              addLog(`☀️ Gerador solar nível ${lvl} instalado! Manutenção ${lvl * 15}% mais barata.`, 'success');
+                              triggerAudioResult(() => sfx.playSound('levelup'));
+                            } else if (requiresFarmLevel5) {
+                              addLog('☀️ Gerador solar nível 3 requer Fazenda Nível 5!', 'error');
+                            }
+                          }}
+                          className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${solarLevel >= lvl ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : canAfford ? 'bg-yellow-500 hover:bg-yellow-400 text-white border-yellow-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                        >
+                          {solarLevel >= lvl ? `✅ Nv${lvl}` : requiresFarmLevel5 ? `Nv${lvl} (Nv5 fazenda)` : `Nv${lvl} (${price}💰)`}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
