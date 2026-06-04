@@ -51,6 +51,13 @@ const ACHIEVEMENTS_LIST = [
   { id: 'level_5', title: 'Fazenda Nível 5', emoji: '📈', description: 'Alcançou o nível 5 de fazenda' },
   { id: 'merchant_partner', title: 'Parceiro do Mercador', emoji: '🧙‍♂️', description: 'Negociou com o comerciante viajante 5 vezes' },
   { id: 'millionaire', title: 'Milionário', emoji: '💰', description: 'Acumulou 1000 moedas de ouro de saldo' },
+  { id: 'silk_producer', title: 'Mestre da Seda', emoji: '🪲', description: 'Coletou 10 sedas brutas do Bicho-da-seda' },
+  { id: 'exotic_farmer', title: 'Fazendeiro Exótico', emoji: '🐊', description: 'Criou um Jacaré na fazenda' },
+  { id: 'organic_master', title: 'Mestre Orgânico', emoji: '🌿', description: 'Produziu 20 unidades de húmus ou muco' },
+  { id: 'rare_feathers', title: 'Colecionador de Penas', emoji: '🦤', description: 'Coletou 5 penas de avestruz' },
+  { id: 'level_10', title: 'Fazenda Centenária', emoji: '🌾', description: 'Alcançou o nível 10 de fazenda' },
+  { id: 'level_20', title: 'Império Aurora', emoji: '🌌', description: 'Alcançou o nível máximo 20!' },
+  { id: 'angora_breeder', title: 'Criador de Angorá', emoji: '🐇', description: 'O Coelho Angorá se reproduziu pela primeira vez' },
 ];
 
 interface FloatingText {
@@ -812,6 +819,18 @@ export default function App() {
       butter: [45, 45, 45, 45, 45, 45, 45],
       yogurt: [35, 35, 35, 35, 35, 35, 35],
       fertile_egg: [36, 36, 36, 36, 36, 36, 36],
+      quail_egg: [8, 8, 8, 8, 8, 8, 8],
+      alpaca_wool: [65, 65, 65, 65, 65, 65, 65],
+      humus: [20, 20, 20, 20, 20, 20, 20],
+      muco: [120, 120, 120, 120, 120, 120, 120],
+      angora_wool: [90, 90, 90, 90, 90, 90, 90],
+      seda_bruta: [80, 80, 80, 80, 80, 80, 80],
+      coxa_ra: [70, 70, 70, 70, 70, 70, 70],
+      carne_avestruz: [200, 200, 200, 200, 200, 200, 200],
+      pena_grande: [60, 60, 60, 60, 60, 60, 60],
+      couro_avestruz: [300, 300, 300, 300, 300, 300, 300],
+      carne_jacare: [250, 250, 250, 250, 250, 250, 250],
+      couro_jacare: [400, 400, 400, 400, 400, 400, 400],
     };
   });
 
@@ -1152,7 +1171,7 @@ export default function App() {
     expiresOnDay: number;
     completed: boolean;
     claimed: boolean;
-    missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items';
+    missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items' | 'collect_silk' | 'sell_exotic' | 'organic_day';
   }
   // BUG 9 FIX: restaura missões do save (eram perdidas ao recarregar)
   const [missions, setMissions] = useState<Mission[]>(() => {
@@ -1955,6 +1974,53 @@ export default function App() {
         missionKey: 'happy_animals'
       }
     ];
+
+    // Randomly add new mission types to the daily pool
+    const rand = Math.random();
+    if (rand < 0.33) {
+      missions.push({
+        id: `daily_silk_${day}`,
+        title: 'Mestre da Seda',
+        description: 'Colete 3 sedas brutas',
+        type: 'daily',
+        goal: 3,
+        current: 0,
+        reward: 60,
+        expiresOnDay: day + 1,
+        completed: false,
+        claimed: false,
+        missionKey: 'collect_silk'
+      });
+    } else if (rand < 0.66) {
+      missions.push({
+        id: `daily_exotic_${day}`,
+        title: 'Vendedor Exótico',
+        description: 'Venda 1 produto exótico (muco, couro, seda)',
+        type: 'daily',
+        goal: 1,
+        current: 0,
+        reward: 80,
+        expiresOnDay: day + 1,
+        completed: false,
+        claimed: false,
+        missionKey: 'sell_exotic'
+      });
+    } else {
+      missions.push({
+        id: `daily_organic_${day}`,
+        title: 'Dia Orgânico',
+        description: 'Produza húmus ou muco hoje',
+        type: 'daily',
+        goal: 1,
+        current: 0,
+        reward: 40,
+        expiresOnDay: day + 1,
+        completed: false,
+        claimed: false,
+        missionKey: 'organic_day'
+      });
+    }
+
     return missions;
   };
 
@@ -2152,6 +2218,25 @@ export default function App() {
     addLog(`🛍️ Compra realizada: +${quantity}u de ${feedLabel} por ${totalCost} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🌽', `-${totalCost}💰`, event);
+  };
+
+  // Buy Folha de Amoreira (for bicho_seda)
+  const buyFolhaAmoreira = (qty: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const pricePerUnit = 5;
+    const totalCost = pricePerUnit * qty;
+    if (gold < totalCost) {
+      addLog(`💰 Moedas insuficientes! Requer ${totalCost} moedas.`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Falta 💰!', event);
+      return;
+    }
+    setGold(prev => prev - totalCost);
+    setInventory(prev => ({ ...prev, folha_amoreira: (prev.folha_amoreira ?? 0) + qty }));
+    setWeeklyStats(prev => ({ ...prev, spending: prev.spending + totalCost }));
+    addLog(`🌿 Compra realizada: +${qty} Folha de Amoreira por ${totalCost} moedas!`, 'success');
+    triggerAudioResult(() => sfx.playSound('click'));
+    spawnFeedback('🌿', `-${totalCost}💰`, event);
   };
 
   // Collect Egg (Galinha)
@@ -2932,7 +3017,11 @@ export default function App() {
     if (!animal || animal.type !== 'avestruz') return;
     if (!animal.woolReady) { addLog(`🦤 ${animal.name} ainda não tem penas prontas!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
     const qty = specialization === 'exotica' ? 2 : 1;
-    setInventory(prev => ({ ...prev, pena_grande: (prev.pena_grande ?? 0) + qty }));
+    setInventory(prev => {
+      const newTotal = (prev.pena_grande ?? 0) + qty;
+      if (newTotal >= 5) checkAndUnlockAchievement('rare_feathers');
+      return { ...prev, pena_grande: newTotal };
+    });
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolReady: false, daysSinceLastWool: 0 } : a));
     addLog(`🦤 ${animal.name} (avestruz) soltou penas! +${qty} pena grande.`, 'success');
     setFarmXp(prev => prev + qty);
@@ -3180,6 +3269,7 @@ export default function App() {
     setFarmXp(prev => prev + 5);
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🎁', `-${price} 💰`, event);
+    if (type === 'jacare') setTimeout(() => checkAndUnlockAchievement('exotic_farmer'), 0);
   };
 
   // --- PROCESSING & SALES INTEGRATIONS ---
@@ -3404,6 +3494,10 @@ export default function App() {
     if (itemType === 'milk') updateMissionProgress('sell_milk', qty);
     updateMissionProgress('sell_any', qty);
     updateMissionProgress('earn_gold', profit);
+    // Missão de produto exótico
+    if (['muco', 'seda_bruta', 'couro_avestruz', 'couro_jacare', 'carne_jacare', 'carne_avestruz'].includes(itemType)) {
+      updateMissionProgress('sell_exotic', qty);
+    }
   };
 
   // --- AUTOMATION AND MASS SELLING SYSTEM ---
@@ -4229,6 +4323,7 @@ export default function App() {
     } else if (newLevel === 10) {
       setGold(prev => prev + 200);
       logs.push({ msg: `🌾 Marco Histórico! Nível 10 atingido! +200 moedas de celebração!`, type: 'success' });
+      setTimeout(() => checkAndUnlockAchievement('level_10'), 0);
     } else {
       const bonusPercent = newLevel <= 10 ? (newLevel - 5) * 5 : 25 + (newLevel - 10) * 3;
       logs.push({ msg: `✨ Bônus: +${bonusPercent}% em todos os produtos da fazenda!`, type: 'system' });
@@ -4286,6 +4381,13 @@ export default function App() {
       // F4: comerciante pode oferecer contrato
       if (Math.random() < 0.6) {
         setTimeout(() => generateMerchantContract(nextDayVal), 50);
+      }
+      // 30% chance to gift folha_amoreira
+      if (Math.random() < 0.3) {
+        setTimeout(() => {
+          setInventory(prev => ({ ...prev, folha_amoreira: (prev.folha_amoreira ?? 0) + 5 }));
+          addNotification('🌿 Comerciante trouxe 5 Folhas de Amoreira de presente!', 'event', nextDayVal);
+        }, 100);
       }
     }
 
@@ -4522,6 +4624,11 @@ export default function App() {
         // Mostrar modal de especialização ao atingir nível 2 pela primeira vez
         if (newLevel === 2 && specialization === null) {
           setTimeout(() => setShowSpecializationModal(true), 800);
+        }
+        if (newLevel === 5) setTimeout(() => checkAndUnlockAchievement('level_5'), 0);
+        if (newLevel === 20) {
+          setTimeout(() => checkAndUnlockAchievement('level_20'), 0);
+          setTimeout(() => addNotification('🌌 PARABÉNS! Você atingiu o Nível 20 — IMPÉRIO AURORA! Você é uma lenda!', 'success', nextDayValue), 0);
         }
       }
 
@@ -4857,8 +4964,15 @@ export default function App() {
         // Minhoca: produz 1 húmus a cada 3 dias
         if (a.type === 'minhoca' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
           const humusAmt = specialization === 'organica' ? 2 : 1;
-          setTimeout(() => setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) + humusAmt })), 0);
+          setTimeout(() => {
+            setInventory(prev => {
+              const newTotal = (prev.humus ?? 0) + humusAmt;
+              if (newTotal >= 20) checkAndUnlockAchievement('organic_master');
+              return { ...prev, humus: newTotal };
+            });
+          }, 0);
           logsToAdd.push({ msg: `🪱 ${a.name} (minhoca) produziu ${humusAmt} húmus!`, type: 'success' });
+          updateMissionProgress('organic_day', 1, nextDayValue);
         }
 
         // Caracol: produz 1 muco a cada 3 dias (2x na chuva)
@@ -4866,15 +4980,29 @@ export default function App() {
           // Easter egg: if player has 'sal' in inventory, don't produce (salt kills snails — just a comment here)
           const mucoAmt = (nextWeather === 'chuva' || weather === 'chuva') ? 2 : 1;
           const finalMuco = specialization === 'organica' ? mucoAmt * 2 : mucoAmt;
-          setTimeout(() => setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) + finalMuco })), 0);
+          setTimeout(() => {
+            setInventory(prev => {
+              const newTotal = (prev.muco ?? 0) + finalMuco;
+              if (newTotal >= 20) checkAndUnlockAchievement('organic_master');
+              return { ...prev, muco: newTotal };
+            });
+          }, 0);
           logsToAdd.push({ msg: `🐌 ${a.name} (caracol) produziu ${finalMuco} muco!`, type: 'success' });
+          updateMissionProgress('organic_day', 1, nextDayValue);
         }
 
         // Bicho-da-seda: a cada 14 dias produz 3 seda_bruta; consome 1 folha_amoreira/dia
         if (a.type === 'bicho_seda') {
           if ((a.age || 0) > 0 && (a.age || 0) % 14 === 0) {
-            setTimeout(() => setInventory(prev => ({ ...prev, seda_bruta: (prev.seda_bruta ?? 0) + 3 })), 0);
+            setTimeout(() => {
+              setInventory(prev => {
+                const newTotal = (prev.seda_bruta ?? 0) + 3;
+                if (newTotal >= 10) checkAndUnlockAchievement('silk_producer');
+                return { ...prev, seda_bruta: newTotal };
+              });
+            }, 0);
             logsToAdd.push({ msg: `🐛 ${a.name} (bicho-da-seda) produziu 3 seda bruta!`, type: 'success' });
+            updateMissionProgress('collect_silk', 3, nextDayValue);
           }
         }
 
@@ -5024,6 +5152,7 @@ export default function App() {
             setAnimals(prev => [...prev, newBaby]);
             setCoelhoReproCount(prev => prev + 1);
             logsToAdd.push({ msg: `🐰 Os coelhos angorá tiveram um filhote! ${newBaby.name} chegou à fazenda!`, type: 'success' });
+            setTimeout(() => checkAndUnlockAchievement('angora_breeder'), 0);
           }
         }
       }
@@ -5162,7 +5291,11 @@ export default function App() {
       // --- SISTEMA DE TURISMO ---
       if (hasTourism && nextDayValue % 7 === 0) {
         const pavaoCount = finalAnimals.filter(a => a.type === 'pavao').length;
-        let tourismRevenue = (farmLevel * 20) + (finalAnimals.length * 5) + (pavaoCount * 30);
+        const avestruzCount = finalAnimals.filter(a => a.type === 'avestruz').length;
+        const jacareCount = finalAnimals.filter(a => a.type === 'jacare').length;
+        const alpacaCount = finalAnimals.filter(a => a.type === 'alpaca').length;
+        const coelhoAngoraCount = finalAnimals.filter(a => a.type === 'coelho_angora').length;
+        let tourismRevenue = (farmLevel * 20) + (finalAnimals.length * 5) + (pavaoCount * 30) + (avestruzCount * 40) + (jacareCount * 60) + (alpacaCount * 15) + (coelhoAngoraCount * 10);
         const happyAnimalsBonus = finalAnimals.filter(a => a.happiness >= 90).length * 3;
         tourismRevenue += happyAnimalsBonus;
         const allHappy = finalAnimals.length > 0 && finalAnimals.every(a => a.happiness >= 80);
@@ -7470,6 +7603,30 @@ export default function App() {
                     ✨ Ov. Fértil ({getActualSellPrice('fertile_egg')}💰)
                   </button>
                   )}
+
+                  {(animals.some(a => a.type === 'avestruz') || (inventory.couro_avestruz ?? 0) > 0) && (
+                  <button
+                    type="button"
+                    onClick={(e) => sellProduct('couro_avestruz', 1, e)}
+                    disabled={(inventory.couro_avestruz ?? 0) < 1}
+                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    title="Vende 1 Couro de Avestruz. Preço base: 300 moedas."
+                  >
+                    🦤 Couro Avestruz ({getActualSellPrice('couro_avestruz')}💰)
+                  </button>
+                  )}
+
+                  {(animals.some(a => a.type === 'jacare') || (inventory.couro_jacare ?? 0) > 0) && (
+                  <button
+                    type="button"
+                    onClick={(e) => sellProduct('couro_jacare', 1, e)}
+                    disabled={(inventory.couro_jacare ?? 0) < 1}
+                    className="bg-green-50 hover:bg-green-100 border border-green-300 disabled:opacity-40 text-green-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    title="Vende 1 Couro de Jacaré. Preço base: 400 moedas."
+                  >
+                    🐊 Couro Jacaré ({getActualSellPrice('couro_jacare')}💰)
+                  </button>
+                  )}
                 </div>
 
               </div>
@@ -7543,6 +7700,40 @@ export default function App() {
                   );
                 })}
               </div>
+
+              {/* --- LOJA DE INSUMOS: Folha de Amoreira --- */}
+              {farmLevel >= 10 && (
+                <div className="mt-4 bg-white/80 p-3 rounded-2xl border-2 border-emerald-300 hover:border-emerald-400 transition-all flex flex-col gap-2.5 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-sans font-black text-emerald-900 text-xs uppercase leading-tight">🌿 Folha de Amoreira</h4>
+                      <p className="text-[9px] text-emerald-700/70 font-mono mt-0.5">Alimento do Bicho-da-seda (1/dia por bicho)</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[8px] text-emerald-700 font-mono uppercase font-black tracking-wider leading-none">Estoque</span>
+                      <span className="font-mono text-sm font-black text-emerald-800">{inventory.folha_amoreira ?? 0}u</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-emerald-200/50">
+                    <button
+                      type="button"
+                      onClick={(e) => buyFolhaAmoreira(1, e)}
+                      disabled={gold < 5}
+                      className="bg-stone-100 hover:bg-stone-200 text-emerald-900 text-[9px] font-mono font-bold py-1 px-0.5 rounded-lg border border-emerald-200 disabled:opacity-40 transition-all cursor-pointer text-center leading-none"
+                    >
+                      +1u (5💰)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => buyFolhaAmoreira(10, e)}
+                      disabled={gold < 50}
+                      className="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-[9px] font-mono font-bold py-1 px-0.5 rounded-lg border border-emerald-200 disabled:opacity-40 transition-all cursor-pointer text-center leading-none"
+                    >
+                      +10u (50💰)
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* --- DIÁRIO DA FAZENDA (ACTION LOGS) --- */}
@@ -9398,6 +9589,38 @@ export default function App() {
                     </div>
                   );
                 })()}
+
+                {/* Novos animais exóticos — gráficos de preço */}
+                {farmLevel >= 3 && (
+                  <div className="border-t-2 border-stone-100 pt-3 mt-1">
+                    <div className="text-[10px] font-mono font-black text-stone-400 uppercase tracking-widest mb-3">🌿 Produtos Exóticos e Novos Animais</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {([
+                        { key: 'quail_egg', label: '🐦 Ovo de Codorna', base: 8 },
+                        { key: 'alpaca_wool', label: '🦙 Lã de Alpaca', base: 65 },
+                        { key: 'humus', label: '🪱 Húmus', base: 20 },
+                        { key: 'muco', label: '🐌 Muco de Caracol', base: 120 },
+                        { key: 'angora_wool', label: '🐇 Lã Angorá', base: 90 },
+                        { key: 'seda_bruta', label: '🪲 Seda Bruta', base: 80 },
+                        { key: 'coxa_ra', label: '🐸 Coxa de Rã', base: 70 },
+                        { key: 'carne_avestruz', label: '🦤 Carne de Avestruz', base: 200 },
+                        { key: 'pena_grande', label: '🦤 Pena de Avestruz', base: 60 },
+                        { key: 'couro_avestruz', label: '🦤 Couro de Avestruz', base: 300 },
+                        { key: 'carne_jacare', label: '🐊 Carne de Jacaré', base: 250 },
+                        { key: 'couro_jacare', label: '🐊 Couro de Jacaré', base: 400 },
+                      ] as const).map(item => (
+                        <div key={item.key} className="bg-white border border-stone-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                          <div>
+                            <div className="font-display font-black text-xs uppercase text-[#78350f]">{item.label}</div>
+                            <div className="text-stone-400 text-[9px] font-mono">Base: {item.base}💰 | Atual: {getDynamicTransactionPrice(item.key)}💰</div>
+                            <div className="text-[9px] text-stone-400 font-mono">Estoque: {inventory[item.key] ?? 0}u</div>
+                          </div>
+                          <PriceChart history={priceHistory[item.key] || [item.base, item.base, item.base, item.base, item.base, item.base, item.base]} basePrice={item.base} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
               </div>
 
