@@ -38,7 +38,7 @@ import {
   Target,
   BarChart2
 } from 'lucide-react';
-import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract, FarmSpecialization, FairResult } from './types';
+import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract, FarmSpecialization, FairResult, FarmWorker, LandLot, BiomeType } from './types';
 import { getRandomName, getUniqueOxName } from './names';
 import { sfx } from './utils/audio';
 import SeasonalParticles from './components/SeasonalParticles';
@@ -177,6 +177,13 @@ const PriceChart: React.FC<PriceChartProps> = ({ history, basePrice }) => {
   );
 };
 
+const WORKER_TYPES = [
+  { role: 'tratador' as const, name: 'Tratador', emoji: '🧑‍🌾', dailyCost: 6, desc: 'Alimenta todos os animais automaticamente no final do dia', minLevel: 7 },
+  { role: 'leiteiro' as const, name: 'Leiteiro', emoji: '🥛', dailyCost: 8, desc: 'Ordena vacas, cabras e búfalos automaticamente', minLevel: 8 },
+  { role: 'coletor' as const, name: 'Coletor', emoji: '🧺', dailyCost: 10, desc: 'Colhe lã, ovos, húmus e produtos prontos automaticamente', minLevel: 10 },
+  { role: 'veterinario' as const, name: 'Veterinário', emoji: '💉', dailyCost: 15, desc: 'Previne epidemias e aumenta felicidade dos animais em 5/dia', minLevel: 12 },
+];
+
 export default function App() {
   // --- STATE WITH LOCALSTORAGE INITIALIZATION ---
   // NOTE: gold, debt, dailyEarning, earningsHistory, weeklySales, weeklyStats,
@@ -219,6 +226,29 @@ export default function App() {
 
   // hasStable, hasSilo, hasFridge, hasTipBox — managed by useFarm hook
 
+  // --- FEATURE 1: Animal List Filters ---
+  const [animalFilter, setAnimalFilter] = useState<string>('all');
+  const [animalSort, setAnimalSort] = useState<'happiness'|'production'|'age'|'name'>('name');
+  const [animalSortDir, setAnimalSortDir] = useState<'asc'|'desc'>('asc');
+
+  // --- FEATURE 2: Worker NPCs ---
+  const [workers, setWorkers] = useState<FarmWorker[]>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).workers ?? [];
+    } catch(e) {}
+    return [];
+  });
+  const [showWorkersModal, setShowWorkersModal] = useState(false);
+
+  // --- FEATURE 3: Land Biomes ---
+  const [landBiomes, setLandBiomes] = useState<LandLot[]>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).landBiomes ?? [];
+    } catch(e) {}
+    return [];
+  });
 
   // Grupo 4b: receita semanal para cálculo de imposto
   const [weeklyTaxPaid, setWeeklyTaxPaid] = useState<number>(0);
@@ -429,6 +459,7 @@ export default function App() {
   // --- FUNCIONALIDADE 5: Histórico de ganhos ---
   // earningsHistory moved to useEconomy
   const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
+  const [showAllTimeStats, setShowAllTimeStats] = useState(false);
   const [productionByAnimal, setProductionByAnimal] = useState<Record<number, { name: string; type: string; produced: number }>>({});
   const [allTimeStats, setAllTimeStats] = useState<{ totalSpentFeed: number; bestDay: number; worstDay: number }>(() => {
     try {
@@ -1829,11 +1860,13 @@ export default function App() {
         nextFeiraProdutosDay,
         nextFeiraExoticaDay,
         nextFestivalDay,
+        workers,
+        landBiomes,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 500;
@@ -3717,6 +3750,76 @@ export default function App() {
         setNextFestivalDay(nextDayValue + 120);
       }
 
+      // --- SISTEMA DE PEÕES (WORKERS) ---
+      if (workers.length > 0) {
+        const workerCost = workers.reduce((sum, w) => sum + w.dailyCost, 0);
+        setGold(prev => prev - workerCost);
+        logsToAdd.push({ msg: `👷 Peões trabalharam hoje! Custo diário: -${workerCost}💰`, type: 'info' });
+
+        // Efeitos dos peões
+        setAnimals(prev => prev.map(a => {
+          let updated = { ...a };
+          // Tratador: alimenta todos os animais
+          if (workers.some(w => w.role === 'tratador') && updated.hunger < 100) {
+            updated.hunger = Math.min(100, updated.hunger + 40);
+          }
+          // Veterinário: +5 felicidade para todos
+          if (workers.some(w => w.role === 'veterinario')) {
+            updated.happiness = Math.min(100, (updated.happiness ?? 0) + 5);
+          }
+          return updated;
+        }));
+
+        // Leiteiro: auto-collect milk from vaca/cabra/bufalo
+        if (workers.some(w => w.role === 'leiteiro')) {
+          let milkCollected = 0;
+          setAnimals(prev => prev.map(a => {
+            if ((a.type === 'vaca' || a.type === 'cabra' || a.type === 'bufalo') && !a.hasProducedToday && (a.happiness ?? 0) >= 50) {
+              milkCollected++;
+              return { ...a, hasProducedToday: true };
+            }
+            return a;
+          }));
+          if (milkCollected > 0) {
+            setInventory(prev => ({ ...prev, milk: prev.milk + milkCollected }));
+            logsToAdd.push({ msg: `🥛 Leiteiro coletou +${milkCollected} leite(s) automaticamente!`, type: 'success' });
+          }
+        }
+
+        // Coletor: auto-collect wool/eggs from ready animals
+        if (workers.some(w => w.role === 'coletor')) {
+          let woolCollected = 0;
+          let eggsCollected = 0;
+          setAnimals(prev => prev.map(a => {
+            if (a.type === 'ovelha' && a.woolReady) {
+              woolCollected++;
+              return { ...a, woolReady: false, daysUntilWool: 7, daysSinceLastWool: 0 };
+            }
+            if ((a.type === 'galinha' || a.type === 'codorna') && (a.happiness ?? 0) >= 50) {
+              eggsCollected++;
+              return { ...a, hasProducedToday: true };
+            }
+            return a;
+          }));
+          if (woolCollected > 0) {
+            setInventory(prev => ({ ...prev, wool: prev.wool + woolCollected }));
+            logsToAdd.push({ msg: `🧺 Coletor recolheu +${woolCollected} lã(s) automaticamente!`, type: 'success' });
+          }
+          if (eggsCollected > 0) {
+            setInventory(prev => ({ ...prev, egg: prev.egg + eggsCollected }));
+            logsToAdd.push({ msg: `🧺 Coletor recolheu +${eggsCollected} ovo(s) automaticamente!`, type: 'success' });
+          }
+        }
+      }
+
+      // --- BIOME BONUSES ---
+      if (landBiomes.length > 0) {
+        const hasPomar = landBiomes.some(b => b.biome === 'pomar');
+        if (hasPomar) {
+          setAnimals(prev => prev.map(a => ({ ...a, happiness: Math.min(100, (a.happiness ?? 0) + 2) })));
+        }
+      }
+
       // --- SISTEMA DE DÍVIDA ---
       // Aplicar juros de 5% sobre dívida existente (antes de verificar game over)
       if (debt > 0) {
@@ -4342,6 +4445,18 @@ export default function App() {
               title="Estatísticas históricas"
             >
               <BarChart2 className="w-5 h-5" />
+            </button>
+
+            {/* 📊 Recordes Button */}
+            <button
+              onClick={() => {
+                setShowAllTimeStats(true);
+                triggerAudioResult(() => sfx.playSound('click'));
+              }}
+              className="bg-[#92400e] border-3 border-[#fbbf24] hover:bg-[#78350f] text-[#fef3c7] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#78350f] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+              title="Recordes da Fazenda Aurora"
+            >
+              🏅
             </button>
 
             {/* Reset Game button */}
@@ -8952,6 +9067,66 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 📊 ALL-TIME STATS / RECORDES MODAL */}
+      {showAllTimeStats && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setShowAllTimeStats(false)}>
+          <div className="bg-[#064e3b] border-4 border-[#fbbf24] rounded-[32px] p-6 max-w-lg w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h2 className="font-display font-black text-[#fef3c7] text-xl uppercase text-center mb-4">📊 Recordes da Fazenda Aurora</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">💰 Total Faturado</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalEarned}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🌟 Melhor Dia</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{allTimeStats.bestDay}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">📦 Itens Coletados</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalCollected}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🌽 Animais Alimentados</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalFed}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🥛 Leite Produzido</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalMilk ?? 0}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🧶 Lã Coletada</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalWool ?? 0}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🥚 Ovos Coletados</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalEggs ?? 0}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🧀 Queijos Fabricados</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalCheese ?? 0}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🐂 Bois Vendidos</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalOxSold ?? 0}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">📅 Dias Jogados</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{currentDay}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🧣 Cachecóis Tecidos</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalScarf ?? 0}</div>
+              </div>
+              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
+                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🥣 Maioneses Feitas</div>
+                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalMayo ?? 0}</div>
+              </div>
+            </div>
+            <button onClick={() => setShowAllTimeStats(false)} className="mt-4 w-full bg-[#78350f] text-[#fef3c7] font-black uppercase py-2 rounded-xl border-2 border-[#fbbf24] hover:bg-[#92400e] transition-colors cursor-pointer">Fechar</button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -198,23 +198,23 @@ export function useAnimals({
     const spec = specOverride !== undefined ? specOverride : specialization;
     let basePrice = 120; // vaca
     if (type === 'ovelha') basePrice = 80;
-    if (type === 'boi') basePrice = 180;
-    if (type === 'galinha') basePrice = 60;
+    if (type === 'boi') basePrice = 150;
+    if (type === 'galinha') basePrice = 20;
     if (type === 'cabra') basePrice = 110;
-    if (type === 'lhama') basePrice = 135;
-    if (type === 'pato') basePrice = 70;
-    if (type === 'ganso') basePrice = 100;
+    if (type === 'lhama') basePrice = 160;
+    if (type === 'pato') basePrice = 50;
+    if (type === 'ganso') basePrice = 75;
     if (type === 'bufalo') basePrice = 220;
-    if (type === 'pavao') basePrice = 300;
-    if (type === 'codorna') basePrice = 40;
-    if (type === 'alpaca') basePrice = 280;
-    if (type === 'minhoca') basePrice = 80;
-    if (type === 'caracol') basePrice = 120;
-    if (type === 'coelho_angora') basePrice = 200;
-    if (type === 'bicho_seda') basePrice = 150;
-    if (type === 'ra') basePrice = 180;
+    if (type === 'pavao') basePrice = 350;
+    if (type === 'codorna') basePrice = 25;
+    if (type === 'alpaca') basePrice = 200;
+    if (type === 'minhoca') basePrice = 35;
+    if (type === 'caracol') basePrice = 55;
+    if (type === 'coelho_angora') basePrice = 100;
+    if (type === 'bicho_seda') basePrice = 80;
+    if (type === 'ra') basePrice = 130;
     if (type === 'avestruz') basePrice = 600;
-    if (type === 'jacare') basePrice = 800;
+    if (type === 'jacare') basePrice = 900;
 
     // Specialization purchase penalty
     const purchasePenalty =
