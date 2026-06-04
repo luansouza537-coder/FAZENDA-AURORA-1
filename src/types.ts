@@ -90,6 +90,22 @@ export interface LogMessage {
   type: 'error' | 'success' | 'info' | 'system' | 'event';
 }
 
+export interface FarmWorker {
+  id: string;
+  role: 'leiteiro' | 'tratador' | 'coletor' | 'veterinario';
+  name: string;
+  dailyCost: number;
+  hiredDay: number;
+}
+
+export type BiomeType = 'pasto' | 'lago' | 'floresta' | 'pomar';
+
+export interface LandLot {
+  id: number;
+  biome: BiomeType;
+  purchasedDay: number;
+}
+
 export interface FarmStats {
   totalEarned: number;
   totalFed: number;

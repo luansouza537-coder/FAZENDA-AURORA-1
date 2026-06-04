@@ -4333,6 +4333,19 @@ export default function App() {
               <span>Melhorias</span>
             </button>
 
+            {/* 👷 Peões Button */}
+            <button
+              onClick={() => {
+                setShowWorkersModal(true);
+                triggerAudioResult(() => sfx.playSound('click'));
+              }}
+              className="bg-[#064e3b] border-3 border-[#fbbf24] hover:bg-[#065f46] text-[#fef3c7] font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#022c22] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
+              title="Contratar Peões: trabalhadores que automatizam tarefas diárias"
+            >
+              <span>👷</span>
+              <span>Peões {workers.length > 0 ? `(${workers.length})` : ''}</span>
+            </button>
+
             {/* 🛡️ Seguro Status */}
             {insurance.active && (
               <div className="bg-green-700 border-3 border-green-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seguro ativo: ${insurance.daysLeft} dias restantes`}>
@@ -4988,8 +5001,47 @@ export default function App() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* Feature 1: Animal Filter Bar */}
+                <div className="col-span-full flex flex-wrap gap-2 mb-3">
+                  <select value={animalFilter} onChange={e => setAnimalFilter(e.target.value)}
+                    className="bg-[#064e3b] border-2 border-[#fbbf24] text-[#fef3c7] text-xs font-mono rounded-xl px-3 py-1.5">
+                    <option value="all">🐾 Todos</option>
+                    {[...new Set(animals.map(a => a.type))].map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                  {(['happiness','production','age','name'] as const).map(s => (
+                    <button key={s} onClick={() => { if (animalSort === s) setAnimalSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setAnimalSort(s); setAnimalSortDir('desc'); }}}
+                      className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalSort === s ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-transparent border-[#fbbf24]/40 text-[#fef3c7]'}`}>
+                      {s === 'happiness' ? '😊 Feliz' : s === 'production' ? '📦 Prod' : s === 'age' ? '📅 Idade' : '🔤 Nome'}
+                      {animalSort === s ? (animalSortDir === 'asc' ? ' ↑' : ' ↓') : ''}
+                    </button>
+                  ))}
+                  <button onClick={() => { setAnimalFilter('all'); setAnimalSort('production'); setAnimalSortDir('desc'); }}
+                    className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-[#10b981]/60 text-[#10b981] bg-transparent">
+                    🏆 Top Prod
+                  </button>
+                  <button onClick={() => { setAnimalFilter('all'); setAnimalSort('happiness'); setAnimalSortDir('asc'); }}
+                    className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-red-400/60 text-red-400 bg-transparent">
+                    ⚠️ Tristes
+                  </button>
+                  <span className="text-[10px] text-[#fef3c7]/60 font-mono self-center ml-1">
+                    Mostrando {animals.filter(a => animalFilter === 'all' || a.type === animalFilter).length} de {animals.length} animais
+                  </span>
+                </div>
                 <AnimatePresence>
-                  {animals.map((animal) => {
+                  {(() => {
+                    const filteredAnimals = animals
+                      .filter(a => animalFilter === 'all' || a.type === animalFilter)
+                      .sort((a, b) => {
+                        let cmp = 0;
+                        if (animalSort === 'happiness') cmp = (a.happiness ?? 0) - (b.happiness ?? 0);
+                        else if (animalSort === 'production') cmp = (a.weeklyProduction ?? 0) - (b.weeklyProduction ?? 0);
+                        else if (animalSort === 'age') cmp = (a.age ?? 0) - (b.age ?? 0);
+                        else cmp = a.name.localeCompare(b.name);
+                        return animalSortDir === 'asc' ? cmp : -cmp;
+                      });
+                    return filteredAnimals.map((animal) => {
                     const isEditing = editingId === animal.id;
                     const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
                     
@@ -5734,7 +5786,8 @@ export default function App() {
 
                       </motion.div>
                     );
-                  })}
+                  });
+                  })()}
                 </AnimatePresence>
               </div>
             )}
