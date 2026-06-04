@@ -326,6 +326,15 @@ export default function App() {
 
   // Ateliê tab state (UI-only, no persistence)
 
+  // Improvement 2: Profit Panel
+  const [showProfitPanel, setShowProfitPanel] = useState<boolean>(false);
+
+  // Improvement 4: Ranking Modal
+  const [showRankingModal, setShowRankingModal] = useState<boolean>(false);
+
+  // Improvement 5: Big Notification
+  const [bigNotification, setBigNotification] = useState<{title: string, body: string, emoji: string, color: string} | null>(null);
+
   // Sleep / Rest state
   const [isSleeping, setIsSleeping] = useState<boolean>(false);
   // BUG 20 FIX: ref para evitar duplo-clique no botão Dormir
@@ -629,13 +638,13 @@ export default function App() {
       humus: [35, 35, 35, 35, 35, 35, 35],
       muco: [120, 120, 120, 120, 120, 120, 120],
       angora_wool: [90, 90, 90, 90, 90, 90, 90],
-      seda_bruta: [80, 80, 80, 80, 80, 80, 80],
-      coxa_ra: [70, 70, 70, 70, 70, 70, 70],
-      carne_avestruz: [180, 180, 180, 180, 180, 180, 180],
-      pena_grande: [60, 60, 60, 60, 60, 60, 60],
+      seda_bruta: [100, 100, 100, 100, 100, 100, 100],
+      coxa_ra: [110, 110, 110, 110, 110, 110, 110],
+      carne_avestruz: [220, 220, 220, 220, 220, 220, 220],
+      pena_grande: [90, 90, 90, 90, 90, 90, 90],
       couro_avestruz: [300, 300, 300, 300, 300, 300, 300],
-      carne_jacare: [250, 250, 250, 250, 250, 250, 250],
-      couro_jacare: [400, 400, 400, 400, 400, 400, 400],
+      carne_jacare: [300, 300, 300, 300, 300, 300, 300],
+      couro_jacare: [500, 500, 500, 500, 500, 500, 500],
       queijo_cabra: [90, 90, 90, 90, 90, 90, 90],
       iogurte_cabra: [55, 55, 55, 55, 55, 55, 55],
       leite_condensado: [100, 100, 100, 100, 100, 100, 100],
@@ -1417,13 +1426,13 @@ export default function App() {
     if (itemType === 'humus') return 35;
     if (itemType === 'muco') return 120;
     if (itemType === 'angora_wool') return 90;
-    if (itemType === 'seda_bruta') return 80;
-    if (itemType === 'coxa_ra') return 70;
-    if (itemType === 'carne_avestruz') return 180;
-    if (itemType === 'pena_grande') return 60;
+    if (itemType === 'seda_bruta') return 100;
+    if (itemType === 'coxa_ra') return 110;
+    if (itemType === 'carne_avestruz') return 220;
+    if (itemType === 'pena_grande') return 90;
     if (itemType === 'couro_avestruz') return 300;
-    if (itemType === 'carne_jacare') return 250;
-    if (itemType === 'couro_jacare') return 400;
+    if (itemType === 'carne_jacare') return 300;
+    if (itemType === 'couro_jacare') return 500;
     if (itemType === 'queijo_cabra') return 90;
     if (itemType === 'iogurte_cabra') return 55;
     if (itemType === 'leite_condensado') return 100;
@@ -2763,6 +2772,7 @@ export default function App() {
         setFarmLevel(newLevel);
         setShowLevelUpModal(newLevel);
         setTimeout(() => addNotification(`🏆 Fazenda subiu para o Nível ${newLevel}! (${newFarmXp} XP total)`, 'success', nextDayValue), 0);
+        setTimeout(() => triggerBigNotification(`NÍVEL ${newLevel}!`, `Sua fazenda evoluiu! Novos benefícios desbloqueados.`, '🏆'), 300);
         // Mostrar modal de especialização ao atingir nível 2 pela primeira vez
         if (newLevel === 2 && specialization === null) {
           setTimeout(() => setShowSpecializationModal(true), 800);
@@ -3538,6 +3548,7 @@ export default function App() {
           if (calcFairScore(best) > npcExpScore()) {
             expGold += 300; expWins++;
             setAnimals(prev => prev.map(a => a.id === best.id ? { ...a, isCampiao: true } : a));
+            setTimeout(() => triggerBigNotification(`${best.name} é CAMPEÃ!`, `Raça Leiteira — Título permanente + +300💰`, '🏆'), 500);
             expLog.push({ msg: `🏆 Exposição: ${best.name} é CAMPEÃ de Raça Leiteira! +300💰 + título permanente!`, type: 'success' });
           } else {
             expLog.push({ msg: `🏆 Exposição: Perdeu Raça Leiteira. Invista em traits positivos!`, type: 'info' });
@@ -3810,6 +3821,49 @@ export default function App() {
   // Também considera falência por dívida > 1000
   const isGameOver = (animals.length === 0 && gold < getAnimalPurchasePrice('galinha')) || debt > 1000;
 
+  // Improvement 2: Daily profit helper
+  const getAnimalDailyProfit = (type: AnimalType): { revenue: number, cost: number, profit: number } => {
+    const feedCostMap: Record<string, number> = {
+      vaca: 3, boi: 3, bufalo: 3,
+      ovelha: 3, cabra: 3, lhama: 3, alpaca: 3,
+      galinha: 2, codorna: 2, pavao: 2,
+      pato: 4, ganso: 4,
+      coelho_angora: 2,
+      ra: 6, avestruz: 6, jacare: 6,
+      minhoca: 0, caracol: 0, bicho_seda: 0,
+    };
+    const cost = feedCostMap[type] ?? 0;
+    let revenue = 0;
+    if (type === 'vaca') revenue = getItemBaseSellPrice('milk') * 1; // ~1/day
+    else if (type === 'ovelha') revenue = getItemBaseSellPrice('wool') / 3; // every 3 days
+    else if (type === 'boi') revenue = 0; // sell on maturity
+    else if (type === 'galinha') revenue = getItemBaseSellPrice('egg') * 1;
+    else if (type === 'cabra') revenue = getItemBaseSellPrice('goat_milk') * 2 * (20/35); // 20d lactation / 35d cycle
+    else if (type === 'lhama') revenue = getItemBaseSellPrice('llama_wool') / 30; // per season
+    else if (type === 'pato') revenue = getItemBaseSellPrice('duck_egg') * 0.7; // seasonal avg
+    else if (type === 'ganso') revenue = getItemBaseSellPrice('goose_egg') / 3;
+    else if (type === 'bufalo') revenue = getItemBaseSellPrice('buffalo_milk') * 3;
+    else if (type === 'pavao') revenue = getItemBaseSellPrice('peacock_feather') / 7;
+    else if (type === 'codorna') revenue = getItemBaseSellPrice('quail_egg') * 6;
+    else if (type === 'alpaca') revenue = getItemBaseSellPrice('alpaca_wool') / 4;
+    else if (type === 'minhoca') revenue = getItemBaseSellPrice('humus') / 3;
+    else if (type === 'caracol') revenue = getItemBaseSellPrice('muco') / 3;
+    else if (type === 'coelho_angora') revenue = getItemBaseSellPrice('angora_wool') / 5;
+    else if (type === 'bicho_seda') revenue = getItemBaseSellPrice('seda_bruta') * 3 / 14;
+    else if (type === 'ra') revenue = getItemBaseSellPrice('coxa_ra') / 7;
+    else if (type === 'avestruz') revenue = getItemBaseSellPrice('pena_grande') / 7;
+    else if (type === 'jacare') revenue = getItemBaseSellPrice('carne_jacare') / 60; // very long term
+    revenue = Math.round(revenue * 10) / 10;
+    const profit = Math.round((revenue - cost) * 10) / 10;
+    return { revenue, cost, profit };
+  };
+
+  // Improvement 5: trigger big notification helper
+  const triggerBigNotification = (title: string, body: string, emoji: string, color: string = '#064e3b') => {
+    setBigNotification({ title, body, emoji, color });
+    setTimeout(() => setBigNotification(null), 3000);
+  };
+
   const { name: seasonName, bg: seasonBg, textColor: seasonTextColor } = (() => {
     const index = Math.floor(((currentDay - 1) % 120) / 30);
     switch (index) {
@@ -3842,6 +3896,25 @@ export default function App() {
       <div className="absolute top-10 left-10 w-32 h-10 bg-white/5 rounded-full blur-sm pointer-events-none" />
       <div className="absolute top-40 right-20 w-48 h-12 bg-white/5 rounded-full blur-sm pointer-events-none" />
       <div className="absolute bottom-20 left-1/4 w-36 h-8 bg-white/5 rounded-full blur-sm pointer-events-none" />
+
+      {/* Improvement 5: Big Notification Banner */}
+      <AnimatePresence>
+        {bigNotification && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.7 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 flex items-center justify-center z-[60] pointer-events-none"
+          >
+            <div className="bg-[#064e3b] border-4 border-[#fbbf24] rounded-3xl p-8 shadow-2xl text-center max-w-sm mx-4">
+              <div className="text-6xl mb-3">{bigNotification.emoji}</div>
+              <div className="text-2xl font-black text-[#fef3c7] font-display">{bigNotification.title}</div>
+              <div className="text-sm text-[#fde68a] mt-2 font-mono">{bigNotification.body}</div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating particles list */}
       <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
@@ -4327,6 +4400,26 @@ export default function App() {
                   title="Comprar Animais: abre o catálogo para expandir seu rebanho"
                 >
                   🛒 COMPRAR ANIMAL
+                </button>
+
+                {/* Improvement 2: Profit Panel Toggle */}
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setShowProfitPanel(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className={`${showProfitPanel ? 'bg-emerald-600 border-emerald-800' : 'bg-teal-700 border-teal-900'} text-white border-b-4 px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5`}
+                  title="Painel de Lucro: mostra receita, custo e lucro estimado por animal"
+                >
+                  💹 LUCRO
+                </button>
+
+                {/* Improvement 4: Ranking Modal */}
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setShowRankingModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="bg-amber-600 border-b-4 border-amber-800 text-white px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
+                  title="Ranking de Animais por produção semanal"
+                >
+                  🏆 RANKING
                 </button>
  
                 {/* HELP / TUTORIAL BUTTON */}
