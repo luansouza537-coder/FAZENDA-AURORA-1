@@ -1334,24 +1334,35 @@ export default function App() {
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
   }, [gold, currentDay, farmLevel, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness]);
 
+  // Ref para rastrear conquistas já desbloqueadas sem depender do estado React (evita stale closure e duplos no StrictMode)
+  const unlockedAchievementsRef = useRef<string[]>(unlockedAchievements);
+  useEffect(() => {
+    unlockedAchievementsRef.current = unlockedAchievements;
+  }, [unlockedAchievements]);
+
   // Centralized achievement condition checker
-  // BUG 5 FIX: usa callback funcional para evitar perda de conquistas quando múltiplas são desbloqueadas
+  // BUG 3 FIX: usa ref para verificar conquistas já desbloqueadas ANTES do setState, evitando
+  // notificações repetidas causadas por stale closure ou dupla execução do updater no StrictMode.
   const checkAndUnlockAchievement = (id: string) => {
     const ach = ACHIEVEMENTS_LIST.find(a => a.id === id);
     if (!ach) return;
 
+    // Verifica via ref (síncrono, sempre atualizado) antes de chamar qualquer setState
+    if (unlockedAchievementsRef.current.includes(id)) return;
+
+    // Atualiza o ref imediatamente para bloquear chamadas concorrentes do mesmo id
+    unlockedAchievementsRef.current = [...unlockedAchievementsRef.current, id];
+
     setUnlockedAchievements(prev => {
-      if (prev.includes(id)) return prev;
+      if (prev.includes(id)) return prev; // guarda dupla via estado
       const newList = [...prev, id];
       localStorage.setItem('aurora_achievements_save', JSON.stringify(newList));
       return newList;
     });
 
-    // Show popup (we call this outside the setState to avoid closure issues;
-    // it may fire even if already unlocked but that's acceptable UX)
-    setAchievementNotification(prev => {
-      // Only show if not already shown for the same achievement
-      if (prev?.id === id) return prev;
+    // Dispara notificação fora do updater para evitar dupla execução no StrictMode
+    setAchievementNotification(current => {
+      if (current?.id === id) return current;
       return {
         id: ach.id,
         title: ach.title,
@@ -1359,8 +1370,6 @@ export default function App() {
         description: ach.description
       };
     });
-
-    // Play level up chime
     triggerAudioResult(() => sfx.playSound('levelup'));
   };
 
@@ -3233,9 +3242,20 @@ export default function App() {
       // Decaimento natural leve de felicidade
       copy.happiness = Math.max(0, copy.happiness - 2);
 
-      // Penalidade extra de fome extrema
-      if (copy.hunger <= 5) {
-        copy.happiness = Math.max(0, copy.happiness - 12);
+      // Penalidade extra de fome extrema (BUG 6 FIX)
+      if (copy.hunger <= 0) {
+        // Incrementa dias consecutivos sem comida
+        copy.daysWithoutFood = (copy.daysWithoutFood ?? 0) + 1;
+        // Penalidade de felicidade: -25/dia após 3 dias consecutivos, senão -15/dia
+        const starvePenalty = copy.daysWithoutFood >= 3 ? 25 : 15;
+        copy.happiness = Math.max(0, copy.happiness - starvePenalty);
+        logs.push({
+          msg: `⚠️ ${copy.name} está passando fome! Alimente urgente!`,
+          type: 'error'
+        });
+      } else {
+        // Reset contador se comeu hoje
+        copy.daysWithoutFood = 0;
       }
 
       // Efeito de trait de felicidade
@@ -4825,8 +4845,10 @@ export default function App() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="bg-[#fde68a]/30 border-4 border-[#fbbf24] rounded-[28px] p-5 flex flex-col md:flex-row gap-4 items-center justify-around mb-2 shadow-inner overflow-hidden"
+                  className="bg-[#fde68a]/30 border-4 border-[#fbbf24] rounded-[28px] p-5 flex flex-col gap-4 mb-2 shadow-inner overflow-hidden"
                 >
+                  {/* BUG 1 FIX: grade responsiva com scroll para que todos os animais sejam acessíveis em mobile e desktop */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
                   {/* Cow */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel >= 4 && (
@@ -5009,6 +5031,7 @@ export default function App() {
                       {farmLevel < 5 ? 'Nível 5+' : 'Comprar'}
                     </button>
                   </div>
+                  </div>{/* fim grid BUG 1 FIX */}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -5257,12 +5280,25 @@ export default function App() {
                             {/* Avatar tooltip */}
                             <div className="absolute top-full right-0 mt-1 w-56 bg-[#78350f] text-[#fef3c7] text-[10px] font-mono rounded-xl p-2.5 shadow-xl border-2 border-[#fbbf24] hidden group-hover/avatartooltip:block z-50 pointer-events-none leading-relaxed normal-case text-left">
                               <div className="font-bold text-[#fbbf24] mb-0.5 uppercase border-b border-white/10 pb-0.5">🌾 RENDIMENTO:</div>
-                              {animal.type === 'vaca' 
-                                ? "🥛 Ordenhe leite diariamente. Dá mais leite se feliz ou em clima de Sol Forte." 
-                                : animal.type === 'ovelha' 
-                                ? "🧶 Fornece lã crua para fabricar cachecóis premium a cada 3 dias." 
+                              {/* BUG 2 FIX: descrições corretas para todos os tipos de animal */}
+                              {animal.type === 'vaca'
+                                ? "🥛 Ordenhe leite diariamente. Dá mais leite se feliz ou em clima de Sol Forte."
+                                : animal.type === 'ovelha'
+                                ? "🧶 Fornece lã crua para fabricar cachecóis premium a cada 3 dias."
                                 : animal.type === 'boi'
                                 ? "🐂 Ganha peso corporal contínuo para revenda de alta lucratividade."
+                                : animal.type === 'cabra'
+                                ? "🐐 Produz leite de cabra em ciclos de lactação. Cada ciclo dura 20 dias de produção seguidos de 15 dias de secagem. Dá +3 felicidade/dia para todos os animais da fazenda."
+                                : animal.type === 'lhama'
+                                ? "🦙 Acumula lã ao longo das estações. Colheita somente na Primavera (mín. 3u). Não perde felicidade no Inverno e reduz custo de manutenção das máquinas."
+                                : animal.type === 'pato'
+                                ? "🦆 Bota ovos de pato diariamente (mais na Primavera, menos no Inverno). Também gera penas ocasionalmente. Reduz chance de pragas em 40%."
+                                : animal.type === 'ganso'
+                                ? "🦢 Bota ovos de ganso a cada 3 dias no Outono/Inverno. Fora dessa época, gera penas a cada 7 dias. Funciona como alarme de eventos negativos."
+                                : animal.type === 'bufalo'
+                                ? "🐃 Produz leite de búfala em grandes quantidades (3u/dia). No Verão sofre estresse térmico (-1u). Seu leite pode virar Muçarela de Búfala (120💰)."
+                                : animal.type === 'pavao'
+                                ? "🦚 Animal de prestígio. Gera penas semanalmente na Primavera/Verão (80💰/u). Com felicidade ≥80%, bônus de +10% felicidade para todos e +3-5% nos preços de venda."
                                 : "🥚 Bota ricos ovos de quintal se manter felicidade > 30% e fome > 25%."}
                             </div>
                           </div>
@@ -5955,6 +5991,8 @@ export default function App() {
                     Vender Cachecol ({getActualSellPrice('scarf')}💰)
                   </button>
 
+                  {/* BUG 5 FIX: itens especiais só aparecem se o jogador tem o animal produtor OU quantidade > 0 */}
+                  {(animals.some(a => a.type === 'cabra') || (inventory.goat_milk ?? 0) > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('goat_milk', 1, e)}
@@ -5964,7 +6002,9 @@ export default function App() {
                   >
                     L. Cabra ({getActualSellPrice('goat_milk')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'lhama') || (inventory.llama_wool ?? 0) > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('llama_wool', 1, e)}
@@ -5974,7 +6014,9 @@ export default function App() {
                   >
                     L. Lhama ({getActualSellPrice('llama_wool')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'pato') || (inventory.duck_egg ?? 0) > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('duck_egg', 1, e)}
@@ -5984,7 +6026,9 @@ export default function App() {
                   >
                     Ov. Pato ({getActualSellPrice('duck_egg')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'ganso') || (inventory.goose_egg ?? 0) > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('goose_egg', 1, e)}
@@ -5994,7 +6038,9 @@ export default function App() {
                   >
                     Ov. Ganso ({getActualSellPrice('goose_egg')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'bufalo') || (inventory.buffalo_milk ?? 0) > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('buffalo_milk', 1, e)}
@@ -6004,7 +6050,9 @@ export default function App() {
                   >
                     L. Búfala ({getActualSellPrice('buffalo_milk')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'bufalo') || (inventory.buffalo_mozzarella ?? 0) > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('buffalo_mozzarella', 1, e)}
@@ -6014,7 +6062,9 @@ export default function App() {
                   >
                     Muç. Búfala ({getActualSellPrice('buffalo_mozzarella')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'pato' || a.type === 'ganso') || (inventory.feather ?? 0) > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('feather', 1, e)}
@@ -6024,7 +6074,9 @@ export default function App() {
                   >
                     Penas ({getActualSellPrice('feather')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'pavao') || (inventory.peacock_feather ?? 0) > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('peacock_feather', 1, e)}
@@ -6034,7 +6086,9 @@ export default function App() {
                   >
                     P. Pavão ({getActualSellPrice('peacock_feather')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'vaca') || (inventory.butter ?? 0) > 0 || inventory.milk > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('butter', 1, e)}
@@ -6044,7 +6098,9 @@ export default function App() {
                   >
                     Manteiga ({getActualSellPrice('butter')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'vaca') || (inventory.yogurt ?? 0) > 0 || inventory.milk > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('yogurt', 1, e)}
@@ -6054,7 +6110,9 @@ export default function App() {
                   >
                     Iogurte ({getActualSellPrice('yogurt')}💰)
                   </button>
+                  )}
 
+                  {(animals.some(a => a.type === 'galinha') || (inventory.fertile_egg ?? 0) > 0) && (
                   <button
                     type="button"
                     onClick={(e) => sellProduct('fertile_egg', 1, e)}
@@ -6064,6 +6122,7 @@ export default function App() {
                   >
                     ✨ Ov. Fértil ({getActualSellPrice('fertile_egg')}💰)
                   </button>
+                  )}
                 </div>
 
               </div>
@@ -7179,13 +7238,15 @@ export default function App() {
                           </div>
                         </div>
                       </div>
+                      {/* BUG 4 FIX: inclui verificação farmLevel < 5 no disabled */}
                       <button
                         type="button"
                         onClick={(e) => craftQueijo('coalho', e)}
-                        disabled={inventory.milk < 3 || queijosEmMaturacao.length >= maxPrateleiras}
-                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#7af00b] cursor-pointer transition-all"
+                        disabled={farmLevel < 5 || inventory.milk < 3 || queijosEmMaturacao.length >= maxPrateleiras}
+                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#7af00b] cursor-pointer transition-all"
+                        title={farmLevel < 5 ? 'Queijaria Artesanal desbloqueada no Nível 5!' : inventory.milk < 3 ? 'Precisa de 3 leites' : queijosEmMaturacao.length >= maxPrateleiras ? 'Prateleiras cheias' : 'Fabricar Queijo Coalho'}
                       >
-                        Fabricar
+                        {farmLevel < 5 ? '🔒 Nível 5+' : 'Fabricar'}
                       </button>
                     </div>
 
@@ -7205,13 +7266,15 @@ export default function App() {
                           </div>
                         </div>
                       </div>
+                      {/* BUG 4 FIX: inclui verificação farmLevel < 5 no disabled */}
                       <button
                         type="button"
                         onClick={(e) => craftQueijo('mucarela', e)}
-                        disabled={inventory.milk < 5 || queijosEmMaturacao.length >= maxPrateleiras}
-                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#7af00b] cursor-pointer transition-all"
+                        disabled={farmLevel < 5 || inventory.milk < 5 || queijosEmMaturacao.length >= maxPrateleiras}
+                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#7af00b] cursor-pointer transition-all"
+                        title={farmLevel < 5 ? 'Queijaria Artesanal desbloqueada no Nível 5!' : inventory.milk < 5 ? 'Precisa de 5 leites' : queijosEmMaturacao.length >= maxPrateleiras ? 'Prateleiras cheias' : 'Fabricar Queijo Muçarela'}
                       >
-                        Fabricar
+                        {farmLevel < 5 ? '🔒 Nível 5+' : 'Fabricar'}
                       </button>
                     </div>
 
@@ -7231,13 +7294,15 @@ export default function App() {
                           </div>
                         </div>
                       </div>
+                      {/* BUG 4 FIX: inclui verificação farmLevel < 5 no disabled */}
                       <button
                         type="button"
                         onClick={(e) => craftQueijo('brie', e)}
-                        disabled={inventory.milk < 8 || queijosEmMaturacao.length >= maxPrateleiras}
-                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#7af00b] cursor-pointer transition-all"
+                        disabled={farmLevel < 5 || inventory.milk < 8 || queijosEmMaturacao.length >= maxPrateleiras}
+                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-mono font-black text-xs px-4 py-2 rounded-xl active:translate-y-0.5 shadow-[0_3px_0_#7af00b] cursor-pointer transition-all"
+                        title={farmLevel < 5 ? 'Queijaria Artesanal desbloqueada no Nível 5!' : inventory.milk < 8 ? 'Precisa de 8 leites' : queijosEmMaturacao.length >= maxPrateleiras ? 'Prateleiras cheias' : 'Fabricar Queijo Brie'}
                       >
-                        Fabricar
+                        {farmLevel < 5 ? '🔒 Nível 5+' : 'Fabricar'}
                       </button>
                     </div>
 

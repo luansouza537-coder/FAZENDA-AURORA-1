@@ -53,6 +53,9 @@ export interface Animal {
 
   // Búfalo
   heatStress?: boolean;      // se está sofrendo estresse térmico (verão)
+
+  // Fome extrema
+  daysWithoutFood?: number;  // dias consecutivos com hunger <= 0
 }
 
 // Funcionalidade 4: Contratos de fornecimento
