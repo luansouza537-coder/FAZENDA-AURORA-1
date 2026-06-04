@@ -65,6 +65,10 @@ export interface Animal {
 
   // Fome extrema
   daysWithoutFood?: number;  // dias consecutivos com hunger <= 0
+
+  // Feiras e prestígio
+  isCampiao?: boolean;       // won a breed exposition
+  weeklyProduction?: number; // tracks production this week for fair scoring
 }
 
 // Funcionalidade 4: Contratos de fornecimento

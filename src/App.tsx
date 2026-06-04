@@ -1035,6 +1035,42 @@ export default function App() {
   });
   const [showFairResultModal, setShowFairResultModal] = useState<FairResult | null>(null);
 
+  const [prestigePoints, setPrestigePoints] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).prestigePoints ?? 0;
+    } catch (e) {}
+    return 0;
+  });
+  const [nextExposicaoDay, setNextExposicaoDay] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).nextExposicaoDay ?? 45;
+    } catch (e) {}
+    return 45;
+  });
+  const [nextFeiraProdutosDay, setNextFeiraProdutosDay] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).nextFeiraProdutosDay ?? 30;
+    } catch (e) {}
+    return 30;
+  });
+  const [nextFeiraExoticaDay, setNextFeiraExoticaDay] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).nextFeiraExoticaDay ?? 60;
+    } catch (e) {}
+    return 60;
+  });
+  const [nextFestivalDay, setNextFestivalDay] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).nextFestivalDay ?? 120;
+    } catch (e) {}
+    return 120;
+  });
+
   const [lastEpidemicDay, setLastEpidemicDay] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -1670,6 +1706,11 @@ export default function App() {
     setNextFairDay(30);
     setFairResults([]);
     setLastEpidemicDay(0);
+    setPrestigePoints(0);
+    setNextExposicaoDay(45);
+    setNextFeiraProdutosDay(30);
+    setNextFeiraExoticaDay(60);
+    setNextFestivalDay(120);
     setDroughtDaysRemaining(0);
     triggerAudioResult(() => sfx.playSound('feed'));
   };
@@ -1827,17 +1868,40 @@ export default function App() {
         coelhoReproCount,
         racaoOrganicaDays,
         fertilizanteDays,
+        prestigePoints,
+        nextExposicaoDay,
+        nextFeiraProdutosDay,
+        nextFeiraExoticaDay,
+        nextFestivalDay,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay]);
 
   // Ref para rastrear conquistas já desbloqueadas sem depender do estado React (evita stale closure e duplos no StrictMode)
   const unlockedAchievementsRef = useRef<string[]>(unlockedAchievements);
+  const prestigeNotifiedRef = useRef<number[]>([]);
   useEffect(() => {
     unlockedAchievementsRef.current = unlockedAchievements;
   }, [unlockedAchievements]);
+
+  // Prestige milestone notifications
+  useEffect(() => {
+    const thresholds = [50, 150, 300, 500];
+    thresholds.forEach(t => {
+      if (prestigePoints >= t && !prestigeNotifiedRef.current.includes(t)) {
+        prestigeNotifiedRef.current.push(t);
+        const msgs: Record<number, string> = {
+          50: '⭐ Marco 50 pts: Turismo recebe bônus de +10%!',
+          150: '⭐ Marco 150 pts: Comerciante aparece com mais frequência!',
+          300: '⭐ Marco 300 pts: Todos os preços +5% permanente!',
+          500: '🌌 Marco 500 pts: Você é uma LENDA DO AGRO!'
+        };
+        addNotification(msgs[t], 'success');
+      }
+    });
+  }, [prestigePoints]);
 
   // Centralized achievement condition checker
   // BUG 3 FIX: usa ref para verificar conquistas já desbloqueadas ANTES do setState, evitando
@@ -2410,6 +2474,8 @@ export default function App() {
     // Bônus de especialização avicultura
     const specBonusEgg = specialization === 'avicultura' ? 1.2 : 1.0;
     totalOvos = Math.round(totalOvos * specBonusEgg);
+    // Apply champion bonus
+    if (animal.isCampiao) totalOvos = Math.round(totalOvos * 1.1);
 
     setInventory(prev => ({
       ...prev,
@@ -2431,7 +2497,7 @@ export default function App() {
 
     setAnimals(prev => prev.map(a => {
       if (a.id === id) {
-        return { ...a, hasProducedToday: false };
+        return { ...a, hasProducedToday: false, weeklyProduction: (a.weeklyProduction ?? 0) + totalOvos };
       }
       return a;
     }));
@@ -3159,6 +3225,8 @@ export default function App() {
     const pavaoCount = animals.filter(a => a.type === 'pavao' && a.happiness >= 80).length;
     if (pavaoCount >= 2) finalPrice *= 1.05;
     else if (pavaoCount === 1) finalPrice *= 1.03;
+    // Prestige bonus: +5% at 300 pts
+    if (prestigePoints >= 300) finalPrice *= 1.05;
     return Math.max(1, Math.round(finalPrice * 10) / 10);
   };
 
@@ -3277,9 +3345,12 @@ export default function App() {
       milk: prev.milk + totalLeite
     }));
 
+    // Apply champion bonus
+    if (animal.isCampiao) totalLeite = Math.round(totalLeite * 1.1);
+
     setAnimals(prev => prev.map(a => {
       if (a.id === id) {
-        return { ...a, hasProducedToday: false };
+        return { ...a, hasProducedToday: false, weeklyProduction: (a.weeklyProduction ?? 0) + totalLeite };
       }
       return a;
     }));
@@ -3323,14 +3394,16 @@ export default function App() {
     // Bônus de especialização fibras
     const specBonusWool = specialization === 'fibras' ? 1.2 : 1.0;
     woolBonus = Math.round(woolBonus * specBonusWool);
+    // Apply champion bonus
+    if (animal.isCampiao) woolBonus = Math.round(woolBonus * 1.1);
 
     setInventory(prev => ({
       ...prev,
       wool: prev.wool + woolBonus
     }));
 
-    setStats(prev => ({ 
-      ...prev, 
+    setStats(prev => ({
+      ...prev,
       totalCollected: prev.totalCollected + 1,
       totalWool: (prev.totalWool || 0) + woolBonus
     }));
@@ -3342,10 +3415,11 @@ export default function App() {
 
     setAnimals(prev => prev.map(a => {
       if (a.id === id) {
-        return { 
-          ...a, 
+        return {
+          ...a,
           woolReady: false,
-          daysSinceLastWool: 0
+          daysSinceLastWool: 0,
+          weeklyProduction: (a.weeklyProduction ?? 0) + woolBonus
         };
       }
       return a;
@@ -4895,6 +4969,19 @@ export default function App() {
     // Esta subfunção atua como âncora de segurança estrutural.
   };
 
+  // Fair scoring helper
+  const calcFairScore = (animal: Animal): number => {
+    const traitBonus: Record<string, number> = {
+      trabalhadora: 30, saudavel: 25, feliz: 20,
+      estressada: -15, gulosa: -10, preguicosa: -20
+    };
+    const trait = animal.trait ?? 'feliz';
+    const base = animal.happiness + (animal.weeklyProduction ?? 0) * 2;
+    const bonus = traitBonus[trait] ?? 0;
+    const campiao = animal.isCampiao ? 15 : 0;
+    return Math.round(base + bonus + campiao);
+  };
+
   // 7. Advance Day
   const advanceDay = (event: React.MouseEvent) => {
     try {
@@ -5585,7 +5672,11 @@ export default function App() {
         }
       }
 
-      setAnimals(finalAnimals);
+      // Reset weeklyProduction every 7 days
+      const animalsWithWeekly = nextDayValue % 7 === 0
+        ? finalAnimals.map(a => ({ ...a, weeklyProduction: 0 }))
+        : finalAnimals;
+      setAnimals(animalsWithWeekly);
       // Apply accumulated wisdom bonuses
       if (Object.values(wisdomBonusUpdates).some(v => v > 0)) {
         setFarmWisdomBonus(prev => ({
@@ -5728,82 +5819,264 @@ export default function App() {
         tourismRevenue += happyAnimalsBonus;
         const allHappy = finalAnimals.length > 0 && finalAnimals.every(a => a.happiness >= 80);
         if (allHappy) tourismRevenue = Math.round(tourismRevenue * 1.5);
+        if (prestigePoints >= 50) tourismRevenue = Math.round(tourismRevenue * 1.1);
         setGold(prev => prev + tourismRevenue);
         logsToAdd.push({ msg: `🏕️ Turistas visitaram sua fazenda! +${tourismRevenue} moedas de receita de turismo!`, type: 'success' });
         setTimeout(() => addNotification(`🏕️ Visita de turistas! +${tourismRevenue} moedas!`, 'success', nextDayValue), 0);
       }
 
-      // --- SISTEMA DE FEIRAS E CONCURSOS (a cada 30 dias) ---
+      // --- SISTEMA DE FEIRAS E CONCURSOS ---
+
+      // Fair 1: Feira Agropecuária (every 30 days)
       if (nextDayValue >= nextFairDay) {
-        const fairLogEntries: { msg: string; type: LogMessage['type'] }[] = [];
-        let fairGold = 0;
-        let fairWins = 0;
-        const npcScore = () => 50 + Math.floor(Math.random() * 36); // 50-85
+        const npcScore = () => 55 + Math.floor(Math.random() * 40);
+        let fairGold = 0; let fairWins = 0;
+        const fairLog: { msg: string; type: LogMessage['type'] }[] = [];
 
-        // Melhor Leite (vaca, cabra, búfalo)
-        const milkAnimals = finalAnimals.filter(a => ['vaca', 'cabra', 'bufalo'].includes(a.type));
-        if (milkAnimals.length > 0) {
-          const best = milkAnimals.reduce((a, b) => (a.happiness > b.happiness ? a : b));
-          const playerScore = Math.round(best.happiness * (best.happiness / 100));
-          const npc = npcScore();
-          if (playerScore > npc) {
-            fairGold += 150;
-            fairWins++;
-            fairLogEntries.push({ msg: `🥛 Feira: ${best.name} venceu a categoria Melhor Leite! +150 moedas!`, type: 'success' });
+        const leiteiros = finalAnimals.filter(a => ['vaca','cabra','bufalo','alpaca'].includes(a.type));
+        if (leiteiros.length > 0) {
+          const best = leiteiros.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
+          if (calcFairScore(best) > npcScore()) {
+            fairGold += 180; fairWins++;
+            fairLog.push({ msg: `🥛 Feira: ${best.name} venceu Melhor Leiteiro! +180💰`, type: 'success' });
           } else {
-            fairLogEntries.push({ msg: `🥛 Feira: Perdeu a categoria Melhor Leite (${playerScore} vs ${npc}).`, type: 'info' });
+            fairLog.push({ msg: `🥛 Feira: Perdeu Melhor Leiteiro. Melhore a produção semanal!`, type: 'info' });
           }
         }
 
-        // Melhor Lã (ovelha, lhama)
-        const woolAnimals = finalAnimals.filter(a => ['ovelha', 'lhama'].includes(a.type));
-        if (woolAnimals.length > 0) {
-          const best = woolAnimals.reduce((a, b) => (a.happiness > b.happiness ? a : b));
-          const playerScore = best.happiness;
-          const npc = npcScore();
-          if (playerScore > npc) {
-            fairGold += 150;
-            fairWins++;
-            fairLogEntries.push({ msg: `🧶 Feira: ${best.name} venceu a categoria Melhor Lã! +150 moedas!`, type: 'success' });
+        const fibras = finalAnimals.filter(a => ['ovelha','lhama','alpaca','coelho_angora'].includes(a.type));
+        if (fibras.length > 0) {
+          const best = fibras.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
+          if (calcFairScore(best) > npcScore()) {
+            fairGold += 180; fairWins++;
+            fairLog.push({ msg: `🧶 Feira: ${best.name} venceu Melhor Fibra! +180💰`, type: 'success' });
           } else {
-            fairLogEntries.push({ msg: `🧶 Feira: Perdeu a categoria Melhor Lã (${Math.round(playerScore)} vs ${npc}).`, type: 'info' });
+            fairLog.push({ msg: `🧶 Feira: Perdeu Melhor Fibra.`, type: 'info' });
           }
         }
 
-        // Melhor Ave (galinha, pato, ganso)
-        const birdAnimals = finalAnimals.filter(a => ['galinha', 'pato', 'ganso'].includes(a.type));
-        if (birdAnimals.length > 0) {
-          const best = birdAnimals.reduce((a, b) => (a.happiness > b.happiness ? a : b));
-          const playerScore = best.happiness;
-          const npc = npcScore();
-          if (playerScore > npc) {
-            fairGold += 150;
-            fairWins++;
-            fairLogEntries.push({ msg: `🥚 Feira: ${best.name} venceu a categoria Melhor Ave! +150 moedas!`, type: 'success' });
+        const aves = finalAnimals.filter(a => ['galinha','pato','ganso','codorna'].includes(a.type));
+        if (aves.length > 0) {
+          const best = aves.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
+          if (calcFairScore(best) > npcScore()) {
+            fairGold += 180; fairWins++;
+            fairLog.push({ msg: `🥚 Feira: ${best.name} venceu Melhor Ave! +180💰`, type: 'success' });
           } else {
-            fairLogEntries.push({ msg: `🥚 Feira: Perdeu a categoria Melhor Ave (${Math.round(playerScore)} vs ${npc}).`, type: 'info' });
+            fairLog.push({ msg: `🥚 Feira: Perdeu Melhor Ave.`, type: 'info' });
           }
         }
 
-        if (fairWins === 3) {
-          fairGold += 500;
-          fairLogEntries.push({ msg: `🏆 CAMPEÃO DA FEIRA! Venceu todas as categorias! +500 moedas de bônus!`, type: 'success' });
+        if (farmLevel >= 6) {
+          const organicos = finalAnimals.filter(a => ['minhoca','caracol'].includes(a.type));
+          if (organicos.length > 0) {
+            const best = organicos.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
+            if (calcFairScore(best) > npcScore() - 10) {
+              fairGold += 150; fairWins++;
+              fairLog.push({ msg: `🌿 Feira: ${best.name} venceu Melhor Orgânico! +150💰`, type: 'success' });
+            } else {
+              fairLog.push({ msg: `🌿 Feira: Perdeu Melhor Orgânico.`, type: 'info' });
+            }
+          }
+        }
+
+        if (fairWins >= 3) { fairGold += 500; fairLog.push({ msg: `🏆 CAMPEÃO DA FEIRA AGROPECUÁRIA! +500💰 bônus!`, type: 'success' }); }
+        const fairPrestige = fairWins * 10;
+        if (fairPrestige > 0) {
+          setPrestigePoints(prev => prev + fairPrestige);
+          fairLog.push({ msg: `⭐ +${fairPrestige} Pontos de Prestígio pela Feira!`, type: 'system' });
         }
 
         if (fairGold > 0) {
           setGold(prev => prev + fairGold);
-          logsToAdd.push(...fairLogEntries);
-          const newResult: FairResult = { day: nextDayValue, category: `${fairWins} categorias`, winner: 'Fazenda Aurora', earned: fairGold };
+          logsToAdd.push(...fairLog);
+          const newResult: FairResult = { day: nextDayValue, category: `Agropecuária - ${fairWins} cats`, winner: 'Fazenda Aurora', earned: fairGold };
           setFairResults(prev => [...prev, newResult]);
-          setTimeout(() => {
-            setShowFairResultModal(newResult);
-            addNotification(`🎪 Feira do Dia ${nextDayValue}: ganhou ${fairGold} moedas em ${fairWins} categorias!`, 'event', nextDayValue);
-          }, 500);
+          setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🎪 Feira Agropecuária: ${fairWins} vitórias, +${fairGold}💰!`, 'event', nextDayValue); }, 500);
         } else {
-          logsToAdd.push(...fairLogEntries);
-          logsToAdd.push({ msg: `🎪 A Feira do Dia ${nextDayValue} terminou sem vitórias desta vez.`, type: 'info' });
+          logsToAdd.push(...fairLog);
+          logsToAdd.push({ msg: `🎪 Feira Agropecuária passou. Nenhuma categoria vencida desta vez.`, type: 'info' });
         }
         setNextFairDay(nextDayValue + 30);
+      }
+
+      // Fair 2: Exposição de Raças (every 45 days, Level 5+)
+      if (farmLevel >= 5 && nextDayValue >= nextExposicaoDay) {
+        const npcExpScore = () => 60 + Math.floor(Math.random() * 35);
+        let expGold = 0; let expWins = 0;
+        const expLog: { msg: string; type: LogMessage['type'] }[] = [];
+
+        const milkCandidates = finalAnimals.filter(a => ['vaca','cabra','bufalo'].includes(a.type));
+        if (milkCandidates.length > 0) {
+          const best = milkCandidates.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
+          if (calcFairScore(best) > npcExpScore()) {
+            expGold += 300; expWins++;
+            setAnimals(prev => prev.map(a => a.id === best.id ? { ...a, isCampiao: true } : a));
+            expLog.push({ msg: `🏆 Exposição: ${best.name} é CAMPEÃ de Raça Leiteira! +300💰 + título permanente!`, type: 'success' });
+          } else {
+            expLog.push({ msg: `🏆 Exposição: Perdeu Raça Leiteira. Invista em traits positivos!`, type: 'info' });
+          }
+        }
+
+        const fiberCandidates = finalAnimals.filter(a => ['ovelha','alpaca','coelho_angora'].includes(a.type));
+        if (fiberCandidates.length > 0) {
+          const best = fiberCandidates.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
+          if (calcFairScore(best) > npcExpScore()) {
+            expGold += 300; expWins++;
+            setAnimals(prev => prev.map(a => a.id === best.id ? { ...a, isCampiao: true } : a));
+            expLog.push({ msg: `🧶 Exposição: ${best.name} é CAMPEÃ de Raça de Fibra! +300💰 + título!`, type: 'success' });
+          } else {
+            expLog.push({ msg: `🧶 Exposição: Perdeu Raça de Fibra.`, type: 'info' });
+          }
+        }
+
+        if (farmLevel >= 12) {
+          const exoticCandidates = finalAnimals.filter(a => ['avestruz','jacare','bicho_seda'].includes(a.type));
+          if (exoticCandidates.length > 0) {
+            const best = exoticCandidates.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
+            if (calcFairScore(best) > npcExpScore() - 5) {
+              expGold += 400; expWins++;
+              setAnimals(prev => prev.map(a => a.id === best.id ? { ...a, isCampiao: true } : a));
+              expLog.push({ msg: `🦎 Exposição: ${best.name} é CAMPEÃO Exótico! +400💰 + título!`, type: 'success' });
+            } else {
+              expLog.push({ msg: `🦎 Exposição: Perdeu Exótico.`, type: 'info' });
+            }
+          }
+        }
+
+        const expPrestige = expWins * 20;
+        if (expPrestige > 0) setPrestigePoints(prev => prev + expPrestige);
+        if (expGold > 0) {
+          setGold(prev => prev + expGold);
+          logsToAdd.push(...expLog);
+          logsToAdd.push({ msg: `⭐ +${expPrestige} Pontos de Prestígio pela Exposição!`, type: 'system' });
+          const newResult: FairResult = { day: nextDayValue, category: `Exposição de Raças - ${expWins} cats`, winner: 'Fazenda Aurora', earned: expGold };
+          setFairResults(prev => [...prev, newResult]);
+          setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🏆 Exposição de Raças: ${expWins} campeões, +${expGold}💰!`, 'event', nextDayValue); }, 600);
+        } else {
+          logsToAdd.push(...expLog);
+        }
+        setNextExposicaoDay(nextDayValue + 45);
+      }
+
+      // Fair 3: Feira Regional de Produtos (every 30 days, Level 6+)
+      if (farmLevel >= 6 && nextDayValue >= nextFeiraProdutosDay) {
+        const prodLog: { msg: string; type: LogMessage['type'] }[] = [];
+        let prodGold = 0; let prodWins = 0;
+
+        const hasQueijo = (inventory.queijoCoalho ?? 0) + (inventory.queijoMucarela ?? 0) + (inventory.queijoBrie ?? 0) + (inventory.queijo_cabra ?? 0) > 0;
+        if (hasQueijo) {
+          const score = (inventory.queijoCoalho ?? 0) * 1 + (inventory.queijoMucarela ?? 0) * 2 + (inventory.queijoBrie ?? 0) * 4 + (inventory.queijo_cabra ?? 0) * 2;
+          if (score >= 2) {
+            prodGold += 250; prodWins++;
+            prodLog.push({ msg: `🧀 Feira de Produtos: Seu queijo venceu! +250💰`, type: 'success' });
+          } else {
+            prodLog.push({ msg: `🧀 Feira de Produtos: Queijo insuficiente para vencer.`, type: 'info' });
+          }
+        }
+
+        const hasTextil = (inventory.scarf ?? 0) + (inventory.manta_premium ?? 0) + (inventory.tecido_alpaca ?? 0) + (inventory.cachecol_angora ?? 0) > 0;
+        if (hasTextil) {
+          const score = (inventory.scarf ?? 0) * 1 + (inventory.cachecol_angora ?? 0) * 2 + (inventory.tecido_alpaca ?? 0) * 3 + (inventory.manta_premium ?? 0) * 6;
+          if (score >= 3) {
+            prodGold += 200; prodWins++;
+            prodLog.push({ msg: `🧶 Feira de Produtos: Seu têxtil venceu! +200💰`, type: 'success' });
+          } else {
+            prodLog.push({ msg: `🧶 Feira de Produtos: Têxtil insuficiente.`, type: 'info' });
+          }
+        }
+
+        if (farmLevel >= 15) {
+          const hasRare = (inventory.bolsa_exotica ?? 0) + (inventory.colete_couro ?? 0) > 0;
+          if (hasRare) {
+            prodGold += 500; prodWins++;
+            prodLog.push({ msg: `🏺 Feira de Produtos: Produto raro venceu a categoria! +500💰`, type: 'success' });
+          }
+        }
+
+        const prodPrestige = prodWins * 15;
+        if (prodPrestige > 0) setPrestigePoints(prev => prev + prodPrestige);
+        if (prodGold > 0) {
+          setGold(prev => prev + prodGold);
+          logsToAdd.push(...prodLog);
+          if (prodPrestige > 0) logsToAdd.push({ msg: `⭐ +${prodPrestige} Pontos de Prestígio!`, type: 'system' });
+          const newResult: FairResult = { day: nextDayValue, category: `Feira de Produtos - ${prodWins} cats`, winner: 'Fazenda Aurora', earned: prodGold };
+          setFairResults(prev => [...prev, newResult]);
+          setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🛒 Feira de Produtos: ${prodWins} vitórias, +${prodGold}💰!`, 'event', nextDayValue); }, 700);
+        } else {
+          logsToAdd.push(...prodLog);
+          logsToAdd.push({ msg: `🛒 Feira Regional de Produtos passou. Acumule mais produtos para vencer!`, type: 'info' });
+        }
+        setNextFeiraProdutosDay(nextDayValue + 30);
+      }
+
+      // Fair 4: Feira de Animais Exóticos (every 60 days, Level 15+ AND licencaExotica)
+      if (farmLevel >= 15 && licencaExotica && nextDayValue >= nextFeiraExoticaDay) {
+        const exoticLog: { msg: string; type: LogMessage['type'] }[] = [];
+        let exoticGold = 0;
+        const exoticAnimals = finalAnimals.filter(a => ['avestruz','jacare','bicho_seda','caracol','ra'].includes(a.type));
+
+        if (exoticAnimals.length > 0) {
+          const npcExoticScore = 70 + Math.floor(Math.random() * 30);
+          const scores = exoticAnimals.map(a => {
+            const ageBonus = Math.min(50, (a.age ?? 0) * 0.2);
+            const rarityBonus: Record<string, number> = { jacare: 40, avestruz: 30, bicho_seda: 20, caracol: 15, ra: 10 };
+            return calcFairScore(a) + ageBonus + (rarityBonus[a.type] ?? 0);
+          });
+          const maxScore = Math.max(...scores);
+          const winner = exoticAnimals[scores.indexOf(maxScore)];
+
+          if (maxScore > npcExoticScore) {
+            exoticGold = 600 + Math.floor(maxScore * 5);
+            setAnimals(prev => prev.map(a => a.id === winner.id ? { ...a, isCampiao: true } : a));
+            exoticLog.push({ msg: `🦎 Feira Exótica: ${winner.name} (${winner.type}) venceu com ${Math.round(maxScore)} pontos! +${exoticGold}💰!`, type: 'success' });
+            setPrestigePoints(prev => prev + 30);
+            exoticLog.push({ msg: `⭐ +30 Pontos de Prestígio pela Feira Exótica!`, type: 'system' });
+          } else {
+            exoticLog.push({ msg: `🦎 Feira Exótica: Não foi desta vez. NPC teve ${npcExoticScore} pontos.`, type: 'info' });
+          }
+        } else {
+          exoticLog.push({ msg: `🦎 Feira Exótica: Sem animais exóticos para competir! (Avestruz, Jacaré, etc.)`, type: 'warning' });
+        }
+
+        if (exoticGold > 0) {
+          setGold(prev => prev + exoticGold);
+          const newResult: FairResult = { day: nextDayValue, category: 'Feira Exótica', winner: 'Fazenda Aurora', earned: exoticGold };
+          setFairResults(prev => [...prev, newResult]);
+          setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🐍 Feira Exótica: +${exoticGold}💰!`, 'event', nextDayValue); }, 800);
+        }
+        logsToAdd.push(...exoticLog);
+        setNextFeiraExoticaDay(nextDayValue + 60);
+      }
+
+      // Fair 5: Festival Cultural da Aurora (every 120 days, Level 8+)
+      if (farmLevel >= 8 && nextDayValue >= nextFestivalDay) {
+        const festLog: { msg: string; type: LogMessage['type'] }[] = [];
+        let festGold = 0;
+
+        const farmScore = finalAnimals.reduce((sum, a) => sum + calcFairScore(a), 0) + farmLevel * 10;
+        const npcFarmScore = 200 + Math.floor(Math.random() * 300);
+
+        festLog.push({ msg: `🎪 FESTIVAL CULTURAL DA AURORA! Pontuação da fazenda: ${farmScore} vs NPC: ${npcFarmScore}`, type: 'event' });
+
+        if (farmScore > npcFarmScore) {
+          festGold += 1000 + farmLevel * 50;
+          festLog.push({ msg: `🏆 Fazenda Aurora venceu o Festival! +${festGold}💰!`, type: 'success' });
+          setPrestigePoints(prev => prev + 50);
+          festLog.push({ msg: `⭐ +50 Pontos de Prestígio pelo Festival Cultural!`, type: 'system' });
+          setMerchantActive(true);
+          setTimeout(() => addNotification(`🎭 Festival Cultural: VITÓRIA! Comerciante especial por 3 dias! +${festGold}💰`, 'event', nextDayValue), 1000);
+        } else {
+          festGold = 300;
+          festLog.push({ msg: `🎪 Festival: Não venceu, mas recebeu 300💰 de participação!`, type: 'info' });
+          setPrestigePoints(prev => prev + 15);
+        }
+
+        setGold(prev => prev + festGold);
+        logsToAdd.push(...festLog);
+        const newResult: FairResult = { day: nextDayValue, category: 'Festival Cultural', winner: farmScore > npcFarmScore ? 'Fazenda Aurora' : 'NPC', earned: festGold };
+        setFairResults(prev => [...prev, newResult]);
+        setTimeout(() => setShowFairResultModal(newResult), 1200);
+        setNextFestivalDay(nextDayValue + 120);
       }
 
       // --- SISTEMA DE DÍVIDA ---
@@ -6149,6 +6422,9 @@ export default function App() {
                       🌌 Nível Máximo Atingido! ({farmXp} XP)
                     </span>
                   </div>
+                )}
+                {prestigePoints > 0 && (
+                  <span className="text-[10px] text-yellow-200 font-mono mt-0.5">⭐ {prestigePoints} Prestígio</span>
                 )}
               </div>
             </div>
@@ -6872,6 +7148,13 @@ export default function App() {
                         {isCritical && (
                           <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-red-600 to-red-800 text-white font-black text-[9px] sm:text-[10px] px-3 py-1 rounded-full uppercase shadow-md flex items-center gap-1.5 animate-pulse border-2 border-white select-none">
                             ⚠️ Risco de Morte Amanhã!
+                          </div>
+                        )}
+
+                        {/* Champion badge */}
+                        {animal.isCampiao && (
+                          <div className="absolute -top-3.5 -right-2.5 z-10">
+                            <span className="bg-yellow-400 text-yellow-900 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">🏆 Campeão</span>
                           </div>
                         )}
 
@@ -10712,6 +10995,33 @@ export default function App() {
                 </div>
 
               </div>
+
+              {/* Prestige Points */}
+              {prestigePoints > 0 && (
+                <div className="px-6 pb-4">
+                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-yellow-700 mb-3 flex items-center gap-1.5">⭐ Pontos de Prestígio</h4>
+                  <div className="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-black font-mono text-yellow-800">⭐ {prestigePoints} pts</span>
+                      <span className="text-[10px] font-mono text-yellow-600">
+                        {prestigePoints >= 500 ? '🌌 LENDA DO AGRO' : prestigePoints >= 300 ? '👑 Mestre' : prestigePoints >= 150 ? '🥇 Experiente' : prestigePoints >= 50 ? '🥈 Reconhecido' : '🌱 Iniciante'}
+                      </span>
+                    </div>
+                    {[
+                      { pts: 50, label: 'Turismo +10%', achieved: prestigePoints >= 50 },
+                      { pts: 150, label: 'Comerciante mais frequente', achieved: prestigePoints >= 150 },
+                      { pts: 300, label: 'Preços +5% permanente', achieved: prestigePoints >= 300 },
+                      { pts: 500, label: 'LENDA DO AGRO', achieved: prestigePoints >= 500 },
+                    ].map(m => (
+                      <div key={m.pts} className="flex items-center gap-2 mb-1">
+                        <span className={`text-[10px] font-mono ${m.achieved ? 'text-yellow-700 font-bold' : 'text-stone-400'}`}>
+                          {m.achieved ? '✅' : '⬜'} {m.pts} pts: {m.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="bg-teal-50 p-4 border-t-2 border-teal-200 flex justify-end shrink-0">
                 <button
