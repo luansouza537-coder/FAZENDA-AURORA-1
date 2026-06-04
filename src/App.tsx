@@ -5599,6 +5599,24 @@ export default function App() {
 
                         </div>
 
+                          {/* Improvement 2: Profit Panel Badge */}
+                          {showProfitPanel && (() => {
+                            const prof = getAnimalDailyProfit(animal.type);
+                            const badgeColor = prof.profit > 5
+                              ? 'bg-emerald-100 border-emerald-400 text-emerald-800'
+                              : prof.profit >= 1
+                              ? 'bg-yellow-100 border-yellow-400 text-yellow-800'
+                              : 'bg-red-100 border-red-400 text-red-700';
+                            const indicator = prof.profit > 5 ? '🟢' : prof.profit >= 1 ? '🟡' : '🔴';
+                            return (
+                              <div className={`mt-2 mx-1 p-2 rounded-xl border-2 ${badgeColor} flex items-center justify-between gap-2 text-[10px] font-mono font-black`}>
+                                <span>{indicator} Receita: <span className="font-black">{prof.revenue}💰/dia</span></span>
+                                <span>Custo: {prof.cost}💰/dia</span>
+                                <span className={prof.profit >= 0 ? 'text-emerald-700' : 'text-red-600'}>Lucro: {prof.profit >= 0 ? '+' : ''}{prof.profit}💰</span>
+                              </div>
+                            );
+                          })()}
+
                       </motion.div>
                     );
                   })}
@@ -8833,6 +8851,64 @@ export default function App() {
                     <pre className="text-[9px] text-stone-400 font-mono whitespace-pre-line leading-relaxed">{opt.bonuses}</pre>
                   </button>
                 ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🏆 MODAL RANKING DE ANIMAIS */}
+      <AnimatePresence>
+        {showRankingModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowRankingModal(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[120] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fffbeb] border-8 border-[#fbbf24] rounded-[36px] max-w-md w-full max-h-[80vh] overflow-hidden shadow-2xl flex flex-col relative"
+            >
+              <div className="bg-gradient-to-r from-[#78350f] to-[#92400e] p-5 text-center shrink-0">
+                <div className="text-4xl mb-1">🏆</div>
+                <h3 className="text-[#fef3c7] text-xl font-display font-black uppercase tracking-wider">Ranking de Animais</h3>
+                <p className="text-[#fcd57e] text-[11px] font-mono mt-0.5">Por produção semanal</p>
+                <button
+                  onClick={() => setShowRankingModal(false)}
+                  className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-[#78350f] hover:bg-[#92400e] border-2 border-[#fbbf24] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold"
+                >✕</button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-5 space-y-2" style={{ scrollbarWidth: 'thin' }}>
+                {animals.length === 0 ? (
+                  <p className="text-center text-stone-500 font-mono text-sm py-8">Nenhum animal na fazenda ainda.</p>
+                ) : (
+                  [...animals]
+                    .sort((a, b) => (b.weeklyProduction ?? 0) - (a.weeklyProduction ?? 0))
+                    .map((animal, idx) => {
+                      const medals = ['🏆', '🥈', '🥉'];
+                      const medal = idx < 3 ? medals[idx] : `${idx + 1}º`;
+                      const typeEmoji = animal.type === 'vaca' ? '🐄' : animal.type === 'ovelha' ? '🐑' : animal.type === 'boi' ? '🐂' : animal.type === 'galinha' ? '🐔' : animal.type === 'cabra' ? '🐐' : animal.type === 'lhama' ? '🦙' : animal.type === 'pato' ? '🦆' : animal.type === 'ganso' ? '🦢' : animal.type === 'bufalo' ? '🐃' : animal.type === 'pavao' ? '🦚' : animal.type === 'codorna' ? '🐦' : animal.type === 'alpaca' ? '🦙' : animal.type === 'minhoca' ? '🪱' : animal.type === 'caracol' ? '🐌' : animal.type === 'coelho_angora' ? '🐰' : animal.type === 'bicho_seda' ? '🐛' : animal.type === 'ra' ? '🐸' : animal.type === 'avestruz' ? '🦤' : animal.type === 'jacare' ? '🐊' : '🐾';
+                      return (
+                        <div key={animal.id} className={`flex items-center gap-3 p-3 rounded-2xl border-2 ${idx === 0 ? 'bg-amber-50 border-amber-400' : idx === 1 ? 'bg-slate-50 border-slate-300' : idx === 2 ? 'bg-orange-50 border-orange-300' : 'bg-white border-stone-200'}`}>
+                          <span className="text-lg font-black w-8 text-center shrink-0">{medal}</span>
+                          <span className="text-2xl shrink-0">{typeEmoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-display font-black text-[#78350f] text-sm truncate">{animal.name}</div>
+                            <div className="text-[10px] font-mono text-stone-500 capitalize">{animal.type}</div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="font-mono font-black text-emerald-700 text-sm">{animal.weeklyProduction ?? 0} prod.</div>
+                            {animal.isCampiao && <div className="text-[9px] font-black text-amber-600">⭐ Campeão</div>}
+                          </div>
+                        </div>
+                      );
+                    })
+                )}
               </div>
             </motion.div>
           </motion.div>
