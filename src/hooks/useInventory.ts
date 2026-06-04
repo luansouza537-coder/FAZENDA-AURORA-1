@@ -120,6 +120,11 @@ export function useInventory({
           peixe: inv.peixe ?? 0,
           mel: inv.mel ?? 0,
           cogumelo: inv.cogumelo ?? 0,
+          hidromel: inv.hidromel ?? 0,
+          risoto_cogumelo: inv.risoto_cogumelo ?? 0,
+          conserva_peixe: inv.conserva_peixe ?? 0,
+          mel_envasado: inv.mel_envasado ?? 0,
+          sopa_cogumelo: inv.sopa_cogumelo ?? 0,
         };
       }
     } catch (e) {}
@@ -184,6 +189,11 @@ export function useInventory({
       peixe: 0,
       mel: 0,
       cogumelo: 0,
+      hidromel: 0,
+      risoto_cogumelo: 0,
+      conserva_peixe: 0,
+      mel_envasado: 0,
+      sopa_cogumelo: 0,
     };
   });
 

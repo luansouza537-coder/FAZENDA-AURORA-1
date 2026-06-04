@@ -110,6 +110,14 @@ export interface LandLot {
   purchasedDay: number;
 }
 
+export interface Inventory {
+  hidromel: number;
+  risoto_cogumelo: number;
+  conserva_peixe: number;
+  mel_envasado: number;
+  sopa_cogumelo: number;
+}
+
 export interface FarmStats {
   totalEarned: number;
   totalFed: number;

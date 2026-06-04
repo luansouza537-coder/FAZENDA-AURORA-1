@@ -70,6 +70,11 @@ export type InventoryState = {
   peixe: number;
   mel: number;
   cogumelo: number;
+  hidromel: number;
+  risoto_cogumelo: number;
+  conserva_peixe: number;
+  mel_envasado: number;
+  sopa_cogumelo: number;
 };
 
 export interface UseAnimalsProps {
@@ -1030,6 +1035,8 @@ export function useAnimals({
     bufalo: { price: 110, daysToAdult: 12 },
     cabra: { price: 55, daysToAdult: 8 },
     pavao: { price: 175, daysToAdult: 20 },
+    ovelha: { price: 40, daysToAdult: 8 },
+    pato: { price: 25, daysToAdult: 6 },
   };
 
   const buyAnimalFilhote = (type: AnimalType, event: React.MouseEvent) => {
@@ -1111,7 +1118,7 @@ export function useAnimals({
     setAnimals(prev => [...prev, newFilhote]);
     setWeeklyStats((prev: any) => ({ ...prev, spending: prev.spending + config.price }));
 
-    const typeLabel = type === 'vaca' ? '🐄 Vaca' : type === 'boi' ? '🐂 Boi' : type === 'bufalo' ? '🐃 Búfalo' : type === 'cabra' ? '🐐 Cabra' : '🦚 Pavão';
+    const typeLabel = type === 'vaca' ? '🐄 Vaca' : type === 'boi' ? '🐂 Boi' : type === 'bufalo' ? '🐃 Búfalo' : type === 'cabra' ? '🐐 Cabra' : type === 'ovelha' ? '🐑 Ovelha' : type === 'pato' ? '🦆 Pato' : '🦚 Pavão';
     addLog(`🍼 ${newFilhote.name} (filhote de ${typeLabel}) chegou à fazenda! Vai crescer em ${config.daysToAdult} dias.`, 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('click'));
