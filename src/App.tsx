@@ -1553,8 +1553,9 @@ export default function App() {
   }, [showLevelUpModal]);
 
   // --- FUNCIONALIDADE 1: Auto-avanço useEffect ---
-  // isGameOver derivado antecipado para uso no useEffect de auto-avanço (preço mínimo galinha = 40 moedas base)
-  const isGameOverForAutoAdvance = animals.length === 0 && gold < 40;
+  // isGameOver derivado antecipado para uso no useEffect de auto-avanço (galinha = 60 moedas base)
+  // BUG FIX: usa 60 como referência correta (preço base da galinha sem especialização/nível)
+  const isGameOverForAutoAdvance = (animals.length === 0 && gold < 60) || debt > 1000;
 
   // BUG 1 FIX: advanceDayRef é declarado logo após advanceDay (ver abaixo).
   // Este ref será atribuído ali; o useEffect do auto-avanço o usa aqui.
@@ -1779,7 +1780,9 @@ export default function App() {
         return {
           ...a,
           hunger: Math.min(100, a.hunger + 35),
-          happiness: Math.min(100, a.happiness + 12)
+          happiness: Math.min(100, a.happiness + 12),
+          // BUG FIX: reseta contador de dias sem comida ao alimentar manualmente
+          daysWithoutFood: 0
         };
       }
       return a;
@@ -3313,7 +3316,9 @@ export default function App() {
           return {
             ...a,
             hunger: Math.min(100, a.hunger + 35),
-            happiness: Math.min(100, a.happiness + 12)
+            happiness: Math.min(100, a.happiness + 12),
+            // BUG FIX: reseta contador de dias sem comida ao alimentar via alimentador automático
+            daysWithoutFood: 0
           };
         } else {
           if (!missingFeeds.includes(feedLabel)) {
@@ -3758,7 +3763,10 @@ export default function App() {
   ) => {
     let deceasedCount = 0;
     const survivors = animalsList.filter(animal => {
-      // Morte por fome extrema (3 dias consecutivos sem comer) — verificada primeiro para evitar dupla contagem
+      // BUG FIX: morte por fome só ocorre após 3 dias consecutivos sem comer (daysWithoutFood >= 3).
+      // A condição antiga `hunger <= 0` foi removida para não anular o sistema de 3 dias — o animal
+      // pode ter fome zerada por 1 ou 2 dias sem morrer, apenas acumulando daysWithoutFood e sofrendo
+      // penalidades de felicidade. Morte imediata por felicidade zerada é mantida separadamente.
       if ((animal.daysWithoutFood ?? 0) >= 3) {
         logs.push({
           msg: `💀 ${animal.name} morreu de fome após 3 dias sem alimentação! Alimente seus animais regularmente!`,
@@ -3767,10 +3775,10 @@ export default function App() {
         setTimeout(() => addNotification(`💀 ${animal.name} morreu de fome após 3 dias sem comer!`, 'warning'), 0);
         deceasedCount++;
         return false;
-      } else if (animal.hunger <= 0 || animal.happiness <= 0) {
-        // Só cai aqui se daysWithoutFood < 3 (evita dupla contagem)
+      } else if (animal.happiness <= 0) {
+        // Morte por tristeza extrema (felicidade zerada) — mantida como condição independente
         logs.push({
-          msg: `💀 Infelizmente, o animal ${animal.name} não resistiu à fome extrema ou tristeza e faleceu.`,
+          msg: `💀 Infelizmente, o animal ${animal.name} não resistiu à tristeza profunda e faleceu.`,
           type: 'error'
         });
         deceasedCount++;
@@ -4450,7 +4458,15 @@ export default function App() {
           logsToAdd.push({ msg: `🏜️ Seca prolongada! Custo de água triplicado este dia.`, type: 'error' });
           setDroughtDaysRemaining(prev => prev - 1);
           // Additional water cost handled below via extra gold deduction
-          setGold(prev => Math.max(0, prev - waterCost * 2)); // extra 2x cost (total 3x)
+          // BUG FIX: gera dívida se ouro insuficiente (consistente com o sistema de dívida)
+          setGold(prev => {
+            const cost = waterCost * 2;
+            if (prev < cost) {
+              setDebt(d => d + (cost - prev));
+              return 0;
+            }
+            return prev - cost;
+          }); // extra 2x cost (total 3x)
         } else if (currentSeasonIdx === 1 && Math.random() < 0.05) {
           logsToAdd.push({ msg: `🏜️ Uma seca prolongada começou! Custo de água será triplicado por 3 dias!`, type: 'error' });
           setTimeout(() => addNotification('🏜️ Seca prolongada por 3 dias! Custo de água triplicado!', 'warning', nextDayValue), 0);
@@ -4458,8 +4474,9 @@ export default function App() {
         }
       }
 
-      // Roubo noturno (4% de chance)
-      if (Math.random() < 0.04) {
+      // Roubo noturno (4% de chance, não ocorre nos primeiros 5 dias)
+      // BUG FIX: protege dias iniciais de roubo para não punir jogador recém-começado
+      if (currentDay > 5 && Math.random() < 0.04) {
         const stolenPercent = 0.2 + Math.random() * 0.2;
         setInventory(prev => ({
           ...prev,
