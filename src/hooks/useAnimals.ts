@@ -106,6 +106,7 @@ export interface UseAnimalsProps {
   updateMissionProgress: (key: string, amount?: number, overrideDay?: number) => void;
   checkAndUnlockAchievement: (id: string) => void;
   triggerConfetti: (event?: React.MouseEvent) => void;
+  onFilhoteBought?: (type: AnimalType, name: string) => void;
 }
 
 export function useAnimals({
@@ -137,6 +138,7 @@ export function useAnimals({
   updateMissionProgress,
   checkAndUnlockAchievement,
   triggerConfetti,
+  onFilhoteBought,
 }: UseAnimalsProps) {
   const [animals, setAnimals] = useState<Animal[]>(() => {
     try {
@@ -1123,6 +1125,7 @@ export function useAnimals({
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🍼', `-${config.price} 💰`, event);
+    if (onFilhoteBought) onFilhoteBought(type, newFilhote.name);
   };
 
   return {

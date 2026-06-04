@@ -326,6 +326,13 @@ export default function App() {
   const [epidemicPrevented, setEpidemicPrevented] = useState<boolean>(false);
   const [merchantSpecialItems, setMerchantSpecialItems] = useState<string[]>([]);
   const [cruzarModal, setCruzarModal] = useState<{ animalId: number; type: AnimalType } | null>(null);
+  const [biomeWeeklyIncome, setBiomeWeeklyIncome] = useState<{ pasto: number; lago: number; floresta: number; pomar: number }>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).biomeWeeklyIncome ?? { pasto: 0, lago: 0, floresta: 0, pomar: 0 }; } catch(e) {} return { pasto: 0, lago: 0, floresta: 0, pomar: 0 };
+  });
+  const [reproHistory, setReproHistory] = useState<{ day: number; animalType: AnimalType; name: string; method: 'natural' | 'gestacao' | 'filhote' }[]>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).reproHistory ?? []; } catch(e) {} return [];
+  });
+  const [showReproModal, setShowReproModal] = useState<boolean>(false);
 
   const REPRODUCAO_CONFIG: Partial<Record<AnimalType, { gestacao: number; minAge: number }>> = {
     vaca: { gestacao: 12, minAge: 30 },
@@ -333,6 +340,7 @@ export default function App() {
     ovelha: { gestacao: 10, minAge: 25 },
     galinha: { gestacao: 5, minAge: 10 },
     pato: { gestacao: 7, minAge: 15 },
+    bufalo: { gestacao: 14, minAge: 30 },
   };
 
   const [weather, setWeather] = useState<'chuva' | 'sol' | 'nublado'>('nublado');
@@ -677,6 +685,8 @@ export default function App() {
     setHasCertSanitario(false);
     setLicencaCriadouro(false);
     setReproducaoAtiva([]);
+    setReproHistory([]);
+    setBiomeWeeklyIncome({ pasto: 0, lago: 0, floresta: 0, pomar: 0 });
     setEpidemicPrevented(false);
     setMerchantSpecialItems([]);
     setCoelhoReproCount(0);
@@ -1532,6 +1542,11 @@ export default function App() {
     if ((itemType as string) === 'peixe') return 45;
     if ((itemType as string) === 'mel') return 80;
     if ((itemType as string) === 'cogumelo') return 35;
+    if ((itemType as string) === 'hidromel') return 180;
+    if ((itemType as string) === 'risoto_cogumelo') return 120;
+    if ((itemType as string) === 'conserva_peixe') return 95;
+    if ((itemType as string) === 'mel_envasado') return 200;
+    if ((itemType as string) === 'sopa_cogumelo') return 80;
     return 0;
   };
 
@@ -1666,6 +1681,11 @@ export default function App() {
     craftCheese,
     craftQueijo,
     craftScarf,
+    craftHidromel,
+    craftRisotoCogumelo,
+    craftConservaPeixe,
+    craftMelEnvasado,
+    craftSopaCogumelo,
     sellProduct,
     sellAllItemsNoConfirm,
     buyFolhaAmoreira,
@@ -1722,6 +1742,7 @@ export default function App() {
     sellJacare,
     sellOx,
     buyAnimal,
+    buyAnimalFilhote,
   } = useAnimals({
     gold,
     setGold,
@@ -1751,6 +1772,9 @@ export default function App() {
     updateMissionProgress,
     checkAndUnlockAchievement,
     triggerConfetti,
+    onFilhoteBought: (type: AnimalType, name: string) => {
+      setReproHistory(prev => [{ day: currentDay, animalType: type, name, method: 'filhote' }, ...prev].slice(0, 50));
+    },
   });
 
   // --- useFairs hook ---
@@ -1920,11 +1944,13 @@ export default function App() {
         hasCertSanitario,
         licencaCriadouro,
         reproducaoAtiva,
+        biomeWeeklyIncome,
+        reproHistory,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 500;
@@ -3124,6 +3150,7 @@ export default function App() {
         setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0, waterCost: 0, energyCost: 0 });
         setWeeklySales({ milk: 0, wool: 0, cheese: 0, scarf: 0, carne: 0, egg: 0, mayo: 0, queijoCoalho: 0, queijoMucarela: 0, queijoBrie: 0 });
         setWeeklyTaxPaid(0);
+        setBiomeWeeklyIncome({ pasto: 0, lago: 0, floresta: 0, pomar: 0 });
       }
 
       // --- F1/F2: Ciclo de vida dos animais (idade e morte por velhice) ---
@@ -3464,6 +3491,7 @@ export default function App() {
         finalAnimalsWithAdulthood.push(newFilhote);
         logsToAdd.push({ msg: `👶 Nasceu um filhote de ${r.type}! ${newFilhote.name} chegou à fazenda!`, type: 'success' });
         setTimeout(() => addNotification(`👶 ${newFilhote.name} (filhote de ${r.type}) nasceu na fazenda!`, 'success', nextDayValue), 0);
+        setReproHistory(prev => [{ day: nextDayValue, animalType: r.type, name: newFilhote.name, method: 'gestacao' }, ...prev].slice(0, 50));
       });
       if (completedGestacoes.length > 0) {
         setReproducaoAtiva(prev => prev.filter(r => nextDayValue < r.gestacaoEnd));
@@ -3501,6 +3529,7 @@ export default function App() {
               finalAnimalsWithAdulthood.push(pintinho);
               naturalBirths++;
               logsToAdd.push({ msg: `🐣 ${a.name} chocou um pintinho! ${pintinho.name} chegou à fazenda!`, type: 'success' });
+              setReproHistory(prev => [{ day: nextDayValue, animalType: 'galinha' as AnimalType, name: pintinho.name, method: 'natural' }, ...prev].slice(0, 50));
             }
           });
         }
@@ -3994,6 +4023,7 @@ export default function App() {
         if (lagoCount > 0 && nextDayValue % 3 === 0) {
           const fishAmt = lagoCount;
           setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) + fishAmt }));
+          setBiomeWeeklyIncome(prev => ({ ...prev, lago: prev.lago + fishAmt * 45 }));
           logsToAdd.push({ msg: `🐟 Lago produziu ${fishAmt} peixe(s)!`, type: 'success' });
         }
 
@@ -4002,11 +4032,13 @@ export default function App() {
         if (florestaCount > 0 && nextDayValue % 5 === 0) {
           const melAmt = florestaCount;
           setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) + melAmt }));
+          setBiomeWeeklyIncome(prev => ({ ...prev, floresta: prev.floresta + melAmt * 80 }));
           logsToAdd.push({ msg: `🍯 Floresta produziu ${melAmt} mel!`, type: 'success' });
         }
         if (florestaCount > 0 && nextDayValue % 4 === 0) {
           const cogAmt = florestaCount;
           setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) + cogAmt }));
+          setBiomeWeeklyIncome(prev => ({ ...prev, floresta: prev.floresta + cogAmt * 35 }));
           logsToAdd.push({ msg: `🍄 Floresta produziu ${cogAmt} cogumelo(s)!`, type: 'success' });
         }
       }
@@ -4663,6 +4695,18 @@ export default function App() {
               🏅
             </button>
 
+            {/* 🐣 Reproduções Button */}
+            <button
+              onClick={() => {
+                setShowReproModal(true);
+                triggerAudioResult(() => sfx.playSound('click'));
+              }}
+              className="bg-pink-600 border-3 border-pink-400 hover:bg-pink-500 text-white p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#9d174d] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+              title="Histórico de Reproduções"
+            >
+              🐣
+            </button>
+
             {/* Reset Game button */}
             <button
               onClick={() => {
@@ -4923,8 +4967,17 @@ export default function App() {
                     >
                       Comprar + 1 🌾
                     </button>
+                    <button
+                      type="button"
+                      onClick={(e) => buyAnimalFilhote('ovelha', e)}
+                      disabled={gold < 40}
+                      className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      title="Compra um filhote de Ovelha por 40 moedas. Cresce em 8 dias."
+                    >
+                      🍼 Filhote 40💰
+                    </button>
                   </div>
-                  
+
                   {/* Ox */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel >= 4 && (
@@ -5015,6 +5068,15 @@ export default function App() {
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                     >
                       Comprar + 1 🌾
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => buyAnimalFilhote('pato', e)}
+                      disabled={gold < 25}
+                      className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      title="Compra um filhote de Pato por 25 moedas. Cresce em 6 dias."
+                    >
+                      🍼 Filhote 25💰
                     </button>
                   </div>
 
@@ -5329,14 +5391,26 @@ export default function App() {
                     className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-red-400/60 text-red-400 bg-transparent">
                     ⚠️ Tristes
                   </button>
+                  <button onClick={() => setAnimalFilter(animalFilter === 'ready' ? 'all' : 'ready')}
+                    className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalFilter === 'ready' ? 'bg-yellow-400 border-yellow-400 text-yellow-900' : 'border-yellow-400/60 text-yellow-300 bg-transparent'}`}>
+                    ⚡ Prontos
+                  </button>
                   <span className="text-[10px] text-[#fef3c7]/60 font-mono self-center ml-1">
-                    Mostrando {animals.filter(a => animalFilter === 'all' || a.type === animalFilter).length} de {animals.length} animais
+                    Mostrando {animals.filter(a => {
+                      if (animalFilter === 'all') return true;
+                      if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.feathersReady) || (a.type === 'bufalo' && !a.hasProducedToday);
+                      return a.type === animalFilter;
+                    }).length} de {animals.length} animais
                   </span>
                 </div>
                 <AnimatePresence>
                   {(() => {
                     const filteredAnimals = animals
-                      .filter(a => animalFilter === 'all' || a.type === animalFilter)
+                      .filter(a => {
+                        if (animalFilter === 'all') return true;
+                        if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.feathersReady) || (a.type === 'bufalo' && !a.hasProducedToday);
+                        return a.type === animalFilter;
+                      })
                       .sort((a, b) => {
                         let cmp = 0;
                         if (animalSort === 'happiness') cmp = (a.happiness ?? 0) - (b.happiness ?? 0);
@@ -6730,6 +6804,38 @@ export default function App() {
                     🍄 Cogumelo ({getActualSellPrice('cogumelo' as any)}💰)
                   </button>
                   )}
+
+                  {/* Biome craft products */}
+                  {(inventory.hidromel ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('hidromel' as any, 1, e)} disabled={(inventory.hidromel ?? 0) < 1}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🍺 Hidromel ({getActualSellPrice('hidromel' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.risoto_cogumelo ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('risoto_cogumelo' as any, 1, e)} disabled={(inventory.risoto_cogumelo ?? 0) < 1}
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🍄 Risoto ({getActualSellPrice('risoto_cogumelo' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.conserva_peixe ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('conserva_peixe' as any, 1, e)} disabled={(inventory.conserva_peixe ?? 0) < 1}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🐟 Conserva ({getActualSellPrice('conserva_peixe' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.mel_envasado ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('mel_envasado' as any, 1, e)} disabled={(inventory.mel_envasado ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🍯 Mel Envasado ({getActualSellPrice('mel_envasado' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.sopa_cogumelo ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('sopa_cogumelo' as any, 1, e)} disabled={(inventory.sopa_cogumelo ?? 0) < 1}
+                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    🍲 Sopa ({getActualSellPrice('sopa_cogumelo' as any)}💰)
+                  </button>
+                  )}
                 </div>
 
               </div>
@@ -7458,6 +7564,30 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* Workers weekly salary */}
+                {workers.length > 0 && (
+                <div className="bg-white/75 border-2 border-[#fbbf24] rounded-2xl p-4 shadow-sm">
+                  <h4 className="font-display font-black text-xs text-[#78350f] uppercase tracking-wider mb-2 border-b border-stone-200 pb-1">
+                    👷 Salários da Semana
+                  </h4>
+                  <div className="space-y-1.5 text-xs font-mono text-stone-700">
+                    {workers.map(worker => {
+                      const def = WORKER_TYPES.find(w => w.role === worker.role);
+                      return (
+                        <div key={worker.id} className="flex items-center justify-between">
+                          <span>{def?.emoji ?? '👷'} {worker.name} ({worker.role})</span>
+                          <span className="font-bold text-red-600">-{worker.dailyCost * 7} moedas</span>
+                        </div>
+                      );
+                    })}
+                    <div className="flex items-center justify-between border-t border-stone-200 pt-1.5 mt-1">
+                      <span className="font-black uppercase text-stone-800">Total Funcionários:</span>
+                      <span className="font-black text-red-700">-{workers.reduce((sum, w) => sum + w.dailyCost * 7, 0)} moedas</span>
+                    </div>
+                  </div>
+                </div>
+                )}
+
                 {/* Agricultural expert recommendation tip bubble */}
                 <div className="bg-indigo-50 border-2 border-indigo-200 rounded-3xl p-4 text-xs leading-relaxed text-indigo-950 flex gap-2.5 items-start">
                   <span className="text-xl shrink-0 selection-none">🧙‍♂️</span>
@@ -7954,6 +8084,11 @@ export default function App() {
                       { label: 'Ovo Defumado', emoji: '🥚', req: `🪿 1 Ov.Ganso (${inventory.goose_egg ?? 0}/1) • Nv6`, canCraft: farmLevel >= 6 && (inventory.goose_egg ?? 0) >= 1, reqLevel: 6, onClick: (e: React.MouseEvent) => craftOvoDefumado(e) },
                       { label: 'Conserva de Codorna', emoji: '🥚', req: `🐦 6 Ov.Codorna (${inventory.quail_egg ?? 0}/6) • Nv4`, canCraft: farmLevel >= 4 && (inventory.quail_egg ?? 0) >= 6, reqLevel: 4, onClick: (e: React.MouseEvent) => craftConservaCodorna(e) },
                       { label: 'Incubar Ovos (Nova Galinha)', emoji: '🐣', req: `🥚 3 Ov.Férteis (${inventory.fertile_egg ?? 0}/3) • Nv7`, canCraft: farmLevel >= 7 && (inventory.fertile_egg ?? 0) >= 3, reqLevel: 7, onClick: (e: React.MouseEvent) => craftIncubarOvos(e) },
+                      { label: 'Hidromel Artesanal', emoji: '🍺', req: `🍯 2 Mel (${inventory.mel ?? 0}/2) + 🥛 3 Leite (${inventory.milk}/3) • Nv8`, canCraft: farmLevel >= 8 && (inventory.mel ?? 0) >= 2 && inventory.milk >= 3, reqLevel: 8, onClick: (e: React.MouseEvent) => craftHidromel(e) },
+                      { label: 'Risoto de Cogumelo', emoji: '🍄', req: `🍄 3 Cogumelos (${inventory.cogumelo ?? 0}/3) • Nv5`, canCraft: farmLevel >= 5 && (inventory.cogumelo ?? 0) >= 3, reqLevel: 5, onClick: (e: React.MouseEvent) => craftRisotoCogumelo(e) },
+                      { label: 'Conserva de Peixe', emoji: '🐟', req: `🐟 2 Peixe (${inventory.peixe ?? 0}/2) • Nv4`, canCraft: farmLevel >= 4 && (inventory.peixe ?? 0) >= 2, reqLevel: 4, onClick: (e: React.MouseEvent) => craftConservaPeixe(e) },
+                      { label: 'Mel Envasado', emoji: '🍯', req: `🍯 3 Mel (${inventory.mel ?? 0}/3) • Nv3`, canCraft: farmLevel >= 3 && (inventory.mel ?? 0) >= 3, reqLevel: 3, onClick: (e: React.MouseEvent) => craftMelEnvasado(e) },
+                      { label: 'Sopa de Cogumelo', emoji: '🍲', req: `🍄 2 Cogumelos (${inventory.cogumelo ?? 0}/2) • Nv3`, canCraft: farmLevel >= 3 && (inventory.cogumelo ?? 0) >= 2, reqLevel: 3, onClick: (e: React.MouseEvent) => craftSopaCogumelo(e) },
                     ].map((r, i) => (
                       <div key={i} className="bg-white border-2 border-orange-100 rounded-xl p-3 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
@@ -8342,6 +8477,22 @@ export default function App() {
                             {b.biome === 'pasto' ? '🌾' : b.biome === 'lago' ? '🌊' : b.biome === 'floresta' ? '🌲' : '🍎'} {b.biome}
                           </span>
                         ))}
+                      </div>
+                    )}
+                    {landBiomes.length > 0 && (Object.values(biomeWeeklyIncome).some(v => v > 0)) && (
+                      <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3">
+                        <div className="text-[10px] font-black uppercase text-green-800 mb-2">📊 Receita Semanal por Bioma</div>
+                        <div className="space-y-1">
+                          {([['lago', '🌊', biomeWeeklyIncome.lago], ['floresta', '🌲', biomeWeeklyIncome.floresta], ['pasto', '🌾', biomeWeeklyIncome.pasto], ['pomar', '🍎', biomeWeeklyIncome.pomar]] as const).map(([key, emoji, val]) => val > 0 ? (
+                            <div key={key} className="flex items-center gap-2">
+                              <span className="text-xs">{emoji} {key}</span>
+                              <div className="flex-1 bg-green-100 rounded-full h-2">
+                                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${Math.min(100, (val / Math.max(...Object.values(biomeWeeklyIncome), 1)) * 100)}%` }} />
+                              </div>
+                              <span className="text-[10px] font-mono font-black text-green-700">+{val}💰</span>
+                            </div>
+                          ) : null)}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -9507,6 +9658,56 @@ export default function App() {
                   className="bg-teal-600 hover:bg-teal-500 text-white border-b-4 border-teal-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer"
                 >
                   Fechar Stats
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🐣 MODAL DE HISTÓRICO DE REPRODUÇÕES */}
+      <AnimatePresence>
+        {showReproModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowReproModal(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[999] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fffbeb] border-8 border-pink-700 rounded-[36px] max-w-md w-full max-h-[80vh] overflow-hidden shadow-2xl flex flex-col relative"
+            >
+              <div className="bg-gradient-to-r from-pink-700 to-pink-900 p-5 border-b-4 border-pink-950 text-center shrink-0">
+                <h3 className="text-white text-xl font-display font-black uppercase tracking-wider">🐣 Histórico de Reproduções</h3>
+                <p className="text-pink-200 text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">Últimos 50 nascimentos registrados</p>
+                <button onClick={() => setShowReproModal(false)}
+                  className="absolute top-4 right-4 text-pink-200 hover:text-white bg-pink-950 hover:bg-pink-800 border-2 border-pink-900 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all text-lg font-bold">✕</button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-2" style={{ scrollbarWidth: 'thin' }}>
+                {reproHistory.length === 0 ? (
+                  <div className="text-center text-stone-500 text-xs italic py-8">Nenhuma reprodução registrada ainda.</div>
+                ) : reproHistory.map((r, i) => (
+                  <div key={i} className="bg-white border-2 border-pink-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{r.method === 'natural' ? '🐣' : r.method === 'gestacao' ? '👶' : '🍼'}</span>
+                      <div>
+                        <div className="font-black text-xs text-pink-900">{r.name}</div>
+                        <div className="text-[9px] font-mono text-stone-500">{r.animalType} • {r.method === 'natural' ? 'Natural' : r.method === 'gestacao' ? 'Gestação' : 'Filhote comprado'}</div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-stone-400 shrink-0">Dia {r.day}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-pink-50 p-4 border-t-2 border-pink-200 flex justify-end shrink-0">
+                <button onClick={() => setShowReproModal(false)}
+                  className="bg-pink-600 hover:bg-pink-500 text-white border-b-4 border-pink-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer">
+                  Fechar
                 </button>
               </div>
             </motion.div>

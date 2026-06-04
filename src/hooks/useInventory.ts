@@ -1033,6 +1033,53 @@ export function useInventory({
     spawnFeedback('💰', `+${totalEarningCalculated} 💰`, { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as any);
   };
 
+  // --- BIOME CRAFT FUNCTIONS ---
+
+  const craftHidromel = (event?: React.MouseEvent) => {
+    if (farmLevel < 8) { addLog('🍺 Hidromel requer Nível 8!', 'error'); return; }
+    if ((inventory.mel ?? 0) < 2 || (inventory.milk ?? 0) < 3) { addLog('🍺 Precisa: 2 Mel + 3 Leite', 'error'); return; }
+    setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) - 2, milk: prev.milk - 3, hidromel: (prev.hidromel ?? 0) + 1 }));
+    addLog('🍺 Hidromel artesanal produzido! (+180💰)', 'success');
+    setFarmXp(prev => prev + 5);
+    spawnFeedback('🍺', 'Hidromel!', event);
+  };
+
+  const craftRisotoCogumelo = (event?: React.MouseEvent) => {
+    if (farmLevel < 5) { addLog('🍄 Risoto requer Nível 5!', 'error'); return; }
+    if ((inventory.cogumelo ?? 0) < 3) { addLog('🍄 Precisa: 3 Cogumelos', 'error'); return; }
+    setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) - 3, risoto_cogumelo: (prev.risoto_cogumelo ?? 0) + 1 }));
+    addLog('🍄 Risoto de Cogumelo preparado! (+120💰)', 'success');
+    setFarmXp(prev => prev + 3);
+    spawnFeedback('🍄', 'Risoto!', event);
+  };
+
+  const craftConservaPeixe = (event?: React.MouseEvent) => {
+    if (farmLevel < 4) { addLog('🐟 Conserva requer Nível 4!', 'error'); return; }
+    if ((inventory.peixe ?? 0) < 2) { addLog('🐟 Precisa: 2 Peixe', 'error'); return; }
+    setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 2, conserva_peixe: (prev.conserva_peixe ?? 0) + 1 }));
+    addLog('🐟 Conserva de Peixe envasada! (+95💰)', 'success');
+    setFarmXp(prev => prev + 3);
+    spawnFeedback('🐟', 'Conserva!', event);
+  };
+
+  const craftMelEnvasado = (event?: React.MouseEvent) => {
+    if (farmLevel < 3) { addLog('🍯 Mel Envasado requer Nível 3!', 'error'); return; }
+    if ((inventory.mel ?? 0) < 3) { addLog('🍯 Precisa: 3 Mel', 'error'); return; }
+    setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) - 3, mel_envasado: (prev.mel_envasado ?? 0) + 1 }));
+    addLog('🍯 Mel Envasado produzido! (+200💰)', 'success');
+    setFarmXp(prev => prev + 4);
+    spawnFeedback('🍯', 'Mel!', event);
+  };
+
+  const craftSopaCogumelo = (event?: React.MouseEvent) => {
+    if (farmLevel < 3) { addLog('🍲 Sopa requer Nível 3!', 'error'); return; }
+    if ((inventory.cogumelo ?? 0) < 2) { addLog('🍲 Precisa: 2 Cogumelos', 'error'); return; }
+    setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) - 2, sopa_cogumelo: (prev.sopa_cogumelo ?? 0) + 1 }));
+    addLog('🍲 Sopa de Cogumelo preparada! (+80💰)', 'success');
+    setFarmXp(prev => prev + 2);
+    spawnFeedback('🍲', 'Sopa!', event);
+  };
+
   // --- BUY FUNCTIONS ---
 
   const buyFolhaAmoreira = (qty: number, event: React.MouseEvent) => {
@@ -1102,6 +1149,11 @@ export function useInventory({
     craftCheese,
     craftQueijo,
     craftScarf,
+    craftHidromel,
+    craftRisotoCogumelo,
+    craftConservaPeixe,
+    craftMelEnvasado,
+    craftSopaCogumelo,
     // Sell functions
     sellProduct,
     sellAllItemsNoConfirm,
