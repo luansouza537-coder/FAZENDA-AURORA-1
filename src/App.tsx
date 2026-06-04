@@ -191,6 +191,7 @@ const MERCHANT_SPECIAL_ITEMS = [
   { id: 'bebedouro', label: '🪣 Bebedouro Automático', desc: 'Animais nunca ficam com sede, -5% epidemia', price: 150, effect: 'bebedouro', oneTime: true },
   { id: 'cert_sanitario', label: '📜 Certificado Sanitário', desc: '+10% preço de venda de carne permanente', price: 200, effect: 'cert_sanitario', oneTime: true },
   { id: 'licenca_exotica_item', label: '📋 Licença Exótica', desc: 'Permite criar Jacaré legalmente', price: 280, effect: 'licenca_exotica', oneTime: true },
+  { id: 'licenca_criadouro', label: '📜 Licença de Criadouro', desc: 'Permite reprodução controlada de Vaca, Cabra, Ovelha e Galinha', price: 400, effect: 'licenca_criadouro', oneTime: true },
 ] as const;
 
 export default function App() {
@@ -314,8 +315,25 @@ export default function App() {
   const [hasCertSanitario, setHasCertSanitario] = useState<boolean>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasCertSanitario ?? false; } catch(e) {} return false;
   });
+  const [licencaCriadouro, setLicencaCriadouro] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).licencaCriadouro ?? false; } catch(e) {} return false;
+  });
+  const [reproducaoAtiva, setReproducaoAtiva] = useState<{
+    animalId1: number; animalId2: number; type: AnimalType; gestacaoEnd: number;
+  }[]>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).reproducaoAtiva ?? []; } catch(e) {} return [];
+  });
   const [epidemicPrevented, setEpidemicPrevented] = useState<boolean>(false);
   const [merchantSpecialItems, setMerchantSpecialItems] = useState<string[]>([]);
+  const [cruzarModal, setCruzarModal] = useState<{ animalId: number; type: AnimalType } | null>(null);
+
+  const REPRODUCAO_CONFIG: Partial<Record<AnimalType, { gestacao: number; minAge: number }>> = {
+    vaca: { gestacao: 12, minAge: 30 },
+    cabra: { gestacao: 8, minAge: 20 },
+    ovelha: { gestacao: 10, minAge: 25 },
+    galinha: { gestacao: 5, minAge: 10 },
+    pato: { gestacao: 7, minAge: 15 },
+  };
 
   const [weather, setWeather] = useState<'chuva' | 'sol' | 'nublado'>('nublado');
   // dailyEarning moved to useEconomy
@@ -657,6 +675,8 @@ export default function App() {
     setLicencaExotica(false);
     setHasBebedouro(false);
     setHasCertSanitario(false);
+    setLicencaCriadouro(false);
+    setReproducaoAtiva([]);
     setEpidemicPrevented(false);
     setMerchantSpecialItems([]);
     setCoelhoReproCount(0);
@@ -1898,11 +1918,13 @@ export default function App() {
         landBiomes,
         hasBebedouro,
         hasCertSanitario,
+        licencaCriadouro,
+        reproducaoAtiva,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 500;
@@ -2865,6 +2887,7 @@ export default function App() {
           if (item.effect === 'bebedouro' && hasBebedouro) return false;
           if (item.effect === 'cert_sanitario' && hasCertSanitario) return false;
           if (item.effect === 'licenca_exotica' && licencaExotica) return false;
+          if (item.effect === 'licenca_criadouro' && licencaCriadouro) return false;
           return true;
         });
         const shuffled = [...availableMerchItems].sort(() => Math.random() - 0.5);
@@ -3390,10 +3413,103 @@ export default function App() {
         }
       }
 
+      // --- LAYER 1: Filhotes atingindo maturidade ---
+      const baseMaxAgeMapAdult: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400 };
+      const finalAnimalsWithAdulthood = finalAnimals.map(a => {
+        if (!a.isAdult && a.adulthoodDay !== undefined && nextDayValue >= a.adulthoodDay) {
+          logsToAdd.push({ msg: `🎉 ${a.name} cresceu e se tornou adulto! Pronto para produzir!`, type: 'success' });
+          setTimeout(() => addNotification(`🎉 ${a.name} (${a.type}) cresceu e está pronto para produzir!`, 'success', nextDayValue), 0);
+          const baseMax = baseMaxAgeMapAdult[a.type] ?? 90;
+          return { ...a, isAdult: true, adulthoodDay: undefined, maxAge: a.maxAge ?? Math.round(baseMax * (1 + (Math.random() * 0.4 - 0.2))) };
+        }
+        return a;
+      });
+
+      // --- LAYER 2: Reprodução Controlada — gestações concluídas ---
+      const completedGestacoes = reproducaoAtiva.filter(r => nextDayValue >= r.gestacaoEnd);
+      const maxAnimalsLayer2 = landLots * 5;
+      completedGestacoes.forEach(r => {
+        if (finalAnimalsWithAdulthood.length >= maxAnimalsLayer2) {
+          logsToAdd.push({ msg: `❌ Fazenda cheia! Filhote de ${r.type} não pôde nascer. Expanda o terreno!`, type: 'error' });
+          return;
+        }
+        const newId = finalAnimalsWithAdulthood.length > 0 ? Math.max(...finalAnimalsWithAdulthood.map(a => a.id)) + 200 + Math.floor(Math.random() * 100) : 200;
+        const baseMax2 = baseMaxAgeMapAdult[r.type] ?? 90;
+        const daysToAdultMap: Partial<Record<AnimalType, number>> = { vaca: 10, boi: 15, bufalo: 12, cabra: 8, pavao: 20, ovelha: 8, galinha: 7, pato: 7 };
+        const daysToAdult = daysToAdultMap[r.type] ?? 10;
+        const newFilhote: Animal = {
+          id: newId,
+          type: r.type,
+          name: getRandomName(r.type),
+          hunger: 80,
+          happiness: 90,
+          consecutiveHappyDays: 0,
+          daysBelow80: 0,
+          isBestFriend: false,
+          trait: getRandomTrait(),
+          age: 0,
+          maxAge: Math.round(baseMax2 * (1 + (Math.random() * 0.4 - 0.2))),
+          isAdult: false,
+          adulthoodDay: nextDayValue + daysToAdult,
+          hasProducedToday: false,
+          ...(r.type === 'ovelha' && { daysUntilWool: 3, daysSinceLastWool: 0, woolReady: false }),
+          ...(r.type === 'cabra' && { isLactating: false, lactationCycle: 0 }),
+          ...(r.type === 'bufalo' && { heatStress: false }),
+          ...(r.type === 'boi' && { weightGain: 0.05 }),
+        };
+        // 15% chance of good trait
+        if (Math.random() < 0.15) {
+          (newFilhote as any).trait = Math.random() < 0.5 ? 'trabalhadora' : 'saudavel';
+        }
+        finalAnimalsWithAdulthood.push(newFilhote);
+        logsToAdd.push({ msg: `👶 Nasceu um filhote de ${r.type}! ${newFilhote.name} chegou à fazenda!`, type: 'success' });
+        setTimeout(() => addNotification(`👶 ${newFilhote.name} (filhote de ${r.type}) nasceu na fazenda!`, 'success', nextDayValue), 0);
+      });
+      if (completedGestacoes.length > 0) {
+        setReproducaoAtiva(prev => prev.filter(r => nextDayValue < r.gestacaoEnd));
+      }
+
+      // --- LAYER 3: Reprodução Natural (Galinha) ---
+      {
+        const galinhas = finalAnimalsWithAdulthood.filter(a => a.type === 'galinha' && a.isAdult !== false);
+        const totalGalinhas = galinhas.length;
+        const maxGalinhas = 10;
+        let naturalBirths = 0;
+        const maxNaturalPerDay = 2;
+        if (totalGalinhas < maxGalinhas) {
+          galinhas.forEach(a => {
+            if (naturalBirths >= maxNaturalPerDay) return;
+            if (finalAnimalsWithAdulthood.length >= maxAnimalsLayer2) return;
+            if ((a.happiness ?? 0) > 80 && Math.random() < 0.03) {
+              const newId2 = finalAnimalsWithAdulthood.length > 0 ? Math.max(...finalAnimalsWithAdulthood.map(x => x.id)) + 300 + Math.floor(Math.random() * 100) : 300;
+              const pintinho: Animal = {
+                id: newId2,
+                type: 'galinha',
+                name: getRandomName('galinha'),
+                hunger: 80,
+                happiness: 90,
+                consecutiveHappyDays: 0,
+                daysBelow80: 0,
+                isBestFriend: false,
+                trait: getRandomTrait(),
+                age: 0,
+                maxAge: Math.round(60 * (1 + (Math.random() * 0.4 - 0.2))),
+                isAdult: false,
+                adulthoodDay: nextDayValue + 7,
+                hasProducedToday: false,
+              };
+              finalAnimalsWithAdulthood.push(pintinho);
+              naturalBirths++;
+              logsToAdd.push({ msg: `🐣 ${a.name} chocou um pintinho! ${pintinho.name} chegou à fazenda!`, type: 'success' });
+            }
+          });
+        }
+      }
+
       // Reset weeklyProduction every 7 days
       const animalsWithWeekly = nextDayValue % 7 === 0
-        ? finalAnimals.map(a => ({ ...a, weeklyProduction: 0 }))
-        : finalAnimals;
+        ? finalAnimalsWithAdulthood.map(a => ({ ...a, weeklyProduction: 0 }))
+        : finalAnimalsWithAdulthood;
       setAnimals(animalsWithWeekly);
       // Apply accumulated wisdom bonuses
       if (Object.values(wisdomBonusUpdates).some(v => v > 0)) {
@@ -4605,6 +4721,7 @@ export default function App() {
                         else if (item.effect === 'bebedouro') { setHasBebedouro(true); addLog('🪣 Bebedouro Automático instalado! Animais sempre hidratados.', 'success'); }
                         else if (item.effect === 'cert_sanitario') { setHasCertSanitario(true); addLog('📜 Certificado Sanitário adquirido! +10% preço de carne permanente.', 'success'); }
                         else if (item.effect === 'licenca_exotica') { setLicencaExotica(true); addLog('📋 Licença Exótica obtida! Agora pode criar Jacaré legalmente.', 'success'); }
+                        else if (item.effect === 'licenca_criadouro') { setLicencaCriadouro(true); addLog('📜 Licença de Criadouro obtida! Reprodução controlada desbloqueada.', 'success'); }
                         setMerchantSpecialItems(prev => prev.filter(id => id !== item.id));
                         triggerAudioResult(() => sfx.playSound('sell'));
                       }}
@@ -4778,8 +4895,17 @@ export default function App() {
                     >
                       Comprar + 1 🌾
                     </button>
+                    <button
+                      type="button"
+                      onClick={(e) => buyAnimalFilhote('vaca', e)}
+                      disabled={gold < 60}
+                      className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      title="Compra um filhote de Vaca por 60 moedas. Cresce em 10 dias."
+                    >
+                      🍼 Filhote 60💰
+                    </button>
                   </div>
-                  
+
                   {/* Sheep */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel >= 4 && (
@@ -4816,8 +4942,17 @@ export default function App() {
                     >
                       Comprar + 1 🌾
                     </button>
+                    <button
+                      type="button"
+                      onClick={(e) => buyAnimalFilhote('boi', e)}
+                      disabled={gold < 75}
+                      className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      title="Compra um filhote de Boi por 75 moedas. Cresce em 15 dias."
+                    >
+                      🍼 Filhote 75💰
+                    </button>
                   </div>
-                  
+
                   {/* Chicken */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel >= 4 && (
@@ -4853,6 +4988,17 @@ export default function App() {
                     >
                       {farmLevel < 2 ? 'Nível 2+' : 'Comprar + 1 🌾'}
                     </button>
+                    {farmLevel >= 2 && (
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimalFilhote('cabra', e)}
+                        disabled={gold < 55}
+                        className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                        title="Compra um filhote de Cabra por 55 moedas. Cresce em 8 dias."
+                      >
+                        🍼 Filhote 55💰
+                      </button>
+                    )}
                   </div>
 
                   {/* Pato (Nível 1+) */}
@@ -4924,6 +5070,17 @@ export default function App() {
                     >
                       {farmLevel < 4 ? 'Nível 4+' : 'Comprar + 1 🌾'}
                     </button>
+                    {farmLevel >= 4 && (
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimalFilhote('bufalo', e)}
+                        disabled={gold < 110}
+                        className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                        title="Compra um filhote de Búfalo por 110 moedas. Cresce em 12 dias."
+                      >
+                        🍼 Filhote 110💰
+                      </button>
+                    )}
                   </div>
 
                   {/* Pavão (Nível 5+) */}
@@ -4942,6 +5099,17 @@ export default function App() {
                     >
                       {farmLevel < 5 ? 'Nível 5+' : 'Comprar + 1 🌾'}
                     </button>
+                    {farmLevel >= 5 && (
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimalFilhote('pavao', e)}
+                        disabled={gold < 175}
+                        className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                        title="Compra um filhote de Pavão por 175 moedas. Cresce em 20 dias."
+                      >
+                        🍼 Filhote 175💰
+                      </button>
+                    )}
                   </div>
 
                   {/* Codorna (Nível 3+) */}
@@ -5314,6 +5482,15 @@ export default function App() {
                                 title={`Lã acumulada ao longo das estações. Colheita disponível na Primavera com mínimo 3.`}
                               >
                                 🧶 Lã: {animal.woolAccumulated ?? 0}/3
+                              </span>
+                            )}
+                            {/* Filhote badge */}
+                            {!animal.isAdult && animal.adulthoodDay !== undefined && (
+                              <span
+                                className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-pink-100 border border-pink-400 text-pink-800 cursor-help"
+                                title={`Filhote: adulto no dia ${animal.adulthoodDay}`}
+                              >
+                                🍼 Filhote — adulto em {Math.max(0, animal.adulthoodDay - currentDay)}d
                               </span>
                             )}
                             {/* MECHANIC 5: Búfalo — badge de estresse térmico */}
@@ -5900,6 +6077,21 @@ export default function App() {
                             </button>
                           )}
 
+                          {/* Cruzar (Layer 2: Reprodução Controlada) */}
+                          {licencaCriadouro && animal.isAdult !== false && REPRODUCAO_CONFIG[animal.type] && (() => {
+                            const alreadyInReproducao = reproducaoAtiva.some(r => r.animalId1 === animal.id || r.animalId2 === animal.id);
+                            return (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); setCruzarModal({ animalId: animal.id, type: animal.type }); }}
+                                disabled={alreadyInReproducao}
+                                className={`rounded-[16px] px-3 py-2 font-display text-[10px] text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1 transition-all select-none ${alreadyInReproducao ? 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60' : 'bg-fuchsia-500 hover:bg-fuchsia-600 border-b-2 border-fuchsia-800 shadow-md active:translate-y-0.5 hover:scale-[1.02]'}`}
+                                title={alreadyInReproducao ? 'Já em gestação' : 'Iniciar reprodução controlada'}
+                              >
+                                🤝 Cruzar
+                              </button>
+                            );
+                          })()}
                         </div>
 
                           {/* Improvement 2: Profit Panel Badge */}
@@ -9429,6 +9621,55 @@ export default function App() {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* 🤝 MODAL DE CRUZAMENTO (Layer 2) */}
+      <AnimatePresence>
+        {cruzarModal && (() => {
+          const cfg = REPRODUCAO_CONFIG[cruzarModal.type];
+          const candidates = animals.filter(a => a.type === cruzarModal.type && a.id !== cruzarModal.id && a.isAdult !== false && !reproducaoAtiva.some(r => r.animalId1 === a.id || r.animalId2 === a.id));
+          return (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+              onClick={() => setCruzarModal(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}
+                className="bg-[#fef3c7] border-4 border-[#fbbf24] rounded-3xl p-6 max-w-sm w-full shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2 className="font-display font-black text-xl text-[#78350f] uppercase mb-2 flex items-center gap-2">🤝 Reprodução Controlada</h2>
+                <p className="text-[11px] text-stone-600 font-mono mb-3">Gestação: {cfg?.gestacao ?? '?'} dias. Selecione o parceiro para cruzar.</p>
+                {candidates.length === 0 ? (
+                  <p className="text-[11px] text-red-600 font-mono">Nenhum parceiro disponível! Compre outro {cruzarModal.type} adulto.</p>
+                ) : (
+                  <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+                    {candidates.map(partner => (
+                      <button key={partner.id} type="button"
+                        onClick={() => {
+                          setReproducaoAtiva(prev => [...prev, {
+                            animalId1: cruzarModal.animalId,
+                            animalId2: partner.id,
+                            type: cruzarModal.type,
+                            gestacaoEnd: currentDay + (cfg?.gestacao ?? 10),
+                          }]);
+                          addLog(`🤝 Iniciada gestação entre dois ${cruzarModal.type}s! Filhote esperado em ${cfg?.gestacao ?? 10} dias.`, 'success');
+                          addNotification(`🤝 Gestação iniciada! Filhote de ${cruzarModal.type} em ${cfg?.gestacao ?? 10} dias.`, 'success');
+                          setCruzarModal(null);
+                        }}
+                        className="bg-fuchsia-500 hover:bg-fuchsia-600 text-white font-black text-xs uppercase px-4 py-2 rounded-xl border-b-2 border-fuchsia-800 transition-all cursor-pointer"
+                      >
+                        {partner.name} (😊 {Math.floor(partner.happiness)}%)
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <button type="button" onClick={() => setCruzarModal(null)} className="mt-3 w-full bg-stone-300 hover:bg-stone-400 text-stone-800 font-black text-xs uppercase px-4 py-2 rounded-xl border-b-2 border-stone-500 transition-all cursor-pointer">Cancelar</button>
+              </motion.div>
+            </motion.div>
+          );
+        })()}
       </AnimatePresence>
 
       {/* 🎪 MODAL RESULTADO DA FEIRA */}
