@@ -3758,7 +3758,7 @@ export default function App() {
   ) => {
     let deceasedCount = 0;
     const survivors = animalsList.filter(animal => {
-      // Morte por fome extrema (3 dias consecutivos sem comer)
+      // Morte por fome extrema (3 dias consecutivos sem comer) — verificada primeiro para evitar dupla contagem
       if ((animal.daysWithoutFood ?? 0) >= 3) {
         logs.push({
           msg: `💀 ${animal.name} morreu de fome após 3 dias sem alimentação! Alimente seus animais regularmente!`,
@@ -3767,8 +3767,8 @@ export default function App() {
         setTimeout(() => addNotification(`💀 ${animal.name} morreu de fome após 3 dias sem comer!`, 'warning'), 0);
         deceasedCount++;
         return false;
-      }
-      if (animal.hunger <= 0 || animal.happiness <= 0) {
+      } else if (animal.hunger <= 0 || animal.happiness <= 0) {
+        // Só cai aqui se daysWithoutFood < 3 (evita dupla contagem)
         logs.push({
           msg: `💀 Infelizmente, o animal ${animal.name} não resistiu à fome extrema ou tristeza e faleceu.`,
           type: 'error'
@@ -4185,9 +4185,9 @@ export default function App() {
         const totalCosts = maintCost + contractPenaltyForGold + taxAmount + waterCost + energyCost;
         const newGold = prev - totalCosts + globalGoldBonus;
         if (newGold < 0) {
-          // Acumular dívida em vez de ir para negativo
+          // Acumular dívida em vez de ir para negativo (sem juros aqui; juros aplicados no bloco de dívida abaixo)
           const newDebtAmount = Math.abs(newGold);
-          setDebt(d => Math.round((d + newDebtAmount) * 1.05));
+          setDebt(d => d + newDebtAmount);
           return 0;
         }
         // Se tem dívida e ouro sobrando, abater parte da dívida
@@ -4563,15 +4563,17 @@ export default function App() {
       }
 
       // --- SISTEMA DE DÍVIDA ---
-      // Verificar se a dívida passa de 1000 (game over)
-      if (debt > 1000) {
-        logsToAdd.push({ msg: `💸 FALÊNCIA! Sua fazenda acumulou uma dívida impagável de ${debt} moedas. Fim de jogo!`, type: 'error' });
-        setTimeout(() => addNotification(`💸 FALÊNCIA! Dívida de ${debt} moedas. Sua fazenda faliu!`, 'warning', nextDayValue), 0);
-      }
-      // Aplicar juros de 5% sobre dívida existente
+      // Aplicar juros de 5% sobre dívida existente (antes de verificar game over)
       if (debt > 0) {
+        const debtInterest = Math.round(debt * 0.05);
         setDebt(prev => Math.round(prev * 1.05));
-        logsToAdd.push({ msg: `💳 Juros de 5% sobre dívida: ${Math.round(debt * 0.05)} moedas adicionados.`, type: 'error' });
+        logsToAdd.push({ msg: `💳 Juros de 5% sobre dívida: ${debtInterest} moedas adicionados.`, type: 'error' });
+      }
+      // Verificar se a dívida passa de 1000 (game over) — usa debt após juros estimados
+      const debtAfterInterest = debt > 0 ? Math.round(debt * 1.05) : debt;
+      if (debtAfterInterest > 1000) {
+        logsToAdd.push({ msg: `💸 FALÊNCIA! Sua fazenda acumulou uma dívida impagável de ${debtAfterInterest} moedas. Fim de jogo!`, type: 'error' });
+        setTimeout(() => addNotification(`💸 FALÊNCIA! Dívida de ${debtAfterInterest} moedas. Sua fazenda faliu!`, 'warning', nextDayValue), 0);
       }
 
       // Próximo dia
@@ -4661,7 +4663,8 @@ export default function App() {
   };
 
   // BUG 16 FIX: usa galinha (animal mais barato) como referência para game over
-  const isGameOver = animals.length === 0 && gold < getAnimalPurchasePrice('galinha');
+  // Também considera falência por dívida > 1000
+  const isGameOver = (animals.length === 0 && gold < getAnimalPurchasePrice('galinha')) || debt > 1000;
 
   const { name: seasonName, bg: seasonBg, textColor: seasonTextColor } = (() => {
     const index = Math.floor(((currentDay - 1) % 120) / 30);
