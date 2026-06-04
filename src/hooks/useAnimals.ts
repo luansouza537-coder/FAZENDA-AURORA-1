@@ -144,7 +144,8 @@ export function useAnimals({
           return parsed.animals.map((a: Animal) => ({
             ...a,
             age: a.age ?? 0,
-            maxAge: a.maxAge ?? Math.round((baseMaxAge[a.type] ?? 90) * (1 + (Math.random() * 0.4 - 0.2)))
+            maxAge: a.maxAge ?? Math.round((baseMaxAge[a.type] ?? 90) * (1 + (Math.random() * 0.4 - 0.2))),
+            isAdult: a.isAdult ?? true,  // existing animals are adults by default
           }));
         }
       }
@@ -329,6 +330,12 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'galinha') return;
 
+    if (animal.isAdult === false) {
+      addLog(`🍼 ${animal.name} ainda é um filhote e não produz ovos!`, 'error');
+      spawnFeedback('🍼', 'Filhote!', event);
+      return;
+    }
+
     if (!animal.hasProducedToday) {
       addLog(`🥚 ${animal.name} já teve seu ovo coletado ou não produziu hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
@@ -412,6 +419,12 @@ export function useAnimals({
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'cabra') return;
+
+    if (animal.isAdult === false) {
+      addLog(`🍼 ${animal.name} ainda é um filhote e não produz leite!`, 'error');
+      spawnFeedback('🍼', 'Filhote!', event);
+      return;
+    }
 
     if (!animal.isLactating) {
       addLog(`🐐 ${animal.name} não está em lactação agora! Aguarde ${animal.lactationCycle ?? 0} dia(s).`, 'error');
@@ -601,6 +614,12 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'vaca') return;
 
+    if (animal.isAdult === false) {
+      addLog(`🍼 ${animal.name} ainda é um filhote e não produz leite!`, 'error');
+      spawnFeedback('🍼', 'Filhote!', event);
+      return;
+    }
+
     if (!animal.hasProducedToday) {
       addLog(`🥛 ${animal.name} já foi ordenhada ou não produziu leite hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
@@ -665,6 +684,12 @@ export function useAnimals({
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'ovelha') return;
+
+    if (animal.isAdult === false) {
+      addLog(`🍼 ${animal.name} ainda é um filhote e não produz lã!`, 'error');
+      spawnFeedback('🍼', 'Filhote!', event);
+      return;
+    }
 
     if (!animal.woolReady) {
       addLog(`🐑 ${animal.name} ainda está crescendo a lã!`, 'error');
@@ -943,6 +968,7 @@ export function useAnimals({
       trait: getRandomTrait(),
       age: 0,
       maxAge,
+      isAdult: true,
       ...(type === 'vaca' && { hasProducedToday: false }),
       ...(type === 'ovelha' && { daysUntilWool: 3, daysSinceLastWool: 2, woolReady: false }),
       ...(type === 'galinha' && { hasProducedToday: false }),
@@ -997,6 +1023,101 @@ export function useAnimals({
     if (type === 'jacare') setTimeout(() => checkAndUnlockAchievement('exotic_farmer'), 0);
   };
 
+  // Filhote prices and days to adult
+  const FILHOTE_CONFIG: Partial<Record<AnimalType, { price: number; daysToAdult: number }>> = {
+    vaca: { price: 60, daysToAdult: 10 },
+    boi: { price: 75, daysToAdult: 15 },
+    bufalo: { price: 110, daysToAdult: 12 },
+    cabra: { price: 55, daysToAdult: 8 },
+    pavao: { price: 175, daysToAdult: 20 },
+  };
+
+  const buyAnimalFilhote = (type: AnimalType, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+
+    const config = FILHOTE_CONFIG[type];
+    if (!config) {
+      addLog(`❌ Este animal não tem opção de filhote.`, 'error');
+      return;
+    }
+
+    if (debt > 200) {
+      addLog(`💳 Você tem uma dívida de ${debt} moedas! Quite a dívida antes de comprar animais.`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Dívida Alta!', event);
+      return;
+    }
+
+    const maxAnimals = landLots * 5;
+    if (animals.length >= maxAnimals) {
+      addLog(`❌ Limite de animais alcançado! Expanda o terreno nas Melhorias!`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Expanda o terreno!', event);
+      return;
+    }
+
+    if (gold < config.price) {
+      addLog(`💰 Moedas insuficientes! Precisa de ${config.price} moedas para comprar o filhote.`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Falta 💰!', event);
+      return;
+    }
+
+    const { feedType, feedLabel } = getAnimalFeedType(type);
+    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
+    if (!noFeedAnimals.includes(type) && (inventory[feedType] ?? 0) < 1) {
+      addLog(`🌾 Você precisa de 1 saco de ${feedLabel} para trazer o filhote. Compre na loja!`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', `Falta ${feedLabel}!`, event);
+      return;
+    }
+
+    const name = type === 'boi' ? getUniqueOxName(animals) : getRandomName(type);
+    const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
+    const happiness = Math.floor(Math.random() * 21) + 60;
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400 };
+    const baseMaxAge = baseMaxAgeMap[type] ?? 90;
+    const variation = 1 + (Math.random() * 0.4 - 0.2);
+    const maxAge = Math.round(baseMaxAge * variation);
+
+    const newFilhote: Animal = {
+      id: newId,
+      type,
+      name,
+      hunger: 60,
+      happiness,
+      consecutiveHappyDays: 0,
+      daysBelow80: 0,
+      isBestFriend: false,
+      trait: getRandomTrait(),
+      age: 0,
+      maxAge,
+      isAdult: false,
+      adulthoodDay: currentDay + config.daysToAdult,
+      hasProducedToday: false,
+      ...(type === 'ovelha' && { daysUntilWool: 3, daysSinceLastWool: 0, woolReady: false }),
+      ...(type === 'boi' && { weightGain: 0.05 }),
+      ...(type === 'cabra' && { isLactating: false, lactationCycle: 0 }),
+      ...(type === 'lhama' && { woolAccumulated: 0 }),
+      ...(type === 'bufalo' && { heatStress: false }),
+      ...(type === 'pavao' && {}),
+    };
+
+    if (!noFeedAnimals.includes(type)) {
+      setInventory(prev => ({ ...prev, [feedType]: (prev[feedType] ?? 0) - 1 }));
+    }
+
+    setGold(prev => prev - config.price);
+    setAnimals(prev => [...prev, newFilhote]);
+    setWeeklyStats((prev: any) => ({ ...prev, spending: prev.spending + config.price }));
+
+    const typeLabel = type === 'vaca' ? '🐄 Vaca' : type === 'boi' ? '🐂 Boi' : type === 'bufalo' ? '🐃 Búfalo' : type === 'cabra' ? '🐐 Cabra' : '🦚 Pavão';
+    addLog(`🍼 ${newFilhote.name} (filhote de ${typeLabel}) chegou à fazenda! Vai crescer em ${config.daysToAdult} dias.`, 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('click'));
+    spawnFeedback('🍼', `-${config.price} 💰`, event);
+  };
+
   return {
     animals,
     setAnimals,
@@ -1029,5 +1150,7 @@ export function useAnimals({
     sellJacare,
     sellOx,
     buyAnimal,
+    buyAnimalFilhote,
+    FILHOTE_CONFIG,
   };
 }

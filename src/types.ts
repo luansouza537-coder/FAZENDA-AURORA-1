@@ -69,6 +69,10 @@ export interface Animal {
   // Feiras e prestígio
   isCampiao?: boolean;       // won a breed exposition
   weeklyProduction?: number; // tracks production this week for fair scoring
+
+  // Filhotes (Layer 1 & 2)
+  isAdult?: boolean;         // false = filhote, true = adulto (default true para existentes)
+  adulthoodDay?: number;     // dia do jogo em que o animal se torna adulto
 }
 
 // Funcionalidade 4: Contratos de fornecimento
