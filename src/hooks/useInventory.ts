@@ -884,8 +884,49 @@ export function useInventory({
     const butterQty = inventory.butter || 0;
     const yogurtQty = inventory.yogurt || 0;
     const fertileEggQty = inventory.fertile_egg || 0;
+    // Biome & exotic items
+    const peixeQty = (inventory as any).peixe || 0;
+    const melQty = (inventory as any).mel || 0;
+    const cogumeloQty = (inventory as any).cogumelo || 0;
+    const hidromelQty = (inventory as any).hidromel || 0;
+    const risotoQty = (inventory as any).risoto_cogumelo || 0;
+    const conservaPeixeQty = (inventory as any).conserva_peixe || 0;
+    const melEnvasadoQty = (inventory as any).mel_envasado || 0;
+    const sopaCogumeloQty = (inventory as any).sopa_cogumelo || 0;
+    // Special / exotic products
+    const quailEggQty = inventory.quail_egg || 0;
+    const alpacaWoolQty = inventory.alpaca_wool || 0;
+    const humusQty = inventory.humus || 0;
+    const mucoQty = inventory.muco || 0;
+    const angoraWoolQty = inventory.angora_wool || 0;
+    const sedaBrutaQty = inventory.seda_bruta || 0;
+    const coxaRaQty = inventory.coxa_ra || 0;
+    const carneAvestruzQty = inventory.carne_avestruz || 0;
+    const penaGrandeQty = inventory.pena_grande || 0;
+    const couroAvestruzQty = inventory.couro_avestruz || 0;
+    const carneJacareQty = inventory.carne_jacare || 0;
+    const couroJacareQty = inventory.couro_jacare || 0;
+    const queijoCabraQty = inventory.queijo_cabra || 0;
+    const iogurteCabraQty = inventory.iogurte_cabra || 0;
+    const leiteCondensadoQty = inventory.leite_condensado || 0;
+    const tapeteLhamaQty = inventory.tapete_lhama || 0;
+    const cachecolAngoraQty = inventory.cachecol_angora || 0;
+    const tecidoAlpacaQty = inventory.tecido_alpaca || 0;
+    const fioSedaQty = inventory.fio_seda || 0;
+    const mantaPremiumQty = inventory.manta_premium || 0;
+    const patePatoQty = inventory.pate_pato || 0;
+    const ovoDefumadoQty = inventory.ovo_defumado || 0;
+    const conservaCodornaQty = inventory.conserva_codorna || 0;
+    const cremeCosmeticoQty = inventory.creme_cosmetico || 0;
+    const saboneteNaturalQty = inventory.sabonete_natural || 0;
+    const almofadaPenasQty = inventory.almofada_penas || 0;
+    const coleteCouroQty = inventory.colete_couro || 0;
+    const bolsaExoticaQty = inventory.bolsa_exotica || 0;
+    const enfeitePavaoQty = inventory.enfeite_pavao || 0;
 
-    if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && featherQty === 0 && peacockFeatherQty === 0 && butterQty === 0 && yogurtQty === 0 && fertileEggQty === 0) {
+    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + penaGrandeQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + almofadaPenasQty + coleteCouroQty + bolsaExoticaQty + enfeitePavaoQty;
+
+    if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && featherQty === 0 && peacockFeatherQty === 0 && butterQty === 0 && yogurtQty === 0 && fertileEggQty === 0 && allExtras === 0) {
       if (!quietValue) {
         addLog(`📦 Seu Armazém está completamente vazio de mercadorias para vender!`, 'error');
         triggerAudioResult(() => sfx.playSound('error'));
@@ -913,6 +954,44 @@ export function useInventory({
     const butterPrice = getDynamicTransactionPrice('butter');
     const yogurtPrice = getDynamicTransactionPrice('yogurt');
     const fertileEggPrice = getDynamicTransactionPrice('fertile_egg');
+    // Extra item prices
+    const peixePrice = getDynamicTransactionPrice('peixe' as any);
+    const melPrice = getDynamicTransactionPrice('mel' as any);
+    const cogumeloPrice = getDynamicTransactionPrice('cogumelo' as any);
+    const hidromelPrice = getDynamicTransactionPrice('hidromel' as any);
+    const risotoPrice = getDynamicTransactionPrice('risoto_cogumelo' as any);
+    const conservaPeixePrice = getDynamicTransactionPrice('conserva_peixe' as any);
+    const melEnvasadoPrice = getDynamicTransactionPrice('mel_envasado' as any);
+    const sopaCogumeloPrice = getDynamicTransactionPrice('sopa_cogumelo' as any);
+    const quailEggPrice = getDynamicTransactionPrice('quail_egg');
+    const alpacaWoolPrice = getDynamicTransactionPrice('alpaca_wool');
+    const humusPrice = getDynamicTransactionPrice('humus');
+    const mucoPrice = getDynamicTransactionPrice('muco');
+    const angoraWoolPrice = getDynamicTransactionPrice('angora_wool');
+    const sedaBrutaPrice = getDynamicTransactionPrice('seda_bruta');
+    const coxaRaPrice = getDynamicTransactionPrice('coxa_ra');
+    const carneAvestruzPrice = getDynamicTransactionPrice('carne_avestruz');
+    const penaGrandePrice = getDynamicTransactionPrice('pena_grande');
+    const couroAvestruzPrice = getDynamicTransactionPrice('couro_avestruz');
+    const carneJacarePrice = getDynamicTransactionPrice('carne_jacare');
+    const couroJacarePrice = getDynamicTransactionPrice('couro_jacare');
+    const queijoCabraPrice = getDynamicTransactionPrice('queijo_cabra');
+    const iogurteCabraPrice = getDynamicTransactionPrice('iogurte_cabra');
+    const leiteCondensadoPrice = getDynamicTransactionPrice('leite_condensado');
+    const tapeteLhamaPrice = getDynamicTransactionPrice('tapete_lhama');
+    const cachecolAngoraPrice = getDynamicTransactionPrice('cachecol_angora');
+    const tecidoAlpacaPrice = getDynamicTransactionPrice('tecido_alpaca');
+    const fioSedaPrice = getDynamicTransactionPrice('fio_seda');
+    const mantaPremiumPrice = getDynamicTransactionPrice('manta_premium');
+    const patePatoPrice = getDynamicTransactionPrice('pate_pato');
+    const ovoDefumadoPrice = getDynamicTransactionPrice('ovo_defumado');
+    const conservaCodornaPrice = getDynamicTransactionPrice('conserva_codorna');
+    const cremeCosmeticoPrice = getDynamicTransactionPrice('creme_cosmetico');
+    const saboneteNaturalPrice = getDynamicTransactionPrice('sabonete_natural');
+    const almofadaPenasPrice = getDynamicTransactionPrice('almofada_penas');
+    const coleteCouroPrice = getDynamicTransactionPrice('colete_couro');
+    const bolsaExoticaPrice = getDynamicTransactionPrice('bolsa_exotica');
+    const enfeitePavaoPrice = getDynamicTransactionPrice('enfeite_pavao');
 
     const totalEarningCalculated =
       (milkQty * milkPrice) +
@@ -934,7 +1013,20 @@ export function useInventory({
       (peacockFeatherQty * peacockFeatherPrice) +
       (butterQty * butterPrice) +
       (yogurtQty * yogurtPrice) +
-      (fertileEggQty * fertileEggPrice);
+      (fertileEggQty * fertileEggPrice) +
+      (peixeQty * peixePrice) + (melQty * melPrice) + (cogumeloQty * cogumeloPrice) +
+      (hidromelQty * hidromelPrice) + (risotoQty * risotoPrice) + (conservaPeixeQty * conservaPeixePrice) +
+      (melEnvasadoQty * melEnvasadoPrice) + (sopaCogumeloQty * sopaCogumeloPrice) +
+      (quailEggQty * quailEggPrice) + (alpacaWoolQty * alpacaWoolPrice) + (humusQty * humusPrice) +
+      (mucoQty * mucoPrice) + (angoraWoolQty * angoraWoolPrice) + (sedaBrutaQty * sedaBrutaPrice) +
+      (coxaRaQty * coxaRaPrice) + (carneAvestruzQty * carneAvestruzPrice) + (penaGrandeQty * penaGrandePrice) +
+      (couroAvestruzQty * couroAvestruzPrice) + (carneJacareQty * carneJacarePrice) + (couroJacareQty * couroJacarePrice) +
+      (queijoCabraQty * queijoCabraPrice) + (iogurteCabraQty * iogurteCabraPrice) + (leiteCondensadoQty * leiteCondensadoPrice) +
+      (tapeteLhamaQty * tapeteLhamaPrice) + (cachecolAngoraQty * cachecolAngoraPrice) + (tecidoAlpacaQty * tecidoAlpacaPrice) +
+      (fioSedaQty * fioSedaPrice) + (mantaPremiumQty * mantaPremiumPrice) + (patePatoQty * patePatoPrice) +
+      (ovoDefumadoQty * ovoDefumadoPrice) + (conservaCodornaQty * conservaCodornaPrice) + (cremeCosmeticoQty * cremeCosmeticoPrice) +
+      (saboneteNaturalQty * saboneteNaturalPrice) + (almofadaPenasQty * almofadaPenasPrice) + (coleteCouroQty * coleteCouroPrice) +
+      (bolsaExoticaQty * bolsaExoticaPrice) + (enfeitePavaoQty * enfeitePavaoPrice);
 
     if (totalEarningCalculated <= 0) return;
 
@@ -962,7 +1054,16 @@ export function useInventory({
       peacock_feather: 0,
       butter: 0,
       yogurt: 0,
-      fertile_egg: 0
+      fertile_egg: 0,
+      quail_egg: 0, alpaca_wool: 0, humus: 0, muco: 0, angora_wool: 0, seda_bruta: 0,
+      coxa_ra: 0, carne_avestruz: 0, pena_grande: 0, couro_avestruz: 0,
+      carne_jacare: 0, couro_jacare: 0, queijo_cabra: 0, iogurte_cabra: 0,
+      leite_condensado: 0, tapete_lhama: 0, cachecol_angora: 0, tecido_alpaca: 0,
+      fio_seda: 0, manta_premium: 0, pate_pato: 0, ovo_defumado: 0, conserva_codorna: 0,
+      creme_cosmetico: 0, sabonete_natural: 0, almofada_penas: 0, colete_couro: 0,
+      bolsa_exotica: 0, enfeite_pavao: 0,
+      peixe: 0, mel: 0, cogumelo: 0, hidromel: 0, risoto_cogumelo: 0,
+      conserva_peixe: 0, mel_envasado: 0, sopa_cogumelo: 0,
     }));
 
     // Update weekly sales statistics
@@ -979,7 +1080,7 @@ export function useInventory({
       queijoBrie: (prev.queijoBrie ?? 0) + brieQty
     }));
 
-    const totalAllQty = milkQty + woolQty + cheeseQty + scarfQty + eggQty + mayoQty + coalhoQty + mucarelaQty + brieQty + goatMilkQty + llamaWoolQty + duckEggQty + gooseEggQty + buffaloMilkQty + buffaloMozzQty + featherQty + peacockFeatherQty + butterQty + yogurtQty + fertileEggQty;
+    const totalAllQty = milkQty + woolQty + cheeseQty + scarfQty + eggQty + mayoQty + coalhoQty + mucarelaQty + brieQty + goatMilkQty + llamaWoolQty + duckEggQty + gooseEggQty + buffaloMilkQty + buffaloMozzQty + featherQty + peacockFeatherQty + butterQty + yogurtQty + fertileEggQty + allExtras;
     setStats(prev => ({
       ...prev,
       totalEarned: prev.totalEarned + totalEarningCalculated,
@@ -1022,6 +1123,29 @@ export function useInventory({
     if (butterQty > 0) messageParts.push(`${butterQty} manteigas`);
     if (yogurtQty > 0) messageParts.push(`${yogurtQty} iogurtes`);
     if (fertileEggQty > 0) messageParts.push(`${fertileEggQty} ovos férteis`);
+    if (quailEggQty > 0) messageParts.push(`${quailEggQty} ovos de codorna`);
+    if (alpacaWoolQty > 0) messageParts.push(`${alpacaWoolQty} lã de alpaca`);
+    if (humusQty > 0) messageParts.push(`${humusQty} húmus`);
+    if (mucoQty > 0) messageParts.push(`${mucoQty} muco`);
+    if (angoraWoolQty > 0) messageParts.push(`${angoraWoolQty} lã angorá`);
+    if (sedaBrutaQty > 0) messageParts.push(`${sedaBrutaQty} seda bruta`);
+    if (coxaRaQty > 0) messageParts.push(`${coxaRaQty} coxas de rã`);
+    if (carneAvestruzQty > 0) messageParts.push(`${carneAvestruzQty} carne de avestruz`);
+    if (couroAvestruzQty > 0) messageParts.push(`${couroAvestruzQty} couro de avestruz`);
+    if (carneJacareQty > 0) messageParts.push(`${carneJacareQty} carne de jacaré`);
+    if (couroJacareQty > 0) messageParts.push(`${couroJacareQty} couro de jacaré`);
+    if (peixeQty > 0) messageParts.push(`${peixeQty} peixes`);
+    if (melQty > 0) messageParts.push(`${melQty} mel`);
+    if (cogumeloQty > 0) messageParts.push(`${cogumeloQty} cogumelos`);
+    if (hidromelQty > 0) messageParts.push(`${hidromelQty} hidromeis`);
+    if (risotoQty > 0) messageParts.push(`${risotoQty} risotos`);
+    if (conservaPeixeQty > 0) messageParts.push(`${conservaPeixeQty} conservas de peixe`);
+    if (melEnvasadoQty > 0) messageParts.push(`${melEnvasadoQty} mel envasado`);
+    if (sopaCogumeloQty > 0) messageParts.push(`${sopaCogumeloQty} sopas de cogumelo`);
+    if (fioSedaQty > 0) messageParts.push(`${fioSedaQty} fios de seda`);
+    if (mantaPremiumQty > 0) messageParts.push(`${mantaPremiumQty} mantas premium`);
+    if (coleteCouroQty > 0) messageParts.push(`${coleteCouroQty} coletes de couro`);
+    if (bolsaExoticaQty > 0) messageParts.push(`${bolsaExoticaQty} bolsas exóticas`);
 
     addLog(`💰 Você vendeu tudo: ${messageParts.join(', ')} por ${totalEarningCalculated} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));

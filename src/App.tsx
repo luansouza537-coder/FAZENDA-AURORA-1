@@ -4305,14 +4305,13 @@ export default function App() {
           }
         }
 
-        // --- Queijeiro: converte 3 leites em 1 queijo coalho com +5% valor ---
+        // --- Queijeiro: converte 3 leites em 1 queijo coalho (entra na maturação de 1 dia) ---
         if (workers.some(w => w.role === 'queijeiro')) {
-          // BUG FIX: logsToAdd.push must happen outside the setInventory updater to avoid
-          // double execution in React StrictMode. Read current milk from inventory closure.
           const currentMilk = inventory.milk ?? 0;
           if (currentMilk >= 3) {
-            logsToAdd.push({ msg: `🧀 Queijeiro transformou 3 leites em 1 Queijo Coalho!`, type: 'success' });
-            setInventory(prev => ({ ...prev, milk: (prev.milk ?? 0) - 3, queijoCoalho: (prev.queijoCoalho ?? 0) + 1 }));
+            logsToAdd.push({ msg: `🧀 Queijeiro colocou 1 Queijo Coalho para maturar (pronto amanhã)!`, type: 'success' });
+            setInventory(prev => ({ ...prev, milk: (prev.milk ?? 0) - 3 }));
+            setQueijosEmMaturacao(prev => [...prev, { tipo: 'coalho', diasRestantes: 1 }]);
           }
         }
       }
