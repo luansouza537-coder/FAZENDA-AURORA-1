@@ -1460,7 +1460,7 @@ export default function App() {
     color: string;
   } => {
     if (animal.isAdult === false) return { phase: 'filhote', label: 'Filhote', emoji: '🐣', prodMult: 0, color: 'bg-yellow-100 border-yellow-300 text-yellow-800' };
-    if (!animal.age || !animal.maxAge) return { phase: 'adulto', label: 'Adulto', emoji: '⭐', prodMult: 1.0, color: 'bg-blue-100 border-blue-300 text-blue-800' };
+    if (animal.age === undefined || !animal.maxAge) return { phase: 'adulto', label: 'Adulto', emoji: '⭐', prodMult: 1.0, color: 'bg-blue-100 border-blue-300 text-blue-800' };
     const ratio = animal.age / animal.maxAge;
     if (ratio < 0.15) return { phase: 'juvenil', label: 'Juvenil', emoji: '🌱', prodMult: 0.6, color: 'bg-lime-100 border-lime-300 text-lime-800' };
     if (ratio < 0.50) return { phase: 'adulto_jovem', label: 'Adulto Jovem', emoji: '⭐', prodMult: 1.1, color: 'bg-emerald-100 border-emerald-300 text-emerald-800' };
@@ -2398,7 +2398,7 @@ export default function App() {
       else if (copy.type === 'ovelha') {
         copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
         const requiredDays = copy.isBestFriend ? 2 : 3;
-        if (copy.daysSinceLastWool >= requiredDays && !copy.woolReady) {
+        if (copy.isAdult !== false && copy.daysSinceLastWool >= requiredDays && !copy.woolReady) {
           if (copy.hunger > 20 && copy.happiness > 25) {
             if (currentW === 'chuva' && Math.random() < 0.30) {
               logs.push({ msg: `🌧️ A lã de ${copy.name} ficou ensopada pela chuva e não pôde se firmar hoje!`, type: 'error' });
@@ -2434,7 +2434,7 @@ export default function App() {
         }
       }
       else if (copy.type === 'galinha') {
-        const ageRatio = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+        const ageRatio = (copy.age !== undefined && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
@@ -2460,11 +2460,11 @@ export default function App() {
             copy.hasProducedToday = false; // BUG FIX: garante que o botão de coleta fique desabilitado imediatamente ao entrar na secagem
             logs.push({ msg: `🐐 ${copy.name} entrou no período de secagem (15 dias).`, type: 'info' });
           } else {
-            const ageRatioGoat = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+            const ageRatioGoat = (copy.age !== undefined && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
             const basePhaseMultGoat = ageRatioGoat < 0.15 ? 0.6 : ageRatioGoat < 0.50 ? 1.1 : ageRatioGoat < 0.75 ? 1.0 : ageRatioGoat < 0.90 ? 0.7 : 0.4;
             const adjustedPhaseMultGoat = Math.min(1.15, basePhaseMultGoat + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
             const lifePhaseBlockGoat = adjustedPhaseMultGoat < 1.0 && Math.random() > adjustedPhaseMultGoat;
-            const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlockGoat;
+            const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlockGoat;
             copy.hasProducedToday = canProduce;
             if (canProduce) {
               logs.push({ msg: `🐐 ${copy.name} está lactando e produziu leite de cabra!`, type: 'info' });
@@ -2497,7 +2497,7 @@ export default function App() {
       }
       else if (copy.type === 'pato') {
         const currentSeason = Math.floor(((dayForSeason - 1) % 120) / 30); // use actual current day for season
-        const ageRatio = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+        const ageRatio = (copy.age !== undefined && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
@@ -2519,7 +2519,7 @@ export default function App() {
       else if (copy.type === 'bufalo') {
         // Summer heat stress
         // We don't have currentDay here but we can check currentW or use approximation
-        const ageRatio = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+        const ageRatio = (copy.age !== undefined && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
@@ -2535,7 +2535,7 @@ export default function App() {
         copy.hasProducedToday = false;
       }
       else if (copy.type === 'codorna') {
-        const ageRatio = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+        const ageRatio = (copy.age !== undefined && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;

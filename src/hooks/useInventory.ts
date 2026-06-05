@@ -885,14 +885,14 @@ export function useInventory({
     const yogurtQty = inventory.yogurt || 0;
     const fertileEggQty = inventory.fertile_egg || 0;
     // Biome & exotic items
-    const peixeQty = (inventory as any).peixe || 0;
-    const melQty = (inventory as any).mel || 0;
-    const cogumeloQty = (inventory as any).cogumelo || 0;
-    const hidromelQty = (inventory as any).hidromel || 0;
-    const risotoQty = (inventory as any).risoto_cogumelo || 0;
-    const conservaPeixeQty = (inventory as any).conserva_peixe || 0;
-    const melEnvasadoQty = (inventory as any).mel_envasado || 0;
-    const sopaCogumeloQty = (inventory as any).sopa_cogumelo || 0;
+    const peixeQty = inventory.peixe || 0;
+    const melQty = inventory.mel || 0;
+    const cogumeloQty = inventory.cogumelo || 0;
+    const hidromelQty = inventory.hidromel || 0;
+    const risotoQty = inventory.risoto_cogumelo || 0;
+    const conservaPeixeQty = inventory.conserva_peixe || 0;
+    const melEnvasadoQty = inventory.mel_envasado || 0;
+    const sopaCogumeloQty = inventory.sopa_cogumelo || 0;
     // Special / exotic products
     const quailEggQty = inventory.quail_egg || 0;
     const alpacaWoolQty = inventory.alpaca_wool || 0;
