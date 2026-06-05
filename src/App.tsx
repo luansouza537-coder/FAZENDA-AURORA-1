@@ -2255,7 +2255,7 @@ export default function App() {
 
       // Atualizações de produção baseadas nas espécies
       if (copy.type === 'vaca') {
-        const canProduce = copy.hunger > 25 && copy.happiness > 30;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30;
         copy.hasProducedToday = canProduce;
         if (!canProduce) {
           if (copy.hunger <= 25) {
@@ -3969,13 +3969,13 @@ export default function App() {
           return updated;
         }));
 
-        // Leiteiro: auto-collect milk from vaca/cabra/bufalo
+        // Leiteiro: auto-collect milk from adult vaca/cabra/bufalo that have produced today
         if (workers.some(w => w.role === 'leiteiro')) {
           let milkCollected = 0;
           setAnimals(prev => prev.map(a => {
-            if ((a.type === 'vaca' || a.type === 'cabra' || a.type === 'bufalo') && !a.hasProducedToday && (a.happiness ?? 0) >= 50) {
+            if ((a.type === 'vaca' || a.type === 'cabra' || a.type === 'bufalo') && a.isAdult !== false && a.hasProducedToday) {
               milkCollected++;
-              return { ...a, hasProducedToday: true };
+              return { ...a, hasProducedToday: false };
             }
             return a;
           }));
@@ -3985,18 +3985,18 @@ export default function App() {
           }
         }
 
-        // Coletor: auto-collect wool/eggs from ready animals
+        // Coletor: auto-collect wool/eggs from ready adult animals
         if (workers.some(w => w.role === 'coletor')) {
           let woolCollected = 0;
           let eggsCollected = 0;
           setAnimals(prev => prev.map(a => {
-            if (a.type === 'ovelha' && a.woolReady) {
+            if (a.type === 'ovelha' && a.isAdult !== false && a.woolReady) {
               woolCollected++;
               return { ...a, woolReady: false, daysUntilWool: 7, daysSinceLastWool: 0 };
             }
-            if ((a.type === 'galinha' || a.type === 'codorna') && (a.happiness ?? 0) >= 50) {
+            if ((a.type === 'galinha' || a.type === 'codorna') && a.isAdult !== false && a.hasProducedToday) {
               eggsCollected++;
-              return { ...a, hasProducedToday: true };
+              return { ...a, hasProducedToday: false };
             }
             return a;
           }));
@@ -8479,15 +8479,15 @@ export default function App() {
                         ))}
                       </div>
                     )}
-                    {landBiomes.length > 0 && (Object.values(biomeWeeklyIncome).some(v => v > 0)) && (
+                    {landBiomes.length > 0 && (Object.values(biomeWeeklyIncome).some((v: number) => v > 0)) && (
                       <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3">
                         <div className="text-[10px] font-black uppercase text-green-800 mb-2">📊 Receita Semanal por Bioma</div>
                         <div className="space-y-1">
-                          {([['lago', '🌊', biomeWeeklyIncome.lago], ['floresta', '🌲', biomeWeeklyIncome.floresta], ['pasto', '🌾', biomeWeeklyIncome.pasto], ['pomar', '🍎', biomeWeeklyIncome.pomar]] as const).map(([key, emoji, val]) => val > 0 ? (
+                          {([['lago', '🌊', biomeWeeklyIncome.lago], ['floresta', '🌲', biomeWeeklyIncome.floresta], ['pasto', '🌾', biomeWeeklyIncome.pasto], ['pomar', '🍎', biomeWeeklyIncome.pomar]] as [string, string, number][]).map(([key, emoji, val]) => val > 0 ? (
                             <div key={key} className="flex items-center gap-2">
                               <span className="text-xs">{emoji} {key}</span>
                               <div className="flex-1 bg-green-100 rounded-full h-2">
-                                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${Math.min(100, (val / Math.max(...Object.values(biomeWeeklyIncome), 1)) * 100)}%` }} />
+                                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${Math.min(100, (val / Math.max(...(Object.values(biomeWeeklyIncome) as number[]), 1)) * 100)}%` }} />
                               </div>
                               <span className="text-[10px] font-mono font-black text-green-700">+{val}💰</span>
                             </div>
