@@ -104,7 +104,7 @@ export interface LogMessage {
 
 export interface FarmWorker {
   id: string;
-  role: 'leiteiro' | 'tratador' | 'coletor' | 'veterinario';
+  role: 'tratador' | 'composteiro' | 'tosquiador' | 'ordenhador' | 'avicultor' | 'queijeiro' | 'tratador_exotico' | 'veterinario' | 'comerciante_residente';
   name: string;
   dailyCost: number;
   hiredDay: number;

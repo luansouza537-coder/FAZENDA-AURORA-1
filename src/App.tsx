@@ -178,10 +178,15 @@ const PriceChart: React.FC<PriceChartProps> = ({ history, basePrice }) => {
 };
 
 const WORKER_TYPES = [
-  { role: 'tratador' as const, name: 'Tratador', emoji: '🧑‍🌾', dailyCost: 6, desc: 'Alimenta todos os animais automaticamente no final do dia', minLevel: 7 },
-  { role: 'leiteiro' as const, name: 'Leiteiro', emoji: '🥛', dailyCost: 8, desc: 'Ordena vacas, cabras e búfalos automaticamente', minLevel: 8 },
-  { role: 'coletor' as const, name: 'Coletor', emoji: '🧺', dailyCost: 10, desc: 'Colhe lã, ovos, húmus e produtos prontos automaticamente', minLevel: 10 },
-  { role: 'veterinario' as const, name: 'Veterinário', emoji: '💉', dailyCost: 15, desc: 'Previne epidemias e aumenta felicidade dos animais em 5/dia', minLevel: 12 },
+  { role: 'tratador' as const, name: 'Tratador', emoji: '🧑‍🌾', dailyCost: 6, desc: 'Alimenta todos os animais diariamente. Essencial para rebanhos grandes.', minLevel: 2 },
+  { role: 'composteiro' as const, name: 'Composteiro', emoji: '🌱', dailyCost: 6, desc: 'Coleta húmus das minhocas e a cada 3 dias produz 1 húmus bônus de compostagem.', minLevel: 3 },
+  { role: 'tosquiador' as const, name: 'Tosquiador', emoji: '✂️', dailyCost: 7, desc: 'Coleta lã de ovelhas e coelhos angorá prontos. Tem chance de lã premium (+10%).', minLevel: 3 },
+  { role: 'ordenhador' as const, name: 'Ordenhador', emoji: '🥛', dailyCost: 8, desc: 'Ordena vacas, cabras, búfalos e alpacas automaticamente ao fim do dia.', minLevel: 4 },
+  { role: 'avicultor' as const, name: 'Avicultor', emoji: '🥚', dailyCost: 7, desc: 'Coleta ovos de galinhas, codornas, patos e avestruzes prontos.', minLevel: 5 },
+  { role: 'queijeiro' as const, name: 'Queijeiro', emoji: '🧀', dailyCost: 12, desc: 'Transforma automaticamente 3 leites em 1 Queijo Coalho por dia. Bônus +5% de venda.', minLevel: 5 },
+  { role: 'tratador_exotico' as const, name: 'Tratador Exótico', emoji: '🦎', dailyCost: 14, desc: 'Cuida de jacarés, rãs e caracóis: +5 felicidade/dia e -50% chance de epidemia nesses animais.', minLevel: 8 },
+  { role: 'veterinario' as const, name: 'Veterinário', emoji: '💉', dailyCost: 15, desc: 'Cura doenças, remove estresse e adiciona +5 felicidade para todos os animais por dia.', minLevel: 10 },
+  { role: 'comerciante_residente' as const, name: 'Comerciante', emoji: '💰', dailyCost: 20, desc: '+8% no preço de venda de leite, lã, ovos, seda, couro e carne bruta.', minLevel: 10 },
 ];
 
 const MERCHANT_SPECIAL_ITEMS = [
@@ -1608,8 +1613,11 @@ export default function App() {
   };
 
   // Final processed sell prices including dynamic pricing equations
+  const COMERCIANTE_BONUS_ITEMS = new Set(['milk','wool','egg','goat_milk','llama_wool','duck_egg','goose_egg','buffalo_milk','quail_egg','alpaca_wool','humus','muco','angora_wool','seda_bruta','coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare','feather','peacock_feather']);
   const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao'): number => {
-    return getDynamicTransactionPrice(itemType);
+    const base = getDynamicTransactionPrice(itemType);
+    const hasComercianteBonus = workers.some(w => w.role === 'comerciante_residente') && COMERCIANTE_BONUS_ITEMS.has(itemType);
+    return hasComercianteBonus ? Math.round(base * 1.08) : base;
   };
 
   const getTrendIconAndColor = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'carne') => {
@@ -4040,63 +4048,152 @@ export default function App() {
         setGold(prev => prev - workerCost);
         logsToAdd.push({ msg: `👷 Peões trabalharam hoje! Custo diário: -${workerCost}💰`, type: 'info' });
 
-        // Efeitos dos peões
-        setAnimals(prev => prev.map(a => {
-          let updated = { ...a };
-          // Tratador: alimenta todos os animais
-          if (workers.some(w => w.role === 'tratador') && updated.hunger < 100) {
-            updated.hunger = Math.min(100, updated.hunger + 40);
-          }
-          // Veterinário: +5 felicidade para todos + cura estados negativos (IMPROVEMENT 9)
-          if (workers.some(w => w.role === 'veterinario')) {
-            updated.happiness = Math.min(100, (updated.happiness ?? 0) + 5);
-            updated.isSick = false;
-            updated.sickDays = 0;
-            updated.stressedDays = 0;
-            updated.lowHappinessDays = 0;
-          }
-          return updated;
-        }));
+        // --- Tratador: alimenta todos os animais ---
+        if (workers.some(w => w.role === 'tratador')) {
+          setAnimals(prev => prev.map(a => ({ ...a, hunger: Math.min(100, a.hunger + 40) })));
+        }
 
-        // Leiteiro: auto-collect milk from adult vaca/cabra/bufalo that have produced today
-        if (workers.some(w => w.role === 'leiteiro')) {
-          let milkCollected = 0;
+        // --- Veterinário: cura doenças + +5 felicidade ---
+        if (workers.some(w => w.role === 'veterinario')) {
+          setAnimals(prev => prev.map(a => ({
+            ...a,
+            happiness: Math.min(100, (a.happiness ?? 0) + 5),
+            isSick: false, sickDays: 0, stressedDays: 0, lowHappinessDays: 0,
+          })));
+        }
+
+        // --- Tratador Exótico: +5 felicidade + -epidemia para exóticos ---
+        if (workers.some(w => w.role === 'tratador_exotico')) {
           setAnimals(prev => prev.map(a => {
-            if ((a.type === 'vaca' || a.type === 'cabra' || a.type === 'bufalo') && a.isAdult !== false && a.hasProducedToday) {
+            if (['jacare', 'ra', 'caracol'].includes(a.type)) {
+              return { ...a, happiness: Math.min(100, (a.happiness ?? 0) + 5), isSick: false, sickDays: 0 };
+            }
+            return a;
+          }));
+        }
+
+        // --- Ordenhador: coleta leite de vaca/cabra/bufalo/alpaca adultos ---
+        if (workers.some(w => w.role === 'ordenhador')) {
+          let milkCollected = 0;
+          let alpacaMilkCollected = 0;
+          setAnimals(prev => prev.map(a => {
+            if (['vaca', 'cabra', 'bufalo'].includes(a.type) && a.isAdult !== false && a.hasProducedToday) {
               milkCollected++;
+              return { ...a, hasProducedToday: false };
+            }
+            if (a.type === 'alpaca' && a.isAdult !== false && a.hasProducedToday) {
+              alpacaMilkCollected++;
               return { ...a, hasProducedToday: false };
             }
             return a;
           }));
           if (milkCollected > 0) {
             setInventory(prev => ({ ...prev, milk: prev.milk + milkCollected }));
-            logsToAdd.push({ msg: `🥛 Leiteiro coletou +${milkCollected} leite(s) automaticamente!`, type: 'success' });
+            logsToAdd.push({ msg: `🥛 Ordenhador coletou +${milkCollected} leite(s) automaticamente!`, type: 'success' });
+          }
+          if (alpacaMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) + alpacaMilkCollected }));
+            logsToAdd.push({ msg: `🦙 Ordenhador coletou +${alpacaMilkCollected} produto(s) de alpaca!`, type: 'success' });
           }
         }
 
-        // Coletor: auto-collect wool/eggs from ready adult animals
-        if (workers.some(w => w.role === 'coletor')) {
+        // --- Tosquiador: coleta lã de ovelha e coelho angorá com chance de premium ---
+        if (workers.some(w => w.role === 'tosquiador')) {
           let woolCollected = 0;
-          let eggsCollected = 0;
+          let angoraCollected = 0;
           setAnimals(prev => prev.map(a => {
             if (a.type === 'ovelha' && a.isAdult !== false && a.woolReady) {
               woolCollected++;
               return { ...a, woolReady: false, daysUntilWool: 7, daysSinceLastWool: 0 };
             }
-            if ((a.type === 'galinha' || a.type === 'codorna') && a.isAdult !== false && a.hasProducedToday) {
-              eggsCollected++;
-              return { ...a, hasProducedToday: false };
+            if (a.type === 'coelho' && a.isAdult !== false && a.woolReady) {
+              angoraCollected++;
+              return { ...a, woolReady: false, daysUntilWool: 5, daysSinceLastWool: 0 };
             }
             return a;
           }));
           if (woolCollected > 0) {
-            setInventory(prev => ({ ...prev, wool: prev.wool + woolCollected }));
-            logsToAdd.push({ msg: `🧺 Coletor recolheu +${woolCollected} lã(s) automaticamente!`, type: 'success' });
+            const bonus = Math.random() < 0.1 ? 1 : 0;
+            setInventory(prev => ({ ...prev, wool: prev.wool + woolCollected + bonus }));
+            logsToAdd.push({ msg: `✂️ Tosquiador coletou +${woolCollected + bonus} lã(s)${bonus > 0 ? ' (lã premium!)' : ''} automaticamente!`, type: 'success' });
           }
+          if (angoraCollected > 0) {
+            setInventory(prev => ({ ...prev, angora_wool: (prev.angora_wool ?? 0) + angoraCollected }));
+            logsToAdd.push({ msg: `🐇 Tosquiador coletou +${angoraCollected} lã angorá automaticamente!`, type: 'success' });
+          }
+        }
+
+        // --- Avicultor: coleta ovos de galinha/codorna/pato/avestruz ---
+        if (workers.some(w => w.role === 'avicultor')) {
+          let eggsCollected = 0;
+          let quailEggs = 0;
+          let duckEggs = 0;
+          let ostrichEggs = 0;
+          setAnimals(prev => prev.map(a => {
+            if (a.type === 'galinha' && a.isAdult !== false && a.hasProducedToday) {
+              eggsCollected++;
+              return { ...a, hasProducedToday: false };
+            }
+            if (a.type === 'codorna' && a.isAdult !== false && a.hasProducedToday) {
+              quailEggs++;
+              return { ...a, hasProducedToday: false };
+            }
+            if (a.type === 'pato' && a.isAdult !== false && a.hasProducedToday) {
+              duckEggs++;
+              return { ...a, hasProducedToday: false };
+            }
+            if (a.type === 'avestruz' && a.isAdult !== false && a.hasProducedToday) {
+              ostrichEggs++;
+              return { ...a, hasProducedToday: false };
+            }
+            return a;
+          }));
           if (eggsCollected > 0) {
             setInventory(prev => ({ ...prev, egg: prev.egg + eggsCollected }));
-            logsToAdd.push({ msg: `🧺 Coletor recolheu +${eggsCollected} ovo(s) automaticamente!`, type: 'success' });
+            logsToAdd.push({ msg: `🥚 Avicultor coletou +${eggsCollected} ovo(s) de galinha!`, type: 'success' });
           }
+          if (quailEggs > 0) {
+            setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) + quailEggs }));
+            logsToAdd.push({ msg: `🥚 Avicultor coletou +${quailEggs} ovo(s) de codorna!`, type: 'success' });
+          }
+          if (duckEggs > 0) {
+            setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) + duckEggs }));
+            logsToAdd.push({ msg: `🥚 Avicultor coletou +${duckEggs} ovo(s) de pato!`, type: 'success' });
+          }
+          if (ostrichEggs > 0) {
+            setInventory(prev => ({ ...prev, egg: prev.egg + ostrichEggs }));
+            logsToAdd.push({ msg: `🥚 Avicultor coletou +${ostrichEggs} ovo(s) de avestruz!`, type: 'success' });
+          }
+        }
+
+        // --- Composteiro: coleta húmus de minhocas + bônus a cada 3 dias ---
+        if (workers.some(w => w.role === 'composteiro')) {
+          let humusCollected = 0;
+          setAnimals(prev => prev.map(a => {
+            if (a.type === 'minhoca' && a.isAdult !== false && a.hasProducedToday) {
+              humusCollected++;
+              return { ...a, hasProducedToday: false };
+            }
+            return a;
+          }));
+          const bonusHumus = nextDayValue % 3 === 0 ? 1 : 0;
+          const totalHumus = humusCollected + bonusHumus;
+          if (totalHumus > 0) {
+            setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) + totalHumus }));
+            logsToAdd.push({ msg: `🌱 Composteiro coletou +${totalHumus} húmus${bonusHumus > 0 ? ' (bônus de compostagem!)' : ''}!`, type: 'success' });
+          }
+        }
+
+        // --- Queijeiro: converte 3 leites em 1 queijo coalho com +5% valor ---
+        if (workers.some(w => w.role === 'queijeiro')) {
+          setInventory(prev => {
+            const available = prev.milk ?? 0;
+            if (available >= 3) {
+              logsToAdd.push({ msg: `🧀 Queijeiro transformou 3 leites em 1 Queijo Coalho!`, type: 'success' });
+              return { ...prev, milk: available - 3, queijoCoalho: (prev.queijoCoalho ?? 0) + 1 };
+            }
+            return prev;
+          });
         }
       }
 
@@ -8414,7 +8511,7 @@ export default function App() {
                   👷 Peões da Fazenda
                 </h3>
                 <p className="text-[#fbbf24] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-                  Contrate até 3 trabalhadores para automatizar tarefas
+                  Vagas: {workers.length}/{Math.max(1, Math.floor(farmLevel / 3))} • 1 vaga a cada 3 níveis
                 </p>
                 <button onClick={() => setShowWorkersModal(false)} className="absolute top-4 right-4 text-[#fef3c7] bg-[#022c22] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
               </div>
@@ -8448,17 +8545,22 @@ export default function App() {
                   <h4 className="text-[#fbbf24] font-black text-xs uppercase">Disponíveis para Contratar</h4>
                   {WORKER_TYPES.map(wt => {
                     const alreadyHired = workers.some(w => w.role === wt.role);
-                    const atMax = workers.length >= 3;
+                    const maxSlots = Math.max(1, Math.floor(farmLevel / 3));
+                    const atMax = workers.length >= maxSlots;
                     const levelOk = farmLevel >= wt.minLevel;
                     const canHire = !alreadyHired && !atMax && levelOk;
                     return (
-                      <div key={wt.role} className={`bg-[#065f46] border-2 rounded-2xl p-4 ${alreadyHired ? 'border-[#10b981]' : 'border-[#fbbf24]/30'}`}>
+                      <div key={wt.role} className={`bg-[#065f46] border-2 rounded-2xl p-4 transition-all ${alreadyHired ? 'border-[#10b981]' : levelOk ? 'border-[#fbbf24]/50' : 'border-[#fbbf24]/15 opacity-60'}`}>
                         <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="text-[#fef3c7] font-black text-sm">{wt.emoji} {wt.name}</div>
-                            <div className="text-[#fef3c7]/70 text-xs font-mono mt-1">{wt.desc}</div>
-                            <div className="text-[#fbbf24] text-xs font-mono mt-1">
-                              -{wt.dailyCost}💰/dia · Nível {wt.minLevel}+ req.
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[#fef3c7] font-black text-sm">{wt.emoji} {wt.name}</span>
+                              {alreadyHired && <span className="text-[9px] bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/40 rounded-full px-2 py-0.5 font-mono uppercase">Contratado</span>}
+                              {!levelOk && <span className="text-[9px] bg-red-900/40 text-red-300 border border-red-500/30 rounded-full px-2 py-0.5 font-mono uppercase">🔒 Nível {wt.minLevel}</span>}
+                            </div>
+                            <div className="text-[#fef3c7]/70 text-[11px] font-mono mt-1 leading-relaxed">{wt.desc}</div>
+                            <div className="text-[#fbbf24] text-[10px] font-mono mt-1.5">
+                              -{wt.dailyCost}💰/dia
                             </div>
                           </div>
                           <button
@@ -8476,13 +8578,13 @@ export default function App() {
                               addLog(`👷 ${wt.name} foi contratado! Custo: -${wt.dailyCost}💰/dia`, 'success');
                             }}
                             className={`shrink-0 text-xs font-black uppercase px-3 py-2 rounded-xl border-2 cursor-pointer transition-all ${
-                              alreadyHired ? 'bg-[#10b981]/20 border-[#10b981] text-[#10b981]' :
-                              !levelOk ? 'bg-[#022c22] border-[#fbbf24]/20 text-[#fef3c7]/30 cursor-not-allowed' :
+                              alreadyHired ? 'bg-[#10b981]/20 border-[#10b981] text-[#10b981] cursor-not-allowed' :
+                              !levelOk ? 'bg-[#022c22] border-[#fbbf24]/10 text-[#fef3c7]/20 cursor-not-allowed' :
                               atMax ? 'bg-[#022c22] border-[#fbbf24]/20 text-[#fef3c7]/30 cursor-not-allowed' :
-                              'bg-[#fbbf24] border-[#fbbf24] text-[#78350f] hover:bg-[#f59e0b]'
+                              'bg-[#fbbf24] border-[#fbbf24] text-[#78350f] hover:bg-[#f59e0b] hover:scale-105 active:translate-y-0.5'
                             }`}
                           >
-                            {alreadyHired ? '✅ Contratado' : !levelOk ? `🔒 Nível ${wt.minLevel}` : atMax ? '🚫 Máx 3' : 'Contratar'}
+                            {alreadyHired ? '✅ Ativo' : !levelOk ? `🔒 Nível ${wt.minLevel}` : atMax ? `🚫 Máx ${maxSlots}` : 'Contratar'}
                           </button>
                         </div>
                       </div>
