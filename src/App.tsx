@@ -888,6 +888,7 @@ export default function App() {
     setIrrigationLevel(0);
     setQueijariaNivel(1);
     setNextDayEvent(null);
+    setActiveMarketEvent(null);
     setSpecialization(null);
     setDebt(0);
     setHasTourism(false);
@@ -1624,10 +1625,15 @@ export default function App() {
   // Keep 1 decimal place precision for display
   const getDynamicPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao', d = currentDay, w = weather, sales = weeklySales): number => {
     const base = getItemBaseSellPrice(itemType);
-    const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType as keyof typeof sales] || 0) / 100));
-    const seasonMult = getSeasonalityMultiplier(itemType as any, d);
-    const weatherMult = getWeatherMultiplier(itemType as any, w);
-    let finalPrice = base * offerMult * seasonMult * weatherMult;
+    const weekSales2 = (sales[itemType as keyof typeof sales] || 0);
+    let offerMult2: number;
+    if (weekSales2 === 0) offerMult2 = 1.15;
+    else if (weekSales2 < 5) offerMult2 = 1.05;
+    else offerMult2 = Math.max(0.6, 1 - weekSales2 / 100);
+    const seasonMult = getSeasonalityMultiplier(itemType, d);
+    const weatherMult = getWeatherMultiplier(itemType, w);
+    const marketBonus2 = activeMarketEvent && activeMarketEvent.items.includes(itemType) ? activeMarketEvent.mult : 1.0;
+    let finalPrice = base * offerMult2 * seasonMult * weatherMult * marketBonus2;
     if (merchantActive) {
       finalPrice *= 1.5;
     }
@@ -1651,10 +1657,31 @@ export default function App() {
   // Rounded to nearest integer for actual gold conversion
   const getDynamicTransactionPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao', d = currentDay, w = weather, sales = weeklySales): number => {
     const base = getItemBaseSellPrice(itemType);
-    const offerMult = Math.max(0.6, Math.min(1.2, 1 - (sales[itemType as keyof typeof sales] || 0) / 100));
-    const seasonMult = getSeasonalityMultiplier(itemType as any, d);
-    const weatherMult = getWeatherMultiplier(itemType as any, w);
-    let finalPrice = base * offerMult * seasonMult * weatherMult;
+    // Oferta: cada unidade vendida reduz 1%; demanda reprimida se vendeu <5 unidades (+5% a +15%)
+    const weekSales = (sales[itemType as keyof typeof sales] || 0);
+    let offerMult: number;
+    if (weekSales === 0) offerMult = 1.15;
+    else if (weekSales < 5) offerMult = 1.05;
+    else offerMult = Math.max(0.6, 1 - weekSales / 100);
+    const seasonMult = getSeasonalityMultiplier(itemType, d);
+    const weatherMult = getWeatherMultiplier(itemType, w);
+    // Produtos processados vinculados ao preço do ingrediente base
+    let processedLinkMult = 1.0;
+    const milkSeasonMult = getSeasonalityMultiplier('milk', d);
+    const woolSeasonMult = getSeasonalityMultiplier('wool', d);
+    const eggSeasonMult = getSeasonalityMultiplier('egg', d);
+    const queijos = new Set(['cheese','queijoCoalho','queijoMucarela','queijoBrie','queijo_cabra','buffalo_mozzarella','iogurte_cabra','leite_condensado','butter','yogurt']);
+    const tecidos = new Set(['scarf','tapete_lhama','cachecol_angora','tecido_alpaca','manta_premium']);
+    const ovosProc = new Set(['mayo','ovo_defumado','conserva_codorna','pate_pato','fertile_egg']);
+    if (queijos.has(itemType)) processedLinkMult = 0.5 + milkSeasonMult * 0.5;
+    else if (tecidos.has(itemType)) processedLinkMult = 0.5 + woolSeasonMult * 0.5;
+    else if (ovosProc.has(itemType)) processedLinkMult = 0.5 + eggSeasonMult * 0.5;
+    // Raridade premium: itens vendidos em baixo volume têm bônus de raridade
+    const RARE_ITEMS = new Set(['couro_jacare','carne_jacare','muco','seda_bruta','angora_wool','bolsa_exotica','colete_couro','manta_premium']);
+    const rarityMult = RARE_ITEMS.has(itemType) && weekSales <= 2 ? 1.1 : 1.0;
+    // Evento de mercado ativo
+    const marketBonus = activeMarketEvent && activeMarketEvent.items.includes(itemType) ? activeMarketEvent.mult : 1.0;
+    let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * marketBonus;
     if (merchantActive) {
       finalPrice *= 1.5;
     }
@@ -1991,6 +2018,7 @@ export default function App() {
         irrigationLevel,
         queijariaNivel,
         nextDayEvent,
+        activeMarketEvent,
         hasStable,
         hasSilo,
         hasFridge,
@@ -2024,7 +2052,7 @@ export default function App() {
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
   // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 2500;
@@ -3199,6 +3227,17 @@ export default function App() {
         }
       });
 
+      // Decrementar evento de mercado ativo
+      if (activeMarketEvent) {
+        const newDaysLeft = activeMarketEvent.daysLeft - 1;
+        if (newDaysLeft <= 0) {
+          setActiveMarketEvent(null);
+          logsToAdd.push({ msg: `📰 Evento de mercado encerrado: ${activeMarketEvent.title}`, type: 'system' });
+        } else {
+          setActiveMarketEvent(prev => prev ? { ...prev, daysLeft: newDaysLeft } : null);
+        }
+      }
+
       // --- FUNCIONALIDADE 1: Custos fixos de água e energia ---
       // Cálculo da conta de água
       const baseWaterCost = 10 + (animals.length * 2);
@@ -3269,6 +3308,22 @@ export default function App() {
       if (currentDay % 7 === 0) {
         setWeeklyReportData({ ...weeklyStats });
         setShowWeeklyReport(true);
+        // Evento de mercado: ~30% chance todo domingo
+        if (Math.random() < 0.3) {
+          const MARKET_EVENTS = [
+            { title: '📰 Feira Gastronômica', desc: 'Queijos e laticínios +25% por 3 dias!', items: ['cheese','queijoCoalho','queijoMucarela','queijoBrie','queijo_cabra','buffalo_mozzarella','butter','yogurt'], mult: 1.25, daysLeft: 3 },
+            { title: '📰 Demanda de Exportação', desc: 'Lãs e fibras +30% por 2 dias!', items: ['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','fio_seda'], mult: 1.30, daysLeft: 2 },
+            { title: '📰 Festival de Ovos', desc: 'Todos os ovos +20% por 3 dias!', items: ['egg','duck_egg','goose_egg','quail_egg','fertile_egg'], mult: 1.20, daysLeft: 3 },
+            { title: '📰 Crise do Laticínio', desc: 'Leites -20% esta semana.', items: ['milk','goat_milk','buffalo_milk'], mult: 0.80, daysLeft: 5 },
+            { title: '📰 Boom Orgânico', desc: 'Húmus e mel +35% por 2 dias!', items: ['humus','mel','mel_envasado'], mult: 1.35, daysLeft: 2 },
+            { title: '📰 Procura de Luxo', desc: 'Produtos exóticos +20% por 3 dias!', items: ['couro_jacare','carne_jacare','muco','bolsa_exotica','colete_couro'], mult: 1.20, daysLeft: 3 },
+            { title: '📰 Concorrência Importada', desc: 'Lã e cachecol -15% por 4 dias.', items: ['wool','scarf','llama_wool'], mult: 0.85, daysLeft: 4 },
+          ];
+          const evt = MARKET_EVENTS[Math.floor(Math.random() * MARKET_EVENTS.length)];
+          setActiveMarketEvent(evt);
+          logsToAdd.push({ msg: `${evt.title}: ${evt.desc}`, type: 'event' });
+          addNotification(`${evt.title}: ${evt.desc}`, 'info');
+        }
         setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0, waterCost: 0, energyCost: 0 });
         setWeeklySales({ milk: 0, wool: 0, cheese: 0, scarf: 0, carne: 0, egg: 0, mayo: 0, queijoCoalho: 0, queijoMucarela: 0, queijoBrie: 0 });
         setWeeklyTaxPaid(0);
@@ -9109,9 +9164,18 @@ export default function App() {
                 </div>
               </div>
 
+              {/* Active market event banner */}
+              {activeMarketEvent && (
+                <div className="bg-amber-50 border-2 border-amber-400 rounded-2xl p-3 mb-4 mx-4 mt-2">
+                  <div className="font-black text-amber-800 text-sm">{activeMarketEvent.title}</div>
+                  <div className="text-amber-700 text-xs mt-0.5">{activeMarketEvent.desc}</div>
+                  <div className="text-amber-500 font-mono text-[10px] mt-1">⏳ {activeMarketEvent.daysLeft} dia(s) restante(s)</div>
+                </div>
+              )}
+
               {/* Commodities listings scrollable container */}
               <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5" style={{ scrollbarWidth: 'thin' }}>
-                
+
                 {/* Product row helper */}
                 {([
                   { key: 'milk', label: '🥛 Leite Cru', base: getItemBaseSellPrice('milk'), desc: 'Produzido por vacas leiteiras comuns.', formula: 'Sazonalidade: Verão (-20%) | Clima: Chuva (-10%), Sol (+10%)' },
