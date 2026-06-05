@@ -352,6 +352,14 @@ export default function App() {
   // dailyEarning moved to useEconomy
 
   // MECHANIC 2: Ganso alarm — pre-drawn event for next day
+  const [activeMarketEvent, setActiveMarketEvent] = useState<{ title: string; desc: string; items: string[]; mult: number; daysLeft: number } | null>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).activeMarketEvent ?? null;
+    } catch (e) {}
+    return null;
+  });
+
   const [nextDayEvent, setNextDayEvent] = useState<string | null>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -1443,34 +1451,92 @@ export default function App() {
   };
 
   // F6: multiplicadores sazonais de preço
-  const getSeasonalityMultiplier = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie', day: number) => {
+  const getSeasonalityMultiplier = (itemType: string, day: number): number => {
     const estacao = getEstacaoKey(day);
-    // Primavera: leite ×1.1, ovos ×1.2
-    if (itemType === 'milk' && estacao === 'primavera') return 1.1;
-    if (itemType === 'egg' && estacao === 'primavera') return 1.2;
-    // Verão: leite ×1.2, queijo ×1.1
-    if (itemType === 'milk' && estacao === 'verao') return 1.2;
-    if ((itemType === 'cheese' || itemType === 'queijoCoalho' || itemType === 'queijoMucarela' || itemType === 'queijoBrie') && estacao === 'verao') return 1.1;
-    // Outono: lã ×1.1, queijo artesanal ×1.2
-    if (itemType === 'wool' && estacao === 'outono') return 1.1;
-    if ((itemType === 'queijoCoalho' || itemType === 'queijoMucarela' || itemType === 'queijoBrie') && estacao === 'outono') return 1.2;
-    if (itemType === 'cheese' && estacao === 'outono') return 1.15;
-    // Inverno: lã ×1.3, cachecol ×1.4
-    if (itemType === 'wool' && estacao === 'inverno') return 1.3;
-    if (itemType === 'scarf' && estacao === 'inverno') return 1.4;
-    if (itemType === 'egg' && estacao === 'inverno') return 0.75;
-    if (itemType === 'mayo' && estacao === 'verao') return 1.15;
+    // --- LATICÍNIOS (leite, manteiga, iogurte, leite condensado) ---
+    const laticinios = new Set(['milk','goat_milk','buffalo_milk','butter','yogurt','iogurte_cabra','leite_condensado']);
+    if (laticinios.has(itemType)) {
+      if (estacao === 'primavera') return 1.1;
+      if (estacao === 'verao') return 1.2;
+      return 1.0;
+    }
+    // --- QUEIJOS ---
+    const queijos = new Set(['cheese','queijoCoalho','queijoMucarela','queijoBrie','queijo_cabra','buffalo_mozzarella']);
+    if (queijos.has(itemType)) {
+      if (estacao === 'verao') return 1.1;
+      if (estacao === 'outono') return 1.2;
+      return 1.0;
+    }
+    // --- LÃS E FIBRAS (ovelha, lhama, alpaca, angorá, seda) ---
+    const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','fio_seda','tecido_alpaca','cachecol_angora','tapete_lhama','manta_premium']);
+    if (las.has(itemType)) {
+      if (estacao === 'outono') return 1.15;
+      if (estacao === 'inverno') return 1.35;
+      if (estacao === 'verao') return 0.85;
+      return 1.0;
+    }
+    // --- CACHECOL / ARTIGOS DE INVERNO ---
+    if (itemType === 'scarf') {
+      if (estacao === 'inverno') return 1.4;
+      if (estacao === 'verao') return 0.7;
+      return 1.0;
+    }
+    // --- OVOS (todas as aves) ---
+    const ovos = new Set(['egg','duck_egg','goose_egg','quail_egg','fertile_egg','ovo_defumado','conserva_codorna']);
+    if (ovos.has(itemType)) {
+      if (estacao === 'primavera') return 1.2;
+      if (estacao === 'inverno') return 0.75;
+      return 1.0;
+    }
+    // --- MAIONESE / PÂTÉ ---
+    if (itemType === 'mayo' || itemType === 'pate_pato') {
+      if (estacao === 'verao') return 1.15;
+      return 1.0;
+    }
+    // --- MEL E PRODUTOS DA FLORESTA ---
+    if (itemType === 'mel' || itemType === 'mel_envasado' || itemType === 'hidromel') {
+      if (estacao === 'verao') return 1.3;
+      if (estacao === 'primavera') return 1.1;
+      return 1.0;
+    }
+    if (itemType === 'cogumelo' || itemType === 'risoto_cogumelo' || itemType === 'sopa_cogumelo') {
+      if (estacao === 'outono') return 1.3;
+      if (estacao === 'inverno') return 1.15;
+      return 1.0;
+    }
+    // --- PEIXE ---
+    if (itemType === 'peixe' || itemType === 'conserva_peixe') {
+      if (estacao === 'verao') return 1.2;
+      if (estacao === 'inverno') return 0.9;
+      return 1.0;
+    }
+    // --- EXÓTICOS (carne, couro, muco, penas) ---
+    const exoticos = new Set(['coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare','muco','feather','peacock_feather','pena_grande','bolsa_exotica','colete_couro','creme_cosmetico','sabonete_natural']);
+    if (exoticos.has(itemType)) {
+      if (estacao === 'verao') return 1.1;
+      if (estacao === 'inverno') return 0.9;
+      return 1.0;
+    }
     return 1.0;
   };
 
-  const getWeatherMultiplier = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie', currentW: 'chuva' | 'sol' | 'nublado') => {
+  const getWeatherMultiplier = (itemType: string, currentW: 'chuva' | 'sol' | 'nublado'): number => {
     if (currentW === 'chuva') {
-      if (itemType === 'milk') return 0.9;
-      if (itemType === 'wool') return 0.8;
-      if (itemType === 'egg') return 0.9; // Chickens like rainy days less
+      const laticinios = new Set(['milk','goat_milk','buffalo_milk','butter','yogurt','iogurte_cabra','leite_condensado']);
+      if (laticinios.has(itemType)) return 0.9;
+      const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool']);
+      if (las.has(itemType)) return 0.8;
+      const ovos = new Set(['egg','duck_egg','goose_egg','quail_egg','fertile_egg']);
+      if (ovos.has(itemType)) return 0.9;
+      if (itemType === 'mel' || itemType === 'mel_envasado') return 0.85;
+      if (itemType === 'cogumelo') return 1.2; // cogumelo cresce na chuva
     } else if (currentW === 'sol') {
-      if (itemType === 'milk') return 1.1;
-      if (itemType === 'egg') return 1.1;
+      const laticinios = new Set(['milk','goat_milk','buffalo_milk']);
+      if (laticinios.has(itemType)) return 1.1;
+      const ovos = new Set(['egg','duck_egg','quail_egg']);
+      if (ovos.has(itemType)) return 1.1;
+      if (itemType === 'mel' || itemType === 'mel_envasado') return 1.15;
+      if (itemType === 'peixe') return 1.1;
     }
     return 1.0;
   };
@@ -1499,24 +1565,24 @@ export default function App() {
       return 30;
     }
     if (itemType === 'egg') {
-      return 4;
+      return farmLevel >= 5 ? 5 : 4;
     }
     if (itemType === 'mayo') {
       return 16;
     }
-    if (itemType === 'goat_milk') return 38;
+    if (itemType === 'goat_milk') return farmLevel >= 4 ? 42 : 38;
     if (itemType === 'llama_wool') return 45;
-    if (itemType === 'duck_egg') return 18;
+    if (itemType === 'duck_egg') return farmLevel >= 5 ? 22 : 18;
     if (itemType === 'goose_egg') return 50;
-    if (itemType === 'buffalo_milk') return 55;
+    if (itemType === 'buffalo_milk') return farmLevel >= 6 ? 62 : 55;
     if (itemType === 'buffalo_mozzarella') return 120;
     if (itemType === 'feather') return 15;
     if (itemType === 'peacock_feather') return 80;
     if (itemType === 'butter') return 45;
     if (itemType === 'yogurt') return 35;
     if (itemType === 'fertile_egg') return 36;
-    if (itemType === 'quail_egg') return 22;
-    if (itemType === 'alpaca_wool') return 65;
+    if (itemType === 'quail_egg') return farmLevel >= 5 ? 26 : 22;
+    if (itemType === 'alpaca_wool') return farmLevel >= 6 ? 75 : 65;
     if (itemType === 'humus') return 20;
     if (itemType === 'muco') return 120;
     if (itemType === 'angora_wool') return 90;
