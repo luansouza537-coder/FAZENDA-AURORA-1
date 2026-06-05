@@ -2411,7 +2411,7 @@ export default function App() {
         }
       }
       else if (copy.type === 'galinha') {
-        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
         copy.hasProducedToday = canProduce;
         if (!canProduce) {
           if (copy.hunger <= 25) {
@@ -2466,7 +2466,7 @@ export default function App() {
       }
       else if (copy.type === 'pato') {
         const currentSeason = Math.floor(((dayForSeason - 1) % 120) / 30); // use actual current day for season
-        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🦆 ${copy.name} botou um ovo de pato!`, type: 'info' });
@@ -2484,7 +2484,7 @@ export default function App() {
       else if (copy.type === 'bufalo') {
         // Summer heat stress
         // We don't have currentDay here but we can check currentW or use approximation
-        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐃 ${copy.name} produziu leite de búfala!`, type: 'info' });
@@ -2496,7 +2496,7 @@ export default function App() {
         copy.hasProducedToday = false;
       }
       else if (copy.type === 'codorna') {
-        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐦 ${copy.name} (codorna) botou ovos de codorna!`, type: 'info' });
@@ -4227,7 +4227,7 @@ export default function App() {
               woolCollected++;
               return { ...a, woolReady: false, daysUntilWool: 7, daysSinceLastWool: 0 };
             }
-            if (a.type === 'coelho' && a.isAdult !== false && a.woolReady) {
+            if (a.type === 'coelho_angora' && a.isAdult !== false && a.woolReady) {
               angoraCollected++;
               return { ...a, woolReady: false, daysUntilWool: 5, daysSinceLastWool: 0 };
             }
@@ -4307,14 +4307,13 @@ export default function App() {
 
         // --- Queijeiro: converte 3 leites em 1 queijo coalho com +5% valor ---
         if (workers.some(w => w.role === 'queijeiro')) {
-          setInventory(prev => {
-            const available = prev.milk ?? 0;
-            if (available >= 3) {
-              logsToAdd.push({ msg: `🧀 Queijeiro transformou 3 leites em 1 Queijo Coalho!`, type: 'success' });
-              return { ...prev, milk: available - 3, queijoCoalho: (prev.queijoCoalho ?? 0) + 1 };
-            }
-            return prev;
-          });
+          // BUG FIX: logsToAdd.push must happen outside the setInventory updater to avoid
+          // double execution in React StrictMode. Read current milk from inventory closure.
+          const currentMilk = inventory.milk ?? 0;
+          if (currentMilk >= 3) {
+            logsToAdd.push({ msg: `🧀 Queijeiro transformou 3 leites em 1 Queijo Coalho!`, type: 'success' });
+            setInventory(prev => ({ ...prev, milk: (prev.milk ?? 0) - 3, queijoCoalho: (prev.queijoCoalho ?? 0) + 1 }));
+          }
         }
       }
 

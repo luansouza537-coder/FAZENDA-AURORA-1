@@ -497,6 +497,12 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'pato') return;
 
+    if (animal.isAdult === false) {
+      addLog(`🍼 ${animal.name} ainda é um filhote e não produz ovos!`, 'error');
+      spawnFeedback('🍼', 'Filhote!', event);
+      return;
+    }
+
     if (!animal.hasProducedToday) {
       addLog(`🦆 ${animal.name} não botou ovo hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
@@ -588,6 +594,12 @@ export function useAnimals({
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'bufalo') return;
+
+    if (animal.isAdult === false) {
+      addLog(`🍼 ${animal.name} ainda é um filhote e não produz leite!`, 'error');
+      spawnFeedback('🍼', 'Filhote!', event);
+      return;
+    }
 
     if (!animal.hasProducedToday) {
       addLog(`🐃 ${animal.name} já foi ordenhada hoje!`, 'error');
