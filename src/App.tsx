@@ -1860,6 +1860,7 @@ export default function App() {
     sellAvestruz,
     sellJacare,
     sellOx,
+    retireAnimal,
     buyAnimal,
     buyAnimalFilhote,
   } = useAnimals({
@@ -3711,7 +3712,11 @@ export default function App() {
           logsToAdd.push({ msg: `🎉 ${a.name} cresceu e se tornou adulto! Pronto para produzir!`, type: 'success' });
           setTimeout(() => addNotification(`🎉 ${a.name} (${a.type}) cresceu e está pronto para produzir!`, 'success', nextDayValue), 0);
           const baseMax = baseMaxAgeMapAdult[a.type] ?? 90;
-          return { ...a, isAdult: true, adulthoodDay: undefined, maxAge: a.maxAge ?? Math.round(baseMax * (1 + (Math.random() * 0.4 - 0.2))) };
+          const jBonus = a.happiness >= 70 ? 0.08 : a.happiness >= 50 ? 0.04 : 0;
+          if (jBonus > 0) {
+            logsToAdd.push({ msg: `🌱 ${a.name} cresceu bem! Recebe +${Math.round(jBonus*100)}% de produção permanente por boa criação na juventude.`, type: 'success' });
+          }
+          return { ...a, isAdult: true, adulthoodDay: undefined, juvenileBonus: jBonus, maxAge: a.maxAge ?? Math.round(baseMax * (1 + (Math.random() * 0.4 - 0.2))) };
         }
         return a;
       });
@@ -5979,16 +5984,16 @@ export default function App() {
                             )}
                             {/* F1/F2: Idade e badge idoso */}
                             {animal.age !== undefined && animal.maxAge !== undefined && (() => {
-                              const ratio = animal.age / animal.maxAge;
-                              const isElder = ratio >= 0.75;
-                              const lifeLabel = ratio < 0.33 ? 'Jovem' : ratio < 0.75 ? 'Adulto' : 'Idoso';
-                              const lifeColor = ratio < 0.33 ? 'bg-green-100 border-green-300 text-green-800' : ratio < 0.75 ? 'bg-blue-100 border-blue-300 text-blue-800' : 'bg-orange-100 border-orange-300 text-orange-800';
+                              const phase = getLifePhase(animal);
+                              const retirable = animal.isAdult !== false && animal.age >= animal.maxAge * 0.75;
+                              const retireHint = retirable ? ' • Clique para aposentar' : '';
                               return (
                                 <span
-                                  className={`inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full border cursor-help ${lifeColor}`}
-                                  title={isElder ? `Idoso: produz 30% menos, mas dá +2% de bônus para outros ${animal.type}s (stackable)` : `Dia ${animal.age} de ${animal.maxAge}`}
+                                  className={`inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full border cursor-help ${phase.color}`}
+                                  title={`${phase.emoji} ${phase.label} — Produção: ${Math.round(phase.prodMult * 100)}% • Dia ${animal.age}/${animal.maxAge}${retireHint}${animal.isVeteran ? ' • 🏅 Veterano' : ''}${animal.juvenileBonus ? ` • +${Math.round((animal.juvenileBonus)*100)}% bônus juvenil` : ''}`}
                                 >
-                                  {isElder ? '🧓 Idoso' : `📅 ${lifeLabel} (${animal.age}d)`}
+                                  {phase.emoji} {phase.label} ({animal.age}d)
+                                  {animal.isVeteran && <span className="ml-0.5">🏅</span>}
                                 </span>
                               );
                             })()}
@@ -6435,6 +6440,18 @@ export default function App() {
                             </button>
                           )}
 
+                          {/* Aposentar Animal (75%+ vida útil, exceto boi) */}
+                          {animal.isAdult !== false && animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75 && animal.type !== 'boi' && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); retireAnimal(animal.id, e); }}
+                              className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-amber-400 bg-amber-50 text-amber-800 hover:bg-amber-100 cursor-pointer transition-all"
+                              title="Aposentar este animal e receber parte do valor"
+                            >
+                              🏡 Aposentar
+                            </button>
+                          )}
+
                           {/* Coletar Leite de Cabra */}
                           {animal.type === 'cabra' && (
                             <button
@@ -6563,7 +6580,15 @@ export default function App() {
                             return (
                               <button
                                 type="button"
-                                onClick={(e) => { e.preventDefault(); setCruzarModal({ animalId: animal.id, type: animal.type }); }}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  // Fertility check: animals older than 80% of maxAge cannot reproduce
+                                  if (animal.age && animal.maxAge && animal.age > animal.maxAge * 0.8) {
+                                    addLog(`❌ ${animal.name} é muito idoso para reproduzir (acima de 80% da vida útil).`, 'error');
+                                    return;
+                                  }
+                                  setCruzarModal({ animalId: animal.id, type: animal.type });
+                                }}
                                 disabled={alreadyInReproducao}
                                 className={`rounded-[16px] px-3 py-2 font-display text-[10px] text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1 transition-all select-none ${alreadyInReproducao ? 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60' : 'bg-fuchsia-500 hover:bg-fuchsia-600 border-b-2 border-fuchsia-800 shadow-md active:translate-y-0.5 hover:scale-[1.02]'}`}
                                 title={alreadyInReproducao ? 'Já em gestação' : 'Iniciar reprodução controlada'}

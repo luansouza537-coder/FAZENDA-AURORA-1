@@ -913,6 +913,27 @@ export function useAnimals({
     spawnFeedback('💰', `+${value} 💰`, event);
   };
 
+  // Retire Animal (elderly animals 75%+ of maxAge)
+  const retireAnimal = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal) return;
+    if (!animal.age || !animal.maxAge || animal.age < animal.maxAge * 0.75) {
+      addLog(`❌ ${animal.name} ainda não está em idade de aposentadoria (precisa ter 75%+ da vida).`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+    const purchasePrice = getAnimalPurchasePrice(animal.type);
+    const ratio = animal.age / animal.maxAge;
+    const retirePct = animal.isVeteran ? 0.5 : ratio >= 0.9 ? 0.2 : 0.3;
+    const value = Math.max(5, Math.round(purchasePrice * retirePct));
+    setAnimals(prev => prev.filter(a => a.id !== id));
+    setGold(prev => prev + value);
+    addLog(`🏡 ${animal.name} foi aposentado com carinho! Você recebeu ${value}💰 de gratidão.`, 'success');
+    triggerAudioResult(() => sfx.playSound('sell'));
+    spawnFeedback('🏡', `+${value}💰`, event);
+  };
+
   // 6. Buy Animal (Feira / Mercado)
   const buyAnimal = (type: AnimalType, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -1171,6 +1192,7 @@ export function useAnimals({
     sellAvestruz,
     sellJacare,
     sellOx,
+    retireAnimal,
     buyAnimal,
     buyAnimalFilhote,
     FILHOTE_CONFIG,
