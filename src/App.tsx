@@ -1953,11 +1953,11 @@ export default function App() {
   }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
-    let price = 500;
-    let reqLevel = 3;
+    let price = 2500;
+    let reqLevel = 6;
     let label = "";
-    if (machineKey === 'shearer') { price = 450; reqLevel = 3; label = "Tosquiadeira Elétrica"; }
-    else if (machineKey === 'feeder') { price = 300; reqLevel = 2; label = "Alimentador Automático"; }
+    if (machineKey === 'shearer') { price = 2000; reqLevel = 5; label = "Tosquiadeira Elétrica"; }
+    else if (machineKey === 'feeder') { price = 1500; reqLevel = 4; label = "Alimentador Automático"; }
     else { label = "Ordenhadeira Automática"; }
 
     if (gold < price) {
@@ -3132,10 +3132,12 @@ export default function App() {
       const waterCost = Math.round(baseWaterCost * (1 - waterDiscount));
 
       // Cálculo da conta de energia
-      const activeMachinesCount = (machines.milkerPurchased && machines.milkerActive ? 1 : 0)
-        + (machines.shearerPurchased && machines.shearerActive ? 1 : 0)
-        + (machines.feederPurchased && machines.feederActive ? 1 : 0);
-      const baseEnergyCost = 15 + (activeMachinesCount * 3);
+      // Cada máquina tem custo de energia distinto por dia de operação
+      const milkerEnergy = machines.milkerPurchased && machines.milkerActive ? 8 : 0;
+      const shearerEnergy = machines.shearerPurchased && machines.shearerActive ? 6 : 0;
+      const feederEnergy = machines.feederPurchased && machines.feederActive ? 5 : 0;
+      const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy;
+      const baseEnergyCost = 15 + machineEnergyCost;
       const energyDiscount = solarLevel === 1 ? 0.4 : solarLevel === 2 ? 0.7 : solarLevel >= 3 ? 1.0 : 0;
       const energyCost = Math.round(baseEnergyCost * (1 - energyDiscount));
 
@@ -7803,14 +7805,14 @@ export default function App() {
                       {machines.milkerPurchased ? (
                         <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase font-mono">Adquirido</span>
                       ) : (
-                        <span className="bg-[#fef3c7] text-[#92400e] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border border-[#fbbf24]">Nível 3+</span>
+                        <span className="bg-[#fef3c7] text-[#92400e] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border border-[#fbbf24]">Nível 6+</span>
                       )}
                     </div>
                     <p className="text-xs text-stone-600 mt-1 leading-relaxed">
                       Coleta automaticamente o leite cru de <strong>TODAS</strong> as vacas produtoras ao final de cada dia. A produção é enviada diretamente para o Armazém.
                     </p>
                     <div className="text-[10px] text-stone-400 font-mono mt-1.5 uppercase tracking-wide">
-                      ⚡ Custo: 500 moedas • Nível mín: 3
+                      ⚡ Compra: 2.500💰 • Nível mín: 6 • Operacional: <span className="text-orange-500 font-black">8⚡/dia</span>
                     </div>
                   </div>
 
@@ -7823,14 +7825,14 @@ export default function App() {
                           e.preventDefault();
                           buyMachine('milker');
                         }}
-                        disabled={gold < 500 || farmLevel < 3}
+                        disabled={gold < 2500 || farmLevel < 6}
                         className={`font-mono font-black text-xs uppercase px-5 py-2.5 rounded-2xl cursor-pointer border-b-4 transition-all shadow-sm ${
-                          gold >= 500 && farmLevel >= 3
+                          gold >= 2500 && farmLevel >= 6
                             ? 'bg-amber-500 hover:bg-amber-400 text-[#451a03] border-amber-700 hover:scale-105 active:translate-y-0.5'
                             : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'
                         }`}
                       >
-                        Comprar (500💰)
+                        Comprar (2.500💰)
                       </button>
                     ) : (
                       <div className="flex flex-col items-center gap-1.5 bg-emerald-100/60 p-2.5 rounded-2xl border border-emerald-200">
@@ -7869,14 +7871,14 @@ export default function App() {
                       {machines.shearerPurchased ? (
                         <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase font-mono">Adquirido</span>
                       ) : (
-                        <span className="bg-[#fef3c7] text-[#92400e] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border border-[#fbbf24]">Nível 3+</span>
+                        <span className="bg-[#fef3c7] text-[#92400e] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border border-[#fbbf24]">Nível 5+</span>
                       )}
                     </div>
                     <p className="text-xs text-stone-600 mt-1 leading-relaxed">
                       Coleta automaticamente a lã de <strong>TODAS</strong> as ovelha com lã madura no fim do dia. Envia fardos ao Armazém sem perda de bônus por qualidade.
                     </p>
                     <div className="text-[10px] text-stone-400 font-mono mt-1.5 uppercase tracking-wide">
-                      ⚡ Custo: 450 moedas • Nível mín: 3
+                      ⚡ Compra: 2.000💰 • Nível mín: 5 • Operacional: <span className="text-orange-500 font-black">6⚡/dia</span>
                     </div>
                   </div>
 
@@ -7889,14 +7891,14 @@ export default function App() {
                           e.preventDefault();
                           buyMachine('shearer');
                         }}
-                        disabled={gold < 450 || farmLevel < 3}
+                        disabled={gold < 2000 || farmLevel < 5}
                         className={`font-mono font-black text-xs uppercase px-5 py-2.5 rounded-2xl cursor-pointer border-b-4 transition-all shadow-sm ${
-                          gold >= 450 && farmLevel >= 3
+                          gold >= 2000 && farmLevel >= 5
                             ? 'bg-amber-500 hover:bg-amber-400 text-[#451a03] border-amber-700 hover:scale-105 active:translate-y-0.5'
                             : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'
                         }`}
                       >
-                        Comprar (450💰)
+                        Comprar (2.000💰)
                       </button>
                     ) : (
                       <div className="flex flex-col items-center gap-1.5 bg-emerald-100/60 p-2.5 rounded-2xl border border-emerald-200">
@@ -7935,15 +7937,14 @@ export default function App() {
                       {machines.feederPurchased ? (
                         <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase font-mono">Adquirido</span>
                       ) : (
-                        <span className="bg-[#fef3c7] text-[#92400e] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border border-[#fbbf24]">Nível 2+</span>
+                        <span className="bg-[#fef3c7] text-[#92400e] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border border-[#fbbf24]">Nível 4+</span>
                       )}
                     </div>
                     <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-                      Alimenta <strong>TODOS</strong> os animais do seu rebanho no final do dia. Cada refeição custa uma taxa reduzida de apenas 3 moedas de ouro por animal.
+                      Alimenta <strong>TODOS</strong> os animais do seu rebanho no final do dia. Cada refeição consome ração do Armazém conforme o tipo de cada animal.
                     </p>
                     <p className="text-[10px] text-stone-400 font-mono mt-1.5 uppercase tracking-wide">
-                      {/* BUG 12 FIX: exibe custo real de manutenção por máquina ativa conforme getCustoManutencaoMaquinas */}
-                      ⚡ Custo: 300 moedas • Nível mín: 2 • Operacional: {getCustoManutencaoMaquinas(farmLevel)} moedas/dia por máquina ativa
+                      ⚡ Compra: 1.500💰 • Nível mín: 4 • Operacional: <span className="text-orange-500 font-black">5⚡/dia</span>
                     </p>
                   </div>
 
@@ -7956,14 +7957,14 @@ export default function App() {
                           e.preventDefault();
                           buyMachine('feeder');
                         }}
-                        disabled={gold < 300 || farmLevel < 2}
+                        disabled={gold < 1500 || farmLevel < 4}
                         className={`font-mono font-black text-xs uppercase px-5 py-2.5 rounded-2xl cursor-pointer border-b-4 transition-all shadow-sm ${
-                          gold >= 300 && farmLevel >= 2
+                          gold >= 1500 && farmLevel >= 4
                             ? 'bg-amber-500 hover:bg-amber-400 text-[#451a03] border-amber-700 hover:scale-105 active:translate-y-0.5'
                             : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'
                         }`}
                       >
-                        Comprar (300💰)
+                        Comprar (1.500💰)
                       </button>
                     ) : (
                       <div className="flex flex-col items-center gap-1.5 bg-emerald-100/60 p-2.5 rounded-2xl border border-emerald-200">
