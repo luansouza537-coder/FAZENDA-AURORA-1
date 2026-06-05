@@ -326,7 +326,7 @@ export function useAnimals({
     addLog(`🌽 Você alimentou ${animal.name} com ${feedLabel}! +Fome +Felicidade.`, 'success');
     triggerAudioResult(() => sfx.playSound('feed'));
     if (soundEnabled) sfx.playAnimalSound(animal.type);
-    spawnFeedback('🌽', '+Fome!', event);
+    spawnFeedback('❤️', '+Feliz!', event); // IMPROVEMENT 8: heart animation on feed
     // Missão: alimentar animais
     updateMissionProgress('feed_animals', 1);
   };

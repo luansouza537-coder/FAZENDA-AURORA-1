@@ -2253,9 +2253,12 @@ export default function App() {
         }
       }
 
+      // IMPROVEMENT 9: Sick animals produce 50% less (50% chance to skip production)
+      const sickProductionBlock = copy.isSick && Math.random() < 0.5;
+
       // Atualizações de produção baseadas nas espécies
       if (copy.type === 'vaca') {
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
         copy.hasProducedToday = canProduce;
         if (!canProduce) {
           if (copy.hunger <= 25) {
@@ -2306,7 +2309,7 @@ export default function App() {
         }
       }
       else if (copy.type === 'galinha') {
-        const canProduce = copy.hunger > 25 && copy.happiness > 30;
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
         copy.hasProducedToday = canProduce;
         if (!canProduce) {
           if (copy.hunger <= 25) {
@@ -2328,7 +2331,7 @@ export default function App() {
             copy.hasProducedToday = false; // BUG FIX: garante que o botão de coleta fique desabilitado imediatamente ao entrar na secagem
             logs.push({ msg: `🐐 ${copy.name} entrou no período de secagem (15 dias).`, type: 'info' });
           } else {
-            const canProduce = copy.hunger > 25 && copy.happiness > 30;
+            const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
             copy.hasProducedToday = canProduce;
             if (canProduce) {
               logs.push({ msg: `🐐 ${copy.name} está lactando e produziu leite de cabra!`, type: 'info' });
@@ -2361,7 +2364,7 @@ export default function App() {
       }
       else if (copy.type === 'pato') {
         const currentSeason = Math.floor(((dayForSeason - 1) % 120) / 30); // use actual current day for season
-        const canProduce = copy.hunger > 25 && copy.happiness > 30;
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🦆 ${copy.name} botou um ovo de pato!`, type: 'info' });
@@ -2379,7 +2382,7 @@ export default function App() {
       else if (copy.type === 'bufalo') {
         // Summer heat stress
         // We don't have currentDay here but we can check currentW or use approximation
-        const canProduce = copy.hunger > 25 && copy.happiness > 30;
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐃 ${copy.name} produziu leite de búfala!`, type: 'info' });
@@ -2391,7 +2394,7 @@ export default function App() {
         copy.hasProducedToday = false;
       }
       else if (copy.type === 'codorna') {
-        const canProduce = copy.hunger > 25 && copy.happiness > 30;
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐦 ${copy.name} (codorna) botou ovos de codorna!`, type: 'info' });
@@ -2483,7 +2486,7 @@ export default function App() {
           if (copy.type === 'ovelha') benefitTxt = "lã a cada 2 dias em vez de 3!";
           if (copy.type === 'boi') benefitTxt = "+0.05 de ganho de peso!";
           if (copy.type === 'galinha') benefitTxt = "+1 ovo diário permanente!";
-          
+
           logs.push({
             msg: `💖 ${copy.name} atingiu a felicidade suprema por 3 dias e virou seu MELHOR AMIGO! Benefício: ${benefitTxt}`,
             type: 'success'
@@ -2513,6 +2516,49 @@ export default function App() {
         } else {
           copy.daysBelow80 = 0;
         }
+      }
+
+      // IMPROVEMENT 5: Best Friend Streak (more tolerant — 85% over 5 days)
+      if (copy.happiness >= 85) {
+        copy.happinessStreak = (copy.happinessStreak ?? 0) + 1;
+        if (copy.happinessStreak >= 5 && !copy.isBestFriend) {
+          copy.isBestFriend = true;
+          logs.push({ msg: `❤️ ${copy.name} se tornou seu Melhor Amigo! Felicidade sustentada por 5 dias!`, type: 'success' });
+        }
+      } else {
+        copy.happinessStreak = 0;
+      }
+
+      // IMPROVEMENT 6: Premium quality flag
+      if (copy.happiness > 90 && copy.hunger > 70) {
+        copy.isHighQuality = true;
+      } else {
+        copy.isHighQuality = false;
+      }
+
+      // IMPROVEMENT 7: Stress state tracking
+      if ((copy.stressedDays ?? 0) > 0) {
+        copy.stressedDays = (copy.stressedDays ?? 0) - 1;
+      }
+
+      // IMPROVEMENT 9: Sick state from prolonged sadness
+      if (copy.happiness < 20) {
+        copy.lowHappinessDays = (copy.lowHappinessDays ?? 0) + 1;
+      } else {
+        copy.lowHappinessDays = Math.max(0, (copy.lowHappinessDays ?? 0) - 1);
+      }
+      if ((copy.lowHappinessDays ?? 0) >= 3 && !copy.isSick) {
+        copy.isSick = true;
+        copy.sickDays = 0;
+        logs.push({ msg: `🤒 ${copy.name} adoeceu de tristeza! Produção reduzida em 50%. Trate com Veterinário!`, type: 'error' });
+      }
+      if (copy.isSick) {
+        copy.sickDays = (copy.sickDays ?? 0) + 1;
+      }
+
+      // IMPROVEMENT 1: Critical happiness log
+      if (copy.happiness < 15) {
+        logs.push({ msg: `💔 ${copy.name} (${copy.type}) está crítico! Felicidade: ${Math.floor(copy.happiness)}%`, type: 'error' });
       }
 
       return copy;
@@ -3659,7 +3705,8 @@ export default function App() {
             setLastEpidemicDay(nextDayValue);
             setAnimals(prev => prev.map(a => {
               if (affected.some(af => af.id === a.id)) {
-                return { ...a, happiness: Math.max(0, a.happiness - 30) };
+                // IMPROVEMENT 7: stress state from epidemic (-30 happiness drop)
+                return { ...a, happiness: Math.max(0, a.happiness - 30), stressedDays: 3 };
               }
               return a;
             }));
@@ -3998,9 +4045,13 @@ export default function App() {
           if (workers.some(w => w.role === 'tratador') && updated.hunger < 100) {
             updated.hunger = Math.min(100, updated.hunger + 40);
           }
-          // Veterinário: +5 felicidade para todos
+          // Veterinário: +5 felicidade para todos + cura estados negativos (IMPROVEMENT 9)
           if (workers.some(w => w.role === 'veterinario')) {
             updated.happiness = Math.min(100, (updated.happiness ?? 0) + 5);
+            updated.isSick = false;
+            updated.sickDays = 0;
+            updated.stressedDays = 0;
+            updated.lowHappinessDays = 0;
           }
           return updated;
         }));
@@ -5503,6 +5554,29 @@ export default function App() {
                           </div>
                         )}
 
+                        {/* IMPROVEMENT 1: Progressive happiness alert badges */}
+                        {animal.happiness < 30 && !isCritical && (
+                          <span className="absolute top-1 left-1 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full animate-pulse z-10">🔴 CRÍTICO</span>
+                        )}
+                        {animal.happiness >= 30 && animal.happiness < 50 && (
+                          <span className="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full z-10">⚠️ TRISTE</span>
+                        )}
+
+                        {/* IMPROVEMENT 7: Stress badge */}
+                        {(animal.stressedDays ?? 0) > 0 && (
+                          <span className="absolute top-1 right-1 text-[8px] bg-orange-500 text-white px-1.5 py-0.5 rounded-full font-black z-10">😰 Estressado ({animal.stressedDays}d)</span>
+                        )}
+
+                        {/* IMPROVEMENT 9: Sick badge */}
+                        {animal.isSick && (
+                          <span className="absolute top-6 left-1 text-[8px] bg-red-600 text-white px-1.5 py-0.5 rounded-full font-black animate-pulse z-10">🤒 Doente</span>
+                        )}
+
+                        {/* IMPROVEMENT 6: Premium quality badge */}
+                        {animal.isHighQuality && (
+                          <span className="absolute top-6 right-1 text-[8px] bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-black z-10">✨ Premium</span>
+                        )}
+
                         {/* Animal header with edit rename */}
                         <div className="flex items-center justify-between gap-3 mb-4">
                           <div className="flex-1">
@@ -5779,7 +5853,12 @@ export default function App() {
                           {/* Happiness bar */}
                           <div className="relative group/happinesstooltip">
                             <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
-                              <span className="flex items-center gap-1">😊 Felicidade</span>
+                              <span className="flex items-center gap-1">😊 Felicidade
+                                {/* IMPROVEMENT 4: Cabra bonus tooltip */}
+                                {animal.type !== 'cabra' && animals.some(a => a.type === 'cabra' && a.isAdult !== false) && (
+                                  <span className="text-[8px] text-emerald-400 font-mono" title="Bônus da Cabra: +3 felicidade/dia">🐐+3</span>
+                                )}
+                              </span>
                               <span>{Math.floor(animal.happiness)}%</span>
                             </div>
                             <div className="bg-[#e5e7eb] h-4 rounded-full overflow-hidden mt-1 border-2 border-[#d1d5db] shadow-inner relative cursor-help">
