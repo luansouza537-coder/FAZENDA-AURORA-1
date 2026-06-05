@@ -4193,18 +4193,19 @@ export default function App() {
           }));
         }
 
-        // --- Ordenhador: coleta leite de vaca/cabra/bufalo/alpaca adultos ---
+        // --- Ordenhador: coleta leite de vaca/cabra/bufalo adultos; tosquia alpaca quando woolReady ---
         if (workers.some(w => w.role === 'ordenhador')) {
           let milkCollected = 0;
-          let alpacaMilkCollected = 0;
+          let alpacaWoolCollected = 0;
           setAnimals(prev => prev.map(a => {
             if (['vaca', 'cabra', 'bufalo'].includes(a.type) && a.isAdult !== false && a.hasProducedToday) {
               milkCollected++;
               return { ...a, hasProducedToday: false };
             }
-            if (a.type === 'alpaca' && a.isAdult !== false && a.hasProducedToday) {
-              alpacaMilkCollected++;
-              return { ...a, hasProducedToday: false };
+            // Alpaca produces wool (woolReady), not milk — ordenhador tosquia alpaca
+            if (a.type === 'alpaca' && a.isAdult !== false && a.woolReady) {
+              alpacaWoolCollected++;
+              return { ...a, woolReady: false, daysSinceLastWool: 0 };
             }
             return a;
           }));
@@ -4212,9 +4213,9 @@ export default function App() {
             setInventory(prev => ({ ...prev, milk: prev.milk + milkCollected }));
             logsToAdd.push({ msg: `🥛 Ordenhador coletou +${milkCollected} leite(s) automaticamente!`, type: 'success' });
           }
-          if (alpacaMilkCollected > 0) {
-            setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) + alpacaMilkCollected }));
-            logsToAdd.push({ msg: `🦙 Ordenhador coletou +${alpacaMilkCollected} produto(s) de alpaca!`, type: 'success' });
+          if (alpacaWoolCollected > 0) {
+            setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) + alpacaWoolCollected }));
+            logsToAdd.push({ msg: `🦙 Ordenhador tosquiou +${alpacaWoolCollected} lã(s) de alpaca automaticamente!`, type: 'success' });
           }
         }
 
@@ -4244,12 +4245,12 @@ export default function App() {
           }
         }
 
-        // --- Avicultor: coleta ovos de galinha/codorna/pato/avestruz ---
+        // --- Avicultor: coleta ovos de galinha/codorna/pato; coleta penas de avestruz (woolReady) ---
         if (workers.some(w => w.role === 'avicultor')) {
           let eggsCollected = 0;
           let quailEggs = 0;
           let duckEggs = 0;
-          let ostrichEggs = 0;
+          let ostrichFeathers = 0;
           setAnimals(prev => prev.map(a => {
             if (a.type === 'galinha' && a.isAdult !== false && a.hasProducedToday) {
               eggsCollected++;
@@ -4263,9 +4264,10 @@ export default function App() {
               duckEggs++;
               return { ...a, hasProducedToday: false };
             }
-            if (a.type === 'avestruz' && a.isAdult !== false && a.hasProducedToday) {
-              ostrichEggs++;
-              return { ...a, hasProducedToday: false };
+            // Avestruz produces pena_grande via woolReady (not hasProducedToday)
+            if (a.type === 'avestruz' && a.isAdult !== false && a.woolReady) {
+              ostrichFeathers++;
+              return { ...a, woolReady: false, daysSinceLastWool: 0 };
             }
             return a;
           }));
@@ -4281,27 +4283,29 @@ export default function App() {
             setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) + duckEggs }));
             logsToAdd.push({ msg: `🥚 Avicultor coletou +${duckEggs} ovo(s) de pato!`, type: 'success' });
           }
-          if (ostrichEggs > 0) {
-            setInventory(prev => ({ ...prev, egg: prev.egg + ostrichEggs }));
-            logsToAdd.push({ msg: `🥚 Avicultor coletou +${ostrichEggs} ovo(s) de avestruz!`, type: 'success' });
+          if (ostrichFeathers > 0) {
+            setInventory(prev => ({ ...prev, pena_grande: (prev.pena_grande ?? 0) + ostrichFeathers }));
+            logsToAdd.push({ msg: `🦤 Avicultor coletou +${ostrichFeathers} pena(s) grande(s) de avestruz!`, type: 'success' });
           }
         }
 
-        // --- Composteiro: coleta húmus de minhocas + bônus a cada 3 dias ---
+        // --- Composteiro: coleta húmus de minhocas (produzem a cada 3 dias via age%3) + bônus a cada 3 dias ---
         if (workers.some(w => w.role === 'composteiro')) {
-          let humusCollected = 0;
-          setAnimals(prev => prev.map(a => {
-            if (a.type === 'minhoca' && a.isAdult !== false && a.hasProducedToday) {
-              humusCollected++;
-              return { ...a, hasProducedToday: false };
-            }
-            return a;
-          }));
+          // Minhoca production is age-based (age % 3 === 0), not hasProducedToday
+          const minhocasProducing = finalAnimals.filter(
+            a => a.type === 'minhoca' && a.isAdult !== false && (a.age || 0) > 0 && (a.age || 0) % 3 === 0
+          ).length;
           const bonusHumus = nextDayValue % 3 === 0 ? 1 : 0;
-          const totalHumus = humusCollected + bonusHumus;
-          if (totalHumus > 0) {
-            setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) + totalHumus }));
-            logsToAdd.push({ msg: `🌱 Composteiro coletou +${totalHumus} húmus${bonusHumus > 0 ? ' (bônus de compostagem!)' : ''}!`, type: 'success' });
+          // Avoid double-counting: the main loop already added humus via setTimeout;
+          // the composteiro adds any minhocas it "supervises" that didn't produce in the main loop
+          // (this covers minhocas on days the composteiro should reinforce collection).
+          // We only add the worker bonus here to avoid duplicate humus from main loop.
+          const totalHumus = bonusHumus;
+          if (minhocasProducing > 0 || bonusHumus > 0) {
+            if (totalHumus > 0) {
+              setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) + totalHumus }));
+            }
+            logsToAdd.push({ msg: `🌱 Composteiro supervisionou ${minhocasProducing} minhoca(s)${bonusHumus > 0 ? ' + bônus de compostagem!' : '!'} `, type: 'success' });
           }
         }
 
