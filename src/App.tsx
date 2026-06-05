@@ -703,7 +703,7 @@ export default function App() {
       scarf: [30, 30, 30, 30, 30, 30, 30],
       egg: [4, 4, 4, 4, 4, 4, 4],
       mayo: [16, 16, 16, 16, 16, 16, 16],
-      queijoCoalho: [14, 14, 14, 14, 14, 14, 14],
+      queijoCoalho: [28, 28, 28, 28, 28, 28, 28],
       queijoMucarela: [28, 28, 28, 28, 28, 28, 28],
       queijoBrie: [65, 65, 65, 65, 65, 65, 65],
       // BUG 14 FIX: removida chave duplicada 'meat'
@@ -1220,7 +1220,7 @@ export default function App() {
         type: 'daily',
         goal: 1,
         current: 0,
-        reward: 50,
+        reward: 30,
         expiresOnDay: day + 1,
         completed: false,
         claimed: false,
@@ -1252,7 +1252,7 @@ export default function App() {
         type: 'daily',
         goal: 1,
         current: 0,
-        reward: 80,
+        reward: 50,
         expiresOnDay: day + 1,
         completed: false,
         claimed: false,
@@ -1482,7 +1482,7 @@ export default function App() {
       return 20;
     }
     if (itemType === 'queijoCoalho') {
-      return 14;
+      return 28;
     }
     if (itemType === 'queijoMucarela') {
       return 28;
@@ -1512,7 +1512,7 @@ export default function App() {
     if (itemType === 'fertile_egg') return 36;
     if (itemType === 'quail_egg') return 22;
     if (itemType === 'alpaca_wool') return 65;
-    if (itemType === 'humus') return 35;
+    if (itemType === 'humus') return 20;
     if (itemType === 'muco') return 120;
     if (itemType === 'angora_wool') return 90;
     if (itemType === 'seda_bruta') return 100;
