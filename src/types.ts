@@ -73,6 +73,14 @@ export interface Animal {
   // Filhotes (Layer 1 & 2)
   isAdult?: boolean;         // false = filhote, true = adulto (default true para existentes)
   adulthoodDay?: number;     // dia do jogo em que o animal se torna adulto
+
+  // Happiness system improvements
+  happinessStreak?: number;  // dias consecutivos com happiness >= 85 (para Melhor Amigo mais tolerante)
+  isHighQuality?: boolean;   // true quando última produção foi premium (happiness > 90%)
+  stressedDays?: number;     // dias restantes em estado estressado (reduz produção 20%)
+  lowHappinessDays?: number; // dias consecutivos com happiness < 20 (sem contar morte)
+  isSick?: boolean;          // adoeceu de tristeza prolongada (produção reduzida 50%)
+  sickDays?: number;         // quantos dias está doente
 }
 
 // Funcionalidade 4: Contratos de fornecimento

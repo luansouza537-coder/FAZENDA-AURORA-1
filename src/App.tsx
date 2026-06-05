@@ -3211,10 +3211,10 @@ export default function App() {
           copy.happiness = Math.min(100, copy.happiness + Math.round(copy.happiness * 0.10));
         }
 
-        // Ganso infeliz: reduz patos e galinhas
-        const unhappyGoose = survivorsAfterAge.some(a2 => a2.type === 'ganso' && a2.happiness < 50);
+        // Ganso infeliz: reduz patos e galinhas (IMPROVEMENT 3: threshold 30, penalty -1)
+        const unhappyGoose = survivorsAfterAge.some(a2 => a2.type === 'ganso' && a2.happiness < 30);
         if (unhappyGoose && (a.type === 'pato' || a.type === 'galinha')) {
-          copy.happiness = Math.max(0, copy.happiness - 2);
+          copy.happiness = Math.max(0, copy.happiness - 1);
         }
 
         // Búfalo: calor no verão
@@ -3293,6 +3293,42 @@ export default function App() {
         // (production set in processarFomeFelicidade, collected here)
 
         return copy;
+      });
+
+      // IMPROVEMENT 2: Species-specific climate preferences
+      const finalAnimalsWithClimate = finalAnimals.map(a => {
+        if (!a.isAdult) return a;
+        let happyDelta = 0;
+        const currentW2 = nextWeather; // weather being set for this new day
+
+        if (currentW2 === 'chuva') {
+          if (a.type === 'bufalo') happyDelta += 5;
+          if (a.type === 'pato' || a.type === 'ganso') happyDelta += 8;
+          if (a.type === 'minhoca' || a.type === 'caracol') happyDelta += 10;
+          if (a.type === 'galinha' || a.type === 'codorna') happyDelta -= 3;
+          if (a.type === 'avestruz') happyDelta -= 5;
+        }
+
+        if (currentW2 === 'sol') {
+          if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao') happyDelta += 5;
+          if (a.type === 'jacare') happyDelta += 8;
+          if (a.type === 'pato' || a.type === 'ganso') happyDelta -= 5;
+          if (a.type === 'minhoca' || a.type === 'caracol') happyDelta -= 5;
+        }
+
+        if (currentSeasonIdx === 1) { // verão
+          if (a.type === 'lhama' || a.type === 'alpaca') happyDelta -= 8;
+          if (a.type === 'jacare' || a.type === 'ra') happyDelta += 5;
+          if (a.type === 'minhoca' || a.type === 'caracol') happyDelta -= 10;
+        }
+        if (currentSeasonIdx === 3) { // inverno
+          if (a.type === 'lhama' || a.type === 'alpaca') happyDelta += 5;
+          if (a.type === 'jacare') happyDelta -= 10;
+          if (a.type === 'ra') happyDelta -= 8;
+        }
+
+        if (happyDelta === 0) return a;
+        return { ...a, happiness: Math.min(100, Math.max(0, a.happiness + happyDelta)) };
       });
 
       // MECHANIC 1: Sistema de Pragas (Pato reduz probabilidade)
@@ -3442,7 +3478,7 @@ export default function App() {
 
       // --- LAYER 1: Filhotes atingindo maturidade ---
       const baseMaxAgeMapAdult: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400 };
-      const finalAnimalsWithAdulthood: Animal[] = finalAnimals.map(a => {
+      const finalAnimalsWithAdulthood: Animal[] = finalAnimalsWithClimate.map(a => {
         if (!a.isAdult && a.adulthoodDay !== undefined && nextDayValue >= a.adulthoodDay) {
           logsToAdd.push({ msg: `🎉 ${a.name} cresceu e se tornou adulto! Pronto para produzir!`, type: 'success' });
           setTimeout(() => addNotification(`🎉 ${a.name} (${a.type}) cresceu e está pronto para produzir!`, 'success', nextDayValue), 0);
