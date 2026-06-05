@@ -1451,6 +1451,24 @@ export default function App() {
     return 'inverno';
   };
 
+  // Returns life phase info for an animal
+  const getLifePhase = (animal: { age?: number; maxAge?: number; isAdult?: boolean; adulthoodDay?: number }): {
+    phase: 'filhote' | 'juvenil' | 'adulto_jovem' | 'adulto' | 'idoso' | 'muito_idoso';
+    label: string;
+    emoji: string;
+    prodMult: number; // production multiplier for this phase
+    color: string;
+  } => {
+    if (animal.isAdult === false) return { phase: 'filhote', label: 'Filhote', emoji: '🐣', prodMult: 0, color: 'bg-yellow-100 border-yellow-300 text-yellow-800' };
+    if (!animal.age || !animal.maxAge) return { phase: 'adulto', label: 'Adulto', emoji: '⭐', prodMult: 1.0, color: 'bg-blue-100 border-blue-300 text-blue-800' };
+    const ratio = animal.age / animal.maxAge;
+    if (ratio < 0.15) return { phase: 'juvenil', label: 'Juvenil', emoji: '🌱', prodMult: 0.6, color: 'bg-lime-100 border-lime-300 text-lime-800' };
+    if (ratio < 0.50) return { phase: 'adulto_jovem', label: 'Adulto Jovem', emoji: '⭐', prodMult: 1.1, color: 'bg-emerald-100 border-emerald-300 text-emerald-800' };
+    if (ratio < 0.75) return { phase: 'adulto', label: 'Adulto', emoji: '🐄', prodMult: 1.0, color: 'bg-blue-100 border-blue-300 text-blue-800' };
+    if (ratio < 0.90) return { phase: 'idoso', label: 'Idoso', emoji: '🧓', prodMult: 0.7, color: 'bg-orange-100 border-orange-300 text-orange-800' };
+    return { phase: 'muito_idoso', label: 'Muito Idoso', emoji: '☠️', prodMult: 0.4, color: 'bg-red-100 border-red-300 text-red-800' };
+  };
+
   // F6: multiplicadores sazonais de preço
   const getSeasonalityMultiplier = (itemType: string, day: number): number => {
     const estacao = getEstacaoKey(day);
@@ -2360,7 +2378,11 @@ export default function App() {
 
       // Atualizações de produção baseadas nas espécies
       if (copy.type === 'vaca') {
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        const ageRatio = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+        const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
+        const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
+        const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (!canProduce) {
           if (copy.hunger <= 25) {
@@ -2411,7 +2433,11 @@ export default function App() {
         }
       }
       else if (copy.type === 'galinha') {
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        const ageRatio = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+        const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
+        const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
+        const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (!canProduce) {
           if (copy.hunger <= 25) {
@@ -2433,7 +2459,11 @@ export default function App() {
             copy.hasProducedToday = false; // BUG FIX: garante que o botão de coleta fique desabilitado imediatamente ao entrar na secagem
             logs.push({ msg: `🐐 ${copy.name} entrou no período de secagem (15 dias).`, type: 'info' });
           } else {
-            const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+            const ageRatioGoat = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+            const basePhaseMultGoat = ageRatioGoat < 0.15 ? 0.6 : ageRatioGoat < 0.50 ? 1.1 : ageRatioGoat < 0.75 ? 1.0 : ageRatioGoat < 0.90 ? 0.7 : 0.4;
+            const adjustedPhaseMultGoat = Math.min(1.15, basePhaseMultGoat + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
+            const lifePhaseBlockGoat = adjustedPhaseMultGoat < 1.0 && Math.random() > adjustedPhaseMultGoat;
+            const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlockGoat;
             copy.hasProducedToday = canProduce;
             if (canProduce) {
               logs.push({ msg: `🐐 ${copy.name} está lactando e produziu leite de cabra!`, type: 'info' });
@@ -2466,7 +2496,11 @@ export default function App() {
       }
       else if (copy.type === 'pato') {
         const currentSeason = Math.floor(((dayForSeason - 1) % 120) / 30); // use actual current day for season
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        const ageRatio = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+        const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
+        const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
+        const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🦆 ${copy.name} botou um ovo de pato!`, type: 'info' });
@@ -2484,7 +2518,11 @@ export default function App() {
       else if (copy.type === 'bufalo') {
         // Summer heat stress
         // We don't have currentDay here but we can check currentW or use approximation
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        const ageRatio = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+        const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
+        const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
+        const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐃 ${copy.name} produziu leite de búfala!`, type: 'info' });
@@ -2496,7 +2534,11 @@ export default function App() {
         copy.hasProducedToday = false;
       }
       else if (copy.type === 'codorna') {
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        const ageRatio = (copy.age && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+        const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
+        const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
+        const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐦 ${copy.name} (codorna) botou ovos de codorna!`, type: 'info' });
@@ -3335,7 +3377,16 @@ export default function App() {
       // de setAnimals) para evitar side-effects (push em logsToAdd, wisdomBonusUpdates)
       // sendo executados duas vezes no StrictMode do React.
       const wisdomBonusUpdates: { vaca: number; ovelha: number; boi: number; galinha: number } = { vaca: 0, ovelha: 0, boi: 0, galinha: 0 };
-      const agedAnimals = survivors.map(a => ({ ...a, age: (a.age || 0) + 1 }));
+      const agedAnimals = survivors.map(a => {
+        const newAge = (a.age || 0) + 1;
+        const maxAge = a.maxAge || 999;
+        const wasVeteran = a.isVeteran;
+        const becameVeteran = !wasVeteran && newAge >= maxAge * 0.5;
+        if (becameVeteran) {
+          logsToAdd.push({ msg: `🏅 ${a.name} (${a.type}) completou metade da vida e se tornou Veterano! +5% produção permanente.`, type: 'success' });
+        }
+        return { ...a, age: newAge, isVeteran: wasVeteran || becameVeteran };
+      });
       const survivorsAfterAge = agedAnimals.filter(a => {
         const maxAge = a.maxAge || 999;
         if (a.age >= maxAge) {

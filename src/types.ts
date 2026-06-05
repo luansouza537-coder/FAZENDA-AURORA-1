@@ -73,6 +73,9 @@ export interface Animal {
   // Filhotes (Layer 1 & 2)
   isAdult?: boolean;         // false = filhote, true = adulto (default true para existentes)
   adulthoodDay?: number;     // dia do jogo em que o animal se torna adulto
+  isVeteran?: boolean;       // reached 50% of maxAge
+  juvenileBonus?: number;    // 0 to 0.1, permanent prod bonus from good juvenile care
+  retirementValue?: number;  // cached retirement gold value
 
   // Happiness system improvements
   happinessStreak?: number;  // dias consecutivos com happiness >= 85 (para Melhor Amigo mais tolerante)
