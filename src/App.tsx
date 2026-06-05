@@ -4587,8 +4587,8 @@ export default function App() {
               className="bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
               title="Acesse a Queijaria para maturação de queijos artesanais e ampliação"
             >
-              <span>🧀</span>
-              <span>Queijaria</span>
+              <span>🏭</span>
+              <span>Produção</span>
               {queijosEmMaturacao.length > 0 && (
                 <span className="bg-red-500 text-white text-[10px] h-5 w-5 rounded-full flex items-center justify-center font-bold font-mono">
                   {queijosEmMaturacao.length}
@@ -6273,7 +6273,7 @@ export default function App() {
                     ]
                   },
                   {
-                    title: '🧀 Queijaria & Processados',
+                    title: '🏭 Produção & Processados',
                     bg: 'bg-amber-50/60 border-amber-200',
                     items: [
                       { key: 'cheese', label: '🧀 Queijo Simp.', qty: inventory.cheese, priceKey: 'cheese' },
@@ -7933,7 +7933,7 @@ export default function App() {
               {/* Tab Navigation */}
               <div className="bg-amber-50 px-4 pt-3 pb-0 border-b-2 border-amber-200 shrink-0 flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'thin' }}>
                 {([
-                  { key: 'queijaria', label: '🧀 Queijaria' },
+                  { key: 'queijaria', label: '🏭 Produção' },
                   { key: 'tecelagem', label: '🧶 Tecelagem' },
                   { key: 'cozinha', label: '🥣 Cozinha' },
                   { key: 'cosmeticos', label: '🌿 Cosméticos' },
@@ -8010,8 +8010,8 @@ export default function App() {
                       <h4 className="font-display font-black text-xs uppercase tracking-wider text-[#78350f] mb-2">📖 Receitas</h4>
                       <div className="grid grid-cols-1 gap-2">
                         {[
-                          { label: 'Queijo Coalho', emoji: '🧀', req: `🥛 3 leite (${inventory.milk}/3) • ⌛ 1d • Nv5`, canCraft: farmLevel >= 5 && inventory.milk >= 3 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 5, onClick: (e: React.MouseEvent) => craftQueijo('coalho', e) },
-                          { label: 'Queijo Muçarela', emoji: '🧀', req: `🥛 5 leite (${inventory.milk}/5) • ⌛ 3d • Nv5`, canCraft: farmLevel >= 5 && inventory.milk >= 5 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 5, onClick: (e: React.MouseEvent) => craftQueijo('mucarela', e) },
+                          { label: 'Queijo Coalho', emoji: '🧀', req: `🥛 3 leite (${inventory.milk}/3) • ⌛ 1d`, canCraft: inventory.milk >= 3 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 1, onClick: (e: React.MouseEvent) => craftQueijo('coalho', e) },
+                          { label: 'Queijo Muçarela', emoji: '🧀', req: `🥛 5 leite (${inventory.milk}/5) • ⌛ 3d • Nv3`, canCraft: farmLevel >= 3 && inventory.milk >= 5 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 3, onClick: (e: React.MouseEvent) => craftQueijo('mucarela', e) },
                           { label: 'Queijo Brie', emoji: '🧀', req: `🥛 8 leite (${inventory.milk}/8) • ⌛ 7d • Nv5`, canCraft: farmLevel >= 5 && inventory.milk >= 8 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 5, onClick: (e: React.MouseEvent) => craftQueijo('brie', e) },
                           { label: 'Muçarela Búfala', emoji: '🧀', req: `🥛 3 L.Búfala (${inventory.buffalo_milk ?? 0}/3) • ⌛ 2d • Nv4`, canCraft: farmLevel >= 4 && (inventory.buffalo_milk ?? 0) >= 3 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 4, onClick: (e: React.MouseEvent) => craftBuffaloMozzarella(e) },
                           { label: 'Manteiga', emoji: '🧈', req: `🥛 2 leite (${inventory.milk}/2) • Nv2`, canCraft: farmLevel >= 2 && inventory.milk >= 2, reqLevel: 2, onClick: (e: React.MouseEvent) => craftButter(e) },

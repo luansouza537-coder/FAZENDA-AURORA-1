@@ -650,9 +650,10 @@ export function useInventory({
   const craftQueijo = (tipo: 'coalho' | 'mucarela' | 'brie', event?: React.MouseEvent) => {
     if (event && event.preventDefault) event.preventDefault();
 
-    // BUG 19 FIX: queijaria artesanal exige nível 5
-    if (farmLevel < 5) {
-      addLog('A Queijaria Artesanal é desbloqueada no Nível 5!', 'error');
+    // Queijo Coalho desde nível 1, Muçarela nível 3, Brie nível 5
+    const minLevel = tipo === 'coalho' ? 1 : tipo === 'mucarela' ? 3 : 5;
+    if (farmLevel < minLevel) {
+      addLog(`🧀 ${tipo === 'mucarela' ? 'Queijo Muçarela requer Nível 3' : 'Queijo Brie requer Nível 5'}!`, 'error');
       triggerAudioResult(() => sfx.playSound('error'));
       return;
     }
