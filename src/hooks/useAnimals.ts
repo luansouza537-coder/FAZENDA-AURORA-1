@@ -782,7 +782,7 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'alpaca') return;
     if (!animal.woolReady) { addLog(`🦙 ${animal.name} ainda não está pronta para tosquia!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
-    const qty = specialization === 'fibras' ? Math.round(1.2) : 1;
+    const qty = specialization === 'fibras' ? 2 : 1;
     setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) + qty }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolReady: false, daysSinceLastWool: 0 } : a));
     addLog(`🦙 ${animal.name} (alpaca) foi tosquiada! +${qty} lã de alpaca.`, 'success');

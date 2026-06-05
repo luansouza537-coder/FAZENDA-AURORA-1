@@ -4195,11 +4195,21 @@ export default function App() {
 
         // --- Ordenhador: coleta leite de vaca/cabra/bufalo adultos; tosquia alpaca quando woolReady ---
         if (workers.some(w => w.role === 'ordenhador')) {
-          let milkCollected = 0;
+          let cowMilkCollected = 0;
+          let goatMilkCollected = 0;
+          let buffaloMilkCollected = 0;
           let alpacaWoolCollected = 0;
           setAnimals(prev => prev.map(a => {
-            if (['vaca', 'cabra', 'bufalo'].includes(a.type) && a.isAdult !== false && a.hasProducedToday) {
-              milkCollected++;
+            if (a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday) {
+              cowMilkCollected++;
+              return { ...a, hasProducedToday: false };
+            }
+            if (a.type === 'cabra' && a.isAdult !== false && a.hasProducedToday) {
+              goatMilkCollected++;
+              return { ...a, hasProducedToday: false };
+            }
+            if (a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday) {
+              buffaloMilkCollected++;
               return { ...a, hasProducedToday: false };
             }
             // Alpaca produces wool (woolReady), not milk — ordenhador tosquia alpaca
@@ -4209,9 +4219,17 @@ export default function App() {
             }
             return a;
           }));
-          if (milkCollected > 0) {
-            setInventory(prev => ({ ...prev, milk: prev.milk + milkCollected }));
-            logsToAdd.push({ msg: `🥛 Ordenhador coletou +${milkCollected} leite(s) automaticamente!`, type: 'success' });
+          if (cowMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, milk: prev.milk + cowMilkCollected }));
+            logsToAdd.push({ msg: `🥛 Ordenhador coletou +${cowMilkCollected} leite(s) de vaca automaticamente!`, type: 'success' });
+          }
+          if (goatMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) + goatMilkCollected }));
+            logsToAdd.push({ msg: `🐐 Ordenhador coletou +${goatMilkCollected} leite(s) de cabra automaticamente!`, type: 'success' });
+          }
+          if (buffaloMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) + buffaloMilkCollected }));
+            logsToAdd.push({ msg: `🐃 Ordenhador coletou +${buffaloMilkCollected} leite(s) de búfala automaticamente!`, type: 'success' });
           }
           if (alpacaWoolCollected > 0) {
             setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) + alpacaWoolCollected }));

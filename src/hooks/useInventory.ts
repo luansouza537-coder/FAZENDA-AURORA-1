@@ -1066,19 +1066,55 @@ export function useInventory({
       conserva_peixe: 0, mel_envasado: 0, sopa_cogumelo: 0,
     }));
 
-    // Update weekly sales statistics
-    setWeeklySales(prev => ({
-      ...prev,
-      milk: prev.milk + milkQty,
-      wool: prev.wool + woolQty,
-      cheese: prev.cheese + cheeseQty,
-      scarf: prev.scarf + scarfQty,
-      egg: prev.egg + eggQty,
-      mayo: prev.mayo + mayoQty,
-      queijoCoalho: (prev.queijoCoalho ?? 0) + coalhoQty,
-      queijoMucarela: (prev.queijoMucarela ?? 0) + mucarelaQty,
-      queijoBrie: (prev.queijoBrie ?? 0) + brieQty
-    }));
+    // Update weekly sales statistics — include ALL sold item types so supply/demand pricing works
+    setWeeklySales(prev => {
+      const updated: any = { ...prev };
+      updated.milk = (prev.milk || 0) + milkQty;
+      updated.wool = (prev.wool || 0) + woolQty;
+      updated.cheese = (prev.cheese || 0) + cheeseQty;
+      updated.scarf = (prev.scarf || 0) + scarfQty;
+      updated.egg = (prev.egg || 0) + eggQty;
+      updated.mayo = (prev.mayo || 0) + mayoQty;
+      updated.queijoCoalho = (prev.queijoCoalho || 0) + coalhoQty;
+      updated.queijoMucarela = (prev.queijoMucarela || 0) + mucarelaQty;
+      updated.queijoBrie = (prev.queijoBrie || 0) + brieQty;
+      // Extended items — stored as dynamic keys via spread so pricing works
+      if (goatMilkQty > 0) updated.goat_milk = (prev.goat_milk || 0) + goatMilkQty;
+      if (llamaWoolQty > 0) updated.llama_wool = (prev.llama_wool || 0) + llamaWoolQty;
+      if (duckEggQty > 0) updated.duck_egg = (prev.duck_egg || 0) + duckEggQty;
+      if (gooseEggQty > 0) updated.goose_egg = (prev.goose_egg || 0) + gooseEggQty;
+      if (buffaloMilkQty > 0) updated.buffalo_milk = (prev.buffalo_milk || 0) + buffaloMilkQty;
+      if (buffaloMozzQty > 0) updated.buffalo_mozzarella = (prev.buffalo_mozzarella || 0) + buffaloMozzQty;
+      if (featherQty > 0) updated.feather = (prev.feather || 0) + featherQty;
+      if (peacockFeatherQty > 0) updated.peacock_feather = (prev.peacock_feather || 0) + peacockFeatherQty;
+      if (butterQty > 0) updated.butter = (prev.butter || 0) + butterQty;
+      if (yogurtQty > 0) updated.yogurt = (prev.yogurt || 0) + yogurtQty;
+      if (fertileEggQty > 0) updated.fertile_egg = (prev.fertile_egg || 0) + fertileEggQty;
+      if (quailEggQty > 0) updated.quail_egg = (prev.quail_egg || 0) + quailEggQty;
+      if (alpacaWoolQty > 0) updated.alpaca_wool = (prev.alpaca_wool || 0) + alpacaWoolQty;
+      if (humusQty > 0) updated.humus = (prev.humus || 0) + humusQty;
+      if (mucoQty > 0) updated.muco = (prev.muco || 0) + mucoQty;
+      if (angoraWoolQty > 0) updated.angora_wool = (prev.angora_wool || 0) + angoraWoolQty;
+      if (sedaBrutaQty > 0) updated.seda_bruta = (prev.seda_bruta || 0) + sedaBrutaQty;
+      if (coxaRaQty > 0) updated.coxa_ra = (prev.coxa_ra || 0) + coxaRaQty;
+      if (carneAvestruzQty > 0) updated.carne_avestruz = (prev.carne_avestruz || 0) + carneAvestruzQty;
+      if (penaGrandeQty > 0) updated.pena_grande = (prev.pena_grande || 0) + penaGrandeQty;
+      if (couroAvestruzQty > 0) updated.couro_avestruz = (prev.couro_avestruz || 0) + couroAvestruzQty;
+      if (carneJacareQty > 0) updated.carne_jacare = (prev.carne_jacare || 0) + carneJacareQty;
+      if (couroJacareQty > 0) updated.couro_jacare = (prev.couro_jacare || 0) + couroJacareQty;
+      if (queijoCabraQty > 0) updated.queijo_cabra = (prev.queijo_cabra || 0) + queijoCabraQty;
+      if (iogurteCabraQty > 0) updated.iogurte_cabra = (prev.iogurte_cabra || 0) + iogurteCabraQty;
+      if (leiteCondensadoQty > 0) updated.leite_condensado = (prev.leite_condensado || 0) + leiteCondensadoQty;
+      if (peixeQty > 0) updated.peixe = (prev.peixe || 0) + peixeQty;
+      if (melQty > 0) updated.mel = (prev.mel || 0) + melQty;
+      if (cogumeloQty > 0) updated.cogumelo = (prev.cogumelo || 0) + cogumeloQty;
+      if (hidromelQty > 0) updated.hidromel = (prev.hidromel || 0) + hidromelQty;
+      if (risotoQty > 0) updated.risoto_cogumelo = (prev.risoto_cogumelo || 0) + risotoQty;
+      if (conservaPeixeQty > 0) updated.conserva_peixe = (prev.conserva_peixe || 0) + conservaPeixeQty;
+      if (melEnvasadoQty > 0) updated.mel_envasado = (prev.mel_envasado || 0) + melEnvasadoQty;
+      if (sopaCogumeloQty > 0) updated.sopa_cogumelo = (prev.sopa_cogumelo || 0) + sopaCogumeloQty;
+      return updated;
+    });
 
     const totalAllQty = milkQty + woolQty + cheeseQty + scarfQty + eggQty + mayoQty + coalhoQty + mucarelaQty + brieQty + goatMilkQty + llamaWoolQty + duckEggQty + gooseEggQty + buffaloMilkQty + buffaloMozzQty + featherQty + peacockFeatherQty + butterQty + yogurtQty + fertileEggQty + allExtras;
     setStats(prev => ({
