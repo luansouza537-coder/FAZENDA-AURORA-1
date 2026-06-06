@@ -394,6 +394,7 @@ export default function App() {
   });
   const [showBuyMenu, setShowBuyMenu] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
+  const [pendingContractOffer, setPendingContractOffer] = useState<import('./types').Contract | null>(null);
   const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>('splash');
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
 
@@ -2759,8 +2760,8 @@ export default function App() {
       id: Math.random().toString(36).substring(2, 9),
       product, quantity, delivered: 0, pricePerUnit, deadline, penalty, active: true
     };
-    setContracts(prev => [...prev, newContract]);
-    setTimeout(() => addNotification(`📋 Comerciante ofereceu contrato: entregar ${quantity} un de ${product} até o dia ${deadline} por ${pricePerUnit} moedas/un!`, 'event', nextDayVal), 0);
+    setPendingContractOffer(newContract);
+    setTimeout(() => addNotification(`📋 Comerciante quer oferecer um contrato! Verifique a proposta para aceitar ou recusar.`, 'event', nextDayVal), 0);
   };
 
   /**
@@ -3365,7 +3366,7 @@ export default function App() {
           const evt = MARKET_EVENTS[Math.floor(Math.random() * MARKET_EVENTS.length)];
           setActiveMarketEvent(evt);
           logsToAdd.push({ msg: `${evt.title}: ${evt.desc}`, type: 'event' });
-          addNotification(`${evt.title}: ${evt.desc}`, 'info');
+          addNotification(`${evt.title}: ${evt.desc}`, 'event');
         }
         setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0, waterCost: 0, energyCost: 0 });
         setWeeklySales({ milk: 0, wool: 0, cheese: 0, scarf: 0, carne: 0, egg: 0, mayo: 0, queijoCoalho: 0, queijoMucarela: 0, queijoBrie: 0 });
@@ -3640,13 +3641,13 @@ export default function App() {
         }
       }
 
-      // Codorna: auto-collect quail_eggs
+      // Codorna: auto-collect quail_eggs (3 por codorna/dia)
       {
-        const codornaCount = finalAnimals.filter(a => a.type === 'codorna' && a.hasProducedToday).length;
-        if (codornaCount > 0) {
-          const eggs = codornaCount * 6;
-          setTimeout(() => setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) + eggs })), 0);
-          logsToAdd.push({ msg: `🐦 ${codornaCount} codorna(s) botaram ${eggs} ovos de codorna!`, type: 'success' });
+        const producingCodornas = finalAnimals.filter(a => a.type === 'codorna' && a.hasProducedToday);
+        if (producingCodornas.length > 0) {
+          const eggs = producingCodornas.length * 3;
+          setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) + eggs }));
+          logsToAdd.push({ msg: `🐦 ${producingCodornas.length} codorna(s) botaram ${eggs} ovos de codorna!`, type: 'success' });
         }
       }
 
@@ -4225,9 +4226,35 @@ export default function App() {
         setGold(prev => prev - workerCost);
         logsToAdd.push({ msg: `👷 Peões trabalharam hoje! Custo diário: -${workerCost}💰`, type: 'info' });
 
-        // --- Tratador: alimenta todos os animais ---
+        // --- Tratador: alimenta todos os animais consumindo ração correta do inventário ---
         if (workers.some(w => w.role === 'tratador')) {
-          setAnimals(prev => prev.map(a => ({ ...a, hunger: Math.min(100, a.hunger + 40) })));
+          const getFeedKeyForType = (type: string): keyof typeof inventory => {
+            if (type === 'vaca' || type === 'boi' || type === 'bufalo') return 'racaoBovina';
+            if (type === 'ovelha' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
+            if (type === 'galinha' || type === 'codorna' || type === 'pavao') return 'racaoAves';
+            if (type === 'pato' || type === 'ganso') return 'racaoAquatica';
+            if (type === 'coelho_angora') return 'racaoCoelho';
+            return 'racaoCarnivora';
+          };
+          const noFeedTypes = ['minhoca', 'caracol', 'bicho_seda'];
+          setInventory(prev => {
+            const updated = { ...prev };
+            animals.forEach(a => {
+              if (noFeedTypes.includes(a.type)) return;
+              const feedKey = getFeedKeyForType(a.type);
+              if ((updated[feedKey] as number) > 0) {
+                (updated[feedKey] as number) -= 1;
+              }
+            });
+            return updated;
+          });
+          setAnimals(prev => prev.map(a => ({
+            ...a,
+            hunger: Math.min(100, a.hunger + 35),
+            happiness: Math.min(100, a.happiness + 12),
+            daysWithoutFood: 0,
+          })));
+          setStats(prev => ({ ...prev, totalFed: prev.totalFed + animals.filter(a => !noFeedTypes.includes(a.type)).length }));
         }
 
         // --- Veterinário: cura doenças + +5 felicidade ---
@@ -4330,10 +4357,7 @@ export default function App() {
               eggsCollected++;
               return { ...a, hasProducedToday: false };
             }
-            if (a.type === 'codorna' && a.isAdult !== false && a.hasProducedToday) {
-              quailEggs++;
-              return { ...a, hasProducedToday: false };
-            }
+            // codorna: auto-collected daily in main loop (not duplicated here)
             if (a.type === 'pato' && a.isAdult !== false && a.hasProducedToday) {
               duckEggs++;
               return { ...a, hasProducedToday: false };
@@ -4349,10 +4373,7 @@ export default function App() {
             setInventory(prev => ({ ...prev, egg: prev.egg + eggsCollected }));
             logsToAdd.push({ msg: `🥚 Avicultor coletou +${eggsCollected} ovo(s) de galinha!`, type: 'success' });
           }
-          if (quailEggs > 0) {
-            setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) + quailEggs }));
-            logsToAdd.push({ msg: `🥚 Avicultor coletou +${quailEggs} ovo(s) de codorna!`, type: 'success' });
-          }
+          // quailEggs handled by main loop auto-collect
           if (duckEggs > 0) {
             setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) + duckEggs }));
             logsToAdd.push({ msg: `🥚 Avicultor coletou +${duckEggs} ovo(s) de pato!`, type: 'success' });
@@ -5438,26 +5459,27 @@ export default function App() {
                   </div>
 
                   {/* Pato (Nível 1+) */}
-                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                  <div className={`flex flex-col items-center p-3.5 rounded-[24px] border-2 w-full max-w-[190px] text-center shadow-md relative ${farmLevel < 3 ? 'bg-stone-100/90 border-stone-300 opacity-70' : 'bg-white/90 border-[#fbbf24]'}`}>
+                    {farmLevel < 3 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">🔒 Nv3</span>}
                     {farmLevel >= 4 && <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>}
                     <span className="text-4xl">🦆</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Pato de Quintal</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Ovos de pato 18💰/u + penas! Reduz pragas 40%.</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Ovos de pato 18💰/u + penas! Reduz pragas 40%. Nível 3+</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('pato')}</span>
                     <button
                       type="button"
                       onClick={(e) => buyAnimal('pato', e)}
-                      disabled={gold < getAnimalPurchasePrice('pato')}
+                      disabled={gold < getAnimalPurchasePrice('pato') || farmLevel < 3}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                     >
-                      Comprar + 1 🌾
+                      {farmLevel < 3 ? '🔒 Nível 3' : 'Comprar + 1 🌾'}
                     </button>
                     <button
                       type="button"
                       onClick={(e) => buyAnimalFilhote('pato', e)}
-                      disabled={gold < 25}
+                      disabled={gold < 25 || farmLevel < 3}
                       className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
-                      title="Compra um filhote de Pato por 25 moedas. Cresce em 6 dias."
+                      title="Compra um filhote de Pato por 25 moedas. Cresce em 6 dias. Requer Nível 3."
                     >
                       🍼 Filhote 25💰
                     </button>
@@ -6645,7 +6667,7 @@ export default function App() {
                 </div>
                 <div className="bg-[#fffbeb] p-3 rounded-2xl border-2 border-[#fbbf24] shadow-sm">
                   <div className="text-[10px] text-[#92400e] uppercase font-black leading-none">Gado Comercializado</div>
-                  <div className="text-base font-black text-amber-700 mt-1">🐂 {stats.totalSold}</div>
+                  <div className="text-base font-black text-amber-700 mt-1">🐂 {stats.totalOxSold ?? 0}</div>
                 </div>
               </div>
             </div>
@@ -6722,6 +6744,14 @@ export default function App() {
                     items: [
                       { key: 'scarf', label: '🧣 Cachecol', qty: inventory.scarf, priceKey: 'scarf' },
                       { key: 'mayo', label: '🥣 Maionese', qty: inventory.mayo ?? 0, priceKey: 'mayo' },
+                      { key: 'tapete_lhama', label: '🪢 Tapete Lhama', qty: (inventory as any).tapete_lhama ?? 0, priceKey: 'tapete_lhama' as any },
+                      { key: 'cachecol_angora', label: '🧣 Cachecol Angorá', qty: (inventory as any).cachecol_angora ?? 0, priceKey: 'cachecol_angora' as any },
+                      { key: 'tecido_alpaca', label: '🧶 Tecido Alpaca', qty: (inventory as any).tecido_alpaca ?? 0, priceKey: 'tecido_alpaca' as any },
+                      { key: 'fio_seda', label: '🪡 Fio de Seda', qty: (inventory as any).fio_seda ?? 0, priceKey: 'fio_seda' as any },
+                      { key: 'manta_premium', label: '✨ Manta Premium', qty: (inventory as any).manta_premium ?? 0, priceKey: 'manta_premium' as any },
+                      { key: 'pate_pato', label: '🍖 Patê de Pato', qty: (inventory as any).pate_pato ?? 0, priceKey: 'pate_pato' as any },
+                      { key: 'ovo_defumado', label: '🥚 Ovo Defumado', qty: (inventory as any).ovo_defumado ?? 0, priceKey: 'ovo_defumado' as any },
+                      { key: 'conserva_codorna', label: '🥚 Conserva Codorna', qty: (inventory as any).conserva_codorna ?? 0, priceKey: 'conserva_codorna' as any },
                     ]
                   },
                   {
@@ -10293,6 +10323,11 @@ export default function App() {
                     {candidates.map(partner => (
                       <button key={partner.id} type="button"
                         onClick={() => {
+                          if (partner.type !== cruzarModal.type) {
+                            addLog(`❌ Erro: ${partner.name} é de espécie diferente! Só é possível cruzar animais da mesma espécie.`, 'error');
+                            setCruzarModal(null);
+                            return;
+                          }
                           setReproducaoAtiva(prev => [...prev, {
                             animalId1: cruzarModal.animalId,
                             animalId2: partner.id,
@@ -10315,6 +10350,53 @@ export default function App() {
             </motion.div>
           );
         })()}
+      </AnimatePresence>
+
+      {/* 📋 MODAL OFERTA DE CONTRATO */}
+      <AnimatePresence>
+        {pendingContractOffer && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}
+              className="bg-[#fef3c7] border-4 border-violet-500 rounded-3xl p-6 max-w-sm w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="font-display font-black text-xl text-[#78350f] uppercase mb-2 flex items-center gap-2">📋 Proposta de Contrato</h2>
+              <p className="text-[11px] text-stone-600 font-mono mb-4">O Comerciante Viajante quer fazer um negócio com você! Quer aceitar?</p>
+              <div className="bg-violet-50 border-2 border-violet-300 rounded-2xl p-4 mb-4 space-y-1">
+                <div className="text-sm font-black text-violet-900">
+                  {pendingContractOffer.product === 'milk' ? '🥛 Leite Cru' : pendingContractOffer.product === 'wool' ? '🧶 Lã Crua' : pendingContractOffer.product === 'egg' ? '🥚 Ovos' : '🧀 Queijo'}
+                </div>
+                <div className="text-xs font-mono text-stone-700">Quantidade: <strong>{pendingContractOffer.quantity} unidades</strong></div>
+                <div className="text-xs font-mono text-stone-700">Preço garantido: <strong>{pendingContractOffer.pricePerUnit}💰/un</strong></div>
+                <div className="text-xs font-mono text-stone-700">Prazo: <strong>Dia {pendingContractOffer.deadline}</strong></div>
+                <div className="text-xs font-mono text-red-600">Multa por atraso: <strong>{pendingContractOffer.penalty}💰</strong></div>
+              </div>
+              <div className="flex gap-2">
+                <button type="button"
+                  onClick={() => {
+                    setContracts(prev => [...prev, pendingContractOffer!]);
+                    addLog(`✅ Contrato aceito! Entregue ${pendingContractOffer.quantity} un de ${pendingContractOffer.product} até o dia ${pendingContractOffer.deadline}.`, 'success');
+                    setPendingContractOffer(null);
+                  }}
+                  className="flex-1 bg-violet-600 hover:bg-violet-500 text-white font-black text-sm uppercase px-4 py-2 rounded-xl border-b-2 border-violet-800 transition-all cursor-pointer">
+                  ✅ Aceitar
+                </button>
+                <button type="button"
+                  onClick={() => {
+                    addLog(`❌ Proposta de contrato recusada.`, 'info');
+                    setPendingContractOffer(null);
+                  }}
+                  className="flex-1 bg-stone-300 hover:bg-stone-400 text-stone-800 font-black text-sm uppercase px-4 py-2 rounded-xl border-b-2 border-stone-500 transition-all cursor-pointer">
+                  ❌ Recusar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* 🎪 MODAL RESULTADO DA FEIRA */}

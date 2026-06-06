@@ -964,6 +964,7 @@ export function useAnimals({
     }
 
     // Level unlock checks for new animals
+    if (type === 'pato' && farmLevel < 3) { addLog('🔒 Pato de Quintal requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'codorna' && farmLevel < 3) { addLog('🔒 Codorna requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'alpaca' && farmLevel < 5) { addLog('🔒 Alpaca requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'minhoca' && farmLevel < 6) { addLog('🔒 Minhoca requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
