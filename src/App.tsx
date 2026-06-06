@@ -2799,8 +2799,8 @@ export default function App() {
       if (Math.random() < 0.6) {
         setTimeout(() => generateMerchantContract(nextDayVal), 50);
       }
-      // 30% chance to gift folha_amoreira
-      if (Math.random() < 0.3) {
+      // 30% chance to gift folha_amoreira (only after silk is unlocked at level 10)
+      if (farmLevel >= 10 && Math.random() < 0.3) {
         setTimeout(() => {
           setInventory(prev => ({ ...prev, folha_amoreira: (prev.folha_amoreira ?? 0) + 5 }));
           addNotification('🌿 Comerciante trouxe 5 Folhas de Amoreira de presente!', 'event', nextDayVal);
@@ -6734,8 +6734,11 @@ export default function App() {
                       { key: 'queijoMucarela', label: '🧀 Muçarela', qty: inventory.queijoMucarela ?? 0, priceKey: 'queijoMucarela' },
                       { key: 'queijoBrie', label: '🧀 Queijo Brie', qty: inventory.queijoBrie ?? 0, priceKey: 'queijoBrie' },
                       { key: 'buffalo_mozzarella', label: '🧀 Muç. Búfala', qty: inventory.buffalo_mozzarella ?? 0, priceKey: 'buffalo_mozzarella' },
+                      { key: 'queijo_cabra', label: '🧀 Q. Cabra', qty: (inventory as any).queijo_cabra ?? 0, priceKey: 'queijo_cabra' as any },
                       { key: 'butter', label: '🧈 Manteiga', qty: inventory.butter ?? 0, priceKey: 'butter' },
                       { key: 'yogurt', label: '🥛 Iogurte', qty: inventory.yogurt ?? 0, priceKey: 'yogurt' },
+                      { key: 'iogurte_cabra', label: '🥛 Iog. Cabra', qty: (inventory as any).iogurte_cabra ?? 0, priceKey: 'iogurte_cabra' as any },
+                      { key: 'leite_condensado', label: '🥛 L. Condensado', qty: (inventory as any).leite_condensado ?? 0, priceKey: 'leite_condensado' as any },
                     ]
                   },
                   {
@@ -6770,7 +6773,7 @@ export default function App() {
                       { key: 'couro_avestruz', label: '🦤 Couro Avestruz', qty: inventory.couro_avestruz ?? 0, priceKey: 'couro_avestruz' as any },
                       { key: 'carne_jacare', label: '🐊 Carne Jacaré', qty: inventory.carne_jacare ?? 0, priceKey: 'carne_jacare' as any },
                       { key: 'couro_jacare', label: '🐊 Couro Jacaré', qty: inventory.couro_jacare ?? 0, priceKey: 'couro_jacare' as any },
-                      { key: 'folha_amoreira', label: '🌿 Folha Amoreira', qty: inventory.folha_amoreira ?? 0 },
+                      ...(farmLevel >= 10 ? [{ key: 'folha_amoreira', label: '🌿 Folha Amoreira', qty: inventory.folha_amoreira ?? 0 }] : []),
                     ]
                   }
                 ];
