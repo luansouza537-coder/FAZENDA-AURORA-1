@@ -2246,7 +2246,9 @@ export default function App() {
 
     // C. Alimentador Automático
     if (machinesObj.feederPurchased && machinesObj.feederActive) {
+      const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
       updatedAnimals = updatedAnimals.map(a => {
+        if (noFeedAnimals.includes(a.type)) return a;
         let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' = 'racaoBovina';
         let feedLabel = 'Ração Bovina';
         if (a.type === 'vaca' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
@@ -2255,7 +2257,7 @@ export default function App() {
         else if (a.type === 'pato' || a.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
         else if (a.type === 'coelho_angora') { feedType = 'racaoCoelho'; feedLabel = 'Ração de Coelhos'; }
         else if (a.type === 'ra' || a.type === 'avestruz' || a.type === 'jacare') { feedType = 'racaoCarnivora'; feedLabel = 'Ração Carnívora'; }
-        
+
         if ((nextInv[feedType] ?? 0) >= 1) {
           nextInv[feedType] -= 1;
           statsCollected.fedCount++;
@@ -4283,7 +4285,9 @@ export default function App() {
           let buffaloMilkCollected = 0;
           let alpacaWoolCollected = 0;
           setAnimals(prev => prev.map(a => {
+            // Skip vacas when ordenhadeira automática is active (it handles them)
             if (a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday) {
+              if (machines.milkerPurchased && machines.milkerActive) return a;
               cowMilkCollected++;
               return { ...a, hasProducedToday: false };
             }
@@ -4325,7 +4329,9 @@ export default function App() {
           let woolCollected = 0;
           let angoraCollected = 0;
           setAnimals(prev => prev.map(a => {
+            // Skip ovelhas when tosquiadeira elétrica is active (it handles them)
             if (a.type === 'ovelha' && a.isAdult !== false && a.woolReady) {
+              if (machines.shearerPurchased && machines.shearerActive) return a;
               woolCollected++;
               return { ...a, woolReady: false, daysUntilWool: 7, daysSinceLastWool: 0 };
             }
