@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import SplashScreen from './components/SplashScreen';
 import { useAnimals } from './hooks/useAnimals';
 import { useInventory } from './hooks/useInventory';
 import { useFairs } from './hooks/useFairs';
@@ -219,6 +220,17 @@ const MERCHANT_SPECIAL_ITEMS = [
 ] as const;
 
 export default function App() {
+  const hasSave = !!localStorage.getItem('aurora_farm_save');
+  const [gameStarted, setGameStarted] = useState<boolean>(false);
+
+  if (!gameStarted) {
+    return <SplashScreen onStart={() => setGameStarted(true)} hasSave={hasSave} />;
+  }
+
+  return <GameApp />;
+}
+
+function GameApp() {
   // --- STATE WITH LOCALSTORAGE INITIALIZATION ---
   // NOTE: gold, debt, dailyEarning, earningsHistory, weeklySales, weeklyStats,
   // previousPrices, priceHistory, merchantActive, daysSinceMerchant, nextMerchantDay,
