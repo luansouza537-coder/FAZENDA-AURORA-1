@@ -2181,70 +2181,14 @@ export default function App() {
   ) => {
     let updatedAnimals = [...animalsList];
     let nextInv = { ...inventoryObj };
-    let statsCollected = { milk: 0, wool: 0, milkedCows: 0, shearedSheep: 0, fedCount: 0 };
+    let statsCollected = { fedCount: 0 };
     let missingFeeds: string[] = [];
 
     if (!hasPaidMaintenance || updatedAnimals.length === 0) {
       return { updatedAnimals, nextInv, statsCollected, missingFeeds };
     }
 
-    // A. Ordenhadeira Automática
-    if (machinesObj.milkerPurchased && machinesObj.milkerActive) {
-      updatedAnimals = updatedAnimals.map(a => {
-        if (a.type === 'vaca' && a.hasProducedToday) {
-          let efficiency = (a.happiness / 100) * (1 - (Math.max(0, 100 - a.hunger) / 200));
-          efficiency = Math.max(0.3, Math.min(1.2, efficiency));
-
-          let baseLeite = 1;
-          let bonus = (efficiency > 0.8) ? 1 : 0;
-          let totalLeite = baseLeite + (Math.random() < 0.3 ? bonus : 0);
-
-          if (a.isBestFriend) {
-            totalLeite += 1;
-          }
-          if (currentWeather === 'sol') {
-            totalLeite += 1;
-          }
-          if (currentWeather === 'chuva') {
-            totalLeite = Math.max(1, Math.round(totalLeite * 0.8));
-          }
-          // BUG 6 FIX: aplica trait de produção na ordenhadeira automática
-          if (a.trait === 'trabalhadora') {
-            totalLeite = Math.max(1, Math.round(totalLeite * 1.15));
-          } else if (a.trait === 'preguicosa') {
-            totalLeite = Math.max(1, Math.round(totalLeite * 0.85));
-          }
-
-          statsCollected.milk += totalLeite;
-          statsCollected.milkedCows++;
-          return { ...a, hasProducedToday: false };
-        }
-        return a;
-      });
-    }
-
-    // B. Tosquiadeira Elétrica
-    if (machinesObj.shearerPurchased && machinesObj.shearerActive) {
-      updatedAnimals = updatedAnimals.map(a => {
-        if (a.type === 'ovelha' && a.woolReady) {
-          let quality = (a.happiness / 100) * (a.hunger / 100);
-          let woolBonus = quality > 0.7 ? 2 : 1;
-          // BUG 6 FIX: aplica trait de produção na tosquiadeira automática
-          if (a.trait === 'trabalhadora') {
-            woolBonus = Math.max(1, Math.round(woolBonus * 1.15));
-          } else if (a.trait === 'preguicosa') {
-            woolBonus = Math.max(1, Math.round(woolBonus * 0.85));
-          }
-
-          statsCollected.wool += woolBonus;
-          statsCollected.shearedSheep++;
-          return { ...a, woolReady: false, daysSinceLastWool: 0 };
-        }
-        return a;
-      });
-    }
-
-    // C. Alimentador Automático
+    // C. Alimentador Automático (runs before processarFomeFelicidade so hunger is set before health check)
     if (machinesObj.feederPurchased && machinesObj.feederActive) {
       const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
       updatedAnimals = updatedAnimals.map(a => {
@@ -2278,7 +2222,7 @@ export default function App() {
       });
     }
 
-    return { updatedAnimals, nextInv, statsCollected, missingFeeds };
+    return { updatedAnimals, nextInv, fedCount: statsCollected.fedCount, missingFeeds };
   };
 
   /**
@@ -2960,58 +2904,20 @@ export default function App() {
       const costReal = activeCount * getCustoManutencaoMaquinas(farmLevel);
       const maintPaid = gold >= costReal;
 
-      // --- SUBFUNÇÃO 2: Processamento de Automatização ---
-      const { 
-        updatedAnimals: animalsAfterAuto, 
-        nextInv: invAfterAuto, 
-        statsCollected, 
-        missingFeeds 
+      // --- SUBFUNÇÃO 2: Processamento de Automatização (Alimentador apenas) ---
+      const {
+        updatedAnimals: animalsAfterAuto,
+        nextInv: invAfterAuto,
+        fedCount: feederFedCount,
+        missingFeeds
       } = processarAutomatizacao(machines, maintPaid, animals, inventory, weather, logsToAdd);
 
-      // Aktualiza inventário se as automações realizaram alterações
-      // BUG 10 / BUG 1 FIX: usa callback funcional para evitar race condition com o setInventory de queijos prontos
-      // BUG CRITICAL FIX: invAfterAuto contém apenas as deduções de ração do alimentador (feeder).
-      // Leite e lã coletados pelas máquinas são rastreados em statsCollected e precisam ser adicionados
-      // explicitamente ao inventário; sem isso os produtos automáticos são registrados nos logs mas nunca aparecem no armazém.
-      if (statsCollected.milk > 0 || statsCollected.wool > 0 || statsCollected.fedCount > 0) {
-        setInventory(prev => ({
-          ...prev,
-          ...invAfterAuto,
-          milk: (invAfterAuto.milk ?? prev.milk) + statsCollected.milk,
-          wool: (invAfterAuto.wool ?? prev.wool) + statsCollected.wool,
-        }));
-      }
-      
-      if (statsCollected.milk > 0) {
-        setStats(prev => ({
-          ...prev,
-          totalCollected: prev.totalCollected + statsCollected.milk,
-          totalMilk: (prev.totalMilk || 0) + statsCollected.milk
-        }));
-        setWeeklyStats(prev => ({ ...prev, milk: prev.milk + statsCollected.milk }));
+      // Aplica deduções de ração do alimentador ao inventário
+      if (feederFedCount > 0) {
+        setInventory(prev => ({ ...prev, ...invAfterAuto }));
+        setStats(prev => ({ ...prev, totalFed: prev.totalFed + feederFedCount }));
         logsToAdd.push({
-          msg: `🏭 Ordenhadeira Automática: Coletou +${statsCollected.milk} Leite(s) de ${statsCollected.milkedCows} vacas e enviou ao Armazém!`,
-          type: 'success'
-        });
-      }
-
-      if (statsCollected.wool > 0) {
-        setStats(prev => ({
-          ...prev,
-          totalCollected: prev.totalCollected + 1,
-          totalWool: (prev.totalWool || 0) + statsCollected.wool
-        }));
-        setWeeklyStats(prev => ({ ...prev, wool: prev.wool + statsCollected.wool }));
-        logsToAdd.push({
-          msg: `🏭 Tosquiadeira Elétrica: Coletou +${statsCollected.wool} Lã(s) de ${statsCollected.shearedSheep} ovelhas e enviou ao Armazém!`,
-          type: 'success'
-        });
-      }
-
-      if (statsCollected.fedCount > 0) {
-        setStats(prev => ({ ...prev, totalFed: prev.totalFed + statsCollected.fedCount }));
-        logsToAdd.push({
-          msg: `🌾 Alimentador Automático: Alimentou ${statsCollected.fedCount} de ${animalsAfterAuto.length} animais consumindo ração do Armazém!`,
+          msg: `🌾 Alimentador Automático: Alimentou ${feederFedCount} de ${animalsAfterAuto.length} animais consumindo ração do Armazém!`,
           type: 'success'
         });
       }
@@ -3174,6 +3080,59 @@ export default function App() {
         if (fertilEggsProduced > 0) {
           setInventory(prev => ({ ...prev, fertile_egg: (prev.fertile_egg ?? 0) + fertilEggsProduced }));
           setProductFreshness(prev => ({ ...prev, fertile_egg: 3 }));
+        }
+      }
+
+      // --- MÁQUINAS: Ordenhadeira e Tosquiadeira — rodam APÓS processarFomeFelicidade ---
+      // Isso garante que coletam a produção do DIA ATUAL (hasProducedToday definido hoje),
+      // evitando que a coleta manual do dia anterior impeça a máquina de funcionar.
+      if (maintPaid) {
+        // A. Ordenhadeira Automática
+        if (machines.milkerPurchased && machines.milkerActive) {
+          let milkCollected = 0;
+          let milkedCows = 0;
+          updatedAnimalsList = updatedAnimalsList.map(a => {
+            if (a.type !== 'vaca' || a.isAdult === false || !a.hasProducedToday) return a;
+            let efficiency = (a.happiness / 100) * (1 - (Math.max(0, 100 - a.hunger) / 200));
+            efficiency = Math.max(0.3, Math.min(1.2, efficiency));
+            let totalLeite = 1 + (efficiency > 0.8 && Math.random() < 0.3 ? 1 : 0);
+            if (a.isBestFriend) totalLeite += 1;
+            if (nextWeather === 'sol') totalLeite += 1;
+            if (nextWeather === 'chuva') totalLeite = Math.max(1, Math.round(totalLeite * 0.8));
+            if (a.trait === 'trabalhadora') totalLeite = Math.max(1, Math.round(totalLeite * 1.15));
+            else if (a.trait === 'preguicosa') totalLeite = Math.max(1, Math.round(totalLeite * 0.85));
+            milkCollected += totalLeite;
+            milkedCows++;
+            return { ...a, hasProducedToday: false };
+          });
+          if (milkCollected > 0) {
+            setInventory(prev => ({ ...prev, milk: prev.milk + milkCollected }));
+            setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + milkCollected, totalMilk: (prev.totalMilk || 0) + milkCollected }));
+            setWeeklyStats(prev => ({ ...prev, milk: prev.milk + milkCollected }));
+            logsToAdd.push({ msg: `🏭 Ordenhadeira Automática: Coletou +${milkCollected} Leite(s) de ${milkedCows} vacas!`, type: 'success' });
+          }
+        }
+
+        // B. Tosquiadeira Elétrica
+        if (machines.shearerPurchased && machines.shearerActive) {
+          let woolCollected = 0;
+          let shearedSheep = 0;
+          updatedAnimalsList = updatedAnimalsList.map(a => {
+            if (a.type !== 'ovelha' || a.isAdult === false || !a.woolReady) return a;
+            let quality = (a.happiness / 100) * (a.hunger / 100);
+            let woolBonus = quality > 0.7 ? 2 : 1;
+            if (a.trait === 'trabalhadora') woolBonus = Math.max(1, Math.round(woolBonus * 1.15));
+            else if (a.trait === 'preguicosa') woolBonus = Math.max(1, Math.round(woolBonus * 0.85));
+            woolCollected += woolBonus;
+            shearedSheep++;
+            return { ...a, woolReady: false, daysSinceLastWool: 0 };
+          });
+          if (woolCollected > 0) {
+            setInventory(prev => ({ ...prev, wool: prev.wool + woolCollected }));
+            setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + 1, totalWool: (prev.totalWool || 0) + woolCollected }));
+            setWeeklyStats(prev => ({ ...prev, wool: prev.wool + woolCollected }));
+            logsToAdd.push({ msg: `🏭 Tosquiadeira Elétrica: Coletou +${woolCollected} Lã(s) de ${shearedSheep} ovelhas!`, type: 'success' });
+          }
         }
       }
 
@@ -4231,7 +4190,7 @@ export default function App() {
 
         // --- Tratador: alimenta todos os animais consumindo ração correta do inventário ---
         if (workers.some(w => w.role === 'tratador')) {
-          const getFeedKeyForType = (type: string): keyof typeof inventory => {
+          const getFeedKeyForType2 = (type: string): keyof typeof inventory => {
             if (type === 'vaca' || type === 'boi' || type === 'bufalo') return 'racaoBovina';
             if (type === 'ovelha' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
             if (type === 'galinha' || type === 'codorna' || type === 'pavao') return 'racaoAves';
@@ -4240,25 +4199,34 @@ export default function App() {
             return 'racaoCarnivora';
           };
           const noFeedTypes = ['minhoca', 'caracol', 'bicho_seda'];
-          setInventory(prev => {
-            const updated = { ...prev };
-            animals.forEach(a => {
-              if (noFeedTypes.includes(a.type)) return;
-              if (a.isAdult === false) return; // filhotes não consomem ração
-              const feedKey = getFeedKeyForType(a.type);
-              if ((updated[feedKey] as number) > 0) {
-                (updated[feedKey] as number) -= 1;
-              }
-            });
-            return updated;
+          // Pre-compute which animals can be fed (using closure inventory snapshot)
+          const tmpInv2 = { ...inventory } as Record<string, number>;
+          const fedAnimalIds = new Set<number>();
+          const feedDeductions: Partial<Record<string, number>> = {};
+          animals.forEach(a => {
+            if (noFeedTypes.includes(a.type) || a.isAdult === false) return;
+            const feedKey = getFeedKeyForType2(a.type) as string;
+            if ((tmpInv2[feedKey] ?? 0) > 0) {
+              tmpInv2[feedKey] -= 1;
+              fedAnimalIds.add(a.id);
+              feedDeductions[feedKey] = (feedDeductions[feedKey] ?? 0) + 1;
+            }
           });
-          setAnimals(prev => prev.map(a => ({
-            ...a,
-            hunger: Math.min(100, a.hunger + 35),
-            happiness: Math.min(100, a.happiness + 12),
-            daysWithoutFood: 0,
-          })));
-          setStats(prev => ({ ...prev, totalFed: prev.totalFed + animals.filter(a => !noFeedTypes.includes(a.type)).length }));
+          if (fedAnimalIds.size > 0) {
+            setInventory(prev => {
+              const updated = { ...prev } as Record<string, number>;
+              Object.entries(feedDeductions).forEach(([key, count]) => {
+                updated[key] = Math.max(0, (updated[key] ?? 0) - (count as number));
+              });
+              return updated as typeof inventory;
+            });
+            setAnimals(prev => prev.map(a => {
+              if (!fedAnimalIds.has(a.id)) return a;
+              return { ...a, hunger: Math.min(100, a.hunger + 35), happiness: Math.min(100, a.happiness + 12), daysWithoutFood: 0 };
+            }));
+            setStats(prev => ({ ...prev, totalFed: prev.totalFed + fedAnimalIds.size }));
+            logsToAdd.push({ msg: `🌾 Tratador alimentou ${fedAnimalIds.size} animal(is) hoje!`, type: 'success' });
+          }
         }
 
         // --- Veterinário: cura doenças + +5 felicidade ---
@@ -5836,7 +5804,8 @@ export default function App() {
                     const isEditing = editingId === animal.id;
                     const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
                     
-                    const isCritical = animal.happiness < 20 || animal.hunger < 25;
+                    const noHungerAnimal = ['minhoca', 'caracol'].includes(animal.type);
+                    const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
                     
                     return (
                       <motion.div
@@ -6151,15 +6120,16 @@ export default function App() {
 
                         {/* Stats - Fome and Felicidade */}
                         <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
-                          
-                          {/* Hunger bar */}
+
+                          {/* Hunger bar — hidden for minhoca/caracol (never need food) */}
+                          {!['minhoca', 'caracol'].includes(animal.type) && (
                           <div className="relative group/hungertooltip">
                             <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
                               <span className="flex items-center gap-1">🍽️ Fome</span>
                               <span>{Math.floor(animal.hunger)}%</span>
                             </div>
                             <div className="bg-[#e5e7eb] h-4 rounded-full overflow-hidden mt-1 border-2 border-[#d1d5db] shadow-inner relative cursor-help">
-                              <div 
+                              <div
                                 className={`h-full rounded-full transition-all duration-300 ${
                                   animal.hunger < 25 ? 'bg-red-500 animate-pulse' : animal.hunger < 60 ? 'bg-[#f59e0b]' : 'bg-[#10b981]'
                                 }`}
@@ -6175,6 +6145,7 @@ export default function App() {
                               <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[5px] w-0.5 h-0.5 border-4 border-transparent border-t-[#fbbf24] bg-transparent" />
                             </div>
                           </div>
+                          )}
 
                           {/* Happiness bar */}
                           <div className="relative group/happinesstooltip">
