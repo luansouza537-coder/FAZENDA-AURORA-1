@@ -1547,11 +1547,11 @@ export default function App() {
 
   // Feed pricing helpers
   const getFeedBasePrice = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora'): number => {
-    if (type === 'racaoBovina') return 3;
+    if (type === 'racaoBovina') return 4;
     if (type === 'racaoOvinos') return 3;
-    if (type === 'racaoAves') return 2;
+    if (type === 'racaoAves') return 3;
     if (type === 'racaoAquatica') return 4;
-    if (type === 'racaoCoelho') return 2;
+    if (type === 'racaoCoelho') return 3;
     if (type === 'racaoCarnivora') return 6;
     return 2;
   };
@@ -1751,32 +1751,36 @@ export default function App() {
 
   // Base raw item prices (increases with levels)
   const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao'): number => {
+    // --- PREÇOS BASE BALANCEADOS ---
+    // Grupo A: early game mais tenso — leite mais lucrativo, ovo mais barato
     if (itemType === 'milk') {
-      return farmLevel >= 2 ? 6 : 5;
+      return farmLevel >= 2 ? 8 : 7;  // era 6/5 — compensa custo de ração aumentado
     }
     if (itemType === 'wool') {
       return farmLevel >= 3 ? 15 : 12;
     }
     if (itemType === 'cheese') {
-      return 20;
+      return 22;  // pequeno aumento
     }
+    // Grupo C: mais valor para processados mid-game
     if (itemType === 'queijoCoalho') {
-      return 28;
+      return 35;  // era 28
     }
     if (itemType === 'queijoMucarela') {
-      return 28;
+      return 40;  // era 28 — diferencia os tipos
     }
     if (itemType === 'queijoBrie') {
-      return 65;
+      return 45;  // era 65 — acessível cedo demais
     }
     if (itemType === 'scarf') {
       return 30;
     }
+    // Grupo A: ovo mais barato para diminuir ROI absurdo da galinha
     if (itemType === 'egg') {
-      return farmLevel >= 5 ? 5 : 4;
+      return farmLevel >= 5 ? 4 : 3;  // era 5/4
     }
     if (itemType === 'mayo') {
-      return 16;
+      return 14;  // era 16 — proporcional ao ovo
     }
     if (itemType === 'goat_milk') return farmLevel >= 4 ? 42 : 38;
     if (itemType === 'llama_wool') return 45;
@@ -1786,28 +1790,28 @@ export default function App() {
     if (itemType === 'buffalo_mozzarella') return 120;
     if (itemType === 'feather') return 15;
     if (itemType === 'peacock_feather') return 80;
-    if (itemType === 'butter') return 45;
-    if (itemType === 'yogurt') return 35;
+    if (itemType === 'butter') return 55;   // era 45 — Grupo C
+    if (itemType === 'yogurt') return 40;   // era 35 — Grupo C
     if (itemType === 'fertile_egg') return 36;
     if (itemType === 'quail_egg') return farmLevel >= 5 ? 26 : 22;
     if (itemType === 'alpaca_wool') return farmLevel >= 6 ? 75 : 65;
-    if (itemType === 'humus') return 20;
-    if (itemType === 'muco') return 120;
+    if (itemType === 'humus') return 15;    // era 20 — Grupo B (sem custo ração)
+    if (itemType === 'muco') return 35;     // era 120 — Grupo B (OP sem ração)
     if (itemType === 'angora_wool') return 90;
     if (itemType === 'seda_bruta') return 100;
     if (itemType === 'coxa_ra') return 110;
     if (itemType === 'carne_avestruz') return 220;
     if (itemType === 'pena_grande') return 90;
-    if (itemType === 'couro_avestruz') return 300;
+    if (itemType === 'couro_avestruz') return 260;  // era 300 — Grupo C
     if (itemType === 'carne_jacare') return 300;
     if (itemType === 'couro_jacare') return 500;
     if (itemType === 'queijo_cabra') return 90;
-    if (itemType === 'iogurte_cabra') return 55;
+    if (itemType === 'iogurte_cabra') return 70;    // era 55 — Grupo C
     if (itemType === 'leite_condensado') return 100;
     if (itemType === 'tapete_lhama') return 110;
-    if (itemType === 'cachecol_angora') return 160;
+    if (itemType === 'cachecol_angora') return 120; // era 160 — Grupo B
     if (itemType === 'tecido_alpaca') return 180;
-    if (itemType === 'fio_seda') return 200;
+    if (itemType === 'fio_seda') return 180;        // era 200 — Grupo C
     if (itemType === 'manta_premium') return 420;
     if (itemType === 'pate_pato') return 95;
     if (itemType === 'ovo_defumado') return 120;
@@ -1816,7 +1820,7 @@ export default function App() {
     if (itemType === 'sabonete_natural') return 140;
     if (itemType === 'almofada_penas') return 170;
     if (itemType === 'colete_couro') return 550;
-    if (itemType === 'bolsa_exotica') return 800;
+    if (itemType === 'bolsa_exotica') return 600;   // era 800 — Grupo B
     if (itemType === 'enfeite_pavao') return 200;
     if ((itemType as string) === 'peixe') return 45;
     if ((itemType as string) === 'mel') return 80;
@@ -2205,7 +2209,7 @@ export default function App() {
   // Persist State Updates Automatically to LocalStorage
   useEffect(() => {
     // Prevent wiping save if loaded empty
-    if (animals.length > 0 || currentDay > 1 || gold !== 80) {
+    if (animals.length > 0 || currentDay > 1 || gold !== 60) {
       const saveData = {
         gold,
         currentDay,
@@ -4978,11 +4982,11 @@ export default function App() {
   // Improvement 2: Daily profit helper
   const getAnimalDailyProfit = (type: AnimalType): { revenue: number, cost: number, profit: number } => {
     const feedCostMap: Record<string, number> = {
-      vaca: 3, boi: 3, bufalo: 3,
+      vaca: 4, boi: 4, bufalo: 4,
       ovelha: 3, cabra: 3, lhama: 3, alpaca: 3,
-      galinha: 2, codorna: 2, pavao: 2,
+      galinha: 3, codorna: 3, pavao: 3,
       pato: 4, ganso: 4,
-      coelho_angora: 2,
+      coelho_angora: 3,
       ra: 6, avestruz: 6, jacare: 6,
       minhoca: 0, caracol: 0, bicho_seda: 0,
     };
@@ -7832,9 +7836,9 @@ export default function App() {
 
               <div className="space-y-4">
                 {([
-                  { key: 'racaoBovina', label: '🌾 Ração Bovina', desc: 'Para Vaca, Boi e Búfalo. 3💰/dia.' },
+                  { key: 'racaoBovina', label: '🌾 Ração Bovina', desc: 'Para Vaca, Boi e Búfalo. 4💰/dia.' },
                   { key: 'racaoOvinos', label: '🐐 Ração de Ovinos', desc: 'Para Ovelha, Cabra, Lhama e Alpaca. 3💰/dia.' },
-                  { key: 'racaoAves', label: '🐔 Ração de Aves', desc: 'Para Galinha, Codorna e Pavão. 2💰/dia.' },
+                  { key: 'racaoAves', label: '🐔 Ração de Aves', desc: 'Para Galinha, Codorna e Pavão. 3💰/dia.' },
                   { key: 'racaoAquatica', label: '🦆 Ração Aquática', desc: 'Para Pato e Ganso. 4💰/dia.' },
                   { key: 'racaoCoelho', label: '🐰 Ração de Coelhos', desc: 'Para Coelho Angorá. 2💰/dia.' },
                   { key: 'racaoCarnivora', label: '🍖 Ração Carnívora', desc: 'Para Rã, Avestruz e Jacaré. 6💰/dia.' }
