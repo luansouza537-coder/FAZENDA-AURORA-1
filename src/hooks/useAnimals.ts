@@ -75,6 +75,9 @@ export type InventoryState = {
   conserva_peixe: number;
   mel_envasado: number;
   sopa_cogumelo: number;
+  queijo_parmesao: number;
+  queijo_serra: number;
+  kit_gourmet: number;
 };
 
 export interface UseAnimalsProps {

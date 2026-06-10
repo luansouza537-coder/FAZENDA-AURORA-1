@@ -125,6 +125,9 @@ export function useInventory({
           conserva_peixe: inv.conserva_peixe ?? 0,
           mel_envasado: inv.mel_envasado ?? 0,
           sopa_cogumelo: inv.sopa_cogumelo ?? 0,
+          queijo_parmesao: inv.queijo_parmesao ?? 0,
+          queijo_serra: inv.queijo_serra ?? 0,
+          kit_gourmet: inv.kit_gourmet ?? 0,
         };
       }
     } catch (e) {}
@@ -194,6 +197,9 @@ export function useInventory({
       conserva_peixe: 0,
       mel_envasado: 0,
       sopa_cogumelo: 0,
+      queijo_parmesao: 0,
+      queijo_serra: 0,
+      kit_gourmet: 0,
     };
   });
 
@@ -217,7 +223,7 @@ export function useInventory({
   });
 
   // --- QUEIJARIA STATES ---
-  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt'; diasRestantes: number }[]>(() => {
+  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt' | 'parmesao' | 'serra'; diasRestantes: number }[]>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
       if (saved) {
@@ -704,6 +710,107 @@ export function useInventory({
     if (event) spawnFeedback('🧀', `Iniciou ${label}`, event);
   };
 
+  const craftQueijoParmesao = (event?: React.MouseEvent) => {
+    if (event && event.preventDefault) event.preventDefault();
+    if (farmLevel < 10) {
+      addLog('🧀 Queijo Parmesão requer Fazenda Nível 10!', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+    if (queijosEmMaturacao.length >= maxPrateleiras) {
+      addLog('🧀 Prateleiras cheias! Aguarde outros queijos maturarem.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+    if (inventory.milk < 10) {
+      addLog('🥛 Leite insuficiente! Parmesão requer 10 leites.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Falta Leite! (10)', event);
+      return;
+    }
+    if ((inventory.queijoCoalho ?? 0) < 2) {
+      addLog('🧀 Queijo Coalho insuficiente! Parmesão requer 2 Queijo Coalho.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Falta Queijo Coalho! (2)', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, milk: prev.milk - 10, queijoCoalho: (prev.queijoCoalho ?? 0) - 2 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'parmesao', diasRestantes: 15 }]);
+    setStats(prev => ({ ...prev, totalCheese: (prev.totalCheese || 0) + 1 }));
+    addLog('🧀 Iniciou maturação do Queijo Parmesão. Ficará pronto em 15 dias.', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    if (event) spawnFeedback('🧀', 'Iniciou Parmesão', event);
+  };
+
+  const craftQueijoSerra = (event?: React.MouseEvent) => {
+    if (event && event.preventDefault) event.preventDefault();
+    if (farmLevel < 14) {
+      addLog('🧀 Queijo da Serra requer Fazenda Nível 14!', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+    if (queijosEmMaturacao.length >= maxPrateleiras) {
+      addLog('🧀 Prateleiras cheias! Aguarde outros queijos maturarem.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+    if ((inventory.goat_milk ?? 0) < 6) {
+      addLog('🐐 Leite de Cabra insuficiente! Serra requer 6 Leites de Cabra.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Falta L.Cabra! (6)', event);
+      return;
+    }
+    if (inventory.milk < 4) {
+      addLog('🥛 Leite insuficiente! Serra requer 4 leites.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Falta Leite! (4)', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 6, milk: prev.milk - 4 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'serra', diasRestantes: 20 }]);
+    setStats(prev => ({ ...prev, totalCheese: (prev.totalCheese || 0) + 1 }));
+    addLog('🧀 Iniciou maturação do Queijo da Serra. Ficará pronto em 20 dias.', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    if (event) spawnFeedback('🧀', 'Iniciou Q. Serra', event);
+  };
+
+  const craftKitGourmet = (event?: React.MouseEvent) => {
+    if (event && event.preventDefault) event.preventDefault();
+    if (farmLevel < 16) {
+      addLog('🎁 Kit Gourmet Premiado requer Fazenda Nível 16!', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+    if ((inventory.queijoBrie ?? 0) < 2) {
+      addLog('🧀 Queijo Brie insuficiente! Kit Gourmet requer 2 Queijo Brie.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Falta Q.Brie! (2)', event);
+      return;
+    }
+    if ((inventory.manta_premium ?? 0) < 1) {
+      addLog('✨ Manta Premium insuficiente! Kit Gourmet requer 1 Manta Premium.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Falta Manta Premium! (1)', event);
+      return;
+    }
+    if ((inventory.mel ?? 0) < 2) {
+      addLog('🍯 Mel insuficiente! Kit Gourmet requer 2 Mel.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Falta Mel! (2)', event);
+      return;
+    }
+    setInventory(prev => ({
+      ...prev,
+      queijoBrie: (prev.queijoBrie ?? 0) - 2,
+      manta_premium: (prev.manta_premium ?? 0) - 1,
+      mel: (prev.mel ?? 0) - 2,
+      kit_gourmet: (prev.kit_gourmet ?? 0) + 1,
+    }));
+    addLog('🎁 Kit Gourmet Premiado montado! Vale 900 moedas.', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    if (event) spawnFeedback('🎁', '+1 Kit Gourmet', event);
+  };
+
   const craftScarf = (event?: React.MouseEvent) => {
     if (event && event.preventDefault) event.preventDefault();
     if (inventory.wool < 2) {
@@ -923,6 +1030,9 @@ export function useInventory({
     const coleteCouroQty = inventory.colete_couro || 0;
     const bolsaExoticaQty = inventory.bolsa_exotica || 0;
     const enfeitePavaoQty = inventory.enfeite_pavao || 0;
+    const queijoParmesaoQty = inventory.queijo_parmesao || 0;
+    const queijoSerraQty = inventory.queijo_serra || 0;
+    const kitGourmetQty = inventory.kit_gourmet || 0;
 
     const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + penaGrandeQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + almofadaPenasQty + coleteCouroQty + bolsaExoticaQty + enfeitePavaoQty;
 
@@ -1026,7 +1136,10 @@ export function useInventory({
       (fioSedaQty * fioSedaPrice) + (mantaPremiumQty * mantaPremiumPrice) + (patePatoQty * patePatoPrice) +
       (ovoDefumadoQty * ovoDefumadoPrice) + (conservaCodornaQty * conservaCodornaPrice) + (cremeCosmeticoQty * cremeCosmeticoPrice) +
       (saboneteNaturalQty * saboneteNaturalPrice) + (almofadaPenasQty * almofadaPenasPrice) + (coleteCouroQty * coleteCouroPrice) +
-      (bolsaExoticaQty * bolsaExoticaPrice) + (enfeitePavaoQty * enfeitePavaoPrice);
+      (bolsaExoticaQty * bolsaExoticaPrice) + (enfeitePavaoQty * enfeitePavaoPrice) +
+      (queijoParmesaoQty * getDynamicTransactionPrice('queijo_parmesao' as any)) +
+      (queijoSerraQty * getDynamicTransactionPrice('queijo_serra' as any)) +
+      (kitGourmetQty * getDynamicTransactionPrice('kit_gourmet' as any));
 
     if (totalEarningCalculated <= 0) return;
 
@@ -1309,6 +1422,9 @@ export function useInventory({
     craftEnfeitePavao,
     craftCheese,
     craftQueijo,
+    craftQueijoParmesao,
+    craftQueijoSerra,
+    craftKitGourmet,
     craftScarf,
     craftHidromel,
     craftRisotoCogumelo,

@@ -197,6 +197,14 @@ const MERCHANT_SPECIAL_ITEMS = [
   { id: 'cert_sanitario', label: '📜 Certificado Sanitário', desc: '+10% preço de venda de carne permanente', price: 200, effect: 'cert_sanitario', oneTime: true },
   { id: 'licenca_exotica_item', label: '📋 Licença Exótica', desc: 'Permite criar Jacaré legalmente', price: 280, effect: 'licenca_exotica', oneTime: true },
   { id: 'licenca_criadouro', label: '📜 Licença de Criadouro', desc: 'Permite reprodução controlada de Vaca, Cabra, Ovelha e Galinha', price: 400, effect: 'licenca_criadouro', oneTime: true },
+  { id: 'kit_primeiros_socorros', label: '🩺 Kit de Primeiros Socorros', desc: 'Cura todos os animais doentes instantaneamente', price: 120, effect: 'cure_all_sick' },
+  { id: 'pocao_fertilidade', label: '🧪 Poção de Fertilidade', desc: 'Todos animais produzem 2x por 3 dias', price: 180, effect: 'fertility_3days' },
+  { id: 'selo_qualidade', label: '🏅 Selo de Qualidade Premium', desc: '+25% preço de venda de todos produtos por 5 dias', price: 220, effect: 'premium_prices_5days' },
+  { id: 'mapa_tesouro', label: '🗺️ Mapa do Tesouro', desc: 'Encontra 200-600 moedas enterradas na fazenda!', price: 90, effect: 'treasure_map' },
+  { id: 'antidoto_pragas', label: '🧴 Antídoto Anti-Pragas', desc: 'Previne invasão de pragas pelos próximos 14 dias', price: 75, effect: 'anti_pest_14days' },
+  { id: 'elixir_felicidade', label: '✨ Elixir da Felicidade', desc: '+30 felicidade a todos os animais imediatamente', price: 50, effect: 'happiness_boost' },
+  { id: 'manual_producao', label: '📚 Manual de Produção Avançada', desc: '+15% produção de todos animais por 7 dias', price: 160, effect: 'production_boost_7days' },
+  { id: 'isca_animal_raro', label: '🎯 Isca para Animal Raro', desc: 'Atrai um animal raro para compra com 50% de desconto no próximo dia', price: 100, effect: 'rare_animal_bait' },
 ] as const;
 
 export default function App() {
@@ -466,6 +474,62 @@ export default function App() {
   // --- FUNCIONALIDADE 1: Auto-avanço ---
   const [autoAdvance, setAutoAdvance] = useState<boolean>(false);
   const [autoSpeed, setAutoSpeed] = useState<number>(5); // segundos
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+
+  // --- SISTEMA DE EMPRÉSTIMO ---
+  const [loanActive, setLoanActive] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).loanActive ?? false; } catch(e) {} return false;
+  });
+  const [loanAmount, setLoanAmount] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).loanAmount ?? 0; } catch(e) {} return 0;
+  });
+  const [loanInterestRate, setLoanInterestRate] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).loanInterestRate ?? 0.1; } catch(e) {} return 0.1;
+  });
+  const [loanWeeksLeft, setLoanWeeksLeft] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).loanWeeksLeft ?? 0; } catch(e) {} return 0;
+  });
+  const [loanDaysUntilInterest, setLoanDaysUntilInterest] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).loanDaysUntilInterest ?? 7; } catch(e) {} return 7;
+  });
+
+  // --- SEGUROS EXTRAS ---
+  const [insuranceTheft, setInsuranceTheft] = useState<{ active: boolean; daysLeft: number }>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).insuranceTheft ?? { active: false, daysLeft: 0 }; } catch(e) {} return { active: false, daysLeft: 0 };
+  });
+  const [insuranceClimate, setInsuranceClimate] = useState<{ active: boolean; daysLeft: number }>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).insuranceClimate ?? { active: false, daysLeft: 0 }; } catch(e) {} return { active: false, daysLeft: 0 };
+  });
+
+  // --- OFICINA DE AUTOMAÇÃO ---
+  const [milkerLevel, setMilkerLevel] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).milkerLevel ?? 1; } catch(e) {} return 1;
+  });
+  const [shearerLevel, setShearerLevel] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).shearerLevel ?? 1; } catch(e) {} return 1;
+  });
+  const [feederLevel, setFeederLevel] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).feederLevel ?? 1; } catch(e) {} return 1;
+  });
+
+  // --- EFEITOS DO MERCADOR EXTRAS ---
+  const [fertilityBoostDays, setFertilityBoostDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).fertilityBoostDays ?? 0; } catch(e) {} return 0;
+  });
+  const [premiumPricesDays, setPremiumPricesDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).premiumPricesDays ?? 0; } catch(e) {} return 0;
+  });
+  const [productionBoostDays, setProductionBoostDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).productionBoostDays ?? 0; } catch(e) {} return 0;
+  });
+  const [antiPestDays, setAntiPestDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).antiPestDays ?? 0; } catch(e) {} return 0;
+  });
+
+  // --- EVENTOS DO MUNDO ---
+  const [worldEvent, setWorldEvent] = useState<{ id: string; title: string; desc: string; daysLeft: number; priceMult: number; items: string[] } | null>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).worldEvent ?? null; } catch(e) {} return null;
+  });
 
   // --- FUNCIONALIDADE 3: Missões ---
   interface Mission {
@@ -1716,6 +1780,9 @@ export default function App() {
     if ((itemType as string) === 'conserva_peixe') return 95;
     if ((itemType as string) === 'mel_envasado') return 200;
     if ((itemType as string) === 'sopa_cogumelo') return 80;
+    if ((itemType as string) === 'queijo_parmesao') return 200;
+    if ((itemType as string) === 'queijo_serra') return 280;
+    if ((itemType as string) === 'kit_gourmet') return 900;
     return 0;
   };
 
@@ -1778,7 +1845,11 @@ export default function App() {
     const rarityMult = RARE_ITEMS.has(itemType) && weekSales <= 2 ? 1.1 : 1.0;
     // Evento de mercado ativo
     const marketBonus = activeMarketEvent && activeMarketEvent.items.includes(itemType) ? activeMarketEvent.mult : 1.0;
-    let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * marketBonus;
+    // Evento mundial ativo
+    const worldEventBonus = worldEvent && worldEvent.items.includes(itemType) ? worldEvent.priceMult : 1.0;
+    // Selo de qualidade premium do mercador
+    const premiumPricesBonus = premiumPricesDays > 0 ? 1.25 : 1.0;
+    let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * marketBonus * worldEventBonus * premiumPricesBonus;
     if (merchantActive) {
       finalPrice *= 1.5;
     }
@@ -1880,6 +1951,9 @@ export default function App() {
     craftEnfeitePavao,
     craftCheese,
     craftQueijo,
+    craftQueijoParmesao,
+    craftQueijoSerra,
+    craftKitGourmet,
     craftScarf,
     craftHidromel,
     craftRisotoCogumelo,
@@ -2010,7 +2084,7 @@ export default function App() {
   const isGameOverForAutoAdvance = (animals.length === 0 && gold < 60) || debt > 1000;
 
   useEffect(() => {
-    if (!autoAdvance || isGameOverForAutoAdvance || isSleeping) return;
+    if (!autoAdvance || isPaused || isGameOverForAutoAdvance || isSleeping) return;
     const anyModalOpen = showBuyMenu || showLevelUpModal !== null || showWeeklyReport || showTutorialModal || showAchievementsModal || showAutomationModal || showMarketModal || showSellAllConfirmModal || showQueijariaModal || showMissionsModal || showNotifications || showStatsModal;
     if (anyModalOpen) return;
 
@@ -2027,7 +2101,7 @@ export default function App() {
     }, autoSpeed * 1000);
 
     return () => clearInterval(interval);
-  }, [autoAdvance, autoSpeed, isGameOverForAutoAdvance, isSleeping, showBuyMenu, showLevelUpModal, showWeeklyReport, showTutorialModal, showAchievementsModal, showAutomationModal, showMarketModal, showSellAllConfirmModal, showQueijariaModal, showMissionsModal, showNotifications, showStatsModal]);
+  }, [autoAdvance, isPaused, autoSpeed, isGameOverForAutoAdvance, isSleeping, showBuyMenu, showLevelUpModal, showWeeklyReport, showTutorialModal, showAchievementsModal, showAutomationModal, showMarketModal, showSellAllConfirmModal, showQueijariaModal, showMissionsModal, showNotifications, showStatsModal]);
 
   // Keyboard Shortcuts (D, S, M, H, 1, 2, 3, Escape)
   useEffect(() => {
@@ -2148,11 +2222,16 @@ export default function App() {
         reproducaoAtiva,
         biomeWeeklyIncome,
         reproHistory,
+        // Médio impacto
+        loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest,
+        insuranceTheft, insuranceClimate,
+        milkerLevel, shearerLevel, feederLevel,
+        fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays,
+        worldEvent,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
-  // BUG FIX: adicionados farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel nas dependências
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 2500;
@@ -2759,7 +2838,7 @@ export default function App() {
     });
 
     readyQueijos.forEach(tipo => {
-      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : 'Queijo Brie';
+      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : tipo === 'parmesao' ? 'Queijo Parmesão' : tipo === 'serra' ? 'Queijo da Serra' : 'Queijo Brie';
       logs.push({
         msg: `🧀 Seu fantástico ${label} terminou sua maturação e está pronto para venda!`,
         type: 'success'
@@ -3239,6 +3318,13 @@ export default function App() {
             if (nextWeather === 'chuva') totalLeite = Math.max(1, Math.round(totalLeite * 0.8));
             if (a.trait === 'trabalhadora') totalLeite = Math.max(1, Math.round(totalLeite * 1.15));
             else if (a.trait === 'preguicosa') totalLeite = Math.max(1, Math.round(totalLeite * 0.85));
+            // Nível da ordenhadeira: +20% por nível adicional (Nv2=+20%, Nv3=+40%)
+            const milkerBonus = 1 + (milkerLevel - 1) * 0.2;
+            // Poção de fertilidade
+            const fertilityMult = fertilityBoostDays > 0 ? 2 : 1;
+            // Manual de produção
+            const productionMult = productionBoostDays > 0 ? 1.15 : 1;
+            totalLeite = Math.round(totalLeite * milkerBonus * fertilityMult * productionMult);
             milkCollected += totalLeite;
             milkedCows++;
             return { ...a, hasProducedToday: false };
@@ -4019,7 +4105,7 @@ export default function App() {
         setInventory(inv => {
           const nextInv = { ...inv };
           readyQueijos.forEach(tipo => {
-            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : 'queijoBrie';
+            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : 'queijoBrie';
             nextInv[key] = (nextInv[key] ?? 0) + 1;
           });
           return nextInv;
@@ -4074,29 +4160,37 @@ export default function App() {
             return prev - cost;
           }); // extra 2x cost (total 3x)
         } else if (currentSeasonIdx === 1 && Math.random() < 0.05) {
-          logsToAdd.push({ msg: `🏜️ Uma seca prolongada começou! Custo de água será triplicado por 3 dias!`, type: 'error' });
-          setTimeout(() => addNotification('🏜️ Seca prolongada por 3 dias! Custo de água triplicado!', 'warning', nextDayValue), 0);
-          setDroughtDaysRemaining(3);
+          if (insuranceClimate.active) {
+            logsToAdd.push({ msg: `🌦️ Seca começou mas Seguro Climático protegeu sua fazenda! Sem custo extra.`, type: 'success' });
+          } else {
+            logsToAdd.push({ msg: `🏜️ Uma seca prolongada começou! Custo de água será triplicado por 3 dias!`, type: 'error' });
+            setTimeout(() => addNotification('🏜️ Seca prolongada por 3 dias! Custo de água triplicado!', 'warning', nextDayValue), 0);
+            setDroughtDaysRemaining(3);
+          }
         }
       }
 
       // Roubo noturno (4% de chance, não ocorre nos primeiros 5 dias)
-      // BUG FIX: protege dias iniciais de roubo para não punir jogador recém-começado
       if (currentDay > 5 && Math.random() < 0.04) {
-        const stolenPercent = 0.2 + Math.random() * 0.2;
-        setInventory(prev => ({
-          ...prev,
-          milk: Math.floor(prev.milk * (1 - stolenPercent)),
-          wool: Math.floor(prev.wool * (1 - stolenPercent)),
-          egg: Math.floor(prev.egg * (1 - stolenPercent)),
-          cheese: Math.floor(prev.cheese * (1 - stolenPercent)),
-          goat_milk: Math.floor(prev.goat_milk * (1 - stolenPercent)),
-          buffalo_milk: Math.floor(prev.buffalo_milk * (1 - stolenPercent)),
-          duck_egg: Math.floor(prev.duck_egg * (1 - stolenPercent)),
-          goose_egg: Math.floor(prev.goose_egg * (1 - stolenPercent)),
-        }));
-        logsToAdd.push({ msg: `🦹 Roubo noturno! Perdeu ${Math.round(stolenPercent * 100)}% do inventário de produtos!`, type: 'error' });
-        setTimeout(() => addNotification(`🦹 Roubo noturno! Perdeu ${Math.round(stolenPercent * 100)}% do inventário!`, 'warning', nextDayValue), 0);
+        if (insuranceTheft.active) {
+          logsToAdd.push({ msg: `🛡️ Tentativa de roubo! Seguro contra Roubo bloqueou o ladrão!`, type: 'success' });
+          setTimeout(() => addNotification(`🛡️ Tentativa de roubo bloqueada pelo seguro!`, 'success', nextDayValue), 0);
+        } else {
+          const stolenPercent = 0.2 + Math.random() * 0.2;
+          setInventory(prev => ({
+            ...prev,
+            milk: Math.floor(prev.milk * (1 - stolenPercent)),
+            wool: Math.floor(prev.wool * (1 - stolenPercent)),
+            egg: Math.floor(prev.egg * (1 - stolenPercent)),
+            cheese: Math.floor(prev.cheese * (1 - stolenPercent)),
+            goat_milk: Math.floor(prev.goat_milk * (1 - stolenPercent)),
+            buffalo_milk: Math.floor(prev.buffalo_milk * (1 - stolenPercent)),
+            duck_egg: Math.floor(prev.duck_egg * (1 - stolenPercent)),
+            goose_egg: Math.floor(prev.goose_egg * (1 - stolenPercent)),
+          }));
+          logsToAdd.push({ msg: `🦹 Roubo noturno! Perdeu ${Math.round(stolenPercent * 100)}% do inventário de produtos!`, type: 'error' });
+          setTimeout(() => addNotification(`🦹 Roubo noturno! Perdeu ${Math.round(stolenPercent * 100)}% do inventário!`, 'warning', nextDayValue), 0);
+        }
       }
 
       // --- SISTEMA DE TURISMO ---
@@ -4627,16 +4721,108 @@ export default function App() {
         setTimeout(() => addNotification(`💸 FALÊNCIA! Dívida de ${debtAfterInterest} moedas. Sua fazenda faliu!`, 'warning', nextDayValue), 0);
       }
 
+      // --- SISTEMA DE EMPRÉSTIMO: juros semanais ---
+      if (loanActive) {
+        const newDaysUntil = loanDaysUntilInterest - 1;
+        if (newDaysUntil <= 0) {
+          const interest = Math.round(loanAmount * loanInterestRate);
+          setGold(prev => Math.max(0, prev - interest));
+          const newWeeks = loanWeeksLeft - 1;
+          setLoanWeeksLeft(newWeeks);
+          setLoanDaysUntilInterest(7);
+          if (newWeeks <= 0) {
+            setLoanActive(false);
+            setLoanAmount(0);
+            logsToAdd.push({ msg: `🏦 Empréstimo quitado! Último pagamento de juros: ${interest} moedas.`, type: 'success' });
+            setTimeout(() => addNotification(`🏦 Empréstimo quitado!`, 'success', nextDayValue), 0);
+          } else {
+            logsToAdd.push({ msg: `🏦 Juros semanais do empréstimo: -${interest} moedas. Ainda ${newWeeks} semana(s) restantes.`, type: 'event' });
+            setTimeout(() => addNotification(`🏦 Juros do empréstimo: -${interest}💰`, 'warning', nextDayValue), 0);
+          }
+        } else {
+          setLoanDaysUntilInterest(newDaysUntil);
+        }
+      }
+
+      // --- SEGUROS EXTRAS: decrementar dias ---
+      if (insuranceTheft.active) {
+        const left = insuranceTheft.daysLeft - 1;
+        if (left <= 0) {
+          setInsuranceTheft({ active: false, daysLeft: 0 });
+          logsToAdd.push({ msg: `🛡️ Seguro contra Roubo expirou! Renove nas Melhorias.`, type: 'event' });
+        } else {
+          setInsuranceTheft(prev => ({ ...prev, daysLeft: left }));
+        }
+      }
+      if (insuranceClimate.active) {
+        const left = insuranceClimate.daysLeft - 1;
+        if (left <= 0) {
+          setInsuranceClimate({ active: false, daysLeft: 0 });
+          logsToAdd.push({ msg: `🌦️ Seguro Climático expirou! Renove nas Melhorias.`, type: 'event' });
+        } else {
+          setInsuranceClimate(prev => ({ ...prev, daysLeft: left }));
+        }
+      }
+
+      // --- EFEITOS DO MERCADOR: decrementar dias ---
+      if (fertilityBoostDays > 0) setFertilityBoostDays(prev => prev - 1);
+      if (premiumPricesDays > 0) setPremiumPricesDays(prev => prev - 1);
+      if (productionBoostDays > 0) setProductionBoostDays(prev => prev - 1);
+      if (antiPestDays > 0) setAntiPestDays(prev => prev - 1);
+
+      // --- EVENTOS DO MUNDO ---
+      if (worldEvent) {
+        const newDaysLeft = worldEvent.daysLeft - 1;
+        if (newDaysLeft <= 0) {
+          setWorldEvent(null);
+          logsToAdd.push({ msg: `📰 Evento mundial "${worldEvent.title}" encerrado. Preços voltam ao normal.`, type: 'system' });
+        } else {
+          setWorldEvent(prev => prev ? { ...prev, daysLeft: newDaysLeft } : null);
+        }
+      } else if (nextDayValue % 15 === 0 && Math.random() < 0.45) {
+        const worldEvents = [
+          { id: 'guerra', title: '⚔️ Conflito Regional', desc: 'Crise aumenta demanda por alimentos! Preços sobem.', daysLeft: 5, priceMult: 1.4, items: ['milk','wool','egg','cheese','meat'] },
+          { id: 'festival', title: '🎉 Festival Nacional', desc: 'Festival aumenta consumo de produtos locais!', daysLeft: 4, priceMult: 1.3, items: ['egg','mayo','cheese','honey','butter'] },
+          { id: 'seca_global', title: '🏜️ Seca Global', desc: 'Escassez mundial valoriza alimentos básicos.', daysLeft: 6, priceMult: 1.5, items: ['milk','goat_milk','buffalo_milk','butter'] },
+          { id: 'exportacao', title: '🚢 Abertura de Exportações', desc: 'Novos mercados abertos! Produtos exóticos valorizados.', daysLeft: 5, priceMult: 1.6, items: ['carne_jacare','couro_jacare','pena_grande','peacock_feather'] },
+          { id: 'feria_gourmet', title: '🍽️ Feira Gourmet Internacional', desc: 'Queijos e derivados premium em alta demanda!', daysLeft: 4, priceMult: 1.45, items: ['queijoBrie','queijoMucarela','queijoCoalho','queijo_cabra'] },
+          { id: 'boom_textil', title: '🧶 Boom Têxtil', desc: 'Indústria de moda em expansão! Lã e fibras valorizadas.', daysLeft: 5, priceMult: 1.35, items: ['wool','alpaca_wool','angora_wool','seda_bruta','fio_seda'] },
+          { id: 'crise_economica', title: '📉 Crise Econômica', desc: 'Recessão reduz preços em 20% por 5 dias.', daysLeft: 5, priceMult: 0.8, items: ['milk','wool','egg','cheese','butter','mayo'] },
+        ];
+        const ev = worldEvents[Math.floor(Math.random() * worldEvents.length)];
+        setWorldEvent(ev);
+        logsToAdd.push({ msg: `🌍 EVENTO MUNDIAL: ${ev.title} — ${ev.desc} (${ev.daysLeft} dias)`, type: 'event' });
+        setTimeout(() => addNotification(`🌍 Evento Mundial: ${ev.title}`, 'info', nextDayValue), 0);
+      }
+
+      // --- MAIS EVENTOS POSITIVOS ALEATÓRIOS ---
+      if (Math.random() < 0.12) {
+        const positiveChances = [
+          () => { const bonus = 30 + Math.floor(Math.random() * 70); setGold(prev => prev + bonus); logsToAdd.push({ msg: `🍀 Sorte! Um visitante deixou uma gorjeta de ${bonus} moedas!`, type: 'success' }); },
+          () => { setAnimals(prev => prev.map(a => a.happiness < 100 ? { ...a, happiness: Math.min(100, a.happiness + 15) } : a)); logsToAdd.push({ msg: `☀️ Dia ensolarado perfeito! Todos os animais ficaram mais felizes (+15 felicidade)!`, type: 'success' }); },
+          () => { setInventory((prev: any) => ({ ...prev, racaoBovina: (prev.racaoBovina ?? 0) + 5, racaoOvinos: (prev.racaoOvinos ?? 0) + 5, racaoAves: (prev.racaoAves ?? 0) + 5 })); logsToAdd.push({ msg: `🎁 Doação! Um vizinho deixou 5 de cada ração na sua porta!`, type: 'success' }); },
+          () => { const xp = 15 + Math.floor(Math.random() * 20); setFarmXp(prev => prev + xp); logsToAdd.push({ msg: `📖 Insight! Aprendeu novas técnicas de fazenda (+${xp} XP)!`, type: 'success' }); },
+          () => { logsToAdd.push({ msg: `🌈 Um arco-íris apareceu sobre sua fazenda! Dizem que traz boa sorte...`, type: 'event' }); setTimeout(() => addNotification('🌈 Arco-íris! Boa sorte chegando!', 'success', nextDayValue), 0); setGold(prev => prev + 20); },
+          () => { setAnimals(prev => prev.map(a => a.isSick ? { ...a, isSick: false } : a)); logsToAdd.push({ msg: `🌿 A brisa fresca curou os animais doentes naturalmente!`, type: 'success' }); },
+        ];
+        const roll = Math.floor(Math.random() * positiveChances.length);
+        positiveChances[roll]();
+      }
+
       // Próximo dia
       setCurrentDay(prev => prev + 1);
 
       setLogs(prev => {
         const dayLabel = currentDay + 1;
+        // Limpar diário a cada 7 dias para evitar acúmulo
+        const keepPrev = nextDayValue % 7 === 0 ? [] : prev.slice(-20);
         const parsedNewLogs: LogMessage[] = [
           {
             id: Math.random().toString(36),
             day: currentDay,
-            message: `🌙 O sol se põe... Amanhece o Dia ${dayLabel}!`,
+            message: nextDayValue % 7 === 0
+              ? `📋 Diário reiniciado no Dia ${dayLabel}! (registros anteriores arquivados)`
+              : `🌙 O sol se põe... Amanhece o Dia ${dayLabel}!`,
             type: 'system'
           },
           ...logsToAdd.map(l => ({
@@ -4646,7 +4832,7 @@ export default function App() {
             type: l.type
           }))
         ];
-        return [...prev.slice(-20), ...parsedNewLogs];
+        return [...keepPrev, ...parsedNewLogs];
       });
 
     } catch (error) {
@@ -5141,8 +5327,28 @@ export default function App() {
 
             {/* 🛡️ Seguro Status */}
             {insurance.active && (
-              <div className="bg-green-700 border-3 border-green-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seguro ativo: ${insurance.daysLeft} dias restantes`}>
+              <div className="bg-green-700 border-3 border-green-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seguro agrícola: ${insurance.daysLeft} dias restantes`}>
                 🛡️ {insurance.daysLeft}d
+              </div>
+            )}
+            {insuranceTheft.active && (
+              <div className="bg-orange-700 border-3 border-orange-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seguro contra Roubo: ${insuranceTheft.daysLeft} dias`}>
+                🔒 {insuranceTheft.daysLeft}d
+              </div>
+            )}
+            {insuranceClimate.active && (
+              <div className="bg-sky-700 border-3 border-sky-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seguro Climático: ${insuranceClimate.daysLeft} dias`}>
+                🌦️ {insuranceClimate.daysLeft}d
+              </div>
+            )}
+            {worldEvent && (
+              <div className={`border-3 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1 ${worldEvent.priceMult >= 1 ? 'bg-green-600 border-green-400' : 'bg-red-600 border-red-400'}`} title={worldEvent.title}>
+                🌍 {worldEvent.daysLeft}d
+              </div>
+            )}
+            {loanActive && (
+              <div className="bg-violet-700 border-3 border-violet-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Empréstimo ativo: ${loanWeeksLeft} semanas restantes`}>
+                🏦 {loanWeeksLeft}sem
               </div>
             )}
 
@@ -5336,6 +5542,18 @@ export default function App() {
                         else if (item.effect === 'cert_sanitario') { setHasCertSanitario(true); addLog('📜 Certificado Sanitário adquirido! +10% preço de carne permanente.', 'success'); }
                         else if (item.effect === 'licenca_exotica') { setLicencaExotica(true); addLog('📋 Licença Exótica obtida! Agora pode criar Jacaré legalmente.', 'success'); }
                         else if (item.effect === 'licenca_criadouro') { setLicencaCriadouro(true); addLog('📜 Licença de Criadouro obtida! Reprodução controlada desbloqueada.', 'success'); }
+                        else if (item.effect === 'cure_all_sick') { setAnimals(prev => prev.map(a => ({ ...a, isSick: false }))); addLog('🩺 Todos os animais doentes foram curados!', 'success'); }
+                        else if (item.effect === 'fertility_3days') { setFertilityBoostDays(prev => prev + 3); addLog('🧪 Poção de Fertilidade ativa! 2x produção por 3 dias!', 'success'); }
+                        else if (item.effect === 'premium_prices_5days') { setPremiumPricesDays(prev => prev + 5); addLog('🏅 Selo de Qualidade Premium ativo! +25% preços por 5 dias!', 'success'); }
+                        else if (item.effect === 'treasure_map') {
+                          const bonus = 200 + Math.floor(Math.random() * 401);
+                          setGold(prev => prev + bonus);
+                          addLog(`🗺️ Mapa do Tesouro! Encontrou ${bonus} moedas enterradas na fazenda!`, 'success');
+                        }
+                        else if (item.effect === 'anti_pest_14days') { setAntiPestDays(prev => prev + 14); addLog('🧴 Antídoto Anti-Pragas ativo por 14 dias!', 'success'); }
+                        else if (item.effect === 'happiness_boost') { setAnimals(prev => prev.map(a => ({ ...a, happiness: Math.min(100, a.happiness + 30) }))); addLog('✨ Elixir da Felicidade! +30 felicidade a todos!', 'success'); }
+                        else if (item.effect === 'production_boost_7days') { setProductionBoostDays(prev => prev + 7); addLog('📚 Manual de Produção Avançada! +15% produção por 7 dias!', 'success'); }
+                        else if (item.effect === 'rare_animal_bait') { addLog('🎯 Isca preparada! Um animal raro pode aparecer amanhã com 50% de desconto!', 'success'); }
                         setMerchantSpecialItems(prev => prev.filter(id => id !== item.id));
                         triggerAudioResult(() => sfx.playSound('sell'));
                       }}
@@ -5458,14 +5676,31 @@ export default function App() {
                   onClick={(e) => {
                     e.preventDefault();
                     setAutoAdvance(prev => !prev);
+                    if (!autoAdvance) setIsPaused(false);
                     triggerAudioResult(() => sfx.playSound('click'));
                   }}
                   disabled={isGameOver}
                   className={`${autoAdvance ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-slate-600 border-slate-800 hover:bg-slate-500'} disabled:bg-stone-500 text-white border-b-4 px-3 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1`}
-                  title={autoAdvance ? 'Auto-avanço ativo — clique para pausar' : 'Ativar auto-avanço de dias'}
+                  title={autoAdvance ? 'Auto-avanço ativo — clique para desativar' : 'Ativar auto-avanço de dias'}
                 >
-                  {autoAdvance ? `▶ AUTO (${autoSpeed}s)` : '⏸ AUTO'}
+                  {autoAdvance ? `▶ AUTO (${autoSpeed}s)` : '▶ AUTO'}
                 </button>
+
+                {/* PAUSE BUTTON */}
+                {autoAdvance && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsPaused(prev => !prev);
+                      triggerAudioResult(() => sfx.playSound('click'));
+                    }}
+                    className={`${isPaused ? 'bg-amber-500 border-amber-700 hover:bg-amber-400' : 'bg-slate-500 border-slate-700 hover:bg-slate-400'} text-white border-b-4 px-3 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1`}
+                    title={isPaused ? 'Auto pausado — clique para retomar' : 'Pausar auto-avanço'}
+                  >
+                    {isPaused ? '⏸ PAUSADO' : '⏸ PAUSA'}
+                  </button>
+                )}
 
                 {/* SELETOR DE VELOCIDADE */}
                 <select
@@ -8615,10 +8850,10 @@ export default function App() {
                       ) : (
                         <div className="grid grid-cols-1 gap-2">
                           {queijosEmMaturacao.map((item, idx) => {
-                            const totalDays = item.tipo === 'coalho' ? 1 : item.tipo === 'mucarela' ? 3 : item.tipo === 'buffalo_mozzarella' ? 2 : item.tipo === 'yogurt' ? 1 : 7;
+                            const totalDays = item.tipo === 'coalho' ? 1 : item.tipo === 'mucarela' ? 3 : item.tipo === 'buffalo_mozzarella' ? 2 : item.tipo === 'yogurt' ? 1 : item.tipo === 'parmesao' ? 15 : item.tipo === 'serra' ? 20 : 7;
                             const elapsed = totalDays - item.diasRestantes;
                             const progressPct = Math.min(100, Math.round((elapsed / totalDays) * 100));
-                            const label = item.tipo === 'coalho' ? 'Queijo Coalho' : item.tipo === 'mucarela' ? 'Queijo Muçarela' : item.tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : item.tipo === 'yogurt' ? 'Iogurte' : 'Queijo Brie';
+                            const label = item.tipo === 'coalho' ? 'Queijo Coalho' : item.tipo === 'mucarela' ? 'Queijo Muçarela' : item.tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : item.tipo === 'yogurt' ? 'Iogurte' : item.tipo === 'parmesao' ? 'Queijo Parmesão' : item.tipo === 'serra' ? 'Queijo da Serra' : 'Queijo Brie';
                             return (
                               <div key={idx} className="bg-white border-2 border-amber-100 rounded-xl p-3 flex items-center gap-3">
                                 <span className="text-2xl">🧀</span>
@@ -8651,6 +8886,8 @@ export default function App() {
                           { label: 'Queijo de Cabra', emoji: '🧀', req: `🐐 3 L.Cabra (${inventory.goat_milk ?? 0}/3) • Nv3`, canCraft: farmLevel >= 3 && (inventory.goat_milk ?? 0) >= 3, reqLevel: 3, onClick: (e: React.MouseEvent) => craftQueijoCabra(e) },
                           { label: 'Iogurte de Cabra', emoji: '🥛', req: `🐐 2 L.Cabra (${inventory.goat_milk ?? 0}/2) • Nv4`, canCraft: farmLevel >= 4 && (inventory.goat_milk ?? 0) >= 2, reqLevel: 4, onClick: (e: React.MouseEvent) => craftIogurteCabra(e) },
                           { label: 'Leite Condensado', emoji: '🥛', req: `🥛 4 leite (${inventory.milk}/4) + 🧈 1 manteiga (${inventory.butter ?? 0}/1) • Nv6`, canCraft: farmLevel >= 6 && inventory.milk >= 4 && (inventory.butter ?? 0) >= 1, reqLevel: 6, onClick: (e: React.MouseEvent) => craftLeiteCondensado(e) },
+                          { label: 'Queijo Parmesão', emoji: '🧀', req: `🥛 10 leite (${inventory.milk}/10) + 🧀 2 Q.Coalho (${inventory.queijoCoalho ?? 0}/2) • ⌛ 15d • Nv10`, canCraft: farmLevel >= 10 && inventory.milk >= 10 && (inventory.queijoCoalho ?? 0) >= 2 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 10, onClick: (e: React.MouseEvent) => craftQueijoParmesao(e) },
+                          { label: 'Queijo da Serra', emoji: '🧀', req: `🐐 6 L.Cabra (${inventory.goat_milk ?? 0}/6) + 🥛 4 leite (${inventory.milk}/4) • ⌛ 20d • Nv14`, canCraft: farmLevel >= 14 && (inventory.goat_milk ?? 0) >= 6 && inventory.milk >= 4 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 14, onClick: (e: React.MouseEvent) => craftQueijoSerra(e) },
                         ].map((r, i) => (
                           <div key={i} className="bg-white border-2 border-stone-200 rounded-xl p-3 flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
@@ -8787,6 +9024,7 @@ export default function App() {
                       { label: 'Colete de Couro', emoji: '🦺', req: `🦤 1 Couro Avestruz (${inventory.couro_avestruz ?? 0}/1) • Nv15`, canCraft: farmLevel >= 15 && (inventory.couro_avestruz ?? 0) >= 1, reqLevel: 15, onClick: (e: React.MouseEvent) => craftColeteCouro(e) },
                       { label: 'Bolsa Exótica', emoji: '👜', req: `🐊 1 Couro Jacaré (${inventory.couro_jacare ?? 0}/1) • Nv18`, canCraft: farmLevel >= 18 && (inventory.couro_jacare ?? 0) >= 1, reqLevel: 18, onClick: (e: React.MouseEvent) => craftBolsaExotica(e) },
                       { label: 'Enfeite de Pavão', emoji: '🦚', req: `🦚 2 P.Pavão (${inventory.peacock_feather ?? 0}/2) + 🦤 1 P.Grande (${inventory.pena_grande ?? 0}/1) • Nv10`, canCraft: farmLevel >= 10 && (inventory.peacock_feather ?? 0) >= 2 && (inventory.pena_grande ?? 0) >= 1, reqLevel: 10, onClick: (e: React.MouseEvent) => craftEnfeitePavao(e) },
+                      { label: 'Kit Gourmet Premiado', emoji: '🎁', req: `🧀 2 Q.Brie (${inventory.queijoBrie ?? 0}/2) + ✨ 1 Manta Premium (${inventory.manta_premium ?? 0}/1) + 🍯 2 Mel (${inventory.mel ?? 0}/2) • Nv16`, canCraft: farmLevel >= 16 && (inventory.queijoBrie ?? 0) >= 2 && (inventory.manta_premium ?? 0) >= 1 && (inventory.mel ?? 0) >= 2, reqLevel: 16, onClick: (e: React.MouseEvent) => craftKitGourmet(e) },
                     ].map((r, i) => (
                       <div key={i} className={`bg-white border-2 rounded-xl p-3 flex items-center justify-between gap-3 ${farmLevel >= r.reqLevel ? 'border-purple-200' : 'border-stone-200 opacity-70'}`}>
                         <div className="flex items-center gap-2">
@@ -9307,6 +9545,190 @@ export default function App() {
                   </button>
                 </div>
 
+                {/* Seguro contra Roubo */}
+                <div className="bg-white border-4 border-orange-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-orange-800 mb-1">🔒 Seguro contra Roubo</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Bloqueia completamente roubo noturno por 10 dias. {insuranceTheft.active ? `Ativo: ${insuranceTheft.daysLeft} dias restantes` : 'Inativo'}
+                  </p>
+                  <button
+                    disabled={insuranceTheft.active || gold < 300}
+                    onClick={() => {
+                      if (!insuranceTheft.active && gold >= 300) {
+                        setGold(prev => prev - 300);
+                        setInsuranceTheft({ active: true, daysLeft: 10 });
+                        addLog('🔒 Seguro contra Roubo contratado por 10 dias!', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${insuranceTheft.active ? 'bg-orange-100 border-orange-300 text-orange-700' : gold >= 300 ? 'bg-orange-500 hover:bg-orange-400 text-white border-orange-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {insuranceTheft.active ? `✅ Ativo (${insuranceTheft.daysLeft}d)` : 'Contratar (300💰 / 10 dias)'}
+                  </button>
+                </div>
+
+                {/* Seguro Climático */}
+                <div className="bg-white border-4 border-sky-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-sky-800 mb-1">🌦️ Seguro Climático</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Protege contra secas e tempestades: sem custo extra de água por 10 dias. {insuranceClimate.active ? `Ativo: ${insuranceClimate.daysLeft} dias restantes` : 'Inativo'}
+                  </p>
+                  <button
+                    disabled={insuranceClimate.active || gold < 350}
+                    onClick={() => {
+                      if (!insuranceClimate.active && gold >= 350) {
+                        setGold(prev => prev - 350);
+                        setInsuranceClimate({ active: true, daysLeft: 10 });
+                        addLog('🌦️ Seguro Climático contratado por 10 dias!', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${insuranceClimate.active ? 'bg-sky-100 border-sky-300 text-sky-700' : gold >= 350 ? 'bg-sky-500 hover:bg-sky-400 text-white border-sky-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {insuranceClimate.active ? `✅ Ativo (${insuranceClimate.daysLeft}d)` : 'Contratar (350💰 / 10 dias)'}
+                  </button>
+                </div>
+
+                {/* Opção de Empréstimo */}
+                <div className="bg-white border-4 border-violet-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-violet-800 mb-1">🏦 Banco Rural — Empréstimo</h4>
+                  {loanActive ? (
+                    <div className="space-y-1">
+                      <p className="text-xs text-stone-500 font-mono">Empréstimo ativo: <strong>{loanAmount.toLocaleString()}💰</strong></p>
+                      <p className="text-xs text-stone-500 font-mono">Juros semanais: <strong>{Math.round(loanInterestRate * 100)}%</strong> — Próximo em {loanDaysUntilInterest}d</p>
+                      <p className="text-xs text-stone-500 font-mono">Semanas restantes: <strong>{loanWeeksLeft}</strong></p>
+                      <button
+                        disabled={gold < loanAmount}
+                        onClick={() => {
+                          if (gold >= loanAmount) {
+                            setGold(prev => prev - loanAmount);
+                            setLoanActive(false);
+                            setLoanAmount(0);
+                            setLoanWeeksLeft(0);
+                            addLog(`🏦 Empréstimo quitado antecipadamente! -${loanAmount}💰`, 'success');
+                            triggerAudioResult(() => sfx.playSound('levelup'));
+                          }
+                        }}
+                        className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer mt-2 ${gold >= loanAmount ? 'bg-violet-500 hover:bg-violet-400 text-white border-violet-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                      >
+                        Quitar Antecipado ({loanAmount.toLocaleString()}💰)
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs text-stone-500 font-mono">Receba ouro agora e pague juros semanais. Escolha o valor:</p>
+                      {[
+                        { amount: 500, rate: 0.05, weeks: 4, label: 'Pequeno (500💰, 5%/sem, 4 sem)' },
+                        { amount: 1500, rate: 0.08, weeks: 5, label: 'Médio (1.500💰, 8%/sem, 5 sem)' },
+                        { amount: 4000, rate: 0.12, weeks: 6, label: 'Grande (4.000💰, 12%/sem, 6 sem)' },
+                        { amount: 10000, rate: 0.15, weeks: 8, label: 'Mega (10.000💰, 15%/sem, 8 sem)' },
+                      ].map(opt => (
+                        <button
+                          key={opt.amount}
+                          onClick={() => {
+                            setGold(prev => prev + opt.amount);
+                            setLoanActive(true);
+                            setLoanAmount(opt.amount);
+                            setLoanInterestRate(opt.rate);
+                            setLoanWeeksLeft(opt.weeks);
+                            setLoanDaysUntilInterest(7);
+                            addLog(`🏦 Empréstimo de ${opt.amount}💰 obtido! Juros: ${Math.round(opt.rate*100)}%/semana por ${opt.weeks} semanas.`, 'success');
+                            triggerAudioResult(() => sfx.playSound('levelup'));
+                          }}
+                          className="w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 bg-violet-500 hover:bg-violet-400 text-white border-violet-700 transition-all cursor-pointer"
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Oficina de Automação Tecnológica */}
+                {(machines.milkerPurchased || machines.shearerPurchased || machines.feederPurchased) && (
+                  <div className="bg-white border-4 border-cyan-300 rounded-3xl p-4">
+                    <h4 className="font-display font-black text-sm uppercase text-cyan-800 mb-1">⚙️ Oficina de Automação</h4>
+                    <p className="text-xs text-stone-500 font-mono mb-3">Melhore suas máquinas para aumentar eficiência e produção.</p>
+                    <div className="space-y-2">
+                      {machines.milkerPurchased && (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-xs font-black text-stone-700">🐄 Ordenhadeira</span>
+                            <span className="ml-2 text-[10px] text-stone-500 font-mono">Nv{milkerLevel}/3 (+{(milkerLevel-1)*20}% produção)</span>
+                          </div>
+                          {milkerLevel < 3 ? (
+                            <button
+                              disabled={gold < milkerLevel * 800}
+                              onClick={() => {
+                                const cost = milkerLevel * 800;
+                                if (gold >= cost) {
+                                  setGold(prev => prev - cost);
+                                  setMilkerLevel(prev => Math.min(3, prev + 1));
+                                  addLog(`⚙️ Ordenhadeira melhorada para Nv${milkerLevel + 1}! +20% de produção de leite!`, 'success');
+                                  triggerAudioResult(() => sfx.playSound('levelup'));
+                                }
+                              }}
+                              className={`text-xs font-mono font-black py-1 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${gold >= milkerLevel * 800 ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                            >
+                              Nv{milkerLevel + 1} ({(milkerLevel * 800).toLocaleString()}💰)
+                            </button>
+                          ) : <span className="text-xs text-emerald-600 font-black">✅ MAX</span>}
+                        </div>
+                      )}
+                      {machines.shearerPurchased && (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-xs font-black text-stone-700">✂️ Tosquiadeira</span>
+                            <span className="ml-2 text-[10px] text-stone-500 font-mono">Nv{shearerLevel}/3 (+{(shearerLevel-1)*20}% produção)</span>
+                          </div>
+                          {shearerLevel < 3 ? (
+                            <button
+                              disabled={gold < shearerLevel * 800}
+                              onClick={() => {
+                                const cost = shearerLevel * 800;
+                                if (gold >= cost) {
+                                  setGold(prev => prev - cost);
+                                  setShearerLevel(prev => Math.min(3, prev + 1));
+                                  addLog(`⚙️ Tosquiadeira melhorada para Nv${shearerLevel + 1}! +20% de produção de lã!`, 'success');
+                                  triggerAudioResult(() => sfx.playSound('levelup'));
+                                }
+                              }}
+                              className={`text-xs font-mono font-black py-1 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${gold >= shearerLevel * 800 ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                            >
+                              Nv{shearerLevel + 1} ({(shearerLevel * 800).toLocaleString()}💰)
+                            </button>
+                          ) : <span className="text-xs text-emerald-600 font-black">✅ MAX</span>}
+                        </div>
+                      )}
+                      {machines.feederPurchased && (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-xs font-black text-stone-700">🥣 Alimentador</span>
+                            <span className="ml-2 text-[10px] text-stone-500 font-mono">Nv{feederLevel}/3 (+{(feederLevel-1)*15}% fome recuperada)</span>
+                          </div>
+                          {feederLevel < 3 ? (
+                            <button
+                              disabled={gold < feederLevel * 600}
+                              onClick={() => {
+                                const cost = feederLevel * 600;
+                                if (gold >= cost) {
+                                  setGold(prev => prev - cost);
+                                  setFeederLevel(prev => Math.min(3, prev + 1));
+                                  addLog(`⚙️ Alimentador melhorado para Nv${feederLevel + 1}! +15% de fome recuperada!`, 'success');
+                                  triggerAudioResult(() => sfx.playSound('levelup'));
+                                }
+                              }}
+                              className={`text-xs font-mono font-black py-1 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${gold >= feederLevel * 600 ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                            >
+                              Nv{feederLevel + 1} ({(feederLevel * 600).toLocaleString()}💰)
+                            </button>
+                          ) : <span className="text-xs text-emerald-600 font-black">✅ MAX</span>}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Grupo 3a: Estábulo */}
                 <div className="bg-white border-4 border-stone-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-stone-800 mb-1">🏠 Estábulo</h4>
@@ -9444,6 +9866,94 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* Laboratório de Laticínios */}
+                <div className="bg-white border-4 border-rose-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-rose-800 mb-1">🔬 Laboratório de Laticínios</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    Todos os queijos maturam 1 dia mais rápido. Requer Nível 6. {hasLaboratorio ? '✅ Instalado' : 'Não instalado'}
+                  </p>
+                  <button
+                    disabled={hasLaboratorio || gold < 8000 || farmLevel < 6}
+                    onClick={() => {
+                      if (!hasLaboratorio && gold >= 8000 && farmLevel >= 6) {
+                        setGold(prev => prev - 8000);
+                        setHasLaboratorio(true);
+                        addLog('🔬 Laboratório de Laticínios construído! Queijos maturam 1 dia mais rápido.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasLaboratorio ? 'bg-rose-100 border-rose-300 text-rose-700' : farmLevel >= 6 && gold >= 8000 ? 'bg-rose-500 hover:bg-rose-400 text-white border-rose-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {hasLaboratorio ? '✅ Laboratório Construído' : farmLevel < 6 ? '🔒 Requer Nível 6 (8.000💰)' : 'Construir Laboratório (8.000💰)'}
+                  </button>
+                </div>
+
+                {/* Pastagem Ampliada */}
+                <div className="bg-white border-4 border-green-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-green-800 mb-1">🌿 Pastagem Ampliada</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    +3 felicidade/dia para bovinos (vaca/boi/búfalo) e ovinos (ovelha/cabra/lhama/alpaca). Requer Nível 8. {hasPastagem ? '✅ Instalada' : 'Não instalada'}
+                  </p>
+                  <button
+                    disabled={hasPastagem || gold < 15000 || farmLevel < 8}
+                    onClick={() => {
+                      if (!hasPastagem && gold >= 15000 && farmLevel >= 8) {
+                        setGold(prev => prev - 15000);
+                        setHasPastagem(true);
+                        addLog('🌿 Pastagem Ampliada construída! Bovinos e ovinos ficam mais felizes.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasPastagem ? 'bg-green-100 border-green-300 text-green-700' : farmLevel >= 8 && gold >= 15000 ? 'bg-green-500 hover:bg-green-400 text-white border-green-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {hasPastagem ? '✅ Pastagem Ampliada' : farmLevel < 8 ? '🔒 Requer Nível 8 (15.000💰)' : 'Construir Pastagem (15.000💰)'}
+                  </button>
+                </div>
+
+                {/* Centro de Exportação */}
+                <div className="bg-white border-4 border-indigo-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-indigo-800 mb-1">🚢 Centro de Exportação</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    +20% preço de venda em TODOS os produtos. Requer Nível 12. {hasExportCenter ? '✅ Instalado' : 'Não instalado'}
+                  </p>
+                  <button
+                    disabled={hasExportCenter || gold < 50000 || farmLevel < 12}
+                    onClick={() => {
+                      if (!hasExportCenter && gold >= 50000 && farmLevel >= 12) {
+                        setGold(prev => prev - 50000);
+                        setHasExportCenter(true);
+                        addLog('🚢 Centro de Exportação construído! Todos os produtos valem +20%.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasExportCenter ? 'bg-indigo-100 border-indigo-300 text-indigo-700' : farmLevel >= 12 && gold >= 50000 ? 'bg-indigo-500 hover:bg-indigo-400 text-white border-indigo-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {hasExportCenter ? '✅ Centro de Exportação' : farmLevel < 12 ? '🔒 Requer Nível 12 (50.000💰)' : 'Construir Centro (50.000💰)'}
+                  </button>
+                </div>
+
+                {/* Academia de Criadores */}
+                <div className="bg-white border-4 border-violet-300 rounded-3xl p-4">
+                  <h4 className="font-display font-black text-sm uppercase text-violet-800 mb-1">🎓 Academia de Criadores</h4>
+                  <p className="text-xs text-stone-500 font-mono mb-2">
+                    +15% XP por dia + animais jovens crescem 20% mais rápido. Requer Nível 16. {hasAcademia ? '✅ Instalada' : 'Não instalada'}
+                  </p>
+                  <button
+                    disabled={hasAcademia || gold < 120000 || farmLevel < 16}
+                    onClick={() => {
+                      if (!hasAcademia && gold >= 120000 && farmLevel >= 16) {
+                        setGold(prev => prev - 120000);
+                        setHasAcademia(true);
+                        addLog('🎓 Academia de Criadores construída! +15% XP/dia e filhotes crescem mais rápido.', 'success');
+                        triggerAudioResult(() => sfx.playSound('levelup'));
+                      }
+                    }}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasAcademia ? 'bg-violet-100 border-violet-300 text-violet-700' : farmLevel >= 16 && gold >= 120000 ? 'bg-violet-500 hover:bg-violet-400 text-white border-violet-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {hasAcademia ? '✅ Academia Construída' : farmLevel < 16 ? '🔒 Requer Nível 16 (120.000💰)' : 'Construir Academia (120.000💰)'}
+                  </button>
+                </div>
+
                 {/* Licença de Fauna Exótica */}
                 <div className="bg-white border-4 border-purple-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-purple-800 mb-1">🦎 Licença de Fauna Exótica</h4>
@@ -9526,10 +10036,21 @@ export default function App() {
 
               {/* Active market event banner */}
               {activeMarketEvent && (
-                <div className="bg-amber-50 border-2 border-amber-400 rounded-2xl p-3 mb-4 mx-4 mt-2">
+                <div className="bg-amber-50 border-2 border-amber-400 rounded-2xl p-3 mb-2 mx-4 mt-2">
                   <div className="font-black text-amber-800 text-sm">{activeMarketEvent.title}</div>
                   <div className="text-amber-700 text-xs mt-0.5">{activeMarketEvent.desc}</div>
                   <div className="text-amber-500 font-mono text-[10px] mt-1">⏳ {activeMarketEvent.daysLeft} dia(s) restante(s)</div>
+                </div>
+              )}
+
+              {/* World event banner */}
+              {worldEvent && (
+                <div className={`border-2 rounded-2xl p-3 mb-2 mx-4 ${worldEvent.priceMult >= 1 ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-400'}`}>
+                  <div className={`font-black text-sm ${worldEvent.priceMult >= 1 ? 'text-green-800' : 'text-red-800'}`}>🌍 {worldEvent.title}</div>
+                  <div className={`text-xs mt-0.5 ${worldEvent.priceMult >= 1 ? 'text-green-700' : 'text-red-700'}`}>{worldEvent.desc}</div>
+                  <div className={`font-mono text-[10px] mt-1 ${worldEvent.priceMult >= 1 ? 'text-green-500' : 'text-red-500'}`}>
+                    {worldEvent.priceMult >= 1 ? `+${Math.round((worldEvent.priceMult-1)*100)}%` : `-${Math.round((1-worldEvent.priceMult)*100)}%`} nos preços afetados — ⏳ {worldEvent.daysLeft} dia(s)
+                  </div>
                 </div>
               )}
 
