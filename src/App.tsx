@@ -2775,20 +2775,73 @@ export default function App() {
 
   // F4: gerar contrato pelo comerciante
   const generateMerchantContract = (nextDayVal: number) => {
-    if (contracts.filter(c => c.active).length >= 2) return; // Máx 2 contratos
-    const products: Array<'milk' | 'wool' | 'egg' | 'cheese'> = ['milk', 'wool', 'egg', 'cheese'];
-    const product = products[Math.floor(Math.random() * products.length)];
-    const basePrices: Record<string, number> = { milk: 5, wool: 12, egg: 4, cheese: 20 };
-    const pricePerUnit = Math.round(basePrices[product] * 1.15);
-    const quantity = 5 + Math.floor(Math.random() * 11); // 5-15
-    const deadline = nextDayVal + 5 + Math.floor(Math.random() * 6); // 5-10 dias
-    const penalty = pricePerUnit * Math.floor(quantity * 0.5);
+    if (contracts.filter(c => c.active).length >= 3) return; // Máx 3 contratos
+
+    // Tiered contract system based on farm level
+    const tier = farmLevel >= 15 ? 'premium' : farmLevel >= 10 ? 'avancado' : farmLevel >= 6 ? 'medio' : 'basico';
+
+    const allProducts = [
+      { product: 'milk', basePrice: 5, minLevel: 1 },
+      { product: 'wool', basePrice: 12, minLevel: 1 },
+      { product: 'egg', basePrice: 4, minLevel: 1 },
+      { product: 'cheese', basePrice: 20, minLevel: 2 },
+      { product: 'goat_milk', basePrice: 38, minLevel: 4 },
+      { product: 'buffalo_milk', basePrice: 55, minLevel: 6 },
+      { product: 'queijoCoalho', basePrice: 28, minLevel: 3 },
+      { product: 'queijoMucarela', basePrice: 28, minLevel: 4 },
+      { product: 'queijoBrie', basePrice: 65, minLevel: 5 },
+      { product: 'butter', basePrice: 45, minLevel: 3 },
+      { product: 'yogurt', basePrice: 35, minLevel: 3 },
+      { product: 'duck_egg', basePrice: 18, minLevel: 4 },
+      { product: 'quail_egg', basePrice: 22, minLevel: 4 },
+      { product: 'feather', basePrice: 15, minLevel: 4 },
+      { product: 'angora_wool', basePrice: 90, minLevel: 9 },
+      { product: 'alpaca_wool', basePrice: 65, minLevel: 6 },
+      { product: 'muco', basePrice: 120, minLevel: 8 },
+      { product: 'seda_bruta', basePrice: 100, minLevel: 11 },
+    ] as const;
+
+    // Filter by farm level
+    const available = allProducts.filter(p => farmLevel >= p.minLevel);
+    const chosen = available[Math.floor(Math.random() * available.length)];
+
+    // Tier multipliers for price premium and quantity
+    const tierConfig = {
+      basico:   { priceMulti: 1.15, qtyMin: 5,  qtyMax: 15, deadlineMin: 5,  deadlineMax: 10, penaltyRate: 0.5 },
+      medio:    { priceMulti: 1.20, qtyMin: 10, qtyMax: 25, deadlineMin: 7,  deadlineMax: 14, penaltyRate: 0.4 },
+      avancado: { priceMulti: 1.25, qtyMin: 15, qtyMax: 40, deadlineMin: 10, deadlineMax: 20, penaltyRate: 0.35 },
+      premium:  { priceMulti: 1.35, qtyMin: 20, qtyMax: 60, deadlineMin: 14, deadlineMax: 30, penaltyRate: 0.3 },
+    };
+    const cfg = tierConfig[tier];
+
+    const pricePerUnit = Math.round(chosen.basePrice * cfg.priceMulti);
+    const quantity = cfg.qtyMin + Math.floor(Math.random() * (cfg.qtyMax - cfg.qtyMin + 1));
+    const deadline = nextDayVal + cfg.deadlineMin + Math.floor(Math.random() * (cfg.deadlineMax - cfg.deadlineMin + 1));
+    const penalty = Math.round(pricePerUnit * quantity * cfg.penaltyRate);
+
+    const clientNames: Record<string, string[]> = {
+      basico: ['Mercadinho do Bairro', 'Feira Local', 'Restaurante Familiar', 'Padaria Aurora'],
+      medio: ['Supermercado Bom Preço', 'Buffet São José', 'Hotel Regional', 'Cooperativa Rural'],
+      avancado: ['Rede Atacado Nordeste', 'Restaurante 5 Estrelas', 'Distribuidora Premium', 'Laticínios Nacionais'],
+      premium: ['Exportadora Internacional', 'Rede de Hotéis Luxo', 'Gourmet Market São Paulo', 'Embaixada Gastronômica'],
+    };
+    const clients = clientNames[tier];
+    const client = clients[Math.floor(Math.random() * clients.length)];
+
     const newContract: Contract = {
       id: Math.random().toString(36).substring(2, 9),
-      product, quantity, delivered: 0, pricePerUnit, deadline, penalty, active: true
+      product: chosen.product as Contract['product'],
+      quantity,
+      delivered: 0,
+      pricePerUnit,
+      deadline,
+      penalty,
+      active: true,
+      client,
+      tier,
     };
     setPendingContractOffer(newContract);
-    setTimeout(() => addNotification(`📋 Comerciante quer oferecer um contrato! Verifique a proposta para aceitar ou recusar.`, 'event', nextDayVal), 0);
+    setTimeout(() => addNotification(`📋 ${client} quer oferecer um contrato [${tier.toUpperCase()}]! Verifique a proposta para aceitar ou recusar.`, 'event', nextDayVal), 0);
   };
 
   /**
@@ -9141,9 +9194,9 @@ export default function App() {
                 {/* F8: Poço d'água */}
                 <div className="bg-white border-4 border-blue-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-blue-800 mb-1">💧 Poço d'Água</h4>
-                  <p className="text-xs text-stone-500 font-mono mb-2">Reduz conta de água em 20% por nível (máx 60%). Atual: Nível {wellLevel}/3 (-{wellLevel * 20}% água) • Compra sequencial</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[{ lvl: 1, price: 700 }, { lvl: 2, price: 2000 }, { lvl: 3, price: 5500 }].map(({ lvl, price }) => {
+                  <p className="text-xs text-stone-500 font-mono mb-2">Reduz conta de água por nível (máx 75%). Atual: Nível {wellLevel}/5 (-{Math.round(Math.min(wellLevel * 15, 75))}% água) • Compra sequencial</p>
+                  <div className="grid grid-cols-5 gap-1">
+                    {[{ lvl: 1, price: 700 }, { lvl: 2, price: 2000 }, { lvl: 3, price: 5500 }, { lvl: 4, price: 25000 }, { lvl: 5, price: 70000 }].map(({ lvl, price }) => {
                       const canBuy = gold >= price && wellLevel === lvl - 1;
                       return (
                       <button
@@ -9153,13 +9206,13 @@ export default function App() {
                           if (canBuy) {
                             setGold(prev => prev - price);
                             setWellLevel(lvl);
-                            addLog(`💧 Poço d'água nível ${lvl} instalado! Água -${lvl * 20}%.`, 'success');
+                            addLog(`💧 Poço d'água nível ${lvl} instalado! Água -${Math.round(Math.min(lvl * 15, 75))}%.`, 'success');
                             triggerAudioResult(() => sfx.playSound('levelup'));
                           }
                         }}
-                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${wellLevel >= lvl ? 'bg-blue-100 border-blue-300 text-blue-700' : canBuy ? 'bg-blue-500 hover:bg-blue-400 text-white border-blue-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                        className={`text-xs font-mono font-black py-2 px-1 rounded-xl border-b-2 transition-all cursor-pointer ${wellLevel >= lvl ? 'bg-blue-100 border-blue-300 text-blue-700' : canBuy ? 'bg-blue-500 hover:bg-blue-400 text-white border-blue-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                       >
-                        {wellLevel >= lvl ? `✅ Nv${lvl}` : wellLevel < lvl - 1 ? `🔒 Nv${lvl}` : `Nv${lvl} (${price}💰)`}
+                        {wellLevel >= lvl ? `✅ Nv${lvl}` : wellLevel < lvl - 1 ? `🔒 Nv${lvl}` : `Nv${lvl} (${price.toLocaleString()}💰)`}
                       </button>
                       );
                     })}
@@ -9170,15 +9223,14 @@ export default function App() {
                 <div className="bg-white border-4 border-yellow-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-yellow-800 mb-1">☀️ Gerador Solar</h4>
                   <p className="text-xs text-stone-500 font-mono mb-2">
-                    Reduz manutenção e conta de energia das máquinas. Atual: Nível {solarLevel}/3<br/>
-                    Nv1: -15% manutenção de máquinas, -40% conta de energia<br/>
-                    Nv2: -30% manutenção, -70% conta de energia<br/>
-                    Nv3: -45% manutenção, energia GRATUITA 🆓 (Nv5+ da fazenda)
+                    Reduz manutenção e conta de energia das máquinas. Atual: Nível {solarLevel}/4<br/>
+                    Nv1: -15% manutenção, -40% energia | Nv2: -30% manutenção, -70% energia<br/>
+                    Nv3: -45% manutenção, energia GRATUITA 🆓 | Nv4: energia GRATUITA + 10% felicidade animais
                   </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[{ lvl: 1, price: 1200 }, { lvl: 2, price: 3500 }, { lvl: 3, price: 9000 }].map(({ lvl, price }) => {
-                      const requiresFarmLevel5 = lvl === 3 && farmLevel < 5;
-                      const canAfford = gold >= price && solarLevel === lvl - 1 && !requiresFarmLevel5;
+                  <div className="grid grid-cols-4 gap-1">
+                    {[{ lvl: 1, price: 1200, minFarm: 1 }, { lvl: 2, price: 3500, minFarm: 1 }, { lvl: 3, price: 9000, minFarm: 5 }, { lvl: 4, price: 40000, minFarm: 14 }].map(({ lvl, price, minFarm }) => {
+                      const requiresFarmLevel = lvl >= 3 && farmLevel < minFarm;
+                      const canAfford = gold >= price && solarLevel === lvl - 1 && !requiresFarmLevel;
                       return (
                         <button
                           key={lvl}
@@ -9189,13 +9241,13 @@ export default function App() {
                               setSolarLevel(lvl);
                               addLog(`☀️ Gerador solar nível ${lvl} instalado! Manutenção ${lvl * 15}% mais barata.`, 'success');
                               triggerAudioResult(() => sfx.playSound('levelup'));
-                            } else if (requiresFarmLevel5) {
-                              addLog('☀️ Gerador solar nível 3 requer Fazenda Nível 5!', 'error');
+                            } else if (requiresFarmLevel) {
+                              addLog(`☀️ Gerador solar nível ${lvl} requer Fazenda Nível ${minFarm}!`, 'error');
                             }
                           }}
-                          className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${solarLevel >= lvl ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : canAfford ? 'bg-yellow-500 hover:bg-yellow-400 text-white border-yellow-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                          className={`text-xs font-mono font-black py-2 px-1 rounded-xl border-b-2 transition-all cursor-pointer ${solarLevel >= lvl ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : canAfford ? 'bg-yellow-500 hover:bg-yellow-400 text-white border-yellow-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                         >
-                          {solarLevel >= lvl ? `✅ Nv${lvl}` : requiresFarmLevel5 ? `Nv${lvl} (Nv5 fazenda)` : `Nv${lvl} (${price}💰)`}
+                          {solarLevel >= lvl ? `✅ Nv${lvl}` : requiresFarmLevel ? `🔒 Nv${lvl}` : `Nv${lvl} (${price.toLocaleString()}💰)`}
                         </button>
                       );
                     })}
@@ -9206,11 +9258,12 @@ export default function App() {
                 <div className="bg-white border-4 border-cyan-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-cyan-800 mb-1">🌊 Sistema de Irrigação</h4>
                   <p className="text-xs text-stone-500 font-mono mb-2">
-                    Nv1: eventos de seca -40% impacto. Nv2: imunidade total a secas. Atual: Nível {irrigationLevel}/2 • Compra sequencial
+                    Nv1: secas -40% impacto | Nv2: imunidade total a secas | Nv3: +1 felicidade/dia animais. Atual: Nível {irrigationLevel}/3 • Compra sequencial
                   </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[{ lvl: 1, price: 1500 }, { lvl: 2, price: 4500 }].map(({ lvl, price }) => {
-                      const canBuy = gold >= price && irrigationLevel === lvl - 1;
+                  <div className="grid grid-cols-3 gap-2">
+                    {[{ lvl: 1, price: 1500 }, { lvl: 2, price: 4500 }, { lvl: 3, price: 20000 }].map(({ lvl, price }) => {
+                      const requiresFarmLevel12 = lvl === 3 && farmLevel < 12;
+                      const canBuy = gold >= price && irrigationLevel === lvl - 1 && !requiresFarmLevel12;
                       return (
                       <button
                         key={lvl}
@@ -9219,13 +9272,13 @@ export default function App() {
                           if (canBuy) {
                             setGold(prev => prev - price);
                             setIrrigationLevel(lvl);
-                            addLog(`🌊 Irrigação nível ${lvl} instalada! Eventos de seca ${lvl === 2 ? 'imunes' : '40% menos impacto'}.`, 'success');
+                            addLog(`🌊 Irrigação nível ${lvl} instalada!`, 'success');
                             triggerAudioResult(() => sfx.playSound('levelup'));
                           }
                         }}
                         className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${irrigationLevel >= lvl ? 'bg-cyan-100 border-cyan-300 text-cyan-700' : canBuy ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                       >
-                        {irrigationLevel >= lvl ? `✅ Nv${lvl}` : irrigationLevel < lvl - 1 ? `🔒 Nv${lvl}` : `Nv${lvl} (${price}💰)`}
+                        {irrigationLevel >= lvl ? `✅ Nv${lvl}` : irrigationLevel < lvl - 1 || requiresFarmLevel12 ? `🔒 Nv${lvl}` : `Nv${lvl} (${price.toLocaleString()}💰)`}
                       </button>
                       );
                     })}
