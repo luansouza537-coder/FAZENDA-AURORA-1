@@ -416,7 +416,7 @@ export function useAnimals({
 
     const bandoTxt = bandoBonus > 0 ? ` (com +${bandoBonus} ovos extras de bônus do efeito de bando!)` : '';
     addLog(`🥚 ${animal.name} produziu ${totalOvos} ovo(s) de quintal enviado(s) ao Armazém!${bandoTxt}`, 'success');
-    triggerAudioResult(() => sfx.playSound('collect'));
+    triggerAudioResult(() => sfx.playSound('egg'));
     // F12: som de animal
     if (soundEnabled) sfx.playAnimalSound('galinha');
     spawnFeedback('🥚', `+${totalOvos} Ovo`, event);
@@ -695,7 +695,7 @@ export function useAnimals({
 
     addLog(`🥛 ${animal.name} produziu ${totalLeite} balde(s) de leite cru enviados ao Armazém!`, 'success');
     setFarmXp(prev => prev + totalLeite);
-    triggerAudioResult(() => sfx.playSound('collect'));
+    triggerAudioResult(() => sfx.playSound('milk'));
     spawnFeedback('🥛', `+${totalLeite} Leite`, event);
     // Missão: coletar itens
     updateMissionProgress('collect_items', totalLeite);
@@ -771,7 +771,7 @@ export function useAnimals({
 
     addLog(`🧶 ${animal.name} foi tosquiada! Adicionado +${woolBonus} lã(s) crua(s) no Armazém.`, 'success');
     setFarmXp(prev => prev + woolBonus);
-    triggerAudioResult(() => sfx.playSound('collect'));
+    triggerAudioResult(() => sfx.playSound('shear'));
     // F12: som de animal
     if (soundEnabled) sfx.playAnimalSound('ovelha');
     spawnFeedback('🧶', `+${woolBonus} Lã`, event);
@@ -911,7 +911,7 @@ export function useAnimals({
     setAnimals(prev => prev.filter(a => a.id !== id));
     addLog(`💰 ${animal.name} (Boi) foi vendido na feira por ${value} moedas!`, 'success');
 
-    triggerAudioResult(() => sfx.playSound('sell'));
+    triggerAudioResult(() => sfx.playSound('sell_animal'));
     triggerConfetti(event);
     spawnFeedback('💰', `+${value} 💰`, event);
   };
@@ -1062,7 +1062,7 @@ export function useAnimals({
     addLog(`🐄 ${newAnimal.name} ${feedMsg}`, 'success');
     addLog(`✨ Parabéns! Você comprou ${newAnimal.name} (${typeLabel}) por ${price} moedas!`, 'success');
     setFarmXp(prev => prev + 5);
-    triggerAudioResult(() => sfx.playSound('click'));
+    triggerAudioResult(() => sfx.playSound('purchase'));
     spawnFeedback('🎁', `-${price} 💰`, event);
     if (type === 'jacare') setTimeout(() => checkAndUnlockAchievement('exotic_farmer'), 0);
   };

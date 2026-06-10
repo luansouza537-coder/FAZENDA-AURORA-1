@@ -63,6 +63,17 @@ const ACHIEVEMENTS_LIST = [
   { id: 'level_10', title: 'Fazenda Centenária', emoji: '🌾', description: 'Alcançou o nível 10 de fazenda' },
   { id: 'level_20', title: 'Império Aurora', emoji: '🌌', description: 'Alcançou o nível máximo 20!' },
   { id: 'angora_breeder', title: 'Criador de Angorá', emoji: '🐇', description: 'O Coelho Angorá se reproduziu pela primeira vez' },
+  { id: 'loan_taken', title: 'Empreendedor', emoji: '🏦', description: 'Contraiu seu primeiro empréstimo bancário' },
+  { id: 'loan_paid', title: 'Quitado!', emoji: '✅', description: 'Quitou um empréstimo antes do prazo' },
+  { id: 'world_event_survived', title: 'Sobrevivente da Crise', emoji: '📉', description: 'Sobreviveu a um Evento Mundial negativo com saldo positivo' },
+  { id: 'world_event_profited', title: 'Especulador', emoji: '📈', description: 'Vendeu mais de 500 moedas durante um Evento Mundial positivo' },
+  { id: 'machine_maxed', title: 'Engenheiro Rural', emoji: '⚙️', description: 'Melhorou uma máquina ao nível máximo (Nv3)' },
+  { id: 'all_insurance', title: 'Segurado Total', emoji: '🛡️', description: 'Ativou os três tipos de seguro ao mesmo tempo' },
+  { id: 'day_100', title: 'Centenário', emoji: '🎉', description: 'Sobreviveu 100 dias na fazenda' },
+  { id: 'day_200', title: 'Veterano', emoji: '🌟', description: 'Alcançou o Dia 200 da fazenda' },
+  { id: 'happy_herd', title: 'Fazenda Feliz', emoji: '😊', description: 'Todos os 10+ animais com felicidade acima de 90 ao mesmo tempo' },
+  { id: 'rich_rich', title: 'Barão do Agro', emoji: '💎', description: 'Acumulou 10.000 moedas de saldo' },
+  { id: 'merchant_loyal', title: 'Cliente VIP', emoji: '🧙', description: 'Comprou 10 itens na loja do Mercador Viajante' },
 ];
 
 interface FloatingText {
@@ -1199,6 +1210,41 @@ export default function App() {
     if (currentGold >= 1000) {
       checkAndUnlockAchievement('millionaire');
     }
+
+    // 11. 💎 Barão do Agro: 10.000 moedas
+    if (currentGold >= 10000) {
+      checkAndUnlockAchievement('rich_rich');
+    }
+
+    // 12. 🎉 Centenário: Dia 100
+    if (currentDay >= 100) {
+      checkAndUnlockAchievement('day_100');
+    }
+
+    // 13. 🌟 Veterano: Dia 200
+    if (currentDay >= 200) {
+      checkAndUnlockAchievement('day_200');
+    }
+
+    // 14. 😊 Fazenda Feliz: 10+ animais todos com happiness > 90
+    if (currentAnimals.length >= 10 && currentAnimals.every(a => (a.happiness ?? 0) >= 90)) {
+      checkAndUnlockAchievement('happy_herd');
+    }
+
+    // 15. 🏦 Empreendedor: primeiro empréstimo
+    if (loanActive) {
+      checkAndUnlockAchievement('loan_taken');
+    }
+
+    // 16. ⚙️ Engenheiro Rural: máquina nível máximo
+    if (milkerLevel >= 3 || shearerLevel >= 3 || feederLevel >= 3) {
+      checkAndUnlockAchievement('machine_maxed');
+    }
+
+    // 17. 🛡️ Segurado Total: todos os 3 seguros ativos
+    if (insurance.active && insuranceTheft.active && insuranceClimate.active) {
+      checkAndUnlockAchievement('all_insurance');
+    }
   };
 
   useEffect(() => {
@@ -2076,7 +2122,7 @@ export default function App() {
     if (currentScreen === 'game') {
       triggerAchievementCheck(stats, gold, farmLevel, animals);
     }
-  }, [stats, gold, farmLevel, animals, currentScreen, totalQueijosFabricados, queijosFabricadosTipos]);
+  }, [stats, gold, farmLevel, animals, currentScreen, totalQueijosFabricados, queijosFabricadosTipos, currentDay, loanActive, milkerLevel, shearerLevel, feederLevel, insurance, insuranceTheft, insuranceClimate]);
 
   // --- FUNCIONALIDADE 1: Auto-avanço useEffect ---
   // isGameOver derivado antecipado para uso no useEffect de auto-avanço (galinha = 60 moedas base)
@@ -2126,6 +2172,8 @@ export default function App() {
         setShowBuyMenu(false);
       } else if (key === 'd' || key === 's') {
         advanceDay(null as any);
+      } else if (key === 'p') {
+        if (autoAdvance) setIsPaused(prev => !prev);
       } else if (key === 'm') {
         setShowMarketModal(prev => !prev);
       } else if (key === 'h') {
@@ -2143,7 +2191,7 @@ export default function App() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   // BUG 9 FIX: adicionadas dependências faltantes para evitar valores stale no handler de teclado
-  }, [animals, inventory, currentDay, weather, weeklySales, showBuyMenu, machines, farmLevel, queijosEmMaturacao, merchantActive, daysSinceMerchant, nextMerchantDay, dailyEarning, weeklyStats]);
+  }, [animals, inventory, currentDay, weather, weeklySales, showBuyMenu, machines, farmLevel, queijosEmMaturacao, merchantActive, daysSinceMerchant, nextMerchantDay, dailyEarning, weeklyStats, autoAdvance, isPaused]);
 
   // Sync log scrollbar — scroll only inside the logs container, not the whole page
   useEffect(() => {
@@ -4721,6 +4769,27 @@ export default function App() {
         setTimeout(() => addNotification(`💸 FALÊNCIA! Dívida de ${debtAfterInterest} moedas. Sua fazenda faliu!`, 'warning', nextDayValue), 0);
       }
 
+      // --- ALERTA DE ESTOQUE BAIXO ---
+      {
+        const feedAlerts: string[] = [];
+        const hasBovinos = finalAnimals.some(a => ['vaca','boi','bufalo'].includes(a.type));
+        const hasOvinos = finalAnimals.some(a => ['ovelha','cabra','lhama','alpaca'].includes(a.type));
+        const hasAves = finalAnimals.some(a => ['galinha','codorna','pavao'].includes(a.type));
+        const hasAquatico = finalAnimals.some(a => ['pato','ganso'].includes(a.type));
+        const hasCoelho = finalAnimals.some(a => a.type === 'coelho_angora');
+        const hasCarnivoro = finalAnimals.some(a => ['jacare','avestruz'].includes(a.type));
+        if (hasBovinos && (inventory.racaoBovina ?? 0) <= 3) feedAlerts.push('🌾 Ração Bovina');
+        if (hasOvinos && (inventory.racaoOvinos ?? 0) <= 3) feedAlerts.push('🐐 Ração de Ovinos');
+        if (hasAves && (inventory.racaoAves ?? 0) <= 3) feedAlerts.push('🐔 Ração de Aves');
+        if (hasAquatico && (inventory.racaoAquatica ?? 0) <= 3) feedAlerts.push('🦆 Ração Aquática');
+        if (hasCoelho && (inventory.racaoCoelho ?? 0) <= 3) feedAlerts.push('🐰 Ração de Coelhos');
+        if (hasCarnivoro && (inventory.racaoCarnivora ?? 0) <= 3) feedAlerts.push('🍖 Ração Carnívora');
+        if (feedAlerts.length > 0 && nextDayValue % 3 === 0) {
+          logsToAdd.push({ msg: `⚠️ Estoque baixo! Menos de 3 unidades: ${feedAlerts.join(', ')}. Reabasteça nas lojas!`, type: 'error' });
+          setTimeout(() => addNotification(`⚠️ Estoque baixo: ${feedAlerts.slice(0,2).join(', ')}`, 'warning', nextDayValue), 0);
+        }
+      }
+
       // --- SISTEMA DE EMPRÉSTIMO: juros semanais ---
       if (loanActive) {
         const newDaysUntil = loanDaysUntilInterest - 1;
@@ -4793,6 +4862,7 @@ export default function App() {
         setWorldEvent(ev);
         logsToAdd.push({ msg: `🌍 EVENTO MUNDIAL: ${ev.title} — ${ev.desc} (${ev.daysLeft} dias)`, type: 'event' });
         setTimeout(() => addNotification(`🌍 Evento Mundial: ${ev.title}`, 'info', nextDayValue), 0);
+        if (ev.priceMult < 1) setTimeout(() => checkAndUnlockAchievement('world_event_survived'), 0);
       }
 
       // --- MAIS EVENTOS POSITIVOS ALEATÓRIOS ---
@@ -5172,7 +5242,12 @@ export default function App() {
               </h1>
               <div className="flex flex-col mt-0.5">
                 <span className="text-[#fcd57e] text-xs uppercase font-mono font-bold tracking-widest block">
-                  🌾 Nível {farmLevel} ({getFarmTitle(farmLevel)}) • Clima: {weather === 'chuva' ? '🌧️ Chuva' : weather === 'sol' ? '☀️ Sol Forte' : '☁️ Nublado'} • Estação: {seasonName}
+                  🌾 Nível {farmLevel} ({getFarmTitle(farmLevel)}) • {weather === 'chuva' ? '🌧️ Chuva' : weather === 'sol' ? '☀️ Sol Forte' : '☁️ Nublado'} • {seasonName}
+                  {nextDayEvent && (
+                    <span className="ml-2 text-[#fbbf24] text-[10px]">
+                      | Amanhã: {nextDayEvent === 'praga' ? '🐀 Pragas' : nextDayEvent === 'tempestade' ? '⛈️ Tempestade' : nextDayEvent === 'seca' ? '🏜️ Seca' : nextDayEvent === 'geada' ? '❄️ Geada' : nextDayEvent === 'predador' ? '🐺 Predador' : nextDayEvent === 'chuva_leve' ? '🌦️ Chuva Leve' : nextDayEvent === 'sol_forte' ? '☀️ Sol Forte' : nextDayEvent === 'vento_bom' ? '🌬️ Vento Bom' : '🌤️ Tranquilo'}
+                    </span>
+                  )}
                 </span>
                 
                 {/* Indicador de progresso XP */}
@@ -5242,6 +5317,11 @@ export default function App() {
               <span className="text-xl sm:text-2xl">💰</span>
               <span>{Math.floor(gold)}</span>
               <span className="text-xs uppercase font-bold tracking-wide text-[#b45309] ml-1">moedas</span>
+              {dailyEarning > 0 && (
+                <span className="text-emerald-700 font-bold text-xs ml-1" title="Ganhos acumulados hoje">
+                  +{dailyEarning}
+                </span>
+              )}
               {debt > 0 && (
                 <span className="text-red-600 font-bold text-xs ml-2" title={`Dívida acumulada com juros de 5%/dia. ${debt > 200 ? 'Não pode comprar animais!' : ''} ${debt > 500 ? 'Comerciante não aparece!' : ''} ${debt > 1000 ? 'FALÊNCIA!' : ''}`}>
                   💳 -{debt}
@@ -5555,6 +5635,8 @@ export default function App() {
                         else if (item.effect === 'production_boost_7days') { setProductionBoostDays(prev => prev + 7); addLog('📚 Manual de Produção Avançada! +15% produção por 7 dias!', 'success'); }
                         else if (item.effect === 'rare_animal_bait') { addLog('🎯 Isca preparada! Um animal raro pode aparecer amanhã com 50% de desconto!', 'success'); }
                         setMerchantSpecialItems(prev => prev.filter(id => id !== item.id));
+                        setStats(prev => ({ ...prev, totalMerchantShopPurchases: (prev.totalMerchantShopPurchases ?? 0) + 1 }));
+                        if (((stats.totalMerchantShopPurchases ?? 0) + 1) >= 10) setTimeout(() => checkAndUnlockAchievement('merchant_loyal'), 0);
                         triggerAudioResult(() => sfx.playSound('sell'));
                       }}
                       disabled={gold < item.price}
@@ -6175,9 +6257,24 @@ export default function App() {
                 )}
                 {/* Feature 1: Animal Filter Bar */}
                 <div className="col-span-full flex flex-wrap gap-2 mb-3">
+                  {/* Categoria rápida */}
+                  {[
+                    { label: '🐾 Todos', value: 'all' },
+                    { label: '🐄 Bovinos', value: '__bovinos__' },
+                    { label: '🐔 Aves', value: '__aves__' },
+                    { label: '🧶 Fibras', value: '__fibras__' },
+                    { label: '🦎 Exóticos', value: '__exoticos__' },
+                    { label: '⚡ Prontos', value: 'ready' },
+                  ].map(f => (
+                    <button key={f.value}
+                      onClick={() => setAnimalFilter(f.value)}
+                      className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 transition-all ${animalFilter === f.value ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-transparent border-[#fbbf24]/40 text-[#fef3c7]'}`}>
+                      {f.label}
+                    </button>
+                  ))}
                   <select value={animalFilter} onChange={e => setAnimalFilter(e.target.value)}
                     className="bg-[#064e3b] border-2 border-[#fbbf24] text-[#fef3c7] text-xs font-mono rounded-xl px-3 py-1.5">
-                    <option value="all">🐾 Todos</option>
+                    <option value="all">🔍 Por tipo</option>
                     {[...new Set(animals.map(a => a.type))].map(type => (
                       <option key={type} value={type}>{type}</option>
                     ))}
@@ -6205,6 +6302,10 @@ export default function App() {
                     Mostrando {animals.filter(a => {
                       if (animalFilter === 'all') return true;
                       if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.feathersReady) || (a.type === 'bufalo' && !a.hasProducedToday);
+                      if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo'].includes(a.type);
+                      if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz'].includes(a.type);
+                      if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra','bicho_seda'].includes(a.type);
+                      if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
                       return a.type === animalFilter;
                     }).length} de {animals.length} animais
                   </span>
@@ -9607,6 +9708,7 @@ export default function App() {
                             setLoanWeeksLeft(0);
                             addLog(`🏦 Empréstimo quitado antecipadamente! -${loanAmount}💰`, 'success');
                             triggerAudioResult(() => sfx.playSound('levelup'));
+                            setTimeout(() => checkAndUnlockAchievement('loan_paid'), 0);
                           }
                         }}
                         className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer mt-2 ${gold >= loanAmount ? 'bg-violet-500 hover:bg-violet-400 text-white border-violet-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
@@ -9634,6 +9736,7 @@ export default function App() {
                             setLoanDaysUntilInterest(7);
                             addLog(`🏦 Empréstimo de ${opt.amount}💰 obtido! Juros: ${Math.round(opt.rate*100)}%/semana por ${opt.weeks} semanas.`, 'success');
                             triggerAudioResult(() => sfx.playSound('levelup'));
+                            setTimeout(() => checkAndUnlockAchievement('loan_taken'), 0);
                           }}
                           className="w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 bg-violet-500 hover:bg-violet-400 text-white border-violet-700 transition-all cursor-pointer"
                         >
