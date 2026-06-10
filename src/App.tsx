@@ -3136,6 +3136,50 @@ export default function App() {
         }
       }
 
+      // --- DEBUFF DE ESPECIALIZAÇÃO: penalidade por diversidade sem peões especializados ---
+      // Ativo apenas quando há 3+ categorias de animais adultos na fazenda.
+      // Para cada categoria sem o peão adequado: -4 felicidade/dia nos animais daquela categoria.
+      {
+        const catDef: Record<string, string[]> = {
+          bovinos:  ['vaca', 'boi', 'bufalo'],
+          fibras:   ['ovelha', 'lhama', 'alpaca', 'coelho_angora', 'cabra'],
+          aves:     ['galinha', 'codorna', 'pato', 'ganso', 'pavao'],
+          exoticos: ['ra', 'avestruz', 'jacare', 'bicho_seda', 'caracol', 'minhoca'],
+        };
+        // Peões que cobrem cada categoria (veterinario cobre tudo)
+        const catWorkers: Record<string, string[]> = {
+          bovinos:  ['ordenhador', 'tratador', 'veterinario'],
+          fibras:   ['tosquiador', 'tratador', 'veterinario'],
+          aves:     ['avicultor', 'tratador', 'veterinario'],
+          exoticos: ['tratador_exotico', 'veterinario'],
+        };
+        const workerRoles = new Set(workers.map(w => w.role));
+        // Descobre quais categorias têm pelo menos 1 animal adulto
+        const activeCategories = Object.entries(catDef).filter(([, types]) =>
+          updatedAnimalsList.some(a => types.includes(a.type) && a.isAdult !== false)
+        );
+        if (activeCategories.length >= 3) {
+          // Para cada categoria ativa sem especialista, aplica penalidade nos animais
+          const penaltyCategories: string[] = [];
+          activeCategories.forEach(([cat, types]) => {
+            const hasSpecialist = catWorkers[cat].some(role => workerRoles.has(role));
+            if (!hasSpecialist) {
+              penaltyCategories.push(cat);
+              updatedAnimalsList = updatedAnimalsList.map(a => {
+                if (!types.includes(a.type) || a.isAdult === false) return a;
+                return { ...a, happiness: Math.max(0, a.happiness - 4) };
+              });
+            }
+          });
+          if (penaltyCategories.length > 0) {
+            logsToAdd.push({
+              msg: `⚠️ Fazenda diversificada sem especialistas! Animais em stress: ${penaltyCategories.join(', ')} (-4 felicidade/dia). Contrate peões especializados!`,
+              type: 'error'
+            });
+          }
+        }
+      }
+
       // --- GRUPO 3a: Estábulo — no inverno, animais recuperam metade da felicidade perdida ---
       if (hasStable && getEstacaoKey(nextDayValue) === 'inverno') {
         updatedAnimalsList = updatedAnimalsList.map(a => ({
@@ -8770,6 +8814,51 @@ export default function App() {
                     </div>
                   </div>
                 )}
+                {/* Alerta de Debuff de Especialização */}
+                {(() => {
+                  const catDef2: Record<string, string[]> = {
+                    'Bovinos 🐄': ['vaca', 'boi', 'bufalo'],
+                    'Fibras/Caprinos 🐑': ['ovelha', 'lhama', 'alpaca', 'coelho_angora', 'cabra'],
+                    'Aves 🐔': ['galinha', 'codorna', 'pato', 'ganso', 'pavao'],
+                    'Exóticos 🦎': ['ra', 'avestruz', 'jacare', 'bicho_seda', 'caracol', 'minhoca'],
+                  };
+                  const catWorkersUI: Record<string, string[]> = {
+                    'Bovinos 🐄': ['ordenhador', 'tratador', 'veterinario'],
+                    'Fibras/Caprinos 🐑': ['tosquiador', 'tratador', 'veterinario'],
+                    'Aves 🐔': ['avicultor', 'tratador', 'veterinario'],
+                    'Exóticos 🦎': ['tratador_exotico', 'veterinario'],
+                  };
+                  const workerRolesUI = new Set(workers.map(w => w.role));
+                  const activeCats = Object.entries(catDef2).filter(([, types]) =>
+                    animals.some(a => types.includes(a.type) && a.isAdult !== false)
+                  );
+                  if (activeCats.length < 3) return null;
+                  const missingCats = activeCats.filter(([cat]) =>
+                    !catWorkersUI[cat].some(r => workerRolesUI.has(r))
+                  );
+                  if (missingCats.length === 0) return (
+                    <div className="bg-[#10b981]/10 border border-[#10b981]/40 rounded-2xl p-3 text-[#10b981] text-[11px] font-mono">
+                      ✅ Todas as {activeCats.length} categorias têm especialistas. Sem debuff!
+                    </div>
+                  );
+                  return (
+                    <div className="bg-red-900/30 border-2 border-red-500/50 rounded-2xl p-4 space-y-2">
+                      <div className="text-red-300 font-black text-xs uppercase">⚠️ Debuff de Diversidade Ativo</div>
+                      <div className="text-red-200/80 text-[11px] font-mono leading-relaxed">
+                        Sua fazenda tem <span className="text-red-300 font-bold">{activeCats.length} categorias</span> sem especialistas para:
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {missingCats.map(([cat]) => (
+                          <span key={cat} className="bg-red-500/20 border border-red-400/40 text-red-200 text-[10px] font-mono px-2 py-0.5 rounded-full">
+                            {cat} -4😊/dia
+                          </span>
+                        ))}
+                      </div>
+                      <div className="text-[#fbbf24] text-[10px] font-mono">Contrate os peões abaixo para remover o debuff.</div>
+                    </div>
+                  );
+                })()}
+
                 <div className="space-y-3">
                   <h4 className="text-[#fbbf24] font-black text-xs uppercase">Disponíveis para Contratar</h4>
                   {WORKER_TYPES.map(wt => {
@@ -8788,8 +8877,13 @@ export default function App() {
                               {!levelOk && <span className="text-[9px] bg-red-900/40 text-red-300 border border-red-500/30 rounded-full px-2 py-0.5 font-mono uppercase">🔒 Nível {wt.minLevel}</span>}
                             </div>
                             <div className="text-[#fef3c7]/70 text-[11px] font-mono mt-1 leading-relaxed">{wt.desc}</div>
-                            <div className="text-[#fbbf24] text-[10px] font-mono mt-1.5">
-                              -{wt.dailyCost}💰/dia
+                            <div className="text-[#fbbf24] text-[10px] font-mono mt-1.5 flex items-center gap-2 flex-wrap">
+                              <span>-{wt.dailyCost}💰/dia</span>
+                              {(wt.role === 'tratador') && <span className="text-[9px] bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30 rounded-full px-1.5 py-0.5">Remove debuff geral</span>}
+                              {(wt.role === 'ordenhador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Bovinos sem debuff</span>}
+                              {(wt.role === 'tosquiador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Fibras/Caprinos sem debuff</span>}
+                              {(wt.role === 'avicultor') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Aves sem debuff</span>}
+                              {(wt.role === 'tratador_exotico') && <span className="text-[9px] bg-purple-500/15 text-purple-300 border border-purple-400/30 rounded-full px-1.5 py-0.5">Exóticos sem debuff</span>}
                             </div>
                           </div>
                           <button
