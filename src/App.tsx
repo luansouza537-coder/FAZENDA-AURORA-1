@@ -472,14 +472,14 @@ export default function App() {
     id: string;
     title: string;
     description: string;
-    type: 'daily' | 'weekly';
+    type: 'daily' | 'weekly' | 'epic';
     goal: number;
     current: number;
     reward: number;
     expiresOnDay: number;
     completed: boolean;
     claimed: boolean;
-    missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items' | 'collect_silk' | 'sell_exotic' | 'organic_day';
+    missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items' | 'collect_silk' | 'sell_exotic' | 'organic_day' | 'sell_cheese' | 'have_animals' | 'sell_wool';
   }
   // BUG 9 FIX: restaura missões do save (eram perdidas ao recarregar)
   const [missions, setMissions] = useState<Mission[]>(() => {
@@ -1050,6 +1050,14 @@ export default function App() {
     setSolarLevel,
     irrigationLevel,
     setIrrigationLevel,
+    hasLaboratorio,
+    setHasLaboratorio,
+    hasPastagem,
+    setHasPastagem,
+    hasExportCenter,
+    setHasExportCenter,
+    hasAcademia,
+    setHasAcademia,
     machines,
     setMachines,
     farmWisdomBonus,
@@ -1320,6 +1328,76 @@ export default function App() {
         claimed: false,
         missionKey: 'feed_animals'
       }
+    ];
+  };
+
+  const generateEpicMissions = (day: number): Mission[] => {
+    return [
+      {
+        id: `epic_milk_${day}`,
+        title: '🥛 Magnata do Leite',
+        description: 'Venda 100 litros de leite nos próximos 30 dias',
+        type: 'epic' as const,
+        goal: 100,
+        current: 0,
+        reward: 800,
+        expiresOnDay: day + 30,
+        completed: false,
+        claimed: false,
+        missionKey: 'sell_milk' as const
+      },
+      {
+        id: `epic_cheese_${day}`,
+        title: '🧀 Mestre Queijeiro',
+        description: 'Produza 20 queijos de qualquer tipo em 45 dias',
+        type: 'epic' as const,
+        goal: 20,
+        current: 0,
+        reward: 1500,
+        expiresOnDay: day + 45,
+        completed: false,
+        claimed: false,
+        missionKey: 'sell_cheese' as const
+      },
+      {
+        id: `epic_animals_${day}`,
+        title: '🐄 Rei do Rebanho',
+        description: 'Tenha 20 animais adultos ao mesmo tempo',
+        type: 'epic' as const,
+        goal: 20,
+        current: 0,
+        reward: 2000,
+        expiresOnDay: day + 60,
+        completed: false,
+        claimed: false,
+        missionKey: 'have_animals' as const
+      },
+      {
+        id: `epic_gold_${day}`,
+        title: '💰 Fazendeiro Bilionário',
+        description: 'Acumule 50.000 moedas em 60 dias',
+        type: 'epic' as const,
+        goal: 50000,
+        current: 0,
+        reward: 3000,
+        expiresOnDay: day + 60,
+        completed: false,
+        claimed: false,
+        missionKey: 'earn_gold' as const
+      },
+      {
+        id: `epic_wool_${day}`,
+        title: '🧶 Império da Lã',
+        description: 'Venda 80 unidades de lã/produtos têxteis em 45 dias',
+        type: 'epic' as const,
+        goal: 80,
+        current: 0,
+        reward: 1200,
+        expiresOnDay: day + 45,
+        completed: false,
+        claimed: false,
+        missionKey: 'sell_wool' as const
+      },
     ];
   };
 
@@ -1721,6 +1799,8 @@ export default function App() {
     // Certificado Sanitário: +10% para produtos de carne
     const meatItems = ['coxa_ra', 'carne_avestruz', 'carne_jacare'] as string[];
     if (hasCertSanitario && meatItems.includes(itemType as string)) finalPrice *= 1.1;
+    // Centro de Exportação: +20% em todos os produtos
+    if (hasExportCenter) finalPrice = Math.round(finalPrice * 1.20);
     return Math.max(1, Math.round(finalPrice));
   };
 
@@ -2980,7 +3060,8 @@ export default function App() {
       });
 
       // --- XP DIÁRIO: animais vivos + dia sobrevivido ---
-      const dailyXp = 2 + Math.floor(animals.length * 0.5);
+      const baseXp = 2 + Math.floor(animals.length * 0.5);
+      const dailyXp = hasAcademia ? Math.round(baseXp * 1.15) : baseXp;
       const newFarmXp = farmXp + dailyXp;
       setFarmXp(newFarmXp);
 
@@ -3056,6 +3137,10 @@ export default function App() {
         }
         if (!hasWeekly) {
           newMissions.push(...generateWeeklyMissions(currentDay + 1));
+        }
+        const hasEpic = nextDayMissions.some(m => m.type === 'epic' && !m.completed && m.expiresOnDay > currentDay + 1);
+        if (!hasEpic) {
+          newMissions.push(...generateEpicMissions(currentDay + 1));
         }
         return newMissions;
       });
@@ -3463,6 +3548,11 @@ export default function App() {
           }
         }
 
+        // Pastagem Ampliada: +3 felicidade para bovinos e ovinos
+        if (hasPastagem && ['vaca', 'boi', 'bufalo', 'ovelha', 'cabra', 'lhama', 'alpaca'].includes(copy.type)) {
+          copy.happiness = Math.min(100, copy.happiness + 3);
+        }
+
         // Lhama: não perde felicidade no inverno
         if (a.type === 'lhama' && currentSeasonIdx === 3) {
           // Undo the happiness loss from cold (restore 2 that was lost by decaimento natural)
@@ -3866,7 +3956,10 @@ export default function App() {
       });
 
       // --- SUBFUNÇÃO 5: Processamento da Maturação de Queijos ---
-      const { remaining: maturacaoRemaining, readyQueijos } = processarMaturacaoQueijos(queijosEmMaturacao, nextDayValue, logsToAdd);
+      const maturacaoInput = hasLaboratorio
+        ? queijosEmMaturacao.map(q => ({ ...q, diasRestantes: Math.max(0, q.diasRestantes - 1) }))
+        : queijosEmMaturacao;
+      const { remaining: maturacaoRemaining, readyQueijos } = processarMaturacaoQueijos(maturacaoInput, nextDayValue, logsToAdd);
       setQueijosEmMaturacao(maturacaoRemaining);
 
       if (readyQueijos.length > 0) {
@@ -8951,10 +9044,11 @@ export default function App() {
                 {/* F7: Expansão de Terreno + Biome Selection */}
                 <div className="bg-white border-4 border-green-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-green-800 mb-1">🏡 Expansão de Terreno</h4>
-                  <p className="text-xs text-stone-500 font-mono mb-3">Cada lote permite +5 animais. Atual: Lote {landLots}/5 ({landLots * 5} animais máx) • Compra sequencial obrigatória</p>
+                  <p className="text-xs text-stone-500 font-mono mb-3">Cada lote permite +5 animais. Atual: Lote {landLots}/10 ({landLots * 5} animais máx) • Compra sequencial obrigatória</p>
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     {[
-                      { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3500, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 22000, minLevel: 8 }
+                      { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3500, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 22000, minLevel: 8 },
+                      { lot: 6, price: 55000, minLevel: 10 }, { lot: 7, price: 140000, minLevel: 12 }, { lot: 8, price: 350000, minLevel: 14 }, { lot: 9, price: 800000, minLevel: 16 }, { lot: 10, price: 2000000, minLevel: 18 },
                     ].map(({ lot, price, minLevel }) => {
                       const canBuy = gold >= price && landLots === lot - 1 && farmLevel >= minLevel;
                       const locked = farmLevel < minLevel;

@@ -374,6 +374,38 @@ export function useFarm({ gold, setGold, checkAndUnlockAchievement }: UseFarmPro
     return 0;
   });
 
+  const [hasLaboratorio, setHasLaboratorio] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).hasLaboratorio ?? false;
+    } catch (e) {}
+    return false;
+  });
+
+  const [hasPastagem, setHasPastagem] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).hasPastagem ?? false;
+    } catch (e) {}
+    return false;
+  });
+
+  const [hasExportCenter, setHasExportCenter] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).hasExportCenter ?? false;
+    } catch (e) {}
+    return false;
+  });
+
+  const [hasAcademia, setHasAcademia] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).hasAcademia ?? false;
+    } catch (e) {}
+    return false;
+  });
+
   const [machines, setMachines] = useState<{
     milkerPurchased: boolean;
     milkerActive: boolean;
@@ -496,6 +528,14 @@ export function useFarm({ gold, setGold, checkAndUnlockAchievement }: UseFarmPro
     setSolarLevel,
     irrigationLevel,
     setIrrigationLevel,
+    hasLaboratorio,
+    setHasLaboratorio,
+    hasPastagem,
+    setHasPastagem,
+    hasExportCenter,
+    setHasExportCenter,
+    hasAcademia,
+    setHasAcademia,
     machines,
     setMachines,
     farmWisdomBonus,
