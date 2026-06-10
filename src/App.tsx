@@ -178,15 +178,15 @@ const PriceChart: React.FC<PriceChartProps> = ({ history, basePrice }) => {
 };
 
 const WORKER_TYPES = [
-  { role: 'tratador' as const, name: 'Tratador', emoji: '🧑‍🌾', dailyCost: 6, desc: 'Alimenta todos os animais diariamente. Essencial para rebanhos grandes.', minLevel: 2 },
-  { role: 'composteiro' as const, name: 'Composteiro', emoji: '🌱', dailyCost: 6, desc: 'Coleta húmus das minhocas e a cada 3 dias produz 1 húmus bônus de compostagem.', minLevel: 3 },
-  { role: 'tosquiador' as const, name: 'Tosquiador', emoji: '✂️', dailyCost: 7, desc: 'Coleta lã de ovelhas e coelhos angorá prontos. Tem chance de lã premium (+10%).', minLevel: 3 },
-  { role: 'ordenhador' as const, name: 'Ordenhador', emoji: '🥛', dailyCost: 8, desc: 'Ordena vacas, cabras, búfalos e alpacas automaticamente ao fim do dia.', minLevel: 4 },
-  { role: 'avicultor' as const, name: 'Avicultor', emoji: '🥚', dailyCost: 7, desc: 'Coleta ovos de galinhas, codornas, patos e avestruzes prontos.', minLevel: 5 },
-  { role: 'queijeiro' as const, name: 'Queijeiro', emoji: '🧀', dailyCost: 12, desc: 'Transforma automaticamente 3 leites em 1 Queijo Coalho por dia. Bônus +5% de venda.', minLevel: 5 },
-  { role: 'tratador_exotico' as const, name: 'Tratador Exótico', emoji: '🦎', dailyCost: 14, desc: 'Cuida de jacarés, rãs e caracóis: +5 felicidade/dia e -50% chance de epidemia nesses animais.', minLevel: 8 },
-  { role: 'veterinario' as const, name: 'Veterinário', emoji: '💉', dailyCost: 15, desc: 'Cura doenças, remove estresse e adiciona +5 felicidade para todos os animais por dia.', minLevel: 10 },
-  { role: 'comerciante_residente' as const, name: 'Comerciante', emoji: '💰', dailyCost: 20, desc: '+8% no preço de venda de leite, lã, ovos, seda, couro e carne bruta.', minLevel: 10 },
+  { role: 'tratador' as const, name: 'Tratador', emoji: '🧑‍🌾', dailyCost: 25, desc: 'Alimenta todos os animais diariamente. Essencial para rebanhos grandes.', minLevel: 2 },
+  { role: 'composteiro' as const, name: 'Composteiro', emoji: '🌱', dailyCost: 20, desc: 'Coleta húmus das minhocas e a cada 3 dias produz 1 húmus bônus de compostagem.', minLevel: 3 },
+  { role: 'tosquiador' as const, name: 'Tosquiador', emoji: '✂️', dailyCost: 28, desc: 'Coleta lã de ovelhas e coelhos angorá prontos. Tem chance de lã premium (+10%).', minLevel: 3 },
+  { role: 'ordenhador' as const, name: 'Ordenhador', emoji: '🥛', dailyCost: 35, desc: 'Ordena vacas, cabras, búfalos e alpacas automaticamente ao fim do dia.', minLevel: 4 },
+  { role: 'avicultor' as const, name: 'Avicultor', emoji: '🥚', dailyCost: 28, desc: 'Coleta ovos de galinhas, codornas, patos e avestruzes prontos.', minLevel: 5 },
+  { role: 'queijeiro' as const, name: 'Queijeiro', emoji: '🧀', dailyCost: 50, desc: 'Transforma automaticamente 3 leites em 1 Queijo Coalho por dia. Bônus +5% de venda.', minLevel: 5 },
+  { role: 'tratador_exotico' as const, name: 'Tratador Exótico', emoji: '🦎', dailyCost: 65, desc: 'Cuida de jacarés, rãs e caracóis: +5 felicidade/dia e -50% chance de epidemia nesses animais.', minLevel: 8 },
+  { role: 'veterinario' as const, name: 'Veterinário', emoji: '💉', dailyCost: 80, desc: 'Cura doenças, remove estresse e adiciona +5 felicidade para todos os animais por dia.', minLevel: 10 },
+  { role: 'comerciante_residente' as const, name: 'Comerciante', emoji: '💰', dailyCost: 120, desc: '+8% no preço de venda de leite, lã, ovos, seda, couro e carne bruta.', minLevel: 10 },
 ];
 
 const MERCHANT_SPECIAL_ITEMS = [
@@ -1209,7 +1209,7 @@ export default function App() {
         type: 'daily',
         goal: 5,
         current: 0,
-        reward: 30,
+        reward: 15,
         expiresOnDay: day + 1,
         completed: false,
         claimed: false,
@@ -1222,7 +1222,7 @@ export default function App() {
         type: 'daily',
         goal: 3,
         current: 0,
-        reward: 25,
+        reward: 12,
         expiresOnDay: day + 1,
         completed: false,
         claimed: false,
@@ -1235,7 +1235,7 @@ export default function App() {
         type: 'daily',
         goal: 1,
         current: 0,
-        reward: 30,
+        reward: 15,
         expiresOnDay: day + 1,
         completed: false,
         claimed: false,
@@ -1253,7 +1253,7 @@ export default function App() {
         type: 'daily',
         goal: 3,
         current: 0,
-        reward: 60,
+        reward: 30,
         expiresOnDay: day + 1,
         completed: false,
         claimed: false,
@@ -1267,7 +1267,7 @@ export default function App() {
         type: 'daily',
         goal: 1,
         current: 0,
-        reward: 50,
+        reward: 25,
         expiresOnDay: day + 1,
         completed: false,
         claimed: false,
@@ -1281,7 +1281,7 @@ export default function App() {
         type: 'daily',
         goal: 1,
         current: 0,
-        reward: 40,
+        reward: 20,
         expiresOnDay: day + 1,
         completed: false,
         claimed: false,
@@ -1301,7 +1301,7 @@ export default function App() {
         type: 'weekly',
         goal: 200,
         current: 0,
-        reward: 100,
+        reward: 50,
         expiresOnDay: day + 7,
         completed: false,
         claimed: false,
@@ -1314,7 +1314,7 @@ export default function App() {
         type: 'weekly',
         goal: 10,
         current: 0,
-        reward: 80,
+        reward: 40,
         expiresOnDay: day + 7,
         completed: false,
         claimed: false,
@@ -2249,6 +2249,7 @@ export default function App() {
       const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
       updatedAnimals = updatedAnimals.map(a => {
         if (noFeedAnimals.includes(a.type)) return a;
+        if (a.isAdult === false) return a; // filhotes não consomem ração industrial
         let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' = 'racaoBovina';
         let feedLabel = 'Ração Bovina';
         if (a.type === 'vaca' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
@@ -3285,18 +3286,18 @@ export default function App() {
       }
 
       // --- FUNCIONALIDADE 1: Custos fixos de água e energia ---
-      // Cálculo da conta de água
-      const baseWaterCost = 10 + (animals.length * 2);
-      const waterDiscount = wellLevel >= 1 ? 0.8 : 0;
+      // Cálculo da conta de água: base cresce com animais e nível da fazenda
+      const baseWaterCost = 30 + (animals.length * 4) + (farmLevel * 5);
+      // Poço reduz 20% por nível (máx 60%)
+      const waterDiscount = Math.min(wellLevel * 0.2, 0.6);
       const waterCost = Math.round(baseWaterCost * (1 - waterDiscount));
 
-      // Cálculo da conta de energia
-      // Cada máquina tem custo de energia distinto por dia de operação
-      const milkerEnergy = machines.milkerPurchased && machines.milkerActive ? 8 : 0;
-      const shearerEnergy = machines.shearerPurchased && machines.shearerActive ? 6 : 0;
-      const feederEnergy = machines.feederPurchased && machines.feederActive ? 5 : 0;
+      // Cálculo da conta de energia: base cresce com nível da fazenda
+      const milkerEnergy = machines.milkerPurchased && machines.milkerActive ? 20 : 0;
+      const shearerEnergy = machines.shearerPurchased && machines.shearerActive ? 15 : 0;
+      const feederEnergy = machines.feederPurchased && machines.feederActive ? 12 : 0;
       const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy;
-      const baseEnergyCost = 15 + machineEnergyCost;
+      const baseEnergyCost = 25 + (farmLevel * 3) + machineEnergyCost;
       const energyDiscount = solarLevel === 1 ? 0.4 : solarLevel === 2 ? 0.7 : solarLevel >= 3 ? 1.0 : 0;
       const energyCost = Math.round(baseEnergyCost * (1 - energyDiscount));
 
@@ -4243,6 +4244,7 @@ export default function App() {
             const updated = { ...prev };
             animals.forEach(a => {
               if (noFeedTypes.includes(a.type)) return;
+              if (a.isAdult === false) return; // filhotes não consomem ração
               const feedKey = getFeedKeyForType(a.type);
               if ((updated[feedKey] as number) > 0) {
                 (updated[feedKey] as number) -= 1;
@@ -8884,27 +8886,32 @@ export default function App() {
                 {/* F7: Expansão de Terreno + Biome Selection */}
                 <div className="bg-white border-4 border-green-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-green-800 mb-1">🏡 Expansão de Terreno</h4>
-                  <p className="text-xs text-stone-500 font-mono mb-3">Cada lote permite +5 animais. Atual: Lote {landLots}/5 ({landLots * 5} animais máx)</p>
+                  <p className="text-xs text-stone-500 font-mono mb-3">Cada lote permite +5 animais. Atual: Lote {landLots}/5 ({landLots * 5} animais máx) • Compra sequencial obrigatória</p>
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     {[
-                      { lot: 2, price: 200 }, { lot: 3, price: 400 }, { lot: 4, price: 800 }, { lot: 5, price: 1600 }
-                    ].map(({ lot, price }) => (
+                      { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3500, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 22000, minLevel: 8 }
+                    ].map(({ lot, price, minLevel }) => {
+                      const canBuy = gold >= price && landLots === lot - 1 && farmLevel >= minLevel;
+                      const locked = farmLevel < minLevel;
+                      const needsPrev = landLots < lot - 1;
+                      return (
                       <button
                         key={lot}
-                        disabled={landLots >= lot || gold < price}
+                        disabled={landLots >= lot || !canBuy}
                         onClick={() => {
-                          if (gold >= price && landLots < lot) {
+                          if (canBuy) {
                             setGold(prev => prev - price);
                             setLandLots(lot);
                             addLog(`🏡 Terreno expandido! Agora você tem ${lot} lote(s) e pode ter até ${lot * 5} animais.`, 'success');
                             triggerAudioResult(() => sfx.playSound('levelup'));
                           }
                         }}
-                        className={`text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${landLots >= lot ? 'bg-green-100 border-green-300 text-green-700' : gold >= price ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                        className={`text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${landLots >= lot ? 'bg-green-100 border-green-300 text-green-700' : canBuy ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                       >
-                        {landLots >= lot ? `✅ Lote ${lot}` : `Lote ${lot} (${price}💰)`}
+                        {landLots >= lot ? `✅ Lote ${lot}` : locked ? `🔒 Lote ${lot} (Nv${minLevel})` : needsPrev ? `🔒 Lote ${lot} (compre anterior)` : `Lote ${lot} (${price}💰)`}
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                   {/* Biome Selection */}
                   <div className="border-t-2 border-green-200 pt-3">
@@ -8975,25 +8982,28 @@ export default function App() {
                 {/* F8: Poço d'água */}
                 <div className="bg-white border-4 border-blue-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-blue-800 mb-1">💧 Poço d'Água</h4>
-                  <p className="text-xs text-stone-500 font-mono mb-2">Reduz custo de ração em 10% por nível. Atual: Nível {wellLevel}/3 ({wellLevel * 10}% desconto)</p>
+                  <p className="text-xs text-stone-500 font-mono mb-2">Reduz conta de água em 20% por nível (máx 60%). Atual: Nível {wellLevel}/3 (-{wellLevel * 20}% água) • Compra sequencial</p>
                   <div className="grid grid-cols-3 gap-2">
-                    {[{ lvl: 1, price: 150 }, { lvl: 2, price: 300 }, { lvl: 3, price: 500 }].map(({ lvl, price }) => (
+                    {[{ lvl: 1, price: 700 }, { lvl: 2, price: 2000 }, { lvl: 3, price: 5500 }].map(({ lvl, price }) => {
+                      const canBuy = gold >= price && wellLevel === lvl - 1;
+                      return (
                       <button
                         key={lvl}
-                        disabled={wellLevel >= lvl || gold < price}
+                        disabled={wellLevel >= lvl || !canBuy}
                         onClick={() => {
-                          if (gold >= price && wellLevel < lvl) {
+                          if (canBuy) {
                             setGold(prev => prev - price);
                             setWellLevel(lvl);
-                            addLog(`💧 Poço d'água nível ${lvl} instalado! Ração ${lvl * 10}% mais barata.`, 'success');
+                            addLog(`💧 Poço d'água nível ${lvl} instalado! Água -${lvl * 20}%.`, 'success');
                             triggerAudioResult(() => sfx.playSound('levelup'));
                           }
                         }}
-                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${wellLevel >= lvl ? 'bg-blue-100 border-blue-300 text-blue-700' : gold >= price ? 'bg-blue-500 hover:bg-blue-400 text-white border-blue-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${wellLevel >= lvl ? 'bg-blue-100 border-blue-300 text-blue-700' : canBuy ? 'bg-blue-500 hover:bg-blue-400 text-white border-blue-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                       >
-                        {wellLevel >= lvl ? `✅ Nv${lvl}` : `Nv${lvl} (${price}💰)`}
+                        {wellLevel >= lvl ? `✅ Nv${lvl}` : wellLevel < lvl - 1 ? `🔒 Nv${lvl}` : `Nv${lvl} (${price}💰)`}
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -9007,9 +9017,9 @@ export default function App() {
                     Nv3: -45% manutenção, energia GRATUITA 🆓 (Nv5+ da fazenda)
                   </p>
                   <div className="grid grid-cols-3 gap-2">
-                    {[{ lvl: 1, price: 200 }, { lvl: 2, price: 400 }, { lvl: 3, price: 700 }].map(({ lvl, price }) => {
+                    {[{ lvl: 1, price: 1200 }, { lvl: 2, price: 3500 }, { lvl: 3, price: 9000 }].map(({ lvl, price }) => {
                       const requiresFarmLevel5 = lvl === 3 && farmLevel < 5;
-                      const canAfford = gold >= price && solarLevel < lvl && !requiresFarmLevel5;
+                      const canAfford = gold >= price && solarLevel === lvl - 1 && !requiresFarmLevel5;
                       return (
                         <button
                           key={lvl}
@@ -9037,26 +9047,29 @@ export default function App() {
                 <div className="bg-white border-4 border-cyan-300 rounded-3xl p-4">
                   <h4 className="font-display font-black text-sm uppercase text-cyan-800 mb-1">🌊 Sistema de Irrigação</h4>
                   <p className="text-xs text-stone-500 font-mono mb-2">
-                    Nv1: eventos de seca -40% impacto. Nv2: imunidade total a secas. Atual: Nível {irrigationLevel}/2
+                    Nv1: eventos de seca -40% impacto. Nv2: imunidade total a secas. Atual: Nível {irrigationLevel}/2 • Compra sequencial
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    {[{ lvl: 1, price: 250 }, { lvl: 2, price: 500 }].map(({ lvl, price }) => (
+                    {[{ lvl: 1, price: 1500 }, { lvl: 2, price: 4500 }].map(({ lvl, price }) => {
+                      const canBuy = gold >= price && irrigationLevel === lvl - 1;
+                      return (
                       <button
                         key={lvl}
-                        disabled={irrigationLevel >= lvl || gold < price}
+                        disabled={irrigationLevel >= lvl || !canBuy}
                         onClick={() => {
-                          if (gold >= price && irrigationLevel < lvl) {
+                          if (canBuy) {
                             setGold(prev => prev - price);
                             setIrrigationLevel(lvl);
                             addLog(`🌊 Irrigação nível ${lvl} instalada! Eventos de seca ${lvl === 2 ? 'imunes' : '40% menos impacto'}.`, 'success');
                             triggerAudioResult(() => sfx.playSound('levelup'));
                           }
                         }}
-                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${irrigationLevel >= lvl ? 'bg-cyan-100 border-cyan-300 text-cyan-700' : gold >= price ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                        className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${irrigationLevel >= lvl ? 'bg-cyan-100 border-cyan-300 text-cyan-700' : canBuy ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                       >
-                        {irrigationLevel >= lvl ? `✅ Nv${lvl}` : `Nv${lvl} (${price}💰)`}
+                        {irrigationLevel >= lvl ? `✅ Nv${lvl}` : irrigationLevel < lvl - 1 ? `🔒 Nv${lvl}` : `Nv${lvl} (${price}💰)`}
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -9067,18 +9080,18 @@ export default function App() {
                     Reduz impacto de eventos negativos em 70% por 7 dias. {insurance.active ? `Ativo: ${insurance.daysLeft} dias restantes` : 'Inativo'}
                   </p>
                   <button
-                    disabled={insurance.active || gold < 50}
+                    disabled={insurance.active || gold < 400}
                     onClick={() => {
-                      if (!insurance.active && gold >= 50) {
-                        setGold(prev => prev - 50);
-                        setInsurance({ active: true, premium: 50, daysLeft: 7 });
-                        addLog('🛡️ Seguro agrícola contratado por 7 dias por 50 moedas!', 'success');
+                      if (!insurance.active && gold >= 400) {
+                        setGold(prev => prev - 400);
+                        setInsurance({ active: true, premium: 400, daysLeft: 7 });
+                        addLog('🛡️ Seguro agrícola contratado por 7 dias por 400 moedas!', 'success');
                         triggerAudioResult(() => sfx.playSound('levelup'));
                       }
                     }}
-                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${insurance.active ? 'bg-emerald-100 border-emerald-300 text-emerald-700' : gold >= 50 ? 'bg-emerald-500 hover:bg-emerald-400 text-white border-emerald-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${insurance.active ? 'bg-emerald-100 border-emerald-300 text-emerald-700' : gold >= 400 ? 'bg-emerald-500 hover:bg-emerald-400 text-white border-emerald-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                   >
-                    {insurance.active ? `✅ Seguro Ativo (${insurance.daysLeft}d)` : 'Contratar Seguro (50💰 / 7 dias)'}
+                    {insurance.active ? `✅ Seguro Ativo (${insurance.daysLeft}d)` : 'Contratar Seguro (400💰 / 7 dias)'}
                   </button>
                 </div>
 
@@ -9089,18 +9102,18 @@ export default function App() {
                     No inverno, animais perdem 50% menos felicidade (recuperam +5 por dia). {hasStable ? '✅ Instalado' : 'Não instalado'}
                   </p>
                   <button
-                    disabled={hasStable || gold < 200}
+                    disabled={hasStable || gold < 1800}
                     onClick={() => {
-                      if (!hasStable && gold >= 200) {
-                        setGold(prev => prev - 200);
+                      if (!hasStable && gold >= 1800) {
+                        setGold(prev => prev - 1800);
                         setHasStable(true);
                         addLog('🏠 Estábulo construído! Animais mais confortáveis no inverno.', 'success');
                         triggerAudioResult(() => sfx.playSound('levelup'));
                       }
                     }}
-                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasStable ? 'bg-stone-100 border-stone-300 text-stone-700' : gold >= 200 ? 'bg-stone-500 hover:bg-stone-400 text-white border-stone-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasStable ? 'bg-stone-100 border-stone-300 text-stone-700' : gold >= 1800 ? 'bg-stone-500 hover:bg-stone-400 text-white border-stone-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                   >
-                    {hasStable ? '✅ Estábulo Construído' : 'Construir Estábulo (200💰)'}
+                    {hasStable ? '✅ Estábulo Construído' : 'Construir Estábulo (1.800💰)'}
                   </button>
                 </div>
 
@@ -9111,18 +9124,18 @@ export default function App() {
                     15% de desconto em todas as compras de ração. {hasSilo ? '✅ Instalado' : 'Não instalado'}
                   </p>
                   <button
-                    disabled={hasSilo || gold < 150}
+                    disabled={hasSilo || gold < 2500}
                     onClick={() => {
-                      if (!hasSilo && gold >= 150) {
-                        setGold(prev => prev - 150);
+                      if (!hasSilo && gold >= 2500) {
+                        setGold(prev => prev - 2500);
                         setHasSilo(true);
                         addLog('🏗️ Silo de grãos construído! 15% de desconto em rações.', 'success');
                         triggerAudioResult(() => sfx.playSound('levelup'));
                       }
                     }}
-                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasSilo ? 'bg-orange-100 border-orange-300 text-orange-700' : gold >= 150 ? 'bg-orange-500 hover:bg-orange-400 text-white border-orange-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasSilo ? 'bg-orange-100 border-orange-300 text-orange-700' : gold >= 2500 ? 'bg-orange-500 hover:bg-orange-400 text-white border-orange-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                   >
-                    {hasSilo ? '✅ Silo Instalado' : 'Instalar Silo (150💰)'}
+                    {hasSilo ? '✅ Silo Instalado' : 'Instalar Silo (2.500💰)'}
                   </button>
                 </div>
 
@@ -9133,18 +9146,18 @@ export default function App() {
                     Previne perda de qualidade dos produtos perecíveis (leite, ovos duram 50% mais). {hasFridge ? '✅ Instalada' : 'Não instalada'}
                   </p>
                   <button
-                    disabled={hasFridge || gold < 250}
+                    disabled={hasFridge || gold < 3500}
                     onClick={() => {
-                      if (!hasFridge && gold >= 250) {
-                        setGold(prev => prev - 250);
+                      if (!hasFridge && gold >= 3500) {
+                        setGold(prev => prev - 3500);
                         setHasFridge(true);
                         addLog('🧊 Geladeira industrial instalada! Produtos perecíveis duram mais.', 'success');
                         triggerAudioResult(() => sfx.playSound('levelup'));
                       }
                     }}
-                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasFridge ? 'bg-sky-100 border-sky-300 text-sky-700' : gold >= 250 ? 'bg-sky-500 hover:bg-sky-400 text-white border-sky-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${hasFridge ? 'bg-sky-100 border-sky-300 text-sky-700' : gold >= 3500 ? 'bg-sky-500 hover:bg-sky-400 text-white border-sky-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                   >
-                    {hasFridge ? '✅ Geladeira Instalada' : 'Instalar Geladeira (250💰)'}
+                    {hasFridge ? '✅ Geladeira Instalada' : 'Instalar Geladeira (3.500💰)'}
                   </button>
                 </div>
 

@@ -314,9 +314,9 @@ export function useInventory({
       return;
     }
     setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) - 3 }));
-    setQueijosEmMaturacao(prev => [...prev, { tipo: 'buffalo_mozzarella', diasRestantes: 2 }]);
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'buffalo_mozzarella', diasRestantes: 5 }]);
     setTotalQueijosFabricados(prev => prev + 1);
-    addLog('🧀 Iniciou a maturação de Muçarela de Búfala (2 dias).', 'success');
+    addLog('🧀 Iniciou a maturação de Muçarela de Búfala (5 dias).', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', 'Muçarela Búfala', event);
   };
@@ -388,8 +388,8 @@ export function useInventory({
       return;
     }
     setInventory(prev => ({ ...prev, milk: prev.milk - 1 }));
-    setQueijosEmMaturacao(prev => [...prev, { tipo: 'yogurt', diasRestantes: 1 }]);
-    addLog('🥛 Iogurte em fermentação! Ficará pronto amanhã.', 'success');
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'yogurt', diasRestantes: 2 }]);
+    addLog('🥛 Iogurte em fermentação! Ficará pronto em 2 dias.', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🥛', 'Fermentando...', event);
   };
@@ -666,7 +666,7 @@ export function useInventory({
     }
 
     const requiredMilk = tipo === 'coalho' ? 3 : tipo === 'mucarela' ? 5 : 8;
-    const diasMaturation = tipo === 'coalho' ? 1 : tipo === 'mucarela' ? 3 : 7;
+    const diasMaturation = tipo === 'coalho' ? 3 : tipo === 'mucarela' ? 6 : 12;
     const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : 'Queijo Brie';
 
     if (inventory.milk < requiredMilk) {
