@@ -147,4 +147,5 @@ export interface FarmStats {
   totalMerchantTrades?: number;
   totalButter?: number;
   totalYogurt?: number;
+  totalMerchantShopPurchases?: number;
 }

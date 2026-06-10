@@ -28,6 +28,8 @@ export interface UseInventoryProps {
   addNotification: (message: string, type?: any, overrideDay?: number) => void;
   spawnFeedback: (emoji: string, text: string, event?: React.MouseEvent) => void;
   triggerAudioResult: (action: () => void) => void;
+  worldEvent?: { priceMult: number } | null;
+  checkAndUnlockAchievement?: (id: string) => void;
   updateMissionProgress: (key: any, amount?: number, overrideDay?: number) => void;
 }
 
@@ -50,6 +52,8 @@ export function useInventory({
   spawnFeedback,
   triggerAudioResult,
   updateMissionProgress,
+  worldEvent,
+  checkAndUnlockAchievement,
 }: UseInventoryProps) {
 
   // --- INVENTORY STATE ---
@@ -1298,6 +1302,9 @@ export function useInventory({
 
     addLog(`💰 Você vendeu tudo: ${messageParts.join(', ')} por ${totalEarningCalculated} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));
+    if (worldEvent && worldEvent.priceMult > 1 && totalEarningCalculated >= 500) {
+      setTimeout(() => checkAndUnlockAchievement?.('world_event_profited'), 0);
+    }
 
     // XP por venda: 1 XP por item vendido, bônus por processados
     const xpEarned = totalAllQty + (coalhoQty + mucarelaQty + brieQty + scarfQty + butterQty + yogurtQty + buffaloMozzQty) * 2;

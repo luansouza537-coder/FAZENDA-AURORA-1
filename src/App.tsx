@@ -2028,6 +2028,8 @@ export default function App() {
     spawnFeedback,
     triggerAudioResult,
     updateMissionProgress,
+    worldEvent,
+    checkAndUnlockAchievement,
   });
 
   // --- useAnimals hook ---
@@ -6316,6 +6318,10 @@ export default function App() {
                       .filter(a => {
                         if (animalFilter === 'all') return true;
                         if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.feathersReady) || (a.type === 'bufalo' && !a.hasProducedToday);
+                        if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo'].includes(a.type);
+                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz'].includes(a.type);
+                        if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra','bicho_seda'].includes(a.type);
+                        if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
                         return a.type === animalFilter;
                       })
                       .sort((a, b) => {
