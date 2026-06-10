@@ -3198,8 +3198,8 @@ function GameApp() {
         setInventory(prev => ({ ...prev, ...invAfterAuto }));
         setStats(prev => ({ ...prev, totalFed: prev.totalFed + feederFedCount }));
         logsToAdd.push({
-          msg: `🌾 Alimentador Automático: Alimentou ${feederFedCount} de ${animalsAfterAuto.length} animais consumindo ração do Armazém!`,
-          type: 'success'
+          msg: `🌾 Alimentador Automático: Alimentou ${feederFedCount} animal(is) — consumiu ${feederFedCount} unidade(s) de ração do Armazém. (ouro não deduzido aqui)`,
+          type: 'info'
         });
       }
 
@@ -8090,7 +8090,7 @@ function GameApp() {
                     🌽 Cuidados & Alimentação
                   </h4>
                   <p className="text-stone-700 leading-relaxed text-xs sm:text-sm">
-                    Alimentar os animais consome <strong className="text-[#b45309]">🌽 4 moedas de ouro</strong>. Isso restaura <strong className="text-green-700">+35% de Fome</strong> e <strong className="text-green-700">+12% de Felicidade</strong>. Se os animais ficarem com fome extrema abaixo de 30% ou felicidade muito baixa, eles começam a perder felicidade até definharem. Mantenha-os alimentados!
+                    Alimentar os animais consome <strong className="text-[#b45309]">🌾 1 unidade de ração</strong> do Armazém (não deduz ouro diretamente). Isso restaura <strong className="text-green-700">+35% de Fome</strong> e <strong className="text-green-700">+12% de Felicidade</strong>. Compre ração no <strong>Silo de Rações</strong> (loja). Se o <strong>Alimentador Automático</strong> estiver ligado, ele consome ração automaticamente a cada dia. Se os animais ficarem com fome extrema ou felicidade muito baixa, eles começam a definhar. Mantenha-os alimentados!
                   </p>
                 </div>
 
@@ -8836,7 +8836,7 @@ function GameApp() {
                       )}
                     </div>
                     <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-                      Alimenta <strong>TODOS</strong> os animais do seu rebanho no final do dia. Cada refeição consome ração do Armazém conforme o tipo de cada animal.
+                      Alimenta <strong>TODOS</strong> os animais do seu rebanho no final do dia. <strong className="text-amber-700">Consome ração do Armazém</strong> (não deduz ouro diretamente — mas você precisa ter ração comprada). Cada animal consome 1 unidade do tipo adequado.
                     </p>
                     <p className="text-[10px] text-stone-400 font-mono mt-1.5 uppercase tracking-wide">
                       ⚡ Compra: 1.500💰 • Nível mín: 4 • Operacional: <span className="text-orange-500 font-black">5⚡/dia</span>
