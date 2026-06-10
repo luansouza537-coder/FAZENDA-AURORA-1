@@ -2114,6 +2114,9 @@ function GameApp() {
     onFilhoteBought: (type: AnimalType, name: string) => {
       setReproHistory(prev => [{ day: currentDay, animalType: type, name, method: 'filhote' }, ...prev].slice(0, 50));
     },
+    onFilhoteAdded: () => {
+      setAnimalFilter('all');
+    },
   });
 
   // --- useFairs hook ---
@@ -5829,21 +5832,23 @@ function GameApp() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
                   {/* Cow */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
-                    {farmLevel >= 4 && (
-                      <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>
-                    )}
                     <span className="text-4xl">🐄</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Vaca Leiteira</h4>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('vaca')}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => buyAnimal('vaca', e)}
-                      disabled={gold < getAnimalPurchasePrice('vaca')}
-                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
-                      title="Compra uma Vaca leiteira. Gera leite diário no Armazém após o primeiro dia."
-                    >
-                      Comprar + 1 🌾
-                    </button>
+                    <div className="relative w-full">
+                      {farmLevel >= 4 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white font-black text-[8px] px-1 py-0.5 rounded-full uppercase z-10">10% Off</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimal('vaca', e)}
+                        disabled={gold < getAnimalPurchasePrice('vaca')}
+                        className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                        title="Compra uma Vaca leiteira. Gera leite diário no Armazém após o primeiro dia."
+                      >
+                        Comprar + 1 🌾
+                      </button>
+                    </div>
                     <button
                       type="button"
                       onClick={(e) => buyAnimalFilhote('vaca', e)}
@@ -5857,21 +5862,23 @@ function GameApp() {
 
                   {/* Sheep */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
-                    {farmLevel >= 4 && (
-                      <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>
-                    )}
                     <span className="text-4xl">🐑</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Ovelha de Lã</h4>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('ovelha')}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => buyAnimal('ovelha', e)}
-                      disabled={gold < getAnimalPurchasePrice('ovelha')}
-                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
-                      title="Compra uma Ovelha. Fornece lã a cada 3 dias (a cada 2 dias se for melhor amigo)."
-                    >
-                      Comprar + 1 🌾
-                    </button>
+                    <div className="relative w-full">
+                      {farmLevel >= 4 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white font-black text-[8px] px-1 py-0.5 rounded-full uppercase z-10">10% Off</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimal('ovelha', e)}
+                        disabled={gold < getAnimalPurchasePrice('ovelha')}
+                        className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                        title="Compra uma Ovelha. Fornece lã a cada 3 dias (a cada 2 dias se for melhor amigo)."
+                      >
+                        Comprar + 1 🌾
+                      </button>
+                    </div>
                     <button
                       type="button"
                       onClick={(e) => buyAnimalFilhote('ovelha', e)}
@@ -5885,27 +5892,29 @@ function GameApp() {
 
                   {/* Ox */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
-                    {farmLevel >= 4 && (
-                      <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>
-                    )}
                     <span className="text-4xl">🐂</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Boi de Corte</h4>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('boi')}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => buyAnimal('boi', e)}
-                      disabled={gold < getAnimalPurchasePrice('boi')}
-                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
-                      title="Compra um Boi. Acumula peso de corte diariamente e vende na feira por alto retorno."
-                    >
-                      Comprar + 1 🌾
-                    </button>
+                    <div className="relative w-full">
+                      {farmLevel >= 4 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white font-black text-[8px] px-1 py-0.5 rounded-full uppercase z-10">10% Off</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimal('boi', e)}
+                        disabled={gold < getAnimalPurchasePrice('boi')}
+                        className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                        title="Compra um Boi adulto. Acumula peso de corte diariamente e vende na feira por alto retorno."
+                      >
+                        Comprar + 1 🌾
+                      </button>
+                    </div>
                     <button
                       type="button"
                       onClick={(e) => buyAnimalFilhote('boi', e)}
                       disabled={gold < 75}
                       className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
-                      title="Compra um filhote de Boi por 75 moedas. Cresce em 15 dias."
+                      title="Compra um filhote de Boi por 75 moedas fixo (sem desconto de nível). Cresce em 15 dias e vai aparecer na lista de animais."
                     >
                       🍼 Filhote 75💰
                     </button>
@@ -5933,19 +5942,23 @@ function GameApp() {
                   {/* Cabra (Nível 2+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 2 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv2+</span>}
-                    {farmLevel >= 4 && <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>}
                     <span className="text-4xl">🐐</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Cabra Leiteira</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite premium 38💰/u. Ciclo de lactação de 20d + bônus passivo de felicidade!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('cabra')}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => buyAnimal('cabra', e)}
-                      disabled={gold < getAnimalPurchasePrice('cabra') || farmLevel < 2}
-                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
-                    >
-                      {farmLevel < 2 ? 'Nível 2+' : 'Comprar + 1 🌾'}
-                    </button>
+                    <div className="relative w-full">
+                      {farmLevel >= 4 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white font-black text-[8px] px-1 py-0.5 rounded-full uppercase z-10">10% Off</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimal('cabra', e)}
+                        disabled={gold < getAnimalPurchasePrice('cabra') || farmLevel < 2}
+                        className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      >
+                        {farmLevel < 2 ? 'Nível 2+' : 'Comprar + 1 🌾'}
+                      </button>
+                    </div>
                     {farmLevel >= 2 && (
                       <button
                         type="button"
@@ -5962,19 +5975,23 @@ function GameApp() {
                   {/* Pato (Nível 1+) */}
                   <div className={`flex flex-col items-center p-3.5 rounded-[24px] border-2 w-full max-w-[190px] text-center shadow-md relative ${farmLevel < 3 ? 'bg-stone-100/90 border-stone-300 opacity-70' : 'bg-white/90 border-[#fbbf24]'}`}>
                     {farmLevel < 3 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">🔒 Nv3</span>}
-                    {farmLevel >= 4 && <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>}
                     <span className="text-4xl">🦆</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Pato de Quintal</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Ovos de pato 18💰/u + penas! Reduz pragas 40%. Nível 3+</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('pato')}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => buyAnimal('pato', e)}
-                      disabled={gold < getAnimalPurchasePrice('pato') || farmLevel < 3}
-                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
-                    >
-                      {farmLevel < 3 ? '🔒 Nível 3' : 'Comprar + 1 🌾'}
-                    </button>
+                    <div className="relative w-full">
+                      {farmLevel >= 4 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white font-black text-[8px] px-1 py-0.5 rounded-full uppercase z-10">10% Off</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimal('pato', e)}
+                        disabled={gold < getAnimalPurchasePrice('pato') || farmLevel < 3}
+                        className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      >
+                        {farmLevel < 3 ? '🔒 Nível 3' : 'Comprar + 1 🌾'}
+                      </button>
+                    </div>
                     <button
                       type="button"
                       onClick={(e) => buyAnimalFilhote('pato', e)}
@@ -6025,19 +6042,23 @@ function GameApp() {
                   {/* Búfalo (Nível 4+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 4 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv4+</span>}
-                    {farmLevel >= 4 && <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>}
                     <span className="text-4xl">🐃</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Búfalo Leiteiro</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite de búfala 55💰/u. Pode virar Muçarela 120💰!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('bufalo')}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => buyAnimal('bufalo', e)}
-                      disabled={gold < getAnimalPurchasePrice('bufalo') || farmLevel < 4}
-                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
-                    >
-                      {farmLevel < 4 ? 'Nível 4+' : 'Comprar + 1 🌾'}
-                    </button>
+                    <div className="relative w-full">
+                      {farmLevel >= 4 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white font-black text-[8px] px-1 py-0.5 rounded-full uppercase z-10">10% Off</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimal('bufalo', e)}
+                        disabled={gold < getAnimalPurchasePrice('bufalo') || farmLevel < 4}
+                        className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      >
+                        {farmLevel < 4 ? 'Nível 4+' : 'Comprar + 1 🌾'}
+                      </button>
+                    </div>
                     {farmLevel >= 4 && (
                       <button
                         type="button"

@@ -110,6 +110,7 @@ export interface UseAnimalsProps {
   checkAndUnlockAchievement: (id: string) => void;
   triggerConfetti: (event?: React.MouseEvent) => void;
   onFilhoteBought?: (type: AnimalType, name: string) => void;
+  onFilhoteAdded?: () => void;
 }
 
 export function useAnimals({
@@ -142,6 +143,7 @@ export function useAnimals({
   checkAndUnlockAchievement,
   triggerConfetti,
   onFilhoteBought,
+  onFilhoteAdded,
 }: UseAnimalsProps) {
   const [animals, setAnimals] = useState<Animal[]>(() => {
     try {
@@ -1163,6 +1165,7 @@ export function useAnimals({
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🍼', `-${config.price} 💰`, event);
     if (onFilhoteBought) onFilhoteBought(type, newFilhote.name);
+    if (onFilhoteAdded) onFilhoteAdded();
   };
 
   return {
