@@ -202,21 +202,31 @@ const WORKER_TYPES = [
 ];
 
 const MERCHANT_SPECIAL_ITEMS = [
-  { id: 'vacina', label: '💉 Vacina Veterinária', desc: 'Previne próxima epidemia garantido', price: 80, effect: 'prevent_epidemic' },
-  { id: 'adubo_especial', label: '🌱 Adubo Especial', desc: 'Equivale a 7 dias de fertilizante', price: 60, effect: 'fertilizante_7days' },
-  { id: 'racao_premium', label: '🥣 Ração Premium', desc: '10 rações de qualquer tipo com +20% eficiência por 3 dias', price: 40, effect: 'premium_feed' },
-  { id: 'bebedouro', label: '🪣 Bebedouro Automático', desc: 'Animais nunca ficam com sede, -5% epidemia', price: 150, effect: 'bebedouro', oneTime: true },
+  // --- Itens existentes que funcionam ---
+  { id: 'racao_premium', label: '🥣 Ração Premium', desc: '+10 de cada tipo de ração no Armazém', price: 40, effect: 'premium_feed' },
+  { id: 'bebedouro', label: '🪣 Bebedouro Automático', desc: 'Animais nunca ficam com sede', price: 150, effect: 'bebedouro', oneTime: true },
   { id: 'cert_sanitario', label: '📜 Certificado Sanitário', desc: '+10% preço de venda de carne permanente', price: 200, effect: 'cert_sanitario', oneTime: true },
   { id: 'licenca_exotica_item', label: '📋 Licença Exótica', desc: 'Permite criar Jacaré legalmente', price: 280, effect: 'licenca_exotica', oneTime: true },
   { id: 'licenca_criadouro', label: '📜 Licença de Criadouro', desc: 'Permite reprodução controlada de Vaca, Cabra, Ovelha e Galinha', price: 400, effect: 'licenca_criadouro', oneTime: true },
   { id: 'kit_primeiros_socorros', label: '🩺 Kit de Primeiros Socorros', desc: 'Cura todos os animais doentes instantaneamente', price: 120, effect: 'cure_all_sick' },
-  { id: 'pocao_fertilidade', label: '🧪 Poção de Fertilidade', desc: 'Todos animais produzem 2x por 3 dias', price: 180, effect: 'fertility_3days' },
+  { id: 'pocao_fertilidade', label: '🧪 Fertilizante Concentrado', desc: 'Todos animais produzem 2× por 3 dias', price: 180, effect: 'fertility_3days' },
   { id: 'selo_qualidade', label: '🏅 Selo de Qualidade Premium', desc: '+25% preço de venda de todos produtos por 5 dias', price: 220, effect: 'premium_prices_5days' },
-  { id: 'mapa_tesouro', label: '🗺️ Mapa do Tesouro', desc: 'Encontra 200-600 moedas enterradas na fazenda!', price: 90, effect: 'treasure_map' },
-  { id: 'antidoto_pragas', label: '🧴 Antídoto Anti-Pragas', desc: 'Previne invasão de pragas pelos próximos 14 dias', price: 75, effect: 'anti_pest_14days' },
-  { id: 'elixir_felicidade', label: '✨ Elixir da Felicidade', desc: '+30 felicidade a todos os animais imediatamente', price: 50, effect: 'happiness_boost' },
+  { id: 'mapa_tesouro', label: '🗺️ Dica de Negócio', desc: 'Informação privilegiada rende 200–600💰 imediatamente', price: 90, effect: 'treasure_map' },
+  { id: 'elixir_felicidade', label: '🎵 Apresentação Musical', desc: 'Show itinerante deixa todos os animais +30 felicidade agora', price: 50, effect: 'happiness_boost' },
   { id: 'manual_producao', label: '📚 Manual de Produção Avançada', desc: '+15% produção de todos animais por 7 dias', price: 160, effect: 'production_boost_7days' },
-  { id: 'isca_animal_raro', label: '🎯 Isca para Animal Raro', desc: 'Atrai um animal raro para compra com 50% de desconto no próximo dia', price: 100, effect: 'rare_animal_bait' },
+  // --- Novos itens ---
+  { id: 'suplemento_mineral', label: '💊 Suplemento Mineral', desc: '+20% produção de leite por 7 dias', price: 90, effect: 'suplemento_mineral_7days' },
+  { id: 'bandagem_vet', label: '🩹 Bandagem Veterinária', desc: 'Cura 1 animal doente (o mais grave)', price: 45, effect: 'cure_one_sick' },
+  { id: 'repelente_insetos', label: '🦟 Repelente de Insetos', desc: 'Reduz chance de doença em 50% por 10 dias', price: 65, effect: 'repelente_10days' },
+  { id: 'sal_mineral', label: '🧂 Sal Mineral', desc: 'Animais não perdem fome por 3 dias', price: 55, effect: 'sal_mineral_3days' },
+  { id: 'selo_organico', label: '🌿 Selo Orgânico', desc: '+20% preço de venda por 7 dias', price: 160, effect: 'selo_organico_7days' },
+  { id: 'balanca_precisao', label: '⚖️ Balança de Precisão', desc: '+5% preço de venda permanente', price: 320, effect: 'balanca_precisao', oneTime: true },
+  { id: 'cisterna', label: '🪣 Cisterna de Água', desc: 'Reduz conta de água em 30% permanente', price: 200, effect: 'cisterna', oneTime: true },
+  { id: 'cobertura_provisoria', label: '☂️ Cobertura Provisória', desc: 'Próxima tempestade não afeta produção', price: 85, effect: 'block_storm' },
+  { id: 'bomba_agua', label: '💧 Bomba d\'Água Manual', desc: 'Próxima seca não reduz felicidade dos animais', price: 75, effect: 'block_drought' },
+  { id: 'silagem_premium', label: '🌽 Silagem Premium', desc: 'Animais não consomem ração do Armazém por 5 dias', price: 110, effect: 'silagem_5days' },
+  { id: 'anuncio_gazeta', label: '📰 Anúncio na Gazeta', desc: 'Mercador retorna garantido no próximo ciclo', price: 60, effect: 'garantir_mercador' },
+  { id: 'contrato_transporte', label: '🚚 Contrato de Transporte', desc: 'Isenta de multa nas próximas 2 entregas vencidas', price: 95, effect: 'isencao_multa_2x' },
 ] as const;
 
 export default function App() {
@@ -568,6 +578,36 @@ function GameApp() {
   });
   const [antiPestDays, setAntiPestDays] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).antiPestDays ?? 0; } catch(e) {} return 0;
+  });
+  const [suplementoMineralDays, setSuplementoMineralDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).suplementoMineralDays ?? 0; } catch(e) {} return 0;
+  });
+  const [repelenteDays, setRepelenteDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).repelenteDays ?? 0; } catch(e) {} return 0;
+  });
+  const [salMineralDays, setSalMineralDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).salMineralDays ?? 0; } catch(e) {} return 0;
+  });
+  const [seloOrganicodays, setSeloOrganicoDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).seloOrganicodays ?? 0; } catch(e) {} return 0;
+  });
+  const [silagemDays, setSilagemDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).silagemDays ?? 0; } catch(e) {} return 0;
+  });
+  const [hasBalanca, setHasBalanca] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasBalanca ?? false; } catch(e) {} return false;
+  });
+  const [hasCisterna, setHasCisterna] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasCisterna ?? false; } catch(e) {} return false;
+  });
+  const [blockNextStorm, setBlockNextStorm] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).blockNextStorm ?? false; } catch(e) {} return false;
+  });
+  const [blockNextDrought, setBlockNextDrought] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).blockNextDrought ?? false; } catch(e) {} return false;
+  });
+  const [isencaoMultaCount, setIsencaoMultaCount] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).isencaoMultaCount ?? 0; } catch(e) {} return 0;
   });
 
   // --- EVENTOS DO MUNDO ---
@@ -1936,7 +1976,10 @@ function GameApp() {
     const worldEventBonus = worldEvent && worldEvent.items.includes(itemType) ? worldEvent.priceMult : 1.0;
     // Selo de qualidade premium do mercador
     const premiumPricesBonus = premiumPricesDays > 0 ? 1.25 : 1.0;
-    let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * marketBonus * worldEventBonus * premiumPricesBonus;
+    // Selo Orgânico (+20%) e Balança de Precisão (+5%)
+    const seloOrganicoBonus = seloOrganicodays > 0 ? 1.20 : 1.0;
+    const balancaBonus = hasBalanca ? 1.05 : 1.0;
+    let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * marketBonus * worldEventBonus * premiumPricesBonus * seloOrganicoBonus * balancaBonus;
     if (merchantActive) {
       finalPrice *= 1.5;
     }
@@ -1957,6 +2000,9 @@ function GameApp() {
     // Certificado Sanitário: +10% para produtos de carne
     const meatItems = ['coxa_ra', 'carne_avestruz', 'carne_jacare'] as string[];
     if (hasCertSanitario && meatItems.includes(itemType as string)) finalPrice *= 1.1;
+    // Suplemento Mineral: +20% para produtos lácteos
+    const milkItems = ['milk', 'goat_milk', 'buffalo_milk', 'cheese', 'queijoCoalho', 'queijoMucarela', 'queijoBrie', 'queijo_cabra', 'buffalo_mozzarella', 'iogurte_cabra', 'leite_condensado', 'butter', 'yogurt'] as string[];
+    if (suplementoMineralDays > 0 && milkItems.includes(itemType as string)) finalPrice *= 1.2;
     // Centro de Exportação: +20% em todos os produtos
     if (hasExportCenter) finalPrice = Math.round(finalPrice * 1.20);
     return Math.max(1, Math.round(finalPrice));
@@ -2323,6 +2369,8 @@ function GameApp() {
         fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays,
         worldEvent,
         financialLog,
+        suplementoMineralDays, repelenteDays, salMineralDays, seloOrganicodays, silagemDays,
+        hasBalanca, hasCisterna, blockNextStorm, blockNextDrought, isencaoMultaCount,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
@@ -2517,9 +2565,9 @@ function GameApp() {
     return animalsList.map(animal => {
       const copy = { ...animal };
 
-      // Animals that don't eat: skip hunger processing
+      // Animals that don't eat: skip hunger processing. Sal Mineral e Silagem evitam perda de fome.
       const noHungerTypes = ['minhoca', 'caracol'];
-      const skipHunger = noHungerTypes.includes(copy.type);
+      const skipHunger = noHungerTypes.includes(copy.type) || salMineralDays > 0 || silagemDays > 0;
 
       // Perda de fome diária: 12 + random 0-7 (gulosa consome +20%)
       const baseHungerLoss = 12 + Math.floor(Math.random() * 8);
@@ -3034,8 +3082,8 @@ function GameApp() {
     let isMerchantNextDay = false;
     let newDaysSinceMerchant = daysSinceMerc + 1;
     let newNextMerchantDay = nextMercDay;
-    // Prestígio 150+: comerciante aparece com mais frequência (threshold reduzido de 3-7 para 2-5)
-    const merchantThreshold = prestigePoints >= 150 ? Math.floor(Math.random() * 4) + 2 : Math.floor(Math.random() * 5) + 3;
+    // Mercador aparece a cada 7 dias fixos. Prestígio 150+ reduz para 5 dias.
+    const merchantThreshold = prestigePoints >= 150 ? 5 : 7;
     if (newDaysSinceMerchant >= nextMercDay) {
       isMerchantNextDay = true;
       newDaysSinceMerchant = 0;
@@ -3252,7 +3300,12 @@ function GameApp() {
       }
 
       // --- SUBFUNÇÃO 3: Processamento e Previsão do Clima ---
-      const nextWeather = atualizarClimaEEventos(currentDay, logsToAdd);
+      let nextWeather = atualizarClimaEEventos(currentDay, logsToAdd);
+      if (nextWeather === 'chuva' && blockNextStorm) {
+        nextWeather = 'nublado';
+        logsToAdd.push({ msg: '☂️ Cobertura Provisória protegeu a fazenda da tempestade! Clima normalizado.', type: 'success' });
+        setBlockNextStorm(false);
+      }
       setWeather(nextWeather);
 
       const nextDayValue = currentDay + 1;
@@ -3323,6 +3376,8 @@ function GameApp() {
           if (item.effect === 'cert_sanitario' && hasCertSanitario) return false;
           if (item.effect === 'licenca_exotica' && licencaExotica) return false;
           if (item.effect === 'licenca_criadouro' && licencaCriadouro) return false;
+          if (item.effect === 'balanca_precisao' && hasBalanca) return false;
+          if (item.effect === 'cisterna' && hasCisterna) return false;
           return true;
         });
         const shuffled = [...availableMerchItems].sort(() => Math.random() - 0.5);
@@ -3590,11 +3645,18 @@ function GameApp() {
 
       // --- F4: Pré-calcular multas de contratos vencidos (síncrono, para incluir no setGold final) ---
       let contractPenaltyForGold = 0;
+      let isencaoUsadas = 0;
       contracts.forEach(c => {
         if (c.active && nextDayValue > c.deadline && c.delivered < c.quantity) {
-          contractPenaltyForGold += c.penalty;
+          if (isencaoMultaCount - isencaoUsadas > 0) {
+            isencaoUsadas++;
+            logsToAdd.push({ msg: `🚚 Contrato vencido — Contrato de Transporte isentou a multa de ${c.penalty}💰!`, type: 'success' });
+          } else {
+            contractPenaltyForGold += c.penalty;
+          }
         }
       });
+      if (isencaoUsadas > 0) setIsencaoMultaCount(prev => Math.max(0, prev - isencaoUsadas));
 
       // Decrementar evento de mercado ativo
       if (activeMarketEvent) {
@@ -3612,7 +3674,7 @@ function GameApp() {
 
       // Água: base mínima + escala com número de animais. Poço reduz até 75%.
       const baseWaterCost = isWeeklyBillDay ? Math.round(8 + animals.length * 2 + irrigationLevel * 4) : 0;
-      const waterDiscount = Math.min(wellLevel * 0.15, 0.75);
+      const waterDiscount = Math.min(wellLevel * 0.15 + (hasCisterna ? 0.3 : 0), 0.90);
       const waterCost = isWeeklyBillDay ? Math.round(baseWaterCost * (1 - waterDiscount)) : 0;
 
       // Energia: só cobra se houver infraestrutura instalada (máquinas, fridge, silo, estábulo, bebedouro, queijaria).
@@ -4271,6 +4333,9 @@ function GameApp() {
         } else if (currentSeasonIdx === 1 && Math.random() < 0.05) {
           if (insuranceClimate.active) {
             logsToAdd.push({ msg: `🌦️ Seca começou mas Seguro Climático protegeu sua fazenda! Sem custo extra.`, type: 'success' });
+          } else if (blockNextDrought) {
+            logsToAdd.push({ msg: `💧 Seca detectada mas a Bomba d'Água neutralizou o impacto! Animais protegidos.`, type: 'success' });
+            setBlockNextDrought(false);
           } else {
             logsToAdd.push({ msg: `🏜️ Uma seca prolongada começou! Custo de água será triplicado por 3 dias!`, type: 'error' });
             setTimeout(() => addNotification('🏜️ Seca prolongada por 3 dias! Custo de água triplicado!', 'warning', nextDayValue), 0);
@@ -4594,11 +4659,13 @@ function GameApp() {
           };
           const noFeedTypes = ['minhoca', 'caracol', 'bicho_seda'];
           // Pre-compute which animals can be fed (using closure inventory snapshot)
+          // Silagem ativa: não consome ração do inventário
           const tmpInv2 = { ...inventory } as Record<string, number>;
           const fedAnimalIds = new Set<number>();
           const feedDeductions: Partial<Record<string, number>> = {};
           animals.forEach(a => {
             if (noFeedTypes.includes(a.type) || a.isAdult === false) return;
+            if (silagemDays > 0) { fedAnimalIds.add(a.id); return; }
             const feedKey = getFeedKeyForType2(a.type) as string;
             if ((tmpInv2[feedKey] ?? 0) > 0) {
               tmpInv2[feedKey] -= 1;
@@ -4900,6 +4967,11 @@ function GameApp() {
       if (premiumPricesDays > 0) setPremiumPricesDays(prev => prev - 1);
       if (productionBoostDays > 0) setProductionBoostDays(prev => prev - 1);
       if (antiPestDays > 0) setAntiPestDays(prev => prev - 1);
+      if (suplementoMineralDays > 0) setSuplementoMineralDays(prev => prev - 1);
+      if (repelenteDays > 0) setRepelenteDays(prev => prev - 1);
+      if (salMineralDays > 0) setSalMineralDays(prev => prev - 1);
+      if (seloOrganicodays > 0) setSeloOrganicoDays(prev => prev - 1);
+      if (silagemDays > 0) setSilagemDays(prev => prev - 1);
 
       // --- EVENTOS DO MUNDO ---
       if (worldEvent) {
@@ -5710,6 +5782,18 @@ function GameApp() {
                         else if (item.effect === 'anti_pest_14days') { setAntiPestDays(prev => prev + 14); addLog('🧴 Antídoto Anti-Pragas ativo por 14 dias!', 'success'); }
                         else if (item.effect === 'happiness_boost') { setAnimals(prev => prev.map(a => ({ ...a, happiness: Math.min(100, a.happiness + 30) }))); addLog('✨ Elixir da Felicidade! +30 felicidade a todos!', 'success'); }
                         else if (item.effect === 'production_boost_7days') { setProductionBoostDays(prev => prev + 7); addLog('📚 Manual de Produção Avançada! +15% produção por 7 dias!', 'success'); }
+                        else if (item.effect === 'suplemento_mineral_7days') { setSuplementoMineralDays(prev => prev + 7); addLog('💊 Suplemento Mineral aplicado! +20% produção de leite por 7 dias!', 'success'); }
+                        else if (item.effect === 'cure_one_sick') { const sick = animals.find(a => a.isSick); if (sick) { setAnimals(prev => prev.map(a => a.id === sick.id ? { ...a, isSick: false } : a)); addLog(`🩹 ${sick.name} foi curado com a bandagem veterinária!`, 'success'); } else addLog('🩹 Nenhum animal doente no momento.', 'info'); }
+                        else if (item.effect === 'repelente_10days') { setRepelenteDays(prev => prev + 10); addLog('🦟 Repelente aplicado! Risco de doença -50% por 10 dias!', 'success'); }
+                        else if (item.effect === 'sal_mineral_3days') { setSalMineralDays(prev => prev + 3); addLog('🧂 Sal mineral disponível! Animais não perdem fome por 3 dias!', 'success'); }
+                        else if (item.effect === 'selo_organico_7days') { setSeloOrganicoDays(prev => prev + 7); addLog('🌿 Selo Orgânico ativo! +20% preço de venda por 7 dias!', 'success'); }
+                        else if (item.effect === 'balanca_precisao') { setHasBalanca(true); addLog('⚖️ Balança de Precisão instalada! +5% preço de venda permanente!', 'success'); }
+                        else if (item.effect === 'cisterna') { setHasCisterna(true); addLog('🪣 Cisterna de Água instalada! -30% conta de água semanal!', 'success'); }
+                        else if (item.effect === 'block_storm') { setBlockNextStorm(true); addLog('☂️ Cobertura Provisória montada! Próxima tempestade não afetará a produção!', 'success'); }
+                        else if (item.effect === 'block_drought') { setBlockNextDrought(true); addLog('💧 Bomba d\'Água pronta! Próxima seca não reduzirá felicidade dos animais!', 'success'); }
+                        else if (item.effect === 'silagem_5days') { setSilagemDays(prev => prev + 5); addLog('🌽 Silagem Premium estocada! Animais não consomem ração por 5 dias!', 'success'); }
+                        else if (item.effect === 'garantir_mercador') { setDaysSinceMerchant(6); addLog('📰 Anúncio publicado! O Mercador retornará garantido no próximo ciclo!', 'success'); }
+                        else if (item.effect === 'isencao_multa_2x') { setIsencaoMultaCount(prev => prev + 2); addLog('🚚 Contrato de Transporte ativo! Próximas 2 multas por entrega vencida serão isentas!', 'success'); }
                         else if (item.effect === 'rare_animal_bait') { addLog('🎯 Isca preparada! Um animal raro pode aparecer amanhã com 50% de desconto!', 'success'); }
                         setMerchantSpecialItems(prev => prev.filter(id => id !== item.id));
                         setStats(prev => ({ ...prev, totalMerchantShopPurchases: (prev.totalMerchantShopPurchases ?? 0) + 1 }));
