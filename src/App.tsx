@@ -429,6 +429,27 @@ function GameApp() {
   const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>('splash');
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
 
+  // Finanças tab
+  interface FinancialEntry {
+    id: string;
+    day: number;
+    type: 'income' | 'expense';
+    category: 'venda' | 'compra' | 'custo_diario' | 'trabalhador' | 'imposto' | 'evento' | 'emprestimo' | 'outro';
+    description: string;
+    amount: number;
+  }
+  const [financialLog, setFinancialLog] = useState<FinancialEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.financialLog)) return parsed.financialLog.slice(0, 200);
+      }
+    } catch(e) {}
+    return [];
+  });
+  const [showFinancasModal, setShowFinancasModal] = useState<boolean>(false);
+
   // New features: Weekly Sales, Previous Prices, Machines and Modals
   // weeklySales moved to useEconomy
 
@@ -1328,6 +1349,10 @@ function GameApp() {
   };
 
   // --- FUNCIONALIDADE 2: Traits dos animais --- (moved to useAnimals hook)
+
+  const addFinancialEntry = (entry: Omit<FinancialEntry, 'id'>) => {
+    setFinancialLog(prev => [{ ...entry, id: `${entry.day}-${Date.now()}-${Math.random()}` }, ...prev].slice(0, 200));
+  };
 
   // --- FUNCIONALIDADE 3: Geração de missões ---
   const generateDailyMissions = (day: number): Mission[] => {
@@ -2297,10 +2322,11 @@ function GameApp() {
         milkerLevel, shearerLevel, feederLevel,
         fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays,
         worldEvent,
+        financialLog,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent, financialLog]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 2500;
@@ -2559,7 +2585,7 @@ function GameApp() {
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (!canProduce) {
           if (copy.hunger <= 25) {
@@ -2574,7 +2600,7 @@ function GameApp() {
       else if (copy.type === 'ovelha') {
         copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
         const requiredDays = copy.isBestFriend ? 2 : 3;
-        if (copy.isAdult !== false && copy.daysSinceLastWool >= requiredDays && !copy.woolReady) {
+        if (copy.daysSinceLastWool >= requiredDays && !copy.woolReady) {
           if (copy.hunger > 20 && copy.happiness > 25) {
             if (currentW === 'chuva' && Math.random() < 0.30) {
               logs.push({ msg: `🌧️ A lã de ${copy.name} ficou ensopada pela chuva e não pôde se firmar hoje!`, type: 'error' });
@@ -2614,7 +2640,7 @@ function GameApp() {
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (!canProduce) {
           if (copy.hunger <= 25) {
@@ -2640,7 +2666,7 @@ function GameApp() {
             const basePhaseMultGoat = ageRatioGoat < 0.15 ? 0.6 : ageRatioGoat < 0.50 ? 1.1 : ageRatioGoat < 0.75 ? 1.0 : ageRatioGoat < 0.90 ? 0.7 : 0.4;
             const adjustedPhaseMultGoat = Math.min(1.15, basePhaseMultGoat + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
             const lifePhaseBlockGoat = adjustedPhaseMultGoat < 1.0 && Math.random() > adjustedPhaseMultGoat;
-            const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlockGoat;
+            const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlockGoat;
             copy.hasProducedToday = canProduce;
             if (canProduce) {
               logs.push({ msg: `🐐 ${copy.name} está lactando e produziu leite de cabra!`, type: 'info' });
@@ -2677,7 +2703,7 @@ function GameApp() {
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🦆 ${copy.name} botou um ovo de pato!`, type: 'info' });
@@ -2699,7 +2725,7 @@ function GameApp() {
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐃 ${copy.name} produziu leite de búfala!`, type: 'info' });
@@ -2715,7 +2741,7 @@ function GameApp() {
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
-        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐦 ${copy.name} (codorna) botou ovos de codorna!`, type: 'info' });
@@ -3647,6 +3673,12 @@ function GameApp() {
         return newGold;
       });
 
+      // --- Registrar custos diários no log financeiro ---
+      if (waterCost > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'custo_diario', description: 'Conta de água', amount: waterCost });
+      if (energyCost > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'custo_diario', description: 'Conta de energia', amount: energyCost });
+      if (maintCost > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'custo_diario', description: 'Manutenção de máquinas', amount: maintCost });
+      if (taxAmount > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'imposto', description: 'Imposto municipal (5% dos lucros)', amount: taxAmount });
+
       // --- SUBFUNÇÃO: Gerar Relatório Semanal ---
       if (currentDay % 7 === 0) {
         setWeeklyReportData({ ...weeklyStats });
@@ -4113,7 +4145,11 @@ function GameApp() {
       const animalsWithWeekly = nextDayValue % 7 === 0
         ? finalAnimalsWithAdulthood.map(a => ({ ...a, weeklyProduction: 0 }))
         : finalAnimalsWithAdulthood;
-      setAnimals(animalsWithWeekly);
+      setAnimals(prev => {
+        const idsInComputed = new Set(animalsWithWeekly.map((a: any) => a.id));
+        const newlyAdded = prev.filter((a: any) => !idsInComputed.has(a.id));
+        return [...animalsWithWeekly, ...newlyAdded];
+      });
       // Apply accumulated wisdom bonuses
       if (Object.values(wisdomBonusUpdates).some(v => v > 0)) {
         setFarmWisdomBonus(prev => ({
@@ -4540,6 +4576,7 @@ function GameApp() {
         const workerCost = workers.reduce((sum, w) => sum + w.dailyCost, 0);
         setGold(prev => prev - workerCost);
         logsToAdd.push({ msg: `👷 Peões trabalharam hoje! Custo diário: -${workerCost}💰`, type: 'info' });
+        addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'trabalhador', description: `Salário de ${workers.length} peão(ões)`, amount: workerCost });
 
         // --- Tratador: alimenta todos os animais consumindo ração correta do inventário ---
         if (workers.some(w => w.role === 'tratador')) {
@@ -5473,8 +5510,23 @@ function GameApp() {
               )}
             </button>
 
+            {/* 💰 Finanças Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowFinancasModal(true);
+                triggerAudioResult(() => sfx.playSound('click'));
+              }}
+              className="bg-emerald-700 border-3 border-emerald-400 hover:bg-emerald-600 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#064e3b] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
+              title="Histórico de transações financeiras da fazenda"
+            >
+              <span>💰</span>
+              <span>Finanças</span>
+            </button>
+
             {/* 💰 Vender Tudo Button */}
-            <button 
+            <button
               onClick={() => {
                 setShowSellAllConfirmModal(true);
                 triggerAudioResult(() => sfx.playSound('click'));
@@ -9209,6 +9261,63 @@ function GameApp() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 💰 FINANÇAS MODAL */}
+      {showFinancasModal && (() => {
+        const todayEntries = financialLog.filter(e => e.day === currentDay);
+        const todayIncome = todayEntries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+        const todayExpense = todayEntries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+        const todayNet = todayIncome - todayExpense;
+        const catEmoji: Record<string, string> = { venda: '🛒', compra: '🛍️', custo_diario: '💧', trabalhador: '👷', imposto: '🏛️', evento: '🎲', emprestimo: '🏦', outro: '💫' };
+        const days = [...new Set(financialLog.map(e => e.day))].sort((a, b) => b - a);
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowFinancasModal(false)}>
+            <div className="bg-stone-900 border-4 border-emerald-600 rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-5 py-4 border-b-2 border-emerald-700">
+                <h2 className="text-emerald-300 font-mono font-black text-base uppercase tracking-wide">💰 Finanças da Fazenda</h2>
+                <button type="button" onClick={() => setShowFinancasModal(false)} className="text-stone-400 hover:text-white text-xl font-bold cursor-pointer">✕</button>
+              </div>
+              <div className="grid grid-cols-3 gap-3 px-5 py-4 border-b border-stone-700">
+                <div className="bg-emerald-900/60 border border-emerald-600 rounded-xl p-3 text-center">
+                  <div className="text-[10px] text-emerald-400 font-mono uppercase mb-1">Receita Hoje</div>
+                  <div className="text-emerald-300 font-mono font-black text-sm">+{todayIncome}💰</div>
+                </div>
+                <div className="bg-red-900/60 border border-red-700 rounded-xl p-3 text-center">
+                  <div className="text-[10px] text-red-400 font-mono uppercase mb-1">Despesas Hoje</div>
+                  <div className="text-red-300 font-mono font-black text-sm">-{todayExpense}💰</div>
+                </div>
+                <div className={`border rounded-xl p-3 text-center ${todayNet >= 0 ? 'bg-emerald-900/60 border-emerald-600' : 'bg-red-900/60 border-red-700'}`}>
+                  <div className="text-[10px] text-stone-400 font-mono uppercase mb-1">Saldo Hoje</div>
+                  <div className={`font-mono font-black text-sm ${todayNet >= 0 ? 'text-emerald-300' : 'text-red-300'}`}>{todayNet >= 0 ? '+' : ''}{todayNet}💰</div>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto px-5 py-3 space-y-4" style={{ scrollbarWidth: 'thin' }}>
+                {financialLog.length === 0 ? (
+                  <div className="text-center text-stone-500 text-sm py-8">Nenhuma transação registrada ainda.</div>
+                ) : days.map(day => {
+                  const entries = financialLog.filter(e => e.day === day);
+                  return (
+                    <div key={day}>
+                      <div className="text-[10px] font-mono font-black text-stone-500 uppercase tracking-wider mb-1.5">Dia {day}</div>
+                      <div className="space-y-1">
+                        {entries.map(entry => (
+                          <div key={entry.id} className="flex items-center gap-2 bg-stone-800 rounded-lg px-3 py-2">
+                            <span className="text-base">{catEmoji[entry.category] ?? '💫'}</span>
+                            <span className="flex-1 text-[11px] text-stone-300 font-mono truncate">{entry.description}</span>
+                            <span className={`font-mono font-black text-xs ${entry.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {entry.type === 'income' ? '+' : '-'}{entry.amount}💰
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 📋 CONTRATOS MODAL */}
       <AnimatePresence>
