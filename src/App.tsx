@@ -3607,47 +3607,51 @@ function GameApp() {
         }
       }
 
-      // --- FUNCIONALIDADE 1: Custos fixos de água e energia ---
-      // Cálculo da conta de água: base cresce com animais e nível da fazenda
-      const baseWaterCost = 30 + (animals.length * 4) + (farmLevel * 5);
-      // Poço reduz 20% por nível (máx 60%)
-      const waterDiscount = Math.min(wellLevel * 0.2, 0.6);
-      const waterCost = Math.round(baseWaterCost * (1 - waterDiscount));
+      // --- FUNCIONALIDADE 1: Contas semanais de água e energia (a cada 7 dias) ---
+      const isWeeklyBillDay = nextDayValue % 7 === 0;
 
-      // Cálculo da conta de energia: base cresce com nível da fazenda
-      const milkerEnergy = machines.milkerPurchased && machines.milkerActive ? 20 : 0;
-      const shearerEnergy = machines.shearerPurchased && machines.shearerActive ? 15 : 0;
-      const feederEnergy = machines.feederPurchased && machines.feederActive ? 12 : 0;
-      const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy;
-      const baseEnergyCost = 25 + (farmLevel * 3) + machineEnergyCost;
+      // Água: base mínima + escala com número de animais. Poço reduz até 75%.
+      const baseWaterCost = isWeeklyBillDay ? Math.round(8 + animals.length * 2 + irrigationLevel * 4) : 0;
+      const waterDiscount = Math.min(wellLevel * 0.15, 0.75);
+      const waterCost = isWeeklyBillDay ? Math.round(baseWaterCost * (1 - waterDiscount)) : 0;
+
+      // Energia: só cobra se houver infraestrutura instalada (máquinas, fridge, silo, estábulo, bebedouro, queijaria).
+      const milkerEnergy = machines.milkerPurchased && machines.milkerActive ? 18 : 0;
+      const shearerEnergy = machines.shearerPurchased && machines.shearerActive ? 14 : 0;
+      const feederEnergy = machines.feederPurchased && machines.feederActive ? 10 : 0;
+      const infraEnergy = (hasFridge ? 12 : 0) + (hasSilo ? 6 : 0) + (hasStable ? 8 : 0) + (hasBebedouro ? 5 : 0) + (queijariaNivel > 0 ? queijariaNivel * 6 : 0);
+      const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy + infraEnergy;
       const energyDiscount = solarLevel === 1 ? 0.4 : solarLevel === 2 ? 0.7 : solarLevel >= 3 ? 1.0 : 0;
-      const energyCost = Math.round(baseEnergyCost * (1 - energyDiscount));
+      const energyCost = isWeeklyBillDay && machineEnergyCost > 0 ? Math.round(machineEnergyCost * (1 - energyDiscount)) : 0;
 
       // Acumular no weeklyStats
-      setWeeklyStats(prev => ({
-        ...prev,
-        waterCost: (prev.waterCost || 0) + waterCost,
-        energyCost: (prev.energyCost || 0) + energyCost,
-      }));
-
-      // Verificar se pode pagar água e energia (usando gold atual da closure)
-      const canAffordWater = gold >= waterCost;
-      const canAffordEnergy = gold >= energyCost;
-
-      if (!canAffordWater) {
-        logsToAdd.push({ msg: '💧 Sem água suficiente! Animais sofrendo.', type: 'error' });
-        // debuff: -8 felicidade extra para todos os animais
-        setTimeout(() => {
-          setAnimals(al => al.map(a => ({ ...a, happiness: Math.max(0, a.happiness - 8) })));
-        }, 0);
-      } else {
-        logsToAdd.push({ msg: `💧 Conta de água paga: -${waterCost} moedas.`, type: 'system' });
+      if (isWeeklyBillDay) {
+        setWeeklyStats(prev => ({
+          ...prev,
+          waterCost: (prev.waterCost || 0) + waterCost,
+          energyCost: (prev.energyCost || 0) + energyCost,
+        }));
       }
 
-      if (!canAffordEnergy && energyCost > 0) {
-        logsToAdd.push({ msg: '⚡ Sem energia! Máquinas paradas hoje.', type: 'error' });
-      } else if (energyCost > 0) {
-        logsToAdd.push({ msg: `⚡ Conta de energia paga: -${energyCost} moedas.`, type: 'system' });
+      // Verificar se pode pagar água e energia
+      const canAffordWater = isWeeklyBillDay ? gold >= waterCost : true;
+      const canAffordEnergy = isWeeklyBillDay ? gold >= energyCost : true;
+
+      if (isWeeklyBillDay) {
+        if (!canAffordWater && waterCost > 0) {
+          logsToAdd.push({ msg: '💧 Sem moedas para pagar a conta de água semanal! Animais sofrendo.', type: 'error' });
+          setTimeout(() => {
+            setAnimals(al => al.map(a => ({ ...a, happiness: Math.max(0, a.happiness - 8) })));
+          }, 0);
+        } else if (waterCost > 0) {
+          logsToAdd.push({ msg: `💧 Conta de água semanal: -${waterCost}💰 (${animals.length} animais).`, type: 'system' });
+        }
+
+        if (!canAffordEnergy && energyCost > 0) {
+          logsToAdd.push({ msg: '⚡ Sem moedas para pagar a conta de energia semanal! Infraestrutura afetada.', type: 'error' });
+        } else if (energyCost > 0) {
+          logsToAdd.push({ msg: `⚡ Conta de energia semanal: -${energyCost}💰 (máquinas + infra).`, type: 'system' });
+        }
       }
 
       // Liquidação financeira final do balanceamento (inclui multas de contratos vencidos e imposto)
