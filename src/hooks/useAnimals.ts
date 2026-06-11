@@ -342,24 +342,20 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'galinha') return;
 
-    if (animal.isAdult === false) {
-      addLog(`🍼 ${animal.name} ainda é um filhote e não produz ovos!`, 'error');
-      spawnFeedback('🍼', 'Filhote!', event);
-      return;
-    }
-
     if (!animal.hasProducedToday) {
       addLog(`🥚 ${animal.name} já teve seu ovo coletado ou não produziu hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
       return;
     }
 
+    const filhoteMultiplier = animal.isAdult === false ? 0.5 : 1.0;
+
     let efficiency = (animal.happiness / 100) * (1 - (Math.max(0, 100 - animal.hunger) / 200));
     efficiency = Math.max(0.3, Math.min(1.2, efficiency));
 
     let baseOvo = 1;
     let bonus = (efficiency > 0.8) ? 1 : 0;
-    let totalOvos = baseOvo + (Math.random() < 0.4 ? bonus : 0);
+    let totalOvos = Math.ceil((baseOvo + (Math.random() < 0.4 ? bonus : 0)) * filhoteMultiplier);
 
     if (animal.isBestFriend) {
       totalOvos += 1;
@@ -417,7 +413,8 @@ export function useAnimals({
     }));
 
     const bandoTxt = bandoBonus > 0 ? ` (com +${bandoBonus} ovos extras de bônus do efeito de bando!)` : '';
-    addLog(`🥚 ${animal.name} produziu ${totalOvos} ovo(s) de quintal enviado(s) ao Armazém!${bandoTxt}`, 'success');
+    const filhotePrefixEgg = animal.isAdult === false ? '🍼 ' : '';
+    addLog(`${filhotePrefixEgg}🥚 ${animal.name} produziu ${totalOvos} ovo(s) de quintal enviado(s) ao Armazém!${bandoTxt}`, 'success');
     triggerAudioResult(() => sfx.playSound('egg'));
     // F12: som de animal
     if (soundEnabled) sfx.playAnimalSound('galinha');
@@ -432,12 +429,6 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'cabra') return;
 
-    if (animal.isAdult === false) {
-      addLog(`🍼 ${animal.name} ainda é um filhote e não produz leite!`, 'error');
-      spawnFeedback('🍼', 'Filhote!', event);
-      return;
-    }
-
     if (!animal.isLactating) {
       addLog(`🐐 ${animal.name} não está em lactação agora! Aguarde ${animal.lactationCycle ?? 0} dia(s).`, 'error');
       spawnFeedback('⏳', 'Secagem', event);
@@ -449,7 +440,8 @@ export function useAnimals({
       return;
     }
 
-    let qty = 2;
+    const filhoteMultiplier = animal.isAdult === false ? 0.5 : 1.0;
+    let qty = Math.ceil(2 * filhoteMultiplier);
     if (animal.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
     qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
@@ -459,7 +451,8 @@ export function useAnimals({
     setProductFreshness((prev: any) => ({ ...prev, goat_milk: 3 }));
     setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + qty }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false } : a));
-    addLog(`🐐 ${animal.name} produziu ${qty} leite(s) de cabra!`, 'success');
+    const filhotePrefixGoat = animal.isAdult === false ? '🍼 ' : '';
+    addLog(`${filhotePrefixGoat}🐐 ${animal.name} produziu ${qty} leite(s) de cabra!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (soundEnabled) sfx.playAnimalSound('cabra');
     spawnFeedback('🥛', `+${qty} Leite Cabra`, event);
@@ -600,25 +593,20 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'bufalo') return;
 
-    if (animal.isAdult === false) {
-      addLog(`🍼 ${animal.name} ainda é um filhote e não produz leite!`, 'error');
-      spawnFeedback('🍼', 'Filhote!', event);
-      return;
-    }
-
     if (!animal.hasProducedToday) {
       addLog(`🐃 ${animal.name} já foi ordenhada hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
       return;
     }
 
+    const filhoteMultiplier = animal.isAdult === false ? 0.5 : 1.0;
     const currentSeason = Math.floor(((currentDay - 1) % 120) / 30);
     let qty = 3;
     if (currentSeason === 1 || animal.heatStress) qty = 2; // Summer heat stress
 
     if (animal.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
-    qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
+    qty = Math.max(1, Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0) * filhoteMultiplier));
 
     setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) + qty }));
     // BUG FIX: reseta frescor ao coletar leite de búfala fresco
@@ -638,12 +626,6 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'vaca') return;
 
-    if (animal.isAdult === false) {
-      addLog(`🍼 ${animal.name} ainda é um filhote e não produz leite!`, 'error');
-      spawnFeedback('🍼', 'Filhote!', event);
-      return;
-    }
-
     if (!animal.hasProducedToday) {
       addLog(`🥛 ${animal.name} já foi ordenhada ou não produziu leite hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
@@ -652,6 +634,7 @@ export function useAnimals({
     // F12: som de animal
     if (soundEnabled) sfx.playAnimalSound('vaca');
 
+    const filhoteMultiplier = animal.isAdult === false ? 0.5 : 1.0;
     let efficiency = (animal.happiness / 100) * (1 - (Math.max(0, 100 - animal.hunger) / 200));
     efficiency = Math.max(0.3, Math.min(1.2, efficiency));
 
@@ -685,7 +668,8 @@ export function useAnimals({
     if (elderBonus > 0) totalLeite = Math.max(1, Math.round(totalLeite * (1 + elderBonus)));
     // Bônus de especialização leiteira
     const specBonusMilk = specialization === 'leiteira' ? 1.2 : 1.0;
-    totalLeite = Math.round(totalLeite * specBonusMilk);
+    totalLeite = Math.round(totalLeite * specBonusMilk * filhoteMultiplier);
+    totalLeite = Math.max(1, totalLeite);
     // Bônus de campeão de raça (+10% produção)
     if (animal.isCampiao) totalLeite = Math.round(totalLeite * 1.1);
 
@@ -709,18 +693,13 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'ovelha') return;
 
-    if (animal.isAdult === false) {
-      addLog(`🍼 ${animal.name} ainda é um filhote e não produz lã!`, 'error');
-      spawnFeedback('🍼', 'Filhote!', event);
-      return;
-    }
-
     if (!animal.woolReady) {
       addLog(`🐑 ${animal.name} ainda está crescendo a lã!`, 'error');
       spawnFeedback('⏳', 'Sem lã', event);
       return;
     }
 
+    const filhoteMultiplierWool = animal.isAdult === false ? 0.5 : 1.0;
     let quality = (animal.happiness / 100) * (animal.hunger / 100);
     let woolBonus = quality > 0.7 ? 2 : 1;
     // BUG 6 FIX: aplica efeito de trait de produção (trabalhadora +15%, preguicosa -15%)
@@ -739,7 +718,7 @@ export function useAnimals({
     if (elderOvelhaBonus > 0) woolBonus = Math.max(1, Math.round(woolBonus * (1 + elderOvelhaBonus)));
     // Bônus de especialização fibras
     const specBonusWool = specialization === 'fibras' ? 1.2 : 1.0;
-    woolBonus = Math.round(woolBonus * specBonusWool);
+    woolBonus = Math.max(1, Math.round(woolBonus * specBonusWool * filhoteMultiplierWool));
     // Apply champion bonus
     if (animal.isCampiao) woolBonus = Math.round(woolBonus * 1.1);
 
