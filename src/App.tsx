@@ -10,6 +10,10 @@ import { useInventory } from './hooks/useInventory';
 import { useFairs } from './hooks/useFairs';
 import { useEconomy } from './hooks/useEconomy';
 import { useFarm, getFarmTitle, getLevelUpDetails, getXpForLevel } from './hooks/useFarm';
+import { ACHIEVEMENTS_LIST } from './data/achievements';
+import { WORKER_TYPES } from './data/workers';
+import { MERCHANT_SPECIAL_ITEMS } from './data/merchantItems';
+import PriceChart from './components/PriceChart';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Coins, 
@@ -44,38 +48,6 @@ import { getRandomName, getUniqueOxName } from './names';
 import { sfx } from './utils/audio';
 import SeasonalParticles from './components/SeasonalParticles';
 
-const ACHIEVEMENTS_LIST = [
-  { id: 'first_steps', title: 'Primeiros Passos', emoji: '🌱', description: 'Coletou o primeiro leite ou lã' },
-  { id: 'master_milk', title: 'Mestre Leiteiro', emoji: '🥛', description: 'Coletou 100 leites no total' },
-  { id: 'king_wool', title: 'Rei da Lã', emoji: '🧶', description: 'Coletou 50 lãs no total' },
-  { id: 'beef_magnate', title: 'Magnata da Carne', emoji: '🐂', description: 'Vendeu 5 bois de corte' },
-  { id: 'animal_friend', title: 'Amigo dos Animais', emoji: '❤️', description: 'Teve 1 vaca, 1 ovelha e 1 boi como "Melhor Amigo" ao mesmo tempo' },
-  { id: 'cheese_beginner', title: 'Queijeiro Iniciante', emoji: '🧀', description: 'Iniciou a maturação de 5 queijos no total' },
-  { id: 'cheese_master', title: 'Mestre dos Queijos', emoji: '🧀', description: 'Fabricou pelo menos 1 de cada tipo de queijo (Coalho, Muçarela, Brie)' },
-  { id: 'cheese_artisan', title: 'Queijeiro Artesanal', emoji: '🧀', description: 'Fabricou 10 queijos no ateliê' },
-  { id: 'master_weaver', title: 'Tecelão Mestre', emoji: '🧣', description: 'Teceu 10 cachecóis de lã no ateliê' },
-  { id: 'level_5', title: 'Fazenda Nível 5', emoji: '📈', description: 'Alcançou o nível 5 de fazenda' },
-  { id: 'merchant_partner', title: 'Parceiro do Mercador', emoji: '🧙‍♂️', description: 'Negociou com o comerciante viajante 5 vezes' },
-  { id: 'millionaire', title: 'Milionário', emoji: '💰', description: 'Acumulou 1000 moedas de ouro de saldo' },
-  { id: 'silk_producer', title: 'Mestre da Seda', emoji: '🪲', description: 'Coletou 10 sedas brutas do Bicho-da-seda' },
-  { id: 'exotic_farmer', title: 'Fazendeiro Exótico', emoji: '🐊', description: 'Criou um Jacaré na fazenda' },
-  { id: 'organic_master', title: 'Mestre Orgânico', emoji: '🌿', description: 'Produziu 20 unidades de húmus ou muco' },
-  { id: 'rare_feathers', title: 'Colecionador de Penas', emoji: '🦤', description: 'Coletou 5 penas de avestruz' },
-  { id: 'level_10', title: 'Fazenda Centenária', emoji: '🌾', description: 'Alcançou o nível 10 de fazenda' },
-  { id: 'level_20', title: 'Império Aurora', emoji: '🌌', description: 'Alcançou o nível máximo 20!' },
-  { id: 'angora_breeder', title: 'Criador de Angorá', emoji: '🐇', description: 'O Coelho Angorá se reproduziu pela primeira vez' },
-  { id: 'loan_taken', title: 'Empreendedor', emoji: '🏦', description: 'Contraiu seu primeiro empréstimo bancário' },
-  { id: 'loan_paid', title: 'Quitado!', emoji: '✅', description: 'Quitou um empréstimo antes do prazo' },
-  { id: 'world_event_survived', title: 'Sobrevivente da Crise', emoji: '📉', description: 'Sobreviveu a um Evento Mundial negativo com saldo positivo' },
-  { id: 'world_event_profited', title: 'Especulador', emoji: '📈', description: 'Vendeu mais de 500 moedas durante um Evento Mundial positivo' },
-  { id: 'machine_maxed', title: 'Engenheiro Rural', emoji: '⚙️', description: 'Melhorou uma máquina ao nível máximo (Nv3)' },
-  { id: 'all_insurance', title: 'Segurado Total', emoji: '🛡️', description: 'Ativou os três tipos de seguro ao mesmo tempo' },
-  { id: 'day_100', title: 'Centenário', emoji: '🎉', description: 'Sobreviveu 100 dias na fazenda' },
-  { id: 'day_200', title: 'Veterano', emoji: '🌟', description: 'Alcançou o Dia 200 da fazenda' },
-  { id: 'happy_herd', title: 'Fazenda Feliz', emoji: '😊', description: 'Todos os 10+ animais com felicidade acima de 90 ao mesmo tempo' },
-  { id: 'rich_rich', title: 'Barão do Agro', emoji: '💎', description: 'Acumulou 10.000 moedas de saldo' },
-  { id: 'merchant_loyal', title: 'Cliente VIP', emoji: '🧙', description: 'Comprou 10 itens na loja do Mercador Viajante' },
-];
 
 interface FloatingText {
   id: string;
@@ -87,146 +59,8 @@ interface FloatingText {
   targetX: number;
 }
 
-interface PriceChartProps {
-  history: number[];
-  basePrice: number;
-}
 
-const PriceChart: React.FC<PriceChartProps> = ({ history, basePrice }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Handle high DPI displays
-    const dpr = window.devicePixelRatio || 1;
-    const width = 110;
-    const height = 40;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    ctx.scale(dpr, dpr);
-
-    // Clear background
-    ctx.clearRect(0, 0, width, height);
-
-    // Grid line
-    ctx.strokeStyle = '#f1f5f9';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, height / 2);
-    ctx.lineTo(width, height / 2);
-    ctx.stroke();
-
-    const data = history && history.length > 0 ? history : [basePrice, basePrice, basePrice, basePrice, basePrice, basePrice, basePrice];
-    const maxVal = Math.max(...data, basePrice * 1.5);
-    const minVal = Math.min(...data, basePrice * 0.5);
-    const range = maxVal - minVal === 0 ? 1 : maxVal - minVal;
-
-    // Draw line
-    ctx.strokeStyle = '#2563eb'; // blue-600
-    ctx.lineWidth = 2.0;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    ctx.beginPath();
-    data.forEach((val, index) => {
-      const x = (index / (data.length - 1)) * (width - 8) + 4;
-      const y = height - ((val - minVal) / range) * (height - 10) - 5;
-      if (index === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
-    });
-    ctx.stroke();
-
-    // Draw gradient area
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.20)');
-    gradient.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    data.forEach((val, index) => {
-      const x = (index / (data.length - 1)) * (width - 8) + 4;
-      const y = height - ((val - minVal) / range) * (height - 10) - 5;
-      if (index === 0) {
-        ctx.moveTo(x, height);
-        ctx.lineTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
-    });
-    ctx.lineTo((data.length - 1) / (data.length - 1) * (width - 8) + 4, height);
-    ctx.closePath();
-    ctx.fill();
-
-    // Draw point at current value
-    const lastValue = data[data.length - 1];
-    const lastX = (data.length - 1) / (data.length - 1) * (width - 8) + 4;
-    const lastY = height - ((lastValue - minVal) / range) * (height - 10) - 5;
-
-    ctx.beginPath();
-    ctx.arc(lastX, lastY, 3.5, 0, 2 * Math.PI);
-    ctx.fillStyle = '#ef4444'; // Red highlight for current
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.0;
-    ctx.stroke();
-
-  }, [history, basePrice]);
-
-  return (
-    <div className="flex flex-col items-center bg-[#fafaf9] border border-stone-200 rounded-lg p-1 shrink-0">
-      <span className="text-[7.5px] text-stone-400 font-mono font-bold uppercase tracking-widest leading-none mb-0.5">7 Dias</span>
-      <canvas ref={canvasRef} />
-    </div>
-  );
-};
-
-const WORKER_TYPES = [
-  { role: 'tratador' as const, name: 'Tratador', emoji: '🧑‍🌾', dailyCost: 25, desc: 'Alimenta todos os animais diariamente. Essencial para rebanhos grandes.', minLevel: 2 },
-  { role: 'composteiro' as const, name: 'Composteiro', emoji: '🌱', dailyCost: 20, desc: 'Coleta húmus das minhocas e a cada 3 dias produz 1 húmus bônus de compostagem.', minLevel: 3 },
-  { role: 'tosquiador' as const, name: 'Tosquiador', emoji: '✂️', dailyCost: 28, desc: 'Coleta lã de ovelhas e coelhos angorá prontos. Tem chance de lã premium (+10%).', minLevel: 3 },
-  { role: 'ordenhador' as const, name: 'Ordenhador', emoji: '🥛', dailyCost: 35, desc: 'Ordena vacas, cabras, búfalos e alpacas automaticamente ao fim do dia.', minLevel: 4 },
-  { role: 'avicultor' as const, name: 'Avicultor', emoji: '🥚', dailyCost: 28, desc: 'Coleta ovos de galinhas, codornas, patos e avestruzes prontos.', minLevel: 5 },
-  { role: 'queijeiro' as const, name: 'Queijeiro', emoji: '🧀', dailyCost: 50, desc: 'Transforma automaticamente 3 leites em 1 Queijo Coalho por dia. Bônus +5% de venda.', minLevel: 5 },
-  { role: 'tratador_exotico' as const, name: 'Tratador Exótico', emoji: '🦎', dailyCost: 65, desc: 'Cuida de jacarés, rãs e caracóis: +5 felicidade/dia e -50% chance de epidemia nesses animais.', minLevel: 8 },
-  { role: 'veterinario' as const, name: 'Veterinário', emoji: '💉', dailyCost: 80, desc: 'Cura doenças, remove estresse e adiciona +5 felicidade para todos os animais por dia.', minLevel: 10 },
-  { role: 'comerciante_residente' as const, name: 'Comerciante', emoji: '💰', dailyCost: 120, desc: '+8% no preço de venda de leite, lã, ovos, seda, couro e carne bruta.', minLevel: 10 },
-];
-
-const MERCHANT_SPECIAL_ITEMS = [
-  // --- Itens existentes que funcionam ---
-  { id: 'racao_premium', label: '🥣 Ração Premium', desc: '+10 de cada tipo de ração no Armazém', price: 40, effect: 'premium_feed' },
-  { id: 'bebedouro', label: '🪣 Bebedouro Automático', desc: 'Animais nunca ficam com sede', price: 150, effect: 'bebedouro', oneTime: true },
-  { id: 'cert_sanitario', label: '📜 Certificado Sanitário', desc: '+10% preço de venda de carne permanente', price: 200, effect: 'cert_sanitario', oneTime: true },
-  { id: 'licenca_exotica_item', label: '📋 Licença Exótica', desc: 'Permite criar Jacaré legalmente', price: 280, effect: 'licenca_exotica', oneTime: true },
-  { id: 'licenca_criadouro', label: '📜 Licença de Criadouro', desc: 'Permite reprodução controlada de Vaca, Cabra, Ovelha e Galinha', price: 400, effect: 'licenca_criadouro', oneTime: true },
-  { id: 'kit_primeiros_socorros', label: '🩺 Kit de Primeiros Socorros', desc: 'Cura todos os animais doentes instantaneamente', price: 120, effect: 'cure_all_sick' },
-  { id: 'pocao_fertilidade', label: '🧪 Fertilizante Concentrado', desc: 'Todos animais produzem 2× por 3 dias', price: 180, effect: 'fertility_3days' },
-  { id: 'selo_qualidade', label: '🏅 Selo de Qualidade Premium', desc: '+25% preço de venda de todos produtos por 5 dias', price: 220, effect: 'premium_prices_5days' },
-  { id: 'mapa_tesouro', label: '🗺️ Dica de Negócio', desc: 'Informação privilegiada rende 200–600💰 imediatamente', price: 90, effect: 'treasure_map' },
-  { id: 'elixir_felicidade', label: '🎵 Apresentação Musical', desc: 'Show itinerante deixa todos os animais +30 felicidade agora', price: 50, effect: 'happiness_boost' },
-  { id: 'manual_producao', label: '📚 Manual de Produção Avançada', desc: '+15% produção de todos animais por 7 dias', price: 160, effect: 'production_boost_7days' },
-  // --- Novos itens ---
-  { id: 'suplemento_mineral', label: '💊 Suplemento Mineral', desc: '+20% produção de leite por 7 dias', price: 90, effect: 'suplemento_mineral_7days' },
-  { id: 'bandagem_vet', label: '🩹 Bandagem Veterinária', desc: 'Cura 1 animal doente (o mais grave)', price: 45, effect: 'cure_one_sick' },
-  { id: 'sal_mineral', label: '🧂 Sal Mineral', desc: 'Animais não perdem fome por 3 dias', price: 55, effect: 'sal_mineral_3days' },
-  { id: 'selo_organico', label: '🌿 Selo Orgânico', desc: '+20% preço de venda por 7 dias', price: 160, effect: 'selo_organico_7days' },
-  { id: 'balanca_precisao', label: '⚖️ Balança de Precisão', desc: '+5% preço de venda permanente', price: 320, effect: 'balanca_precisao', oneTime: true },
-  { id: 'cisterna', label: '🪣 Cisterna de Água', desc: 'Reduz conta de água em 30% permanente', price: 200, effect: 'cisterna', oneTime: true },
-  { id: 'cobertura_provisoria', label: '☂️ Cobertura Provisória', desc: 'Próxima tempestade não afeta produção', price: 85, effect: 'block_storm' },
-  { id: 'bomba_agua', label: '💧 Bomba d\'Água Manual', desc: 'Próxima seca não reduz felicidade dos animais', price: 75, effect: 'block_drought' },
-  { id: 'silagem_premium', label: '🌽 Silagem Premium', desc: 'Animais não consomem ração do Armazém por 5 dias', price: 110, effect: 'silagem_5days' },
-  { id: 'anuncio_gazeta', label: '📰 Anúncio na Gazeta', desc: 'Mercador retorna garantido no próximo ciclo', price: 60, effect: 'garantir_mercador' },
-  { id: 'contrato_transporte', label: '🚚 Contrato de Transporte', desc: 'Isenta de multa nas próximas 2 entregas vencidas', price: 95, effect: 'isencao_multa_2x' },
-] as const;
 
 export default function App() {
   const hasSave = !!localStorage.getItem('aurora_farm_save');
