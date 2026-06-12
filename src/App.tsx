@@ -1396,194 +1396,130 @@ function GameApp() {
 
   // --- FUNCIONALIDADE 3: Geração de missões ---
   const generateDailyMissions = (day: number): Mission[] => {
-    const missions: Mission[] = [
-      {
-        id: `daily_milk_${day}`,
-        title: 'Leiteiro Dedicado',
-        description: 'Venda 5 litros de leite hoje',
-        type: 'daily',
-        goal: 5,
-        current: 0,
-        reward: 15,
-        expiresOnDay: day + 1,
-        completed: false,
-        claimed: false,
-        missionKey: 'sell_milk'
-      },
-      {
-        id: `daily_collect_${day}`,
-        title: 'Colheita do Dia',
-        description: 'Colete 3 itens hoje (leite, lã ou ovos)',
-        type: 'daily',
-        goal: 3,
-        current: 0,
-        reward: 12,
-        expiresOnDay: day + 1,
-        completed: false,
-        claimed: false,
-        missionKey: 'collect_items'
-      },
-      {
-        id: `daily_happy_${day}`,
-        title: 'Fazenda Feliz',
-        description: 'Mantenha todos os animais com felicidade > 70%',
-        type: 'daily',
-        goal: 1,
-        current: 0,
-        reward: 15,
-        expiresOnDay: day + 1,
-        completed: false,
-        claimed: false,
-        missionKey: 'happy_animals'
-      }
+    // Pool A: produção (sorteia 1)
+    const poolA = [
+      { id: `daily_milk_${day}`,    title: 'Leiteiro do Dia',     description: 'Colete leite de qualquer vaca, cabra ou búfala',         missionKey: 'collect_items' as const, goal: 2,  reward: 5  },
+      { id: `daily_egg_${day}`,     title: 'Coleta de Ovos',      description: 'Colete ovos de qualquer ave hoje',                        missionKey: 'collect_items' as const, goal: 3,  reward: 5  },
+      { id: `daily_wool_${day}`,    title: 'Dia de Tosquia',      description: 'Colete lã de qualquer animal hoje',                       missionKey: 'collect_items' as const, goal: 1,  reward: 5  },
+      { id: `daily_collect_${day}`, title: 'Colheita do Dia',     description: 'Colete 4 itens quaisquer (leite, lã ou ovos)',            missionKey: 'collect_items' as const, goal: 4,  reward: 6  },
+      { id: `daily_organic_${day}`, title: 'Produção Orgânica',   description: 'Colete húmus ou muco hoje',                               missionKey: 'organic_day'   as const, goal: 1,  reward: 6  },
+    ];
+    // Pool B: vendas (sorteia 1)
+    const poolB = [
+      { id: `daily_sell_${day}`,    title: 'Vendedor do Dia',     description: 'Venda pelo menos 3 itens do Armazém hoje',               missionKey: 'sell_milk'     as const, goal: 3,  reward: 6  },
+      { id: `daily_smilk_${day}`,   title: 'Venda de Leite',      description: 'Venda 4 litros de leite hoje',                           missionKey: 'sell_milk'     as const, goal: 4,  reward: 7  },
+      { id: `daily_swool_${day}`,   title: 'Venda de Lã',         description: 'Venda 2 unidades de lã hoje',                            missionKey: 'sell_wool'     as const, goal: 2,  reward: 6  },
+      { id: `daily_segg_${day}`,    title: 'Mercado de Ovos',     description: 'Venda 4 ovos (qualquer tipo) hoje',                      missionKey: 'sell_milk'     as const, goal: 4,  reward: 6  },
+      { id: `daily_schs_${day}`,    title: 'Queijo no Balcão',    description: 'Venda 1 queijo de qualquer tipo hoje',                   missionKey: 'sell_cheese'   as const, goal: 1,  reward: 8  },
+    ];
+    // Pool C: cuidados (sorteia 1)
+    const poolC = [
+      { id: `daily_happy_${day}`,   title: 'Fazenda Feliz',       description: 'Todos os animais com felicidade > 70% hoje',             missionKey: 'happy_animals' as const, goal: 1,  reward: 7  },
+      { id: `daily_feed_${day}`,    title: 'Hora da Ração',       description: 'Alimente pelo menos 2 animais manualmente hoje',         missionKey: 'feed_animals'  as const, goal: 2,  reward: 5  },
+      { id: `daily_nosick_${day}`,  title: 'Rebanho Saudável',    description: 'Termine o dia sem nenhum animal doente',                 missionKey: 'happy_animals' as const, goal: 1,  reward: 6  },
+    ];
+    // Pool D: bônus difícil (sorteia 1, recompensa um pouco maior)
+    const poolD = [
+      { id: `daily_silk_${day}`,    title: 'Coleta de Seda',      description: 'Colete seda bruta do bicho-da-seda hoje',                missionKey: 'collect_silk'  as const, goal: 1,  reward: 12 },
+      { id: `daily_exotic_${day}`,  title: 'Produto Exótico',     description: 'Venda 1 produto exótico (muco, couro ou seda)',          missionKey: 'sell_exotic'   as const, goal: 1,  reward: 12 },
+      { id: `daily_cheese2_${day}`, title: 'Queijaria Ativa',     description: 'Inicie a maturação de 1 queijo na Queijaria hoje',       missionKey: 'sell_cheese'   as const, goal: 1,  reward: 10 },
+      { id: `daily_contract_${day}`,title: 'Entrega do Dia',      description: 'Entregue itens a qualquer contrato ativo hoje',          missionKey: 'sell_milk'     as const, goal: 1,  reward: 14 },
     ];
 
-    // Randomly add new mission types to the daily pool
-    const rand = Math.random();
-    if (rand < 0.33) {
-      missions.push({
-        id: `daily_silk_${day}`,
-        title: 'Mestre da Seda',
-        description: 'Colete 3 sedas brutas',
-        type: 'daily',
-        goal: 3,
-        current: 0,
-        reward: 30,
-        expiresOnDay: day + 1,
-        completed: false,
-        claimed: false,
-        missionKey: 'collect_silk'
-      });
-    } else if (rand < 0.66) {
-      missions.push({
-        id: `daily_exotic_${day}`,
-        title: 'Vendedor Exótico',
-        description: 'Venda 1 produto exótico (muco, couro, seda)',
-        type: 'daily',
-        goal: 1,
-        current: 0,
-        reward: 25,
-        expiresOnDay: day + 1,
-        completed: false,
-        claimed: false,
-        missionKey: 'sell_exotic'
-      });
-    } else {
-      missions.push({
-        id: `daily_organic_${day}`,
-        title: 'Dia Orgânico',
-        description: 'Produza húmus ou muco hoje',
-        type: 'daily',
-        goal: 1,
-        current: 0,
-        reward: 20,
-        expiresOnDay: day + 1,
-        completed: false,
-        claimed: false,
-        missionKey: 'organic_day'
-      });
-    }
+    const pick = <T,>(pool: T[]) => pool[Math.floor(Math.random() * pool.length)];
+    const toMission = (m: typeof poolA[0]): Mission => ({
+      ...m, type: 'daily' as const, current: 0, expiresOnDay: day + 1, completed: false, claimed: false,
+    });
 
-    return missions;
+    return [pick(poolA), pick(poolB), pick(poolC), pick(poolD)].map(toMission);
   };
 
   const generateWeeklyMissions = (day: number): Mission[] => {
-    return [
-      {
-        id: `weekly_gold_${day}`,
-        title: 'Capitalista Semanal',
-        description: 'Ganhe 200 moedas esta semana',
-        type: 'weekly',
-        goal: 200,
-        current: 0,
-        reward: 50,
-        expiresOnDay: day + 7,
-        completed: false,
-        claimed: false,
-        missionKey: 'earn_gold'
-      },
-      {
-        id: `weekly_feed_${day}`,
-        title: 'Cuidador de Rebanho',
-        description: 'Alimente animais 10 vezes esta semana',
-        type: 'weekly',
-        goal: 10,
-        current: 0,
-        reward: 40,
-        expiresOnDay: day + 7,
-        completed: false,
-        claimed: false,
-        missionKey: 'feed_animals'
-      }
+    // Sorteia 3 de um pool de 10 missões semanais
+    const pool: Omit<Mission, 'id' | 'type' | 'current' | 'expiresOnDay' | 'completed' | 'claimed'>[] = [
+      { title: 'Produção Semanal',      description: 'Colete 20 itens quaisquer esta semana',              missionKey: 'collect_items' as const, goal: 20,  reward: 18 },
+      { title: 'Mercado da Semana',     description: 'Venda pelo menos 15 itens esta semana',              missionKey: 'sell_milk'     as const, goal: 15,  reward: 20 },
+      { title: 'Semana Leiteira',       description: 'Venda 12 litros de leite esta semana',               missionKey: 'sell_milk'     as const, goal: 12,  reward: 22 },
+      { title: 'Semana da Lã',          description: 'Venda 8 unidades de lã esta semana',                 missionKey: 'sell_wool'     as const, goal: 8,   reward: 20 },
+      { title: 'Ovos da Semana',        description: 'Venda 20 ovos (qualquer tipo) esta semana',          missionKey: 'sell_milk'     as const, goal: 20,  reward: 18 },
+      { title: 'Rebanho Alimentado',    description: 'Alimente animais 15 vezes esta semana',              missionKey: 'feed_animals'  as const, goal: 15,  reward: 16 },
+      { title: 'Renda Semanal',         description: 'Ganhe 150 moedas em vendas esta semana',             missionKey: 'earn_gold'     as const, goal: 150, reward: 20 },
+      { title: 'Queijos da Semana',     description: 'Produza ou venda 3 queijos esta semana',             missionKey: 'sell_cheese'   as const, goal: 3,   reward: 25 },
+      { title: 'Animais Felizes',       description: 'Todos os animais com felicidade >70% por 5 dias',    missionKey: 'happy_animals' as const, goal: 5,   reward: 22 },
+      { title: 'Semana Orgânica',       description: 'Colete húmus ou muco 4 vezes esta semana',           missionKey: 'organic_day'   as const, goal: 4,   reward: 20 },
     ];
+    const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
+    return shuffled.map((m, i) => ({
+      ...m, id: `weekly_${i}_${day}`, type: 'weekly' as const, current: 0,
+      expiresOnDay: day + 7, completed: false, claimed: false,
+    }));
   };
 
   const generateEpicMissions = (day: number): Mission[] => {
     return [
       {
         id: `epic_milk_${day}`,
-        title: '🥛 Magnata do Leite',
-        description: 'Venda 100 litros de leite nos próximos 30 dias',
-        type: 'epic' as const,
-        goal: 100,
-        current: 0,
-        reward: 800,
-        expiresOnDay: day + 30,
-        completed: false,
-        claimed: false,
+        title: '🥛 Leiteria em Marcha',
+        description: 'Venda 60 litros de leite nos próximos 30 dias',
+        type: 'epic' as const, goal: 60, current: 0,
+        reward: 120, expiresOnDay: day + 30, completed: false, claimed: false,
         missionKey: 'sell_milk' as const
       },
       {
+        id: `epic_wool_${day}`,
+        title: '🧶 Fio a Fio',
+        description: 'Venda 40 unidades de lã ou têxteis em 45 dias',
+        type: 'epic' as const, goal: 40, current: 0,
+        reward: 100, expiresOnDay: day + 45, completed: false, claimed: false,
+        missionKey: 'sell_wool' as const
+      },
+      {
         id: `epic_cheese_${day}`,
-        title: '🧀 Mestre Queijeiro',
-        description: 'Produza 20 queijos de qualquer tipo em 45 dias',
-        type: 'epic' as const,
-        goal: 20,
-        current: 0,
-        reward: 1500,
-        expiresOnDay: day + 45,
-        completed: false,
-        claimed: false,
+        title: '🧀 Queijaria da Aurora',
+        description: 'Produza 10 queijos de qualquer tipo em 45 dias',
+        type: 'epic' as const, goal: 10, current: 0,
+        reward: 150, expiresOnDay: day + 45, completed: false, claimed: false,
         missionKey: 'sell_cheese' as const
       },
       {
+        id: `epic_egg_${day}`,
+        title: '🥚 Galinheiro Produtivo',
+        description: 'Venda 50 ovos (qualquer tipo) em 30 dias',
+        type: 'epic' as const, goal: 50, current: 0,
+        reward: 90, expiresOnDay: day + 30, completed: false, claimed: false,
+        missionKey: 'sell_milk' as const
+      },
+      {
         id: `epic_animals_${day}`,
-        title: '🐄 Rei do Rebanho',
-        description: 'Tenha 20 animais adultos ao mesmo tempo',
-        type: 'epic' as const,
-        goal: 20,
-        current: 0,
-        reward: 2000,
-        expiresOnDay: day + 60,
-        completed: false,
-        claimed: false,
+        title: '🐄 Rebanho Próspero',
+        description: 'Tenha 10 animais adultos ao mesmo tempo',
+        type: 'epic' as const, goal: 10, current: 0,
+        reward: 200, expiresOnDay: day + 60, completed: false, claimed: false,
         missionKey: 'have_animals' as const
       },
       {
         id: `epic_gold_${day}`,
-        title: '💰 Fazendeiro Bilionário',
-        description: 'Acumule 50.000 moedas em 60 dias',
-        type: 'epic' as const,
-        goal: 50000,
-        current: 0,
-        reward: 3000,
-        expiresOnDay: day + 60,
-        completed: false,
-        claimed: false,
+        title: '💰 Poupança Rural',
+        description: 'Acumule 2.000 moedas em 60 dias',
+        type: 'epic' as const, goal: 2000, current: 0,
+        reward: 250, expiresOnDay: day + 60, completed: false, claimed: false,
         missionKey: 'earn_gold' as const
       },
       {
-        id: `epic_wool_${day}`,
-        title: '🧶 Império da Lã',
-        description: 'Venda 80 unidades de lã/produtos têxteis em 45 dias',
-        type: 'epic' as const,
-        goal: 80,
-        current: 0,
-        reward: 1200,
-        expiresOnDay: day + 45,
-        completed: false,
-        claimed: false,
-        missionKey: 'sell_wool' as const
+        id: `epic_feed_${day}`,
+        title: '🌾 Cuidador Dedicado',
+        description: 'Alimente animais 40 vezes nos próximos 30 dias',
+        type: 'epic' as const, goal: 40, current: 0,
+        reward: 80, expiresOnDay: day + 30, completed: false, claimed: false,
+        missionKey: 'feed_animals' as const
+      },
+      {
+        id: `epic_happy_${day}`,
+        title: '😊 Fazenda Exemplar',
+        description: 'Mantenha todos os animais felizes (>70%) por 10 dias seguidos',
+        type: 'epic' as const, goal: 10, current: 0,
+        reward: 180, expiresOnDay: day + 45, completed: false, claimed: false,
+        missionKey: 'happy_animals' as const
       },
     ];
   };
