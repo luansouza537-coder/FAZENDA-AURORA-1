@@ -285,6 +285,7 @@ function GameApp() {
   const [animalFilter, setAnimalFilter] = useState<string>('all');
   const [animalSort, setAnimalSort] = useState<'happiness'|'production'|'age'|'name'>('name');
   const [animalSortDir, setAnimalSortDir] = useState<'asc'|'desc'>('asc');
+  const [animalViewMode, setAnimalViewMode] = useState<'card'|'list'>('card');
 
   // --- FEATURE 2: Worker NPCs ---
   const [workers, setWorkers] = useState<FarmWorker[]>(() => {
@@ -1439,19 +1440,44 @@ function GameApp() {
   };
 
   const generateWeeklyMissions = (day: number): Mission[] => {
-    // Sorteia 3 de um pool de 10 missões semanais
-    const pool: Omit<Mission, 'id' | 'type' | 'current' | 'expiresOnDay' | 'completed' | 'claimed'>[] = [
-      { title: 'Produção Semanal',      description: 'Colete 20 itens quaisquer esta semana',              missionKey: 'collect_items' as const, goal: 20,  reward: 18 },
-      { title: 'Mercado da Semana',     description: 'Venda pelo menos 15 itens esta semana',              missionKey: 'sell_milk'     as const, goal: 15,  reward: 20 },
-      { title: 'Semana Leiteira',       description: 'Venda 12 litros de leite esta semana',               missionKey: 'sell_milk'     as const, goal: 12,  reward: 22 },
-      { title: 'Semana da Lã',          description: 'Venda 8 unidades de lã esta semana',                 missionKey: 'sell_wool'     as const, goal: 8,   reward: 20 },
-      { title: 'Ovos da Semana',        description: 'Venda 20 ovos (qualquer tipo) esta semana',          missionKey: 'sell_milk'     as const, goal: 20,  reward: 18 },
-      { title: 'Rebanho Alimentado',    description: 'Alimente animais 15 vezes esta semana',              missionKey: 'feed_animals'  as const, goal: 15,  reward: 16 },
-      { title: 'Renda Semanal',         description: 'Ganhe 150 moedas em vendas esta semana',             missionKey: 'earn_gold'     as const, goal: 150, reward: 20 },
-      { title: 'Queijos da Semana',     description: 'Produza ou venda 3 queijos esta semana',             missionKey: 'sell_cheese'   as const, goal: 3,   reward: 25 },
-      { title: 'Animais Felizes',       description: 'Todos os animais com felicidade >70% por 5 dias',    missionKey: 'happy_animals' as const, goal: 5,   reward: 22 },
-      { title: 'Semana Orgânica',       description: 'Colete húmus ou muco 4 vezes esta semana',           missionKey: 'organic_day'   as const, goal: 4,   reward: 20 },
+    const animalTypes = new Set(animals.map(a => a.type));
+    const hasMilkAnimals = ['vaca','cabra','bufalo'].some(t => animalTypes.has(t as any));
+    const hasWoolAnimals = ['ovelha','lhama','alpaca','coelho_angora'].some(t => animalTypes.has(t as any));
+    const hasEggBirds   = ['galinha','pato','codorna','ganso','pavao','avestruz'].some(t => animalTypes.has(t as any));
+    const hasOrganicAnimals = ['minhoca','caracol'].some(t => animalTypes.has(t as any));
+
+    type PoolEntry = Omit<Mission, 'id'|'type'|'current'|'expiresOnDay'|'completed'|'claimed'>;
+    // Always available from level 1
+    const basePool: PoolEntry[] = [
+      { title: 'Produção Semanal',   description: 'Colete 20 itens quaisquer esta semana',          missionKey: 'collect_items' as const, goal: 20,  reward: 18 },
+      { title: 'Mercado da Semana',  description: 'Venda pelo menos 10 itens esta semana',           missionKey: 'sell_milk'     as const, goal: 10,  reward: 16 },
+      { title: 'Rebanho Alimentado', description: 'Alimente animais 12 vezes esta semana',           missionKey: 'feed_animals'  as const, goal: 12,  reward: 16 },
+      { title: 'Animais Felizes',    description: 'Mantenha todos os animais felizes (>70%) por 3 dias', missionKey: 'happy_animals' as const, goal: 3, reward: 18 },
+      { title: 'Renda Semanal',      description: 'Ganhe 80 moedas em vendas esta semana',           missionKey: 'earn_gold'     as const, goal: 80,  reward: 16 },
     ];
+    // Level 2+ (unlocked with ovelha/more animals)
+    const mid1Pool: PoolEntry[] = [
+      ...(hasMilkAnimals  ? [{ title: 'Semana Leiteira', description: 'Venda 10 litros de leite esta semana',         missionKey: 'sell_milk'  as const, goal: 10, reward: 20 } as PoolEntry] : []),
+      ...(hasWoolAnimals  ? [{ title: 'Semana da Lã',    description: 'Venda 6 unidades de lã esta semana',           missionKey: 'sell_wool'  as const, goal: 6,  reward: 18 } as PoolEntry] : []),
+      ...(hasEggBirds     ? [{ title: 'Ovos da Semana',  description: 'Venda 15 ovos (qualquer tipo) esta semana',    missionKey: 'sell_milk'  as const, goal: 15, reward: 18 } as PoolEntry] : []),
+      { title: 'Renda Crescente',    description: 'Ganhe 150 moedas em vendas esta semana',          missionKey: 'earn_gold'     as const, goal: 150, reward: 22 },
+    ];
+    // Level 3+ (queijaria)
+    const mid2Pool: PoolEntry[] = [
+      { title: 'Queijos da Semana',  description: 'Produza ou venda 3 queijos esta semana',          missionKey: 'sell_cheese'   as const, goal: 3,   reward: 24 },
+      { title: 'Animais Felizes+',   description: 'Mantenha todos com felicidade >70% por 5 dias',   missionKey: 'happy_animals' as const, goal: 5,   reward: 22 },
+    ];
+    // Level 5+ (exotic/organic)
+    const advPool: PoolEntry[] = [
+      ...(hasOrganicAnimals ? [{ title: 'Semana Orgânica', description: 'Colete húmus ou muco 4 vezes esta semana', missionKey: 'organic_day' as const, goal: 4, reward: 20 } as PoolEntry] : []),
+      { title: 'Grande Mercado',     description: 'Venda pelo menos 25 itens esta semana',           missionKey: 'sell_milk'     as const, goal: 25,  reward: 24 },
+    ];
+
+    let pool = [...basePool];
+    if (farmLevel >= 2) pool = [...pool, ...mid1Pool];
+    if (farmLevel >= 3) pool = [...pool, ...mid2Pool];
+    if (farmLevel >= 5) pool = [...pool, ...advPool];
+
     const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
     return shuffled.map((m, i) => ({
       ...m, id: `weekly_${i}_${day}`, type: 'weekly' as const, current: 0,
@@ -1460,72 +1486,78 @@ function GameApp() {
   };
 
   const generateEpicMissions = (day: number): Mission[] => {
-    return [
+    const animalTypes = new Set(animals.map(a => a.type));
+    const hasMilkAnimals = ['vaca','cabra','bufalo'].some(t => animalTypes.has(t as any));
+    const hasWoolAnimals = ['ovelha','lhama','alpaca','coelho_angora'].some(t => animalTypes.has(t as any));
+    const hasEggBirds   = ['galinha','pato','codorna','ganso','avestruz'].some(t => animalTypes.has(t as any));
+
+    const all = [
+      // Always available
       {
-        id: `epic_milk_${day}`,
-        title: '🥛 Leiteria em Marcha',
-        description: 'Venda 60 litros de leite nos próximos 30 dias',
-        type: 'epic' as const, goal: 60, current: 0,
-        reward: 120, expiresOnDay: day + 30, completed: false, claimed: false,
-        missionKey: 'sell_milk' as const
+        id: `epic_gold_${day}`, title: '💰 Poupança Rural',
+        description: farmLevel <= 2 ? 'Acumule 500 moedas' : 'Acumule 2.000 moedas em 60 dias',
+        type: 'epic' as const, goal: farmLevel <= 2 ? 500 : 2000, current: 0,
+        reward: farmLevel <= 2 ? 80 : 250, expiresOnDay: day + 60, completed: false, claimed: false,
+        missionKey: 'earn_gold' as const, minLevel: 1,
       },
       {
-        id: `epic_wool_${day}`,
-        title: '🧶 Fio a Fio',
-        description: 'Venda 40 unidades de lã ou têxteis em 45 dias',
-        type: 'epic' as const, goal: 40, current: 0,
-        reward: 100, expiresOnDay: day + 45, completed: false, claimed: false,
-        missionKey: 'sell_wool' as const
-      },
-      {
-        id: `epic_cheese_${day}`,
-        title: '🧀 Queijaria da Aurora',
-        description: 'Produza 10 queijos de qualquer tipo em 45 dias',
-        type: 'epic' as const, goal: 10, current: 0,
-        reward: 150, expiresOnDay: day + 45, completed: false, claimed: false,
-        missionKey: 'sell_cheese' as const
-      },
-      {
-        id: `epic_egg_${day}`,
-        title: '🥚 Galinheiro Produtivo',
-        description: 'Venda 50 ovos (qualquer tipo) em 30 dias',
-        type: 'epic' as const, goal: 50, current: 0,
-        reward: 90, expiresOnDay: day + 30, completed: false, claimed: false,
-        missionKey: 'sell_milk' as const
-      },
-      {
-        id: `epic_animals_${day}`,
-        title: '🐄 Rebanho Próspero',
-        description: 'Tenha 10 animais adultos ao mesmo tempo',
-        type: 'epic' as const, goal: 10, current: 0,
-        reward: 200, expiresOnDay: day + 60, completed: false, claimed: false,
-        missionKey: 'have_animals' as const
-      },
-      {
-        id: `epic_gold_${day}`,
-        title: '💰 Poupança Rural',
-        description: 'Acumule 2.000 moedas em 60 dias',
-        type: 'epic' as const, goal: 2000, current: 0,
-        reward: 250, expiresOnDay: day + 60, completed: false, claimed: false,
-        missionKey: 'earn_gold' as const
-      },
-      {
-        id: `epic_feed_${day}`,
-        title: '🌾 Cuidador Dedicado',
+        id: `epic_feed_${day}`, title: '🌾 Cuidador Dedicado',
         description: 'Alimente animais 40 vezes nos próximos 30 dias',
         type: 'epic' as const, goal: 40, current: 0,
         reward: 80, expiresOnDay: day + 30, completed: false, claimed: false,
-        missionKey: 'feed_animals' as const
+        missionKey: 'feed_animals' as const, minLevel: 1,
       },
       {
-        id: `epic_happy_${day}`,
-        title: '😊 Fazenda Exemplar',
+        id: `epic_happy_${day}`, title: '😊 Fazenda Exemplar',
         description: 'Mantenha todos os animais felizes (>70%) por 10 dias seguidos',
         type: 'epic' as const, goal: 10, current: 0,
         reward: 180, expiresOnDay: day + 45, completed: false, claimed: false,
-        missionKey: 'happy_animals' as const
+        missionKey: 'happy_animals' as const, minLevel: 1,
       },
+      // Level 2+ with milk animals
+      ...(farmLevel >= 2 && hasMilkAnimals ? [{
+        id: `epic_milk_${day}`, title: '🥛 Leiteria em Marcha',
+        description: 'Venda 60 litros de leite nos próximos 30 dias',
+        type: 'epic' as const, goal: 60, current: 0,
+        reward: 120, expiresOnDay: day + 30, completed: false, claimed: false,
+        missionKey: 'sell_milk' as const, minLevel: 2,
+      }] : []),
+      // Level 2+ with egg birds
+      ...(farmLevel >= 2 && hasEggBirds ? [{
+        id: `epic_egg_${day}`, title: '🥚 Galinheiro Produtivo',
+        description: 'Venda 50 ovos (qualquer tipo) em 30 dias',
+        type: 'epic' as const, goal: 50, current: 0,
+        reward: 90, expiresOnDay: day + 30, completed: false, claimed: false,
+        missionKey: 'sell_milk' as const, minLevel: 2,
+      }] : []),
+      // Level 2+ with wool animals
+      ...(farmLevel >= 2 && hasWoolAnimals ? [{
+        id: `epic_wool_${day}`, title: '🧶 Fio a Fio',
+        description: 'Venda 40 unidades de lã ou têxteis em 45 dias',
+        type: 'epic' as const, goal: 40, current: 0,
+        reward: 100, expiresOnDay: day + 45, completed: false, claimed: false,
+        missionKey: 'sell_wool' as const, minLevel: 2,
+      }] : []),
+      // Level 3+ (queijaria)
+      ...(farmLevel >= 3 ? [{
+        id: `epic_cheese_${day}`, title: '🧀 Queijaria da Aurora',
+        description: 'Produza 10 queijos de qualquer tipo em 45 dias',
+        type: 'epic' as const, goal: 10, current: 0,
+        reward: 150, expiresOnDay: day + 45, completed: false, claimed: false,
+        missionKey: 'sell_cheese' as const, minLevel: 3,
+      }] : []),
+      // Level 4+ (bigger herd)
+      ...(farmLevel >= 4 ? [{
+        id: `epic_animals_${day}`, title: '🐄 Rebanho Próspero',
+        description: 'Tenha 10 animais adultos ao mesmo tempo',
+        type: 'epic' as const, goal: 10, current: 0,
+        reward: 200, expiresOnDay: day + 60, completed: false, claimed: false,
+        missionKey: 'have_animals' as const, minLevel: 4,
+      }] : []),
     ];
+
+    // Strip the minLevel helper field before returning
+    return all.map(({ minLevel: _ml, ...m }) => m);
   };
 
   // BUG 11 FIX: aceita overrideDay para que notificações disparadas dentro de advanceDay
@@ -6426,6 +6458,13 @@ function GameApp() {
                       return a.type === animalFilter;
                     }).length} de {animals.length} animais
                   </span>
+                  <button
+                    onClick={() => setAnimalViewMode(m => m === 'card' ? 'list' : 'card')}
+                    className="ml-auto text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-[#fbbf24]/60 text-[#fef3c7] bg-transparent hover:bg-[#fbbf24]/10 transition-all"
+                    title="Alternar entre modo card e lista compacta"
+                  >
+                    {animalViewMode === 'card' ? '☰ Lista' : '⊞ Cards'}
+                  </button>
                 </div>
                 <AnimatePresence>
                   {(() => {
@@ -6447,6 +6486,77 @@ function GameApp() {
                         else cmp = a.name.localeCompare(b.name);
                         return animalSortDir === 'asc' ? cmp : -cmp;
                       });
+                    if (animalViewMode === 'list') {
+                      return (
+                        <div key="list-wrapper" className="col-span-full space-y-1">
+                          {filteredAnimals.map((animal) => {
+                            const noHungerAnimal = ['minhoca','caracol'].includes(animal.type);
+                            const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
+                            const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
+                            const isReady =
+                              (animal.type === 'vaca' && animal.hasProducedToday) ||
+                              (animal.type === 'ovelha' && animal.woolReady) ||
+                              (animal.type === 'galinha' && animal.hasProducedToday) ||
+                              (animal.type === 'boi' && (animal.weightGain || 0) >= 0.8) ||
+                              (animal.type === 'cabra' && animal.isLactating && animal.hasProducedToday) ||
+                              (animal.type === 'pato' && animal.hasProducedToday) ||
+                              (animal.type === 'bufalo' && animal.hasProducedToday);
+                            const typeLabel: Record<string, string> = {
+                              vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐',
+                              lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
+                              codorna: '🐦', alpaca: '🦙', minhoca: '🪱', caracol: '🐌',
+                              coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊',
+                            };
+                            return (
+                              <div
+                                key={animal.id}
+                                className={`flex items-center gap-3 px-4 py-2 rounded-2xl border-2 text-sm transition-all ${
+                                  isCritical
+                                    ? 'bg-red-50 border-red-400'
+                                    : animal.isAdult === false
+                                    ? 'bg-blue-50/60 border-blue-200'
+                                    : 'bg-[#fffbeb] border-[#fbbf24]/60'
+                                }`}
+                              >
+                                <span className="text-xl w-6 text-center select-none">{typeLabel[animal.type] ?? '🐾'}</span>
+                                <span className="font-black text-[#78350f] w-28 truncate text-xs uppercase">{animal.name}</span>
+                                {animal.isBestFriend && <span className="text-[9px] bg-pink-100 border border-pink-300 text-pink-700 font-black px-1.5 py-0.5 rounded-full">💖 Amigo</span>}
+                                {animal.isCampiao && <span className="text-[9px] bg-yellow-100 border border-yellow-300 text-yellow-800 font-black px-1.5 py-0.5 rounded-full">🏆</span>}
+                                {animal.isAdult === false && <span className="text-[9px] bg-blue-100 border border-blue-300 text-blue-700 font-black px-1.5 py-0.5 rounded-full">🍼 {Math.max(0, (animal.adulthoodDay ?? 0) - currentDay)}d</span>}
+                                {animal.isSick && <span className="text-[9px] bg-red-100 border border-red-300 text-red-700 font-black px-1.5 py-0.5 rounded-full animate-pulse">🤒</span>}
+                                <div className="flex items-center gap-1 ml-auto">
+                                  <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>
+                                  {!noHungerAnimal && <span className="text-[10px] font-mono text-stone-500">🍽️{animal.hunger}%</span>}
+                                  {animal.type === 'boi' && <span className="text-[10px] font-mono text-stone-500">🔥{Math.floor((animal.weightGain||0)*100)}%</span>}
+                                  {isCritical && <span className="text-[9px] bg-red-500 text-white font-black px-1.5 py-0.5 rounded-full animate-pulse">⚠️</span>}
+                                  {isReady && <span className="text-[9px] bg-green-500 text-white font-black px-1.5 py-0.5 rounded-full">✅ Pronto</span>}
+                                </div>
+                                <div className="flex gap-1 ml-2 shrink-0">
+                                  {animal.isAdult !== false && (
+                                    <button
+                                      onClick={e => feedAnimal(animal.id, e)}
+                                      className="text-[9px] font-black px-2 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 cursor-pointer transition-all"
+                                    >🍽️</button>
+                                  )}
+                                  {animal.type === 'vaca' && animal.hasProducedToday && (
+                                    <button onClick={e => collectMilk(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 hover:bg-blue-200 cursor-pointer">🥛</button>
+                                  )}
+                                  {animal.type === 'ovelha' && animal.woolReady && (
+                                    <button onClick={e => collectWool(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-purple-100 border border-purple-300 text-purple-800 hover:bg-purple-200 cursor-pointer">🧶</button>
+                                  )}
+                                  {(animal.type === 'galinha' || animal.type === 'codorna') && animal.hasProducedToday && (
+                                    <button onClick={e => collectEgg(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-yellow-100 border border-yellow-300 text-yellow-800 hover:bg-yellow-200 cursor-pointer">🥚</button>
+                                  )}
+                                  {animal.type === 'boi' && animal.isAdult !== false && (
+                                    <button onClick={e => sellOx(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-red-100 border border-red-300 text-red-800 hover:bg-red-200 cursor-pointer">💰{valueOfOx}</button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    }
                     return filteredAnimals.map((animal) => {
                     const isEditing = editingId === animal.id;
                     const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
