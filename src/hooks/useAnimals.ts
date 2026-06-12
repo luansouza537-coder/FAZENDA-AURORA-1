@@ -863,6 +863,10 @@ export function useAnimals({
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'boi') return;
+    if (animal.isAdult === false) {
+      addLog('🐂 O filhote precisa crescer antes de ser vendido!', 'error');
+      return;
+    }
 
     const value = calculateBoiValue(animal);
 

@@ -217,7 +217,6 @@ const MERCHANT_SPECIAL_ITEMS = [
   // --- Novos itens ---
   { id: 'suplemento_mineral', label: '💊 Suplemento Mineral', desc: '+20% produção de leite por 7 dias', price: 90, effect: 'suplemento_mineral_7days' },
   { id: 'bandagem_vet', label: '🩹 Bandagem Veterinária', desc: 'Cura 1 animal doente (o mais grave)', price: 45, effect: 'cure_one_sick' },
-  { id: 'repelente_insetos', label: '🦟 Repelente de Insetos', desc: 'Reduz chance de doença em 50% por 10 dias', price: 65, effect: 'repelente_10days' },
   { id: 'sal_mineral', label: '🧂 Sal Mineral', desc: 'Animais não perdem fome por 3 dias', price: 55, effect: 'sal_mineral_3days' },
   { id: 'selo_organico', label: '🌿 Selo Orgânico', desc: '+20% preço de venda por 7 dias', price: 160, effect: 'selo_organico_7days' },
   { id: 'balanca_precisao', label: '⚖️ Balança de Precisão', desc: '+5% preço de venda permanente', price: 320, effect: 'balanca_precisao', oneTime: true },
@@ -581,9 +580,6 @@ function GameApp() {
   });
   const [suplementoMineralDays, setSuplementoMineralDays] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).suplementoMineralDays ?? 0; } catch(e) {} return 0;
-  });
-  const [repelenteDays, setRepelenteDays] = useState<number>(() => {
-    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).repelenteDays ?? 0; } catch(e) {} return 0;
   });
   const [salMineralDays, setSalMineralDays] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).salMineralDays ?? 0; } catch(e) {} return 0;
@@ -1396,34 +1392,42 @@ function GameApp() {
 
   // --- FUNCIONALIDADE 3: Geração de missões ---
   const generateDailyMissions = (day: number): Mission[] => {
-    // Pool A: produção (sorteia 1)
+    const animalTypes = new Set(animals.map(a => a.type));
+    const hasEggBirds = ['galinha','pato','codorna','ganso','pavao','avestruz'].some(t => animalTypes.has(t as any));
+    const hasMilkAnimals = ['vaca','cabra','bufalo'].some(t => animalTypes.has(t as any));
+    const hasWoolAnimals = ['ovelha','lhama','alpaca','coelho_angora'].some(t => animalTypes.has(t as any));
+    const hasOrganicAnimals = ['minhoca','caracol'].some(t => animalTypes.has(t as any));
+    const hasSilkworm = animalTypes.has('bicho_seda');
+    const hasExotic = ['caracol','jacare','bicho_seda','avestruz'].some(t => animalTypes.has(t as any));
+
+    // Pool A: produção — filtra por animais que o jogador realmente tem
     const poolA = [
-      { id: `daily_milk_${day}`,    title: 'Leiteiro do Dia',     description: 'Colete leite de qualquer vaca, cabra ou búfala',         missionKey: 'collect_items' as const, goal: 2,  reward: 5  },
-      { id: `daily_egg_${day}`,     title: 'Coleta de Ovos',      description: 'Colete ovos de qualquer ave hoje',                        missionKey: 'collect_items' as const, goal: 3,  reward: 5  },
-      { id: `daily_wool_${day}`,    title: 'Dia de Tosquia',      description: 'Colete lã de qualquer animal hoje',                       missionKey: 'collect_items' as const, goal: 1,  reward: 5  },
       { id: `daily_collect_${day}`, title: 'Colheita do Dia',     description: 'Colete 4 itens quaisquer (leite, lã ou ovos)',            missionKey: 'collect_items' as const, goal: 4,  reward: 6  },
-      { id: `daily_organic_${day}`, title: 'Produção Orgânica',   description: 'Colete húmus ou muco hoje',                               missionKey: 'organic_day'   as const, goal: 1,  reward: 6  },
+      ...(hasMilkAnimals  ? [{ id: `daily_milk_${day}`,    title: 'Leiteiro do Dia',     description: 'Colete leite de qualquer vaca, cabra ou búfala',         missionKey: 'collect_items' as const, goal: 2,  reward: 5  }] : []),
+      ...(hasEggBirds     ? [{ id: `daily_egg_${day}`,     title: 'Coleta de Ovos',      description: 'Colete ovos de qualquer ave hoje',                        missionKey: 'collect_items' as const, goal: 3,  reward: 5  }] : []),
+      ...(hasWoolAnimals  ? [{ id: `daily_wool_${day}`,    title: 'Dia de Tosquia',      description: 'Colete lã de qualquer animal hoje',                       missionKey: 'collect_items' as const, goal: 1,  reward: 5  }] : []),
+      ...(hasOrganicAnimals ? [{ id: `daily_organic_${day}`, title: 'Produção Orgânica', description: 'Colete húmus ou muco hoje',                               missionKey: 'organic_day'   as const, goal: 1,  reward: 6  }] : []),
     ];
-    // Pool B: vendas (sorteia 1)
+    // Pool B: vendas — filtra por animais disponíveis
     const poolB = [
       { id: `daily_sell_${day}`,    title: 'Vendedor do Dia',     description: 'Venda pelo menos 3 itens do Armazém hoje',               missionKey: 'sell_milk'     as const, goal: 3,  reward: 6  },
-      { id: `daily_smilk_${day}`,   title: 'Venda de Leite',      description: 'Venda 4 litros de leite hoje',                           missionKey: 'sell_milk'     as const, goal: 4,  reward: 7  },
-      { id: `daily_swool_${day}`,   title: 'Venda de Lã',         description: 'Venda 2 unidades de lã hoje',                            missionKey: 'sell_wool'     as const, goal: 2,  reward: 6  },
-      { id: `daily_segg_${day}`,    title: 'Mercado de Ovos',     description: 'Venda 4 ovos (qualquer tipo) hoje',                      missionKey: 'sell_milk'     as const, goal: 4,  reward: 6  },
       { id: `daily_schs_${day}`,    title: 'Queijo no Balcão',    description: 'Venda 1 queijo de qualquer tipo hoje',                   missionKey: 'sell_cheese'   as const, goal: 1,  reward: 8  },
+      ...(hasMilkAnimals  ? [{ id: `daily_smilk_${day}`,   title: 'Venda de Leite',      description: 'Venda 4 litros de leite hoje',                           missionKey: 'sell_milk'     as const, goal: 4,  reward: 7  }] : []),
+      ...(hasWoolAnimals  ? [{ id: `daily_swool_${day}`,   title: 'Venda de Lã',         description: 'Venda 2 unidades de lã hoje',                            missionKey: 'sell_wool'     as const, goal: 2,  reward: 6  }] : []),
+      ...(hasEggBirds     ? [{ id: `daily_segg_${day}`,    title: 'Mercado de Ovos',     description: 'Venda 4 ovos (qualquer tipo) hoje',                      missionKey: 'sell_milk'     as const, goal: 4,  reward: 6  }] : []),
     ];
-    // Pool C: cuidados (sorteia 1)
+    // Pool C: cuidados (sempre disponível)
     const poolC = [
       { id: `daily_happy_${day}`,   title: 'Fazenda Feliz',       description: 'Todos os animais com felicidade > 70% hoje',             missionKey: 'happy_animals' as const, goal: 1,  reward: 7  },
       { id: `daily_feed_${day}`,    title: 'Hora da Ração',       description: 'Alimente pelo menos 2 animais manualmente hoje',         missionKey: 'feed_animals'  as const, goal: 2,  reward: 5  },
       { id: `daily_nosick_${day}`,  title: 'Rebanho Saudável',    description: 'Termine o dia sem nenhum animal doente',                 missionKey: 'happy_animals' as const, goal: 1,  reward: 6  },
     ];
-    // Pool D: bônus difícil (sorteia 1, recompensa um pouco maior)
+    // Pool D: bônus difícil — filtra por animais disponíveis
     const poolD = [
-      { id: `daily_silk_${day}`,    title: 'Coleta de Seda',      description: 'Colete seda bruta do bicho-da-seda hoje',                missionKey: 'collect_silk'  as const, goal: 1,  reward: 12 },
-      { id: `daily_exotic_${day}`,  title: 'Produto Exótico',     description: 'Venda 1 produto exótico (muco, couro ou seda)',          missionKey: 'sell_exotic'   as const, goal: 1,  reward: 12 },
       { id: `daily_cheese2_${day}`, title: 'Queijaria Ativa',     description: 'Inicie a maturação de 1 queijo na Queijaria hoje',       missionKey: 'sell_cheese'   as const, goal: 1,  reward: 10 },
       { id: `daily_contract_${day}`,title: 'Entrega do Dia',      description: 'Entregue itens a qualquer contrato ativo hoje',          missionKey: 'sell_milk'     as const, goal: 1,  reward: 14 },
+      ...(hasSilkworm ? [{ id: `daily_silk_${day}`,    title: 'Coleta de Seda',      description: 'Colete seda bruta do bicho-da-seda hoje',                missionKey: 'collect_silk'  as const, goal: 1,  reward: 12 }] : []),
+      ...(hasExotic   ? [{ id: `daily_exotic_${day}`,  title: 'Produto Exótico',     description: 'Venda 1 produto exótico (muco, couro ou seda)',          missionKey: 'sell_exotic'   as const, goal: 1,  reward: 12 }] : []),
     ];
 
     const pick = <T,>(pool: T[]) => pool[Math.floor(Math.random() * pool.length)];
@@ -2305,7 +2309,7 @@ function GameApp() {
         fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays,
         worldEvent,
         financialLog,
-        suplementoMineralDays, repelenteDays, salMineralDays, seloOrganicodays, silagemDays,
+        suplementoMineralDays, salMineralDays, seloOrganicodays, silagemDays,
         hasBalanca, hasCisterna, blockNextStorm, blockNextDrought, isencaoMultaCount,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
@@ -3502,7 +3506,7 @@ function GameApp() {
       // BUG FIX: taxAmount calculado aqui mas deduzido no setGold consolidado final,
       // evitando dois setGold separados que calculavam taxActual com gold stale do closure.
       let taxAmount = 0;
-      if (currentDay % 7 === 0) {
+      if (currentDay % 14 === 0) {
         const weekEarnings = weeklyStats.earnings;
         let tax = Math.round(weekEarnings * 0.05);
         tax = Math.max(10, Math.min(200, tax));
@@ -4904,7 +4908,6 @@ function GameApp() {
       if (productionBoostDays > 0) setProductionBoostDays(prev => prev - 1);
       if (antiPestDays > 0) setAntiPestDays(prev => prev - 1);
       if (suplementoMineralDays > 0) setSuplementoMineralDays(prev => prev - 1);
-      if (repelenteDays > 0) setRepelenteDays(prev => prev - 1);
       if (salMineralDays > 0) setSalMineralDays(prev => prev - 1);
       if (seloOrganicodays > 0) setSeloOrganicoDays(prev => prev - 1);
       if (silagemDays > 0) setSilagemDays(prev => prev - 1);
@@ -5720,7 +5723,6 @@ function GameApp() {
                         else if (item.effect === 'production_boost_7days') { setProductionBoostDays(prev => prev + 7); addLog('📚 Manual de Produção Avançada! +15% produção por 7 dias!', 'success'); }
                         else if (item.effect === 'suplemento_mineral_7days') { setSuplementoMineralDays(prev => prev + 7); addLog('💊 Suplemento Mineral aplicado! +20% produção de leite por 7 dias!', 'success'); }
                         else if (item.effect === 'cure_one_sick') { const sick = animals.find(a => a.isSick); if (sick) { setAnimals(prev => prev.map(a => a.id === sick.id ? { ...a, isSick: false } : a)); addLog(`🩹 ${sick.name} foi curado com a bandagem veterinária!`, 'success'); } else addLog('🩹 Nenhum animal doente no momento.', 'info'); }
-                        else if (item.effect === 'repelente_10days') { setRepelenteDays(prev => prev + 10); addLog('🦟 Repelente aplicado! Risco de doença -50% por 10 dias!', 'success'); }
                         else if (item.effect === 'sal_mineral_3days') { setSalMineralDays(prev => prev + 3); addLog('🧂 Sal mineral disponível! Animais não perdem fome por 3 dias!', 'success'); }
                         else if (item.effect === 'selo_organico_7days') { setSeloOrganicoDays(prev => prev + 7); addLog('🌿 Selo Orgânico ativo! +20% preço de venda por 7 dias!', 'success'); }
                         else if (item.effect === 'balanca_precisao') { setHasBalanca(true); addLog('⚖️ Balança de Precisão instalada! +5% preço de venda permanente!', 'success'); }
@@ -7353,7 +7355,7 @@ function GameApp() {
                     title: '🏭 Produção & Processados',
                     bg: 'bg-amber-50/60 border-amber-200',
                     items: [
-                      { key: 'cheese', label: '🧀 Queijo Simp.', qty: inventory.cheese, priceKey: 'cheese' },
+                      { key: 'cheese', label: '🧀 Queijo Básico', qty: inventory.cheese, priceKey: 'cheese' },
                       { key: 'queijoCoalho', label: '🧀 Q. Coalho', qty: inventory.queijoCoalho ?? 0, priceKey: 'queijoCoalho' },
                       { key: 'queijoMucarela', label: '🧀 Muçarela', qty: inventory.queijoMucarela ?? 0, priceKey: 'queijoMucarela' },
                       { key: 'queijoBrie', label: '🧀 Queijo Brie', qty: inventory.queijoBrie ?? 0, priceKey: 'queijoBrie' },
@@ -7467,9 +7469,9 @@ function GameApp() {
                       craftCheese(e);
                     }}
                     className="bg-[#10b981] hover:bg-[#059669] text-white border-b-2 border-[#065f46] py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider cursor-pointer active:translate-y-0.5 transition-all shadow-sm"
-                    title="Requer 2 Leites Crus. Fabrica 1 Queijo nobre para ganho superior de ouro. [Atalho rápido: Tecla 1]"
+                    title="Requer 2 Leites Crus. Fabrica 1 Queijo Básico. Queijaria produz variedades mais valiosas. [Atalho rápido: Tecla 1]"
                   >
-                    🧀 Fazer Queijo (🥛x2) <span className="text-[9px] text-[#fef3c7] ml-1 opacity-80">[Atalho: 1]</span>
+                    🧀 Queijo Básico (🥛x2) <span className="text-[9px] text-[#fef3c7] ml-1 opacity-80">[Atalho: 1]</span>
                   </button>
 
                   <button
@@ -7563,9 +7565,9 @@ function GameApp() {
                     onClick={(e) => sellProduct('cheese', 1, e)}
                     disabled={inventory.cheese < 1}
                     className="bg-amber-105 hover:bg-amber-150 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm col-span-2"
-                    title="Vende 1 Queijo nobre."
+                    title="Vende 1 Queijo Básico (feito com 2 leites). Para queijos premium use a Queijaria."
                   >
-                    Vender Queijo Simp. ({getActualSellPrice('cheese')}💰)
+                    Vender Queijo Básico ({getActualSellPrice('cheese')}💰)
                   </button>
 
                   <button
