@@ -1,0 +1,11 @@
+export const WORKER_TYPES = [
+  { role: 'tratador'             as const, name: 'Tratador',           emoji: '🧑‍🌾', dailyCost: 25,  desc: 'Alimenta todos os animais diariamente. Essencial para rebanhos grandes.',                                                       minLevel: 2 },
+  { role: 'composteiro'          as const, name: 'Composteiro',        emoji: '🌱',  dailyCost: 20,  desc: 'Coleta húmus das minhocas e a cada 3 dias produz 1 húmus bônus de compostagem.',                                                 minLevel: 3 },
+  { role: 'tosquiador'           as const, name: 'Tosquiador',         emoji: '✂️',  dailyCost: 28,  desc: 'Coleta lã de ovelhas e coelhos angorá prontos. Tem chance de lã premium (+10%).',                                                minLevel: 3 },
+  { role: 'ordenhador'           as const, name: 'Ordenhador',         emoji: '🥛',  dailyCost: 35,  desc: 'Ordena vacas, cabras, búfalos e alpacas automaticamente ao fim do dia.',                                                          minLevel: 4 },
+  { role: 'avicultor'            as const, name: 'Avicultor',          emoji: '🥚',  dailyCost: 28,  desc: 'Coleta ovos de galinhas, codornas, patos e avestruzes prontos.',                                                                  minLevel: 5 },
+  { role: 'queijeiro'            as const, name: 'Queijeiro',          emoji: '🧀',  dailyCost: 50,  desc: 'Transforma automaticamente 3 leites em 1 Queijo Coalho por dia. Bônus +5% de venda.',                                            minLevel: 5 },
+  { role: 'tratador_exotico'     as const, name: 'Tratador Exótico',   emoji: '🦎',  dailyCost: 65,  desc: 'Cuida de jacarés, rãs e caracóis: +5 felicidade/dia e -50% chance de epidemia nesses animais.',                                  minLevel: 8 },
+  { role: 'veterinario'          as const, name: 'Veterinário',        emoji: '💉',  dailyCost: 80,  desc: 'Cura doenças, remove estresse e adiciona +5 felicidade para todos os animais por dia.',                                           minLevel: 10 },
+  { role: 'comerciante_residente'as const, name: 'Comerciante',        emoji: '💰',  dailyCost: 120, desc: '+8% no preço de venda de leite, lã, ovos, seda, couro e carne bruta.',                                                           minLevel: 10 },
+];

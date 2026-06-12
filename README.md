@@ -1,20 +1,53 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# 🌾 Fazenda Aurora
 
-# Run and deploy your AI Studio app
+Simulação agrícola com progressão profunda, economia dinâmica e mais de 19 tipos de animais.
 
-This contains everything you need to run your app locally.
+## Sobre o Jogo
 
-View your app in AI Studio: https://ai.studio/apps/e731d95f-af81-4b0f-b7de-d51dc219155c
+Em **Fazenda Aurora** você começa com uma pequena propriedade e 60 moedas. Alimente seus animais, colete recursos, processe produtos artesanais e venda no mercado para expandir sua fazenda.
 
-## Run Locally
+**Destaques:**
+- 19 tipos de animais — vacas, ovelhas, galinhas, lhamas, jacarés e muito mais
+- Cadeia de produção: leite → queijo → queijo brie; lã → cachecol; ovos → maionese
+- Economia dinâmica com variação de preços, eventos mundiais e mercador viajante
+- Sistema de contratos, feiras regionais e prestígio
+- Clima, estações e eventos aleatórios que afetam a produção
+- Conquistas, especializações de fazenda e trabalhadores contratáveis
+- Progressão de 20 níveis até o Império Aurora
 
-**Prerequisites:**  Node.js
+## Como Jogar
 
+**Pré-requisitos:** Node.js 18+
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+# Instalar dependências
+npm install
+
+# Executar em desenvolvimento
+npm run dev
+
+# Build de produção
+npm run build
+```
+
+O jogo roda em `http://localhost:3000` e salva automaticamente no localStorage do navegador.
+
+## Atalhos de Teclado
+
+| Tecla | Ação |
+|-------|------|
+| `F` | Alimentar todos os animais |
+| `C` | Coletar toda produção |
+| `S` | Vender todos os itens |
+| `N` | Avançar dia |
+| `P` | Pausar/retomar avanço automático |
+
+## Tecnologias
+
+- React 19 + TypeScript
+- Vite + Tailwind CSS
+- Web Audio API (efeitos sonoros sintetizados)
+
+## Licença
+
+Apache 2.0 — veja [LICENSE](LICENSE) para detalhes.

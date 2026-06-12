@@ -17,46 +17,77 @@ class SoundFXManager {
     }
   }
 
-  public playSound(type: 'click' | 'feed' | 'collect' | 'sell' | 'levelup' | 'event' | 'error' | string) {
+  public playSound(type: 'click' | 'feed' | 'collect' | 'sell' | 'levelup' | 'event' | 'error' | 'milk' | 'shear' | 'egg' | 'sell_animal' | 'purchase' | 'coin' | string) {
     if (this.isMuted) return;
     try {
       this.init();
       if (!this.ctx) return;
-      
+
       const t = this.ctx.currentTime;
-      
+
       switch (type) {
         case 'click': {
-          // click: som curto de botão (frequência 600Hz, duração 0.08s)
           this.playTone(600, 0.08, 'sine', t);
           break;
         }
         case 'feed': {
-          // feed: som de mastigação/baixo (300Hz, 0.12s, com decay rápido)
           this.playTone(300, 0.12, 'triangle', t);
           break;
         }
         case 'collect': {
-          // collect: som de moeda/ding (1200Hz, 0.15s, com envelope rápido)
           this.playTone(1200, 0.15, 'sine', t);
           break;
         }
+        case 'milk': {
+          // Leite: som de líquido pingando (dois pulsos baixos)
+          this.playTone(180, 0.10, 'sine', t);
+          this.playTone(200, 0.12, 'sine', t + 0.12);
+          break;
+        }
+        case 'shear': {
+          // Tosquia: som de tesoura rápida (clicks agudos em sequência)
+          this.playTone(900, 0.05, 'square', t);
+          this.playTone(850, 0.05, 'square', t + 0.07);
+          this.playTone(900, 0.05, 'square', t + 0.14);
+          break;
+        }
+        case 'egg': {
+          // Ovo: som de galinha clucando (tom médio-agudo curto)
+          this.playTone(650, 0.08, 'sine', t);
+          this.playTone(550, 0.10, 'sine', t + 0.09);
+          break;
+        }
+        case 'sell_animal': {
+          // Venda de animal: nota descendente (mercado de gado)
+          this.playTone(500, 0.10, 'sine', t);
+          this.playTone(400, 0.10, 'sine', t + 0.10);
+          this.playTone(300, 0.20, 'sine', t + 0.20);
+          break;
+        }
+        case 'purchase': {
+          // Compra: som de sino duplo positivo
+          this.playTone(700, 0.10, 'sine', t);
+          this.playTone(900, 0.15, 'sine', t + 0.12);
+          break;
+        }
+        case 'coin': {
+          // Moeda: clink metálico agudo
+          this.playTone(1400, 0.06, 'sine', t);
+          this.playTone(1600, 0.08, 'sine', t + 0.04);
+          break;
+        }
         case 'sell': {
-          // sell: caixa registradora (dois tons: 800Hz e 600Hz em sequência)
           this.playTone(800, 0.08, 'sine', t);
           this.playTone(600, 0.15, 'sine', t + 0.08);
           break;
         }
         case 'levelup': {
-          // levelup: fanfarra curta (três tons: 500Hz, 700Hz, 900Hz)
           this.playTone(500, 0.10, 'sine', t);
           this.playTone(700, 0.10, 'sine', t + 0.10);
           this.playTone(900, 0.25, 'sine', t + 0.20);
           break;
         }
         case 'event': {
-          // event: som de notificação (chime: 1000Hz com vibrato suave)
-          // Implement standard subtle vibrato using frequency modulation rate
           const osc = this.ctx.createOscillator();
           const gainNode = this.ctx.createGain();
           osc.type = 'sine';
@@ -65,31 +96,24 @@ class SoundFXManager {
           osc.frequency.linearRampToValueAtTime(970, t + 0.12);
           osc.frequency.linearRampToValueAtTime(1010, t + 0.18);
           osc.frequency.linearRampToValueAtTime(1000, t + 0.24);
-          
           gainNode.gain.setValueAtTime(0.08, t);
           gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
-          
           osc.connect(gainNode);
           gainNode.connect(this.ctx.destination);
-          
           osc.start(t);
           osc.stop(t + 0.25);
           break;
         }
         case 'error': {
-          // error: som de erro (buzz: 200Hz com distorção leve)
           const osc = this.ctx.createOscillator();
           const gainNode = this.ctx.createGain();
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(200, t);
           osc.frequency.linearRampToValueAtTime(170, t + 0.2);
-          
           gainNode.gain.setValueAtTime(0.06, t);
           gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
-          
           osc.connect(gainNode);
           gainNode.connect(this.ctx.destination);
-          
           osc.start(t);
           osc.stop(t + 0.22);
           break;
@@ -125,6 +149,53 @@ class SoundFXManager {
 
   public playClick() {
     this.playSound('click');
+  }
+
+  // Funcionalidade 12: Sons de animais ao coletar (expandido para todas as espécies)
+  public playAnimalSound(animalType: string) {
+    if (this.isMuted) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+
+      const sounds: Record<string, { freq: number; type: OscillatorType; duration: number }> = {
+        vaca:    { freq: 150, type: 'sine',     duration: 0.4 },
+        ovelha:  { freq: 400, type: 'sine',     duration: 0.3 },
+        boi:     { freq: 120, type: 'sawtooth', duration: 0.5 },
+        galinha: { freq: 600, type: 'square',   duration: 0.15 },
+        cabra:   { freq: 350, type: 'sine',     duration: 0.3 },
+        lhama:   { freq: 300, type: 'sine',     duration: 0.4 },
+        pato:    { freq: 500, type: 'square',   duration: 0.2 },
+        ganso:   { freq: 450, type: 'sawtooth', duration: 0.3 },
+        bufalo:  { freq: 130, type: 'sine',     duration: 0.5 },
+        pavao:   { freq: 800, type: 'sine',     duration: 0.6 },
+        codorna: { freq: 700, type: 'sine',     duration: 0.1 },
+        alpaca:  { freq: 320, type: 'sine',     duration: 0.35 },
+        minhoca: { freq: 200, type: 'sine',     duration: 0.2 },
+        caracol: { freq: 180, type: 'sine',     duration: 0.3 },
+        coelho_angora: { freq: 650, type: 'sine', duration: 0.1 },
+        bicho_seda: { freq: 900, type: 'sine',  duration: 0.1 },
+        ra:      { freq: 250, type: 'square',   duration: 0.2 },
+        avestruz: { freq: 180, type: 'sawtooth', duration: 0.4 },
+        jacare:  { freq: 100, type: 'sawtooth', duration: 0.6 },
+      };
+
+      const s = sounds[animalType] ?? { freq: 440, type: 'sine' as OscillatorType, duration: 0.2 };
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.type = s.type;
+      osc.frequency.setValueAtTime(s.freq, t);
+      osc.frequency.exponentialRampToValueAtTime(s.freq * 0.8, t + s.duration);
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + s.duration);
+      osc.start(t);
+      osc.stop(t + s.duration);
+    } catch (e) {
+      // Ignored
+    }
   }
 
   private playTone(freq: number, duration: number, type: OscillatorType, time: number) {
