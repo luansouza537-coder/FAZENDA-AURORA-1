@@ -10,6 +10,7 @@ import { useInventory } from './hooks/useInventory';
 import { useFairs } from './hooks/useFairs';
 import { useEconomy } from './hooks/useEconomy';
 import { useFarm, getFarmTitle, getLevelUpDetails, getXpForLevel } from './hooks/useFarm';
+import { useMissions } from './hooks/useMissions';
 import { ACHIEVEMENTS_LIST } from './data/achievements';
 import { WORKER_TYPES } from './data/workers';
 import { MERCHANT_SPECIAL_ITEMS } from './data/merchantItems';
@@ -50,6 +51,8 @@ import SeasonalParticles from './components/SeasonalParticles';
 import { ContractsModal, PendingContractModal } from './components/ContractsModal';
 import { AnimalCard, AnimalListRow } from './components/AnimalCard';
 import { MissionsModal } from './components/MissionsModal';
+import WorkersModal from './components/WorkersModal';
+import TutorialModal from './components/TutorialModal';
 
 
 interface FloatingText {
@@ -1231,175 +1234,6 @@ function GameApp() {
     setFinancialLog(prev => [{ ...entry, id: `${entry.day}-${Date.now()}-${Math.random()}` }, ...prev].slice(0, 200));
   };
 
-  // --- FUNCIONALIDADE 3: Geração de missões ---
-  const generateDailyMissions = (day: number): Mission[] => {
-    const animalTypes = new Set(animals.map(a => a.type));
-    const hasEggBirds = ['galinha','pato','codorna','ganso','pavao','avestruz'].some(t => animalTypes.has(t as any));
-    const hasMilkAnimals = ['vaca','cabra','bufalo'].some(t => animalTypes.has(t as any));
-    const hasWoolAnimals = ['ovelha','lhama','alpaca','coelho_angora'].some(t => animalTypes.has(t as any));
-    const hasOrganicAnimals = ['minhoca','caracol'].some(t => animalTypes.has(t as any));
-    const hasSilkworm = animalTypes.has('bicho_seda');
-    const hasExotic = ['caracol','jacare','bicho_seda','avestruz'].some(t => animalTypes.has(t as any));
-
-    // Pool A: produção — filtra por animais que o jogador realmente tem
-    const poolA = [
-      { id: `daily_collect_${day}`, title: 'Colheita do Dia',     description: 'Colete 4 itens quaisquer (leite, lã ou ovos)',            missionKey: 'collect_items' as const, goal: 4,  reward: 6  },
-      ...(hasMilkAnimals  ? [{ id: `daily_milk_${day}`,    title: 'Leiteiro do Dia',     description: 'Colete leite de qualquer vaca, cabra ou búfala',         missionKey: 'collect_items' as const, goal: 2,  reward: 5  }] : []),
-      ...(hasEggBirds     ? [{ id: `daily_egg_${day}`,     title: 'Coleta de Ovos',      description: 'Colete ovos de qualquer ave hoje',                        missionKey: 'collect_items' as const, goal: 3,  reward: 5  }] : []),
-      ...(hasWoolAnimals  ? [{ id: `daily_wool_${day}`,    title: 'Dia de Tosquia',      description: 'Colete lã de qualquer animal hoje',                       missionKey: 'collect_items' as const, goal: 1,  reward: 5  }] : []),
-      ...(hasOrganicAnimals ? [{ id: `daily_organic_${day}`, title: 'Produção Orgânica', description: 'Colete húmus ou muco hoje',                               missionKey: 'organic_day'   as const, goal: 1,  reward: 6  }] : []),
-    ];
-    // Pool B: vendas — filtra por animais disponíveis
-    const poolB = [
-      { id: `daily_sell_${day}`,    title: 'Vendedor do Dia',     description: 'Venda pelo menos 3 itens do Armazém hoje',               missionKey: 'sell_milk'     as const, goal: 3,  reward: 6  },
-      { id: `daily_schs_${day}`,    title: 'Queijo no Balcão',    description: 'Venda 1 queijo de qualquer tipo hoje',                   missionKey: 'sell_cheese'   as const, goal: 1,  reward: 8  },
-      ...(hasMilkAnimals  ? [{ id: `daily_smilk_${day}`,   title: 'Venda de Leite',      description: 'Venda 4 litros de leite hoje',                           missionKey: 'sell_milk'     as const, goal: 4,  reward: 7  }] : []),
-      ...(hasWoolAnimals  ? [{ id: `daily_swool_${day}`,   title: 'Venda de Lã',         description: 'Venda 2 unidades de lã hoje',                            missionKey: 'sell_wool'     as const, goal: 2,  reward: 6  }] : []),
-      ...(hasEggBirds     ? [{ id: `daily_segg_${day}`,    title: 'Mercado de Ovos',     description: 'Venda 4 ovos (qualquer tipo) hoje',                      missionKey: 'sell_milk'     as const, goal: 4,  reward: 6  }] : []),
-    ];
-    // Pool C: cuidados (sempre disponível)
-    const poolC = [
-      { id: `daily_happy_${day}`,   title: 'Fazenda Feliz',       description: 'Todos os animais com felicidade > 70% hoje',             missionKey: 'happy_animals' as const, goal: 1,  reward: 7  },
-      { id: `daily_feed_${day}`,    title: 'Hora da Ração',       description: 'Alimente pelo menos 2 animais manualmente hoje',         missionKey: 'feed_animals'  as const, goal: 2,  reward: 5  },
-      { id: `daily_nosick_${day}`,  title: 'Rebanho Saudável',    description: 'Termine o dia sem nenhum animal doente',                 missionKey: 'happy_animals' as const, goal: 1,  reward: 6  },
-    ];
-    // Pool D: bônus difícil — filtra por animais disponíveis
-    const poolD = [
-      { id: `daily_cheese2_${day}`, title: 'Queijaria Ativa',     description: 'Inicie a maturação de 1 queijo na Queijaria hoje',       missionKey: 'sell_cheese'   as const, goal: 1,  reward: 10 },
-      { id: `daily_contract_${day}`,title: 'Entrega do Dia',      description: 'Entregue itens a qualquer contrato ativo hoje',          missionKey: 'sell_milk'     as const, goal: 1,  reward: 14 },
-      ...(hasSilkworm ? [{ id: `daily_silk_${day}`,    title: 'Coleta de Seda',      description: 'Colete seda bruta do bicho-da-seda hoje',                missionKey: 'collect_silk'  as const, goal: 1,  reward: 12 }] : []),
-      ...(hasExotic   ? [{ id: `daily_exotic_${day}`,  title: 'Produto Exótico',     description: 'Venda 1 produto exótico (muco, couro ou seda)',          missionKey: 'sell_exotic'   as const, goal: 1,  reward: 12 }] : []),
-    ];
-
-    const pick = <T,>(pool: T[]) => pool[Math.floor(Math.random() * pool.length)];
-    const toMission = (m: typeof poolA[0]): Mission => ({
-      ...m, type: 'daily' as const, current: 0, expiresOnDay: day + 1, completed: false, claimed: false,
-    });
-
-    return [pick(poolA), pick(poolB), pick(poolC), pick(poolD)].map(toMission);
-  };
-
-  const generateWeeklyMissions = (day: number): Mission[] => {
-    const animalTypes = new Set(animals.map(a => a.type));
-    const hasMilkAnimals = ['vaca','cabra','bufalo'].some(t => animalTypes.has(t as any));
-    const hasWoolAnimals = ['ovelha','lhama','alpaca','coelho_angora'].some(t => animalTypes.has(t as any));
-    const hasEggBirds   = ['galinha','pato','codorna','ganso','pavao','avestruz'].some(t => animalTypes.has(t as any));
-    const hasOrganicAnimals = ['minhoca','caracol'].some(t => animalTypes.has(t as any));
-
-    type PoolEntry = Omit<Mission, 'id'|'type'|'current'|'expiresOnDay'|'completed'|'claimed'>;
-    // Always available from level 1
-    const basePool: PoolEntry[] = [
-      { title: 'Produção Semanal',   description: 'Colete 20 itens quaisquer esta semana',          missionKey: 'collect_items' as const, goal: 20,  reward: 18 },
-      { title: 'Mercado da Semana',  description: 'Venda pelo menos 10 itens esta semana',           missionKey: 'sell_milk'     as const, goal: 10,  reward: 16 },
-      { title: 'Rebanho Alimentado', description: 'Alimente animais 12 vezes esta semana',           missionKey: 'feed_animals'  as const, goal: 12,  reward: 16 },
-      { title: 'Animais Felizes',    description: 'Mantenha todos os animais felizes (>70%) por 3 dias', missionKey: 'happy_animals' as const, goal: 3, reward: 18 },
-      { title: 'Renda Semanal',      description: 'Ganhe 80 moedas em vendas esta semana',           missionKey: 'earn_gold'     as const, goal: 80,  reward: 16 },
-    ];
-    // Level 2+ (unlocked with ovelha/more animals)
-    const mid1Pool: PoolEntry[] = [
-      ...(hasMilkAnimals  ? [{ title: 'Semana Leiteira', description: 'Venda 10 litros de leite esta semana',         missionKey: 'sell_milk'  as const, goal: 10, reward: 20 } as PoolEntry] : []),
-      ...(hasWoolAnimals  ? [{ title: 'Semana da Lã',    description: 'Venda 6 unidades de lã esta semana',           missionKey: 'sell_wool'  as const, goal: 6,  reward: 18 } as PoolEntry] : []),
-      ...(hasEggBirds     ? [{ title: 'Ovos da Semana',  description: 'Venda 15 ovos (qualquer tipo) esta semana',    missionKey: 'sell_milk'  as const, goal: 15, reward: 18 } as PoolEntry] : []),
-      { title: 'Renda Crescente',    description: 'Ganhe 150 moedas em vendas esta semana',          missionKey: 'earn_gold'     as const, goal: 150, reward: 22 },
-    ];
-    // Level 3+ (queijaria)
-    const mid2Pool: PoolEntry[] = [
-      { title: 'Queijos da Semana',  description: 'Produza ou venda 3 queijos esta semana',          missionKey: 'sell_cheese'   as const, goal: 3,   reward: 24 },
-      { title: 'Animais Felizes+',   description: 'Mantenha todos com felicidade >70% por 5 dias',   missionKey: 'happy_animals' as const, goal: 5,   reward: 22 },
-    ];
-    // Level 5+ (exotic/organic)
-    const advPool: PoolEntry[] = [
-      ...(hasOrganicAnimals ? [{ title: 'Semana Orgânica', description: 'Colete húmus ou muco 4 vezes esta semana', missionKey: 'organic_day' as const, goal: 4, reward: 20 } as PoolEntry] : []),
-      { title: 'Grande Mercado',     description: 'Venda pelo menos 25 itens esta semana',           missionKey: 'sell_milk'     as const, goal: 25,  reward: 24 },
-    ];
-
-    let pool = [...basePool];
-    if (farmLevel >= 2) pool = [...pool, ...mid1Pool];
-    if (farmLevel >= 3) pool = [...pool, ...mid2Pool];
-    if (farmLevel >= 5) pool = [...pool, ...advPool];
-
-    const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
-    return shuffled.map((m, i) => ({
-      ...m, id: `weekly_${i}_${day}`, type: 'weekly' as const, current: 0,
-      expiresOnDay: day + 7, completed: false, claimed: false,
-    }));
-  };
-
-  const generateEpicMissions = (day: number): Mission[] => {
-    const animalTypes = new Set(animals.map(a => a.type));
-    const hasMilkAnimals = ['vaca','cabra','bufalo'].some(t => animalTypes.has(t as any));
-    const hasWoolAnimals = ['ovelha','lhama','alpaca','coelho_angora'].some(t => animalTypes.has(t as any));
-    const hasEggBirds   = ['galinha','pato','codorna','ganso','avestruz'].some(t => animalTypes.has(t as any));
-
-    const all = [
-      // Always available
-      {
-        id: `epic_gold_${day}`, title: '💰 Poupança Rural',
-        description: farmLevel <= 2 ? 'Acumule 500 moedas' : 'Acumule 2.000 moedas em 60 dias',
-        type: 'epic' as const, goal: farmLevel <= 2 ? 500 : 2000, current: 0,
-        reward: farmLevel <= 2 ? 80 : 250, expiresOnDay: day + 60, completed: false, claimed: false,
-        missionKey: 'earn_gold' as const, minLevel: 1,
-      },
-      {
-        id: `epic_feed_${day}`, title: '🌾 Cuidador Dedicado',
-        description: 'Alimente animais 40 vezes nos próximos 30 dias',
-        type: 'epic' as const, goal: 40, current: 0,
-        reward: 80, expiresOnDay: day + 30, completed: false, claimed: false,
-        missionKey: 'feed_animals' as const, minLevel: 1,
-      },
-      {
-        id: `epic_happy_${day}`, title: '😊 Fazenda Exemplar',
-        description: 'Mantenha todos os animais felizes (>70%) por 10 dias seguidos',
-        type: 'epic' as const, goal: 10, current: 0,
-        reward: 180, expiresOnDay: day + 45, completed: false, claimed: false,
-        missionKey: 'happy_animals' as const, minLevel: 1,
-      },
-      // Level 2+ with milk animals
-      ...(farmLevel >= 2 && hasMilkAnimals ? [{
-        id: `epic_milk_${day}`, title: '🥛 Leiteria em Marcha',
-        description: 'Venda 60 litros de leite nos próximos 30 dias',
-        type: 'epic' as const, goal: 60, current: 0,
-        reward: 120, expiresOnDay: day + 30, completed: false, claimed: false,
-        missionKey: 'sell_milk' as const, minLevel: 2,
-      }] : []),
-      // Level 2+ with egg birds
-      ...(farmLevel >= 2 && hasEggBirds ? [{
-        id: `epic_egg_${day}`, title: '🥚 Galinheiro Produtivo',
-        description: 'Venda 50 ovos (qualquer tipo) em 30 dias',
-        type: 'epic' as const, goal: 50, current: 0,
-        reward: 90, expiresOnDay: day + 30, completed: false, claimed: false,
-        missionKey: 'sell_milk' as const, minLevel: 2,
-      }] : []),
-      // Level 2+ with wool animals
-      ...(farmLevel >= 2 && hasWoolAnimals ? [{
-        id: `epic_wool_${day}`, title: '🧶 Fio a Fio',
-        description: 'Venda 40 unidades de lã ou têxteis em 45 dias',
-        type: 'epic' as const, goal: 40, current: 0,
-        reward: 100, expiresOnDay: day + 45, completed: false, claimed: false,
-        missionKey: 'sell_wool' as const, minLevel: 2,
-      }] : []),
-      // Level 3+ (queijaria)
-      ...(farmLevel >= 3 ? [{
-        id: `epic_cheese_${day}`, title: '🧀 Queijaria da Aurora',
-        description: 'Produza 10 queijos de qualquer tipo em 45 dias',
-        type: 'epic' as const, goal: 10, current: 0,
-        reward: 150, expiresOnDay: day + 45, completed: false, claimed: false,
-        missionKey: 'sell_cheese' as const, minLevel: 3,
-      }] : []),
-      // Level 4+ (bigger herd)
-      ...(farmLevel >= 4 ? [{
-        id: `epic_animals_${day}`, title: '🐄 Rebanho Próspero',
-        description: 'Tenha 10 animais adultos ao mesmo tempo',
-        type: 'epic' as const, goal: 10, current: 0,
-        reward: 200, expiresOnDay: day + 60, completed: false, claimed: false,
-        missionKey: 'have_animals' as const, minLevel: 4,
-      }] : []),
-    ];
-
-    // Strip the minLevel helper field before returning
-    return all.map(({ minLevel: _ml, ...m }) => m);
-  };
-
   // BUG 11 FIX: aceita overrideDay para que notificações disparadas dentro de advanceDay
   // (onde currentDay ainda não foi atualizado pelo React) registrem o dia correto.
   const updateMissionProgress = (key: Mission['missionKey'], amount: number = 1, overrideDay?: number) => {
@@ -2047,6 +1881,9 @@ function GameApp() {
       setAnimalFilter('all');
     },
   });
+
+  // --- useMissions hook ---
+  const { generateDailyMissions, generateWeeklyMissions, generateEpicMissions } = useMissions({ animals, farmLevel, inventory });
 
   // --- useFairs hook ---
   const {
@@ -7386,144 +7223,7 @@ function GameApp() {
       </div>
 
       {/* --- TUTORIAL / HELP MODAL --- */}
-      <AnimatePresence>
-        {showTutorialModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowTutorialModal(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#fffbeb] border-8 border-[#78350f] rounded-[36px] max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
-            >
-              {/* Header */}
-              <div className="bg-[#78350f] p-5 border-b-4 border-[#92400e] text-center shrink-0">
-                <h3 className="text-white text-xl sm:text-2xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2 animate-pulse" style={{ textShadow: '1.5px 1.5px 0px #451a03', animationDuration: '4s' }}>
-                  📖 Manual da Fazenda Aurora
-                </h3>
-                <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-                  Tudo sobre a criação de animais, fabricação e vendas!
-                </p>
-                <button
-                  onClick={() => {
-                    setShowTutorialModal(false);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-[#92400e] hover:bg-[#b45309] border-2 border-[#78350f] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all active:scale-95 text-lg font-bold"
-                  title="Fechar"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Scrollable content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-5 text-sm font-sans" style={{ scrollbarWidth: 'thin' }}>
-                
-                {/* 1. Cuidados Básicos */}
-                <div className="bg-white/75 p-4 rounded-2xl border-2 border-[#fbbf24] shadow-sm">
-                  <h4 className="font-display font-black text-xs sm:text-sm text-[#78350f] uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                    🌽 Cuidados & Alimentação
-                  </h4>
-                  <p className="text-stone-700 leading-relaxed text-xs sm:text-sm">
-                    Alimentar os animais consome <strong className="text-[#b45309]">🌾 1 unidade de ração</strong> do Armazém (não deduz ouro diretamente). Isso restaura <strong className="text-green-700">+35% de Fome</strong> e <strong className="text-green-700">+12% de Felicidade</strong>. Compre ração no <strong>Silo de Rações</strong> (loja). Se o <strong>Alimentador Automático</strong> estiver ligado, ele consome ração automaticamente a cada dia. Se os animais ficarem com fome extrema ou felicidade muito baixa, eles começam a definhar. Mantenha-os alimentados!
-                  </p>
-                </div>
-
-                {/* 2. Produção de Matérias-Primas */}
-                <div className="bg-white/75 p-4 rounded-2xl border-2 border-[#fbbf24] shadow-sm">
-                  <h4 className="font-display font-black text-xs sm:text-sm text-[#78350f] uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                    🥛 Produção dos Animais
-                  </h4>
-                  <ul className="text-stone-700 space-y-2 text-xs sm:text-sm list-disc pl-4">
-                    <li>
-                      <strong className="text-[#b45309]">🐄 Vacas Leiteiras:</strong> Produzem <strong className="text-[#1d4ed8]">Leite Cru</strong> diariamente no Armazém desde que estejam felizes e alimentadas.
-                    </li>
-                    <li>
-                      <strong className="text-[#b45309]">🐑 Ovelhas de Lã:</strong> Produzem <strong className="text-purple-700">Novelo de Lã</strong> após 3 dias de crescimento (ou a cada 2 dias se for Melhor Amigo). Estão sujeitas a falhas se tosquiadas em clima inadequado.
-                    </li>
-                    <li>
-                      <strong className="text-[#b45309]">🐂 Bois de Corte:</strong> Não geram recursos diários, mas ganham peso físico todos os dias. Quando estiverem pesados, podem ser vendidos na feira por um retorno altíssimo!
-                    </li>
-                  </ul>
-                </div>
-
-                {/* 3. Nível da Fazenda */}
-                <div className="bg-white/75 p-4 rounded-2xl border-2 border-[#fbbf24] shadow-sm">
-                  <h4 className="font-display font-black text-xs sm:text-sm text-[#78350f] uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                    🏆 Progressão & Nível da Fazenda
-                  </h4>
-                  <p className="text-stone-700 leading-relaxed text-xs sm:text-sm">
-                    Sua fazenda evolui automaticamente a cada <strong className="text-[#b45309]">10 dias acumulados</strong>. Cada novo nível traz benefícios fixos permanentes de mercado:
-                  </p>
-                  <ul className="text-stone-700 space-y-1 mt-2 text-xs list-none pl-1">
-                    <li>⭐ <strong>Nível 2:</strong> Preço base do Leite Cru sobe de 5 para <strong>6 moedas</strong>.</li>
-                    <li>⭐ <strong>Nível 3:</strong> Preço base da Lã Crua sobe de 12 para <strong>15 moedas</strong>.</li>
-                    <li>⭐ <strong>Nível 4:</strong> Desconto de <strong>10%</strong> na compra de qualquer novo animal.</li>
-                    <li>⭐ <strong>Nível 5:</strong> Bônus extra de de mais <strong>+5 moedas</strong> na venda de qualquer Boi.</li>
-                  </ul>
-                </div>
-
-                {/* 4. Clima Estações & Mercador */}
-                <div className="bg-white/75 p-4 rounded-2xl border-2 border-[#fbbf24] shadow-sm">
-                  <h4 className="font-display font-black text-xs sm:text-sm text-[#78350f] uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                    🌧️ Eventos, Clima & Mercador Viajante
-                  </h4>
-                  <ul className="text-stone-700 space-y-2 text-xs sm:text-sm list-disc pl-4">
-                    <li>
-                      <strong>🌧️ Clima Chuvoso:</strong> Reduz a produção de leite das vacas em 20% e traz 30% de chance das ovelhas molharem a lã, atrasando a tosquia do dia.
-                    </li>
-                    <li>
-                      <strong>☀️ Clima Ensolarado:</strong> Anima as vacas e faz com que produzam +1 balde extra de leite cru!
-                    </li>
-                    <li>
-                      <strong>🧙‍♂️ Mercador Viajante:</strong> Aparece na fazenda de forma aleatória (a cada 3-7 dias). O mercador paga generosos <strong>1.5x moedas adicionais</strong> por qualquer produto ou animal vendido naquele dia!
-                    </li>
-                  </ul>
-                </div>
-
-                {/* 5. Melhor Amigo e Crafting */}
-                <div className="bg-white/75 p-4 rounded-2xl border-2 border-[#fbbf24] shadow-sm">
-                  <h4 className="font-display font-black text-xs sm:text-sm text-[#78350f] uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                    💖 Melhor Amigo & Fabricação (Ateliê)
-                  </h4>
-                  <ul className="text-stone-700 space-y-2 text-xs sm:text-sm list-disc pl-4">
-                    <li>
-                      <strong>💖 Status Melhor Amigo:</strong> Se mantiver a felicidade do animal em <strong className="text-rose-600">100% por 3 dias consecutivos</strong>, ele se torna seu melhor amigo de forma permanente (dando bônus: +1 leite para vaca, lã a cada 2 dias para ovelha, e ganho acelerado de peso para o boi). Cuidado! Se a felicidade cair abaixo de 80% por 2 dias, o status de melhor amigo será perdido.
-                    </li>
-                    <li>
-                      <strong>🧀 Ateliê de Queijo:</strong> Combine <strong>2 Leites Crus</strong> no Ateliê para fabricar 1 <strong>Queijo Nobre</strong> (vende por 15 moedas base, aumentando ainda mais o lucro!).
-                    </li>
-                    <li>
-                      <strong>🧣 Ateliê de Costura:</strong> Combine <strong>2 Lãs Cruas</strong> no Ateliê para costurar 1 elegante <strong>Cachecol</strong> (vende por 30 moedas base!).
-                    </li>
-                  </ul>
-                </div>
-
-              </div>
-
-              {/* Footer */}
-              <div className="bg-[#78350f]/10 p-4 border-t-2 border-[#78350f]/20 flex justify-end shrink-0">
-                <button
-                  onClick={() => {
-                    setShowTutorialModal(false);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  className="bg-[#10b981] hover:bg-[#059669] text-white border-b-4 border-[#065f46] shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer"
-                >
-                  Entendi, Voltar ao Jogo!
-                </button>
-              </div>
-
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showTutorialModal && <TutorialModal onClose={() => { setShowTutorialModal(false); triggerAudioResult(() => sfx.playSound('click')); }} />}
 
       {/* 😴 SLEEP OVERLAY */}
       <AnimatePresence>
@@ -8616,162 +8316,21 @@ function GameApp() {
       </AnimatePresence>
 
       {/* 👷 WORKERS MODAL */}
-      <AnimatePresence>
-        {showWorkersModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowWorkersModal(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[99] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#064e3b] border-8 border-[#fbbf24] rounded-[36px] max-w-lg w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
-            >
-              <div className="bg-[#065f46] p-5 border-b-4 border-[#fbbf24] text-center shrink-0">
-                <h3 className="text-[#fef3c7] text-xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
-                  👷 Peões da Fazenda
-                </h3>
-                <p className="text-[#fbbf24] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-                  Vagas: {workers.length}/{Math.max(1, Math.floor(farmLevel / 3))} • 1 vaga a cada 3 níveis
-                </p>
-                <button onClick={() => setShowWorkersModal(false)} className="absolute top-4 right-4 text-[#fef3c7] bg-[#022c22] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
-              </div>
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {workers.length > 0 && (
-                  <div className="bg-[#065f46] border-2 border-[#fbbf24]/40 rounded-2xl p-4">
-                    <h4 className="text-[#fbbf24] font-black text-xs uppercase mb-3">Peões Contratados</h4>
-                    <div className="space-y-2">
-                      {workers.map(w => {
-                        const wt = WORKER_TYPES.find(t => t.role === w.role);
-                        return (
-                          <div key={w.id} className="flex items-center justify-between bg-[#022c22] rounded-xl px-3 py-2">
-                            <span className="text-[#fef3c7] font-mono text-sm">{wt?.emoji} {w.name}</span>
-                            <span className="text-[#fbbf24] font-mono text-xs">-{w.dailyCost}💰/dia</span>
-                            <button onClick={() => {
-                              setWorkers(prev => prev.filter(x => x.id !== w.id));
-                              addLog(`👷 ${w.name} foi dispensado.`, 'info');
-                            }} className="text-red-400 text-xs font-black px-2 py-1 rounded-lg border border-red-400/40 hover:bg-red-400/20 cursor-pointer">
-                              Dispensar
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="text-[#fbbf24] font-mono text-xs mt-3 text-right">
-                      Custo total: -{workers.reduce((s, w) => s + w.dailyCost, 0)}💰/dia
-                    </div>
-                  </div>
-                )}
-                {/* Alerta de Debuff de Especialização */}
-                {(() => {
-                  const catDef2: Record<string, string[]> = {
-                    'Bovinos 🐄': ['vaca', 'boi', 'bufalo'],
-                    'Fibras/Caprinos 🐑': ['ovelha', 'lhama', 'alpaca', 'coelho_angora', 'cabra'],
-                    'Aves 🐔': ['galinha', 'codorna', 'pato', 'ganso', 'pavao'],
-                    'Exóticos 🦎': ['ra', 'avestruz', 'jacare', 'bicho_seda', 'caracol', 'minhoca'],
-                  };
-                  const catWorkersUI: Record<string, string[]> = {
-                    'Bovinos 🐄': ['ordenhador', 'tratador', 'veterinario'],
-                    'Fibras/Caprinos 🐑': ['tosquiador', 'tratador', 'veterinario'],
-                    'Aves 🐔': ['avicultor', 'tratador', 'veterinario'],
-                    'Exóticos 🦎': ['tratador_exotico', 'veterinario'],
-                  };
-                  const workerRolesUI = new Set(workers.map(w => w.role));
-                  const activeCats = Object.entries(catDef2).filter(([, types]) =>
-                    animals.some(a => types.includes(a.type) && a.isAdult !== false)
-                  );
-                  if (activeCats.length < 3) return null;
-                  const missingCats = activeCats.filter(([cat]) =>
-                    !catWorkersUI[cat].some(r => workerRolesUI.has(r))
-                  );
-                  if (missingCats.length === 0) return (
-                    <div className="bg-[#10b981]/10 border border-[#10b981]/40 rounded-2xl p-3 text-[#10b981] text-[11px] font-mono">
-                      ✅ Todas as {activeCats.length} categorias têm especialistas. Sem debuff!
-                    </div>
-                  );
-                  return (
-                    <div className="bg-red-900/30 border-2 border-red-500/50 rounded-2xl p-4 space-y-2">
-                      <div className="text-red-300 font-black text-xs uppercase">⚠️ Debuff de Diversidade Ativo</div>
-                      <div className="text-red-200/80 text-[11px] font-mono leading-relaxed">
-                        Sua fazenda tem <span className="text-red-300 font-bold">{activeCats.length} categorias</span> sem especialistas para:
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {missingCats.map(([cat]) => (
-                          <span key={cat} className="bg-red-500/20 border border-red-400/40 text-red-200 text-[10px] font-mono px-2 py-0.5 rounded-full">
-                            {cat} -4😊/dia
-                          </span>
-                        ))}
-                      </div>
-                      <div className="text-[#fbbf24] text-[10px] font-mono">Contrate os peões abaixo para remover o debuff.</div>
-                    </div>
-                  );
-                })()}
-
-                <div className="space-y-3">
-                  <h4 className="text-[#fbbf24] font-black text-xs uppercase">Disponíveis para Contratar</h4>
-                  {WORKER_TYPES.map(wt => {
-                    const alreadyHired = workers.some(w => w.role === wt.role);
-                    const maxSlots = Math.max(1, Math.floor(farmLevel / 3));
-                    const atMax = workers.length >= maxSlots;
-                    const levelOk = farmLevel >= wt.minLevel;
-                    const canHire = !alreadyHired && !atMax && levelOk;
-                    return (
-                      <div key={wt.role} className={`bg-[#065f46] border-2 rounded-2xl p-4 transition-all ${alreadyHired ? 'border-[#10b981]' : levelOk ? 'border-[#fbbf24]/50' : 'border-[#fbbf24]/15 opacity-60'}`}>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-[#fef3c7] font-black text-sm">{wt.emoji} {wt.name}</span>
-                              {alreadyHired && <span className="text-[9px] bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/40 rounded-full px-2 py-0.5 font-mono uppercase">Contratado</span>}
-                              {!levelOk && <span className="text-[9px] bg-red-900/40 text-red-300 border border-red-500/30 rounded-full px-2 py-0.5 font-mono uppercase">🔒 Nível {wt.minLevel}</span>}
-                            </div>
-                            <div className="text-[#fef3c7]/70 text-[11px] font-mono mt-1 leading-relaxed">{wt.desc}</div>
-                            <div className="text-[#fbbf24] text-[10px] font-mono mt-1.5 flex items-center gap-2 flex-wrap">
-                              <span>-{wt.dailyCost}💰/dia</span>
-                              {(wt.role === 'tratador') && <span className="text-[9px] bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30 rounded-full px-1.5 py-0.5">Remove debuff geral</span>}
-                              {(wt.role === 'ordenhador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Bovinos sem debuff</span>}
-                              {(wt.role === 'tosquiador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Fibras/Caprinos sem debuff</span>}
-                              {(wt.role === 'avicultor') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Aves sem debuff</span>}
-                              {(wt.role === 'tratador_exotico') && <span className="text-[9px] bg-purple-500/15 text-purple-300 border border-purple-400/30 rounded-full px-1.5 py-0.5">Exóticos sem debuff</span>}
-                            </div>
-                          </div>
-                          <button
-                            disabled={!canHire}
-                            onClick={() => {
-                              if (!canHire) return;
-                              const newWorker: FarmWorker = {
-                                id: Math.random().toString(36).substring(2, 9),
-                                role: wt.role,
-                                name: wt.name,
-                                dailyCost: wt.dailyCost,
-                                hiredDay: currentDay,
-                              };
-                              setWorkers(prev => [...prev, newWorker]);
-                              addLog(`👷 ${wt.name} foi contratado! Custo: -${wt.dailyCost}💰/dia`, 'success');
-                            }}
-                            className={`shrink-0 text-xs font-black uppercase px-3 py-2 rounded-xl border-2 cursor-pointer transition-all ${
-                              alreadyHired ? 'bg-[#10b981]/20 border-[#10b981] text-[#10b981] cursor-not-allowed' :
-                              !levelOk ? 'bg-[#022c22] border-[#fbbf24]/10 text-[#fef3c7]/20 cursor-not-allowed' :
-                              atMax ? 'bg-[#022c22] border-[#fbbf24]/20 text-[#fef3c7]/30 cursor-not-allowed' :
-                              'bg-[#fbbf24] border-[#fbbf24] text-[#78350f] hover:bg-[#f59e0b] hover:scale-105 active:translate-y-0.5'
-                            }`}
-                          >
-                            {alreadyHired ? '✅ Ativo' : !levelOk ? `🔒 Nível ${wt.minLevel}` : atMax ? `🚫 Máx ${maxSlots}` : 'Contratar'}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showWorkersModal && (
+        <WorkersModal
+          workers={workers}
+          farmLevel={farmLevel}
+          animals={animals}
+          currentDay={currentDay}
+          onClose={() => setShowWorkersModal(false)}
+          onFireWorker={(id) => { setWorkers(prev => prev.filter(x => x.id !== id)); addLog(`👷 Peão dispensado.`, 'info'); }}
+          onHireWorker={(wt) => {
+            const newWorker: FarmWorker = { id: Math.random().toString(36).substring(2, 9), role: wt.role, name: wt.name, dailyCost: wt.dailyCost, hiredDay: currentDay };
+            setWorkers(prev => [...prev, newWorker]);
+            addLog(`👷 ${wt.name} foi contratado! Custo: -${wt.dailyCost}💰/dia`, 'success');
+          }}
+        />
+      )}
 
       {/* 🔧 MELHORIAS MODAL (F7 terreno, F8 poço, F9 solar, F10 irrigação, F5 seguro, F11 queijaria) */}
       <AnimatePresence>
