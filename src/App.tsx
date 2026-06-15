@@ -6291,6 +6291,52 @@ function GameApp() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* 🏡 PAINEL VISUAL DE SLOTS */}
+                <div className="col-span-full mb-1">
+                  <div className="flex flex-wrap gap-1.5">
+                    {Array.from({ length: landLots * 5 }).map((_, i) => {
+                      const lotIndex = Math.floor(i / 5);
+                      const slotAnimal = animals[i];
+                      const typeEmoji: Record<string, string> = {
+                        vaca:'🐄', ovelha:'🐑', boi:'🐂', galinha:'🐔', cabra:'🐐',
+                        lhama:'🦙', pato:'🦆', ganso:'🦢', bufalo:'🐃', pavao:'🦚',
+                        codorna:'🐦', alpaca:'🦙', minhoca:'🪱', caracol:'🐌',
+                        coelho_angora:'🐰', bicho_seda:'🐛', ra:'🐸', avestruz:'🦤', jacare:'🐊',
+                      };
+                      const lotColors = ['border-amber-400/60','border-green-400/60','border-blue-400/60','border-purple-400/60','border-rose-400/60'];
+                      const lotColor = lotColors[lotIndex] ?? 'border-amber-400/60';
+                      if (i > 0 && i % 5 === 0) {
+                        return (
+                          <React.Fragment key={`sep-${i}`}>
+                            <div className="w-px h-8 bg-white/20 self-center mx-0.5" />
+                            <div
+                              className={`w-9 h-9 rounded-xl border-2 flex items-center justify-center text-lg transition-all ${slotAnimal ? `bg-[#064e3b]/80 ${lotColor}` : 'bg-black/20 border-white/10'}`}
+                              title={slotAnimal ? `${slotAnimal.name} (${slotAnimal.type})` : `Slot ${i + 1} — vazio`}
+                            >
+                              {slotAnimal ? (typeEmoji[slotAnimal.type] ?? '🐾') : <span className="text-white/20 text-xs font-black">+</span>}
+                            </div>
+                          </React.Fragment>
+                        );
+                      }
+                      return (
+                        <div
+                          key={i}
+                          className={`w-9 h-9 rounded-xl border-2 flex items-center justify-center text-lg transition-all ${slotAnimal ? `bg-[#064e3b]/80 ${lotColor}` : 'bg-black/20 border-white/10'}`}
+                          title={slotAnimal ? `${slotAnimal.name} (${slotAnimal.type})` : `Slot ${i + 1} — vazio`}
+                        >
+                          {slotAnimal ? (typeEmoji[slotAnimal.type] ?? '🐾') : <span className="text-white/20 text-xs font-black">+</span>}
+                        </div>
+                      );
+                    })}
+                    {landLots < 5 && (
+                      <div className="w-9 h-9 rounded-xl border-2 border-dashed border-white/20 flex items-center justify-center" title="Expanda o terreno para mais slots">
+                        <span className="text-white/20 text-lg">🔒</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[9px] text-amber-200/50 font-mono mt-1 ml-0.5">{animals.length}/{landLots * 5} slots ocupados · {landLots} lote(s) · separadores por lote</p>
+                </div>
+
                 {/* Worker Visual Feedback Bar */}
                 {workers.length > 0 && (
                   <div className="col-span-full flex flex-wrap gap-2 mb-3">
