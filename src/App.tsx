@@ -1421,6 +1421,45 @@ function GameApp() {
 
   // --- ACTIONS ---
 
+  // Export save as JSON file
+  const exportSave = () => {
+    const raw = localStorage.getItem('aurora_farm_save');
+    if (!raw) { addLog('❌ Nenhum save encontrado para exportar.', 'error'); return; }
+    const blob = new Blob([raw], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fazenda-aurora-dia${currentDay}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    addLog('💾 Save exportado com sucesso!', 'success');
+  };
+
+  // Import save from JSON file
+  const importSave = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const text = ev.target?.result as string;
+          JSON.parse(text); // valida JSON antes de salvar
+          localStorage.setItem('aurora_farm_save', text);
+          addLog('✅ Save importado! Recarregando...', 'success');
+          setTimeout(() => window.location.reload(), 1000);
+        } catch {
+          addLog('❌ Arquivo inválido. Use um save exportado da Fazenda Aurora.', 'error');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   // 1. Rename Animal
   const startRename = (id: number, currentName: string) => {
     setEditingId(id);
@@ -5689,7 +5728,27 @@ function GameApp() {
                 >
                   📖 TUTORIAL
                 </button>
- 
+
+                {/* EXPORT SAVE */}
+                <button
+                  type="button"
+                  onClick={exportSave}
+                  className="bg-stone-600 hover:bg-stone-500 text-white border-b-4 border-stone-800 px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
+                  title="Exportar Save: baixa seu progresso como arquivo .json para backup"
+                >
+                  💾 SALVAR
+                </button>
+
+                {/* IMPORT SAVE */}
+                <button
+                  type="button"
+                  onClick={importSave}
+                  className="bg-stone-700 hover:bg-stone-600 text-white border-b-4 border-stone-900 px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
+                  title="Importar Save: carrega um arquivo .json de backup"
+                >
+                  📂 CARREGAR
+                </button>
+
                 {/* ADVANCE DAY */}
                 <button
                   type="button"
