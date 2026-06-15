@@ -118,6 +118,9 @@ function GameApp() {
 
   // hasStable, hasSilo, hasFridge, hasTipBox — managed by useFarm hook
 
+  // --- DEBUG MODE ---
+  const [debugMode, setDebugMode] = useState<boolean>(false);
+
   // --- FEATURE 1: Animal List Filters ---
   const [animalFilter, setAnimalFilter] = useState<string>('all');
   const [animalSort, setAnimalSort] = useState<'happiness'|'production'|'age'|'name'>('name');
@@ -3201,6 +3204,14 @@ function GameApp() {
       setFarmXp(newFarmXp);
 
       // --- SUBFUNÇÃO 6: Verificação de Nível da Fazenda ---
+      // Pós-nível 20: cada 50 XP acumulado vira 1 ponto de prestígio
+      if (farmLevel >= 20) {
+        const prestigeGained = Math.floor(dailyXp / 10);
+        if (prestigeGained > 0) {
+          setPrestigePoints(prev => prev + prestigeGained);
+          if (debugMode) logsToAdd.push({ msg: `🌌 [DEBUG] +${prestigeGained} Prestígio (nível máximo)`, type: 'system' });
+        }
+      }
       const { newLevel, levelUpOccurred } = verificarNivelFazenda(nextDayValue, farmLevel, newFarmXp, logsToAdd);
       if (levelUpOccurred) {
         setFarmLevel(newLevel);
@@ -3593,6 +3604,16 @@ function GameApp() {
         }
         return newGold;
       });
+
+      // --- DEBUG MODE: fluxo de ouro diário ---
+      if (debugMode) {
+        const totalCostsDebug = maintCost + contractPenaltyForGold + taxAmount + waterCost + energyCost;
+        const workerCostDebug = workers.reduce((s, w) => s + w.dailyCost, 0);
+        logsToAdd.push({
+          msg: `🔍 [DEBUG Dia ${nextDayValue}] Entradas: +${globalGoldBonus}💰 | Saídas: água=${waterCost} energia=${energyCost} maint=${maintCost} imposto=${taxAmount} multa=${contractPenaltyForGold} workers=${workerCostDebug} | Net: ${globalGoldBonus - totalCostsDebug >= 0 ? '+' : ''}${globalGoldBonus - totalCostsDebug}💰`,
+          type: 'system'
+        });
+      }
 
       // --- Registrar custos diários no log financeiro ---
       if (waterCost > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'custo_diario', description: 'Conta de água', amount: waterCost });
@@ -5262,14 +5283,14 @@ function GameApp() {
                     </div>
                   );
                 })() : (
-                  <div className="flex items-center gap-1.5 mt-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="text-[10px] text-yellow-300 font-mono font-bold uppercase tracking-wider">
-                      🌌 Nível Máximo Atingido! ({farmXp} XP)
+                      🌌 IMPÉRIO AURORA — Nível Máximo!
+                    </span>
+                    <span className="text-[10px] bg-yellow-400/20 border border-yellow-400/40 text-yellow-200 font-mono font-black px-2 py-0.5 rounded-full">
+                      ⭐ {prestigePoints} Prestígio
                     </span>
                   </div>
-                )}
-                {prestigePoints > 0 && (
-                  <span className="text-[10px] text-yellow-200 font-mono mt-0.5">⭐ {prestigePoints} Prestígio</span>
                 )}
               </div>
             </div>
@@ -5747,6 +5768,16 @@ function GameApp() {
                   title="Importar Save: carrega um arquivo .json de backup"
                 >
                   📂 CARREGAR
+                </button>
+
+                {/* DEBUG MODE TOGGLE */}
+                <button
+                  type="button"
+                  onClick={() => setDebugMode(prev => !prev)}
+                  className={`${debugMode ? 'bg-orange-600 border-orange-900' : 'bg-stone-800 border-stone-950'} text-white border-b-4 px-3 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer`}
+                  title="Modo Debug: mostra fluxo de ouro detalhado no log a cada dia"
+                >
+                  {debugMode ? '🔍 DEBUG ON' : '🔍 DEBUG'}
                 </button>
 
                 {/* ADVANCE DAY */}
