@@ -150,6 +150,7 @@ export interface AnimalCardProps {
   onCollectAvestruzPena: (id: number, e: React.MouseEvent) => void;
   onSellAvestruz: (id: number, e: React.MouseEvent) => void;
   onSellJacare: (id: number, e: React.MouseEvent) => void;
+  onSellAnimal: (id: number, e: React.MouseEvent) => void;
   onRetireAnimal: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
   getAnimalDailyProfit: (type: AnimalType) => DailyProfit;
@@ -193,6 +194,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onCollectAvestruzPena,
   onSellAvestruz,
   onSellJacare,
+  onSellAnimal,
   onRetireAnimal,
   calculateBoiValue,
   getAnimalDailyProfit,
@@ -848,6 +850,24 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             💰 Vender
           </button>
         )}
+
+        {/* Vender Animal — qualquer adulto exceto boi (que tem sellOx) */}
+        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'avestruz' && animal.type !== 'jacare' && (() => {
+          const age = animal.age ?? 0;
+          const maxAge = animal.maxAge ?? 90;
+          const lifeFraction = Math.min(1, age / maxAge);
+          const sellPct = Math.max(0.10, 0.80 - lifeFraction * 0.70);
+          return (
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); onSellAnimal(animal.id, e); }}
+              className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-stone-400 bg-stone-50 text-stone-700 hover:bg-stone-100 cursor-pointer transition-all"
+              title={`Vender por ~${Math.round(sellPct * 100)}% do valor. Quanto mais velho, menos vale (mín. 10%).`}
+            >
+              💸 Vender ({Math.round(sellPct * 100)}%)
+            </button>
+          );
+        })()}
 
         {/* Aposentar Animal (75%+ vida útil, exceto boi) */}
         {animal.isAdult !== false && animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75 && animal.type !== 'boi' && (

@@ -75,6 +75,7 @@ interface AnimalGridProps {
   collectAvestruzPena: (id: number, e?: React.MouseEvent) => void;
   sellAvestruz: (id: number, e?: React.MouseEvent) => void;
   sellJacare: (id: number, e?: React.MouseEvent) => void;
+  sellAnimal: (id: number, e: React.MouseEvent) => void;
   retireAnimal: (id: number, e?: React.MouseEvent) => void;
   getAnimalDailyProfit: (animal: Animal) => number;
   getTraitInfo: (trait: string) => { label: string; color: string; description: string };
@@ -157,6 +158,7 @@ export default function AnimalGrid({
   collectAvestruzPena,
   sellAvestruz,
   sellJacare,
+  sellAnimal,
   retireAnimal,
   getAnimalDailyProfit,
   getTraitInfo,
@@ -1003,6 +1005,7 @@ export default function AnimalGrid({
                         onCollectAvestruzPena={collectAvestruzPena}
                         onSellAvestruz={sellAvestruz}
                         onSellJacare={sellJacare}
+                        onSellAnimal={sellAnimal}
                         onRetireAnimal={retireAnimal}
                         calculateBoiValue={calculateBoiValue}
                         getAnimalDailyProfit={getAnimalDailyProfit}

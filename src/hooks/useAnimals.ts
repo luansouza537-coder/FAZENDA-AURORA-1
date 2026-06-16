@@ -901,6 +901,30 @@ export function useAnimals({
     spawnFeedback('💰', `+${value} 💰`, event);
   };
 
+  // Sell Animal — any adult at depreciated value (filhotes blocked)
+  const sellAnimal = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal) return;
+    if (animal.isAdult === false) {
+      addLog(`❌ Filhotes não podem ser vendidos — aguarde crescerem!`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      return;
+    }
+    const purchasePrice = getAnimalPurchasePrice(animal.type);
+    const age = animal.age ?? 0;
+    const maxAge = animal.maxAge ?? 90;
+    // Value depreciates linearly from 80% (young) to 10% (near end of life)
+    const lifeFraction = Math.min(1, age / maxAge);
+    const sellPct = Math.max(0.10, 0.80 - lifeFraction * 0.70);
+    const value = Math.max(5, Math.round(purchasePrice * sellPct));
+    setAnimals(prev => prev.filter(a => a.id !== id));
+    setGold(prev => prev + value);
+    addLog(`💰 ${animal.name} foi vendido por ${value}💰 (${Math.round(sellPct * 100)}% do valor original).`, 'success');
+    triggerAudioResult(() => sfx.playSound('sell'));
+    spawnFeedback('💰', `+${value}💰`, event);
+  };
+
   // Retire Animal (elderly animals 75%+ of maxAge)
   const retireAnimal = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -1182,6 +1206,7 @@ export function useAnimals({
     sellAvestruz,
     sellJacare,
     sellOx,
+    sellAnimal,
     retireAnimal,
     buyAnimal,
     buyAnimalFilhote,

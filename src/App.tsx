@@ -1849,6 +1849,7 @@ function GameApp() {
     sellAvestruz,
     sellJacare,
     sellOx,
+    sellAnimal,
     retireAnimal,
     buyAnimal,
     buyAnimalFilhote,
@@ -3289,11 +3290,15 @@ function GameApp() {
       let taxAmount = 0;
       if (currentDay % 14 === 0) {
         const weekEarnings = weeklyStats.earnings;
-        let tax = Math.round(weekEarnings * 0.05);
-        tax = Math.max(10, Math.min(200, tax));
-        taxAmount = tax; // será limitado ao ouro disponível no setGold consolidado abaixo
+        // Imposto progressivo: 5% base + 1% extra por cada 500 moedas acumuladas acima de 500
+        const wealthBrackets = Math.max(0, Math.floor((gold - 500) / 500));
+        const taxRate = 0.05 + wealthBrackets * 0.01;
+        let tax = Math.round(weekEarnings * taxRate);
+        tax = Math.max(10, tax);
+        taxAmount = tax;
         setWeeklyTaxPaid(tax);
-        logsToAdd.push({ msg: `🏛️ Imposto municipal: -${tax} moedas (5% dos lucros da semana)`, type: 'system' });
+        const rateDisplay = Math.round(taxRate * 100);
+        logsToAdd.push({ msg: `🏛️ Imposto municipal: -${tax} moedas (${rateDisplay}% dos lucros — ${gold > 500 ? `acúmulo de ${Math.floor(gold)}💰 eleva a alíquota` : 'alíquota base'})`, type: 'system' });
       }
 
       // --- GRUPO 4c: Caixinha de gorjeta ---
@@ -4395,7 +4400,7 @@ function GameApp() {
           const fedAnimalIds = new Set<number>();
           const feedDeductions: Partial<Record<string, number>> = {};
           animals.forEach(a => {
-            if (noFeedTypes.includes(a.type) || a.isAdult === false) return;
+            if (noFeedTypes.includes(a.type)) return;
             if (silagemDays > 0) { fedAnimalIds.add(a.id); return; }
             const feedKey = getFeedKeyForType2(a.type) as string;
             if ((tmpInv2[feedKey] ?? 0) > 0) {
@@ -5634,6 +5639,7 @@ function GameApp() {
             collectAvestruzPena={collectAvestruzPena}
             sellAvestruz={sellAvestruz}
             sellJacare={sellJacare}
+            sellAnimal={sellAnimal}
             retireAnimal={retireAnimal}
             getAnimalDailyProfit={getAnimalDailyProfit}
             getTraitInfo={getTraitInfo}
