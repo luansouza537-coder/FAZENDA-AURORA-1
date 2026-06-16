@@ -1,9 +1,5 @@
 import React from 'react';
-
-interface FinancialEntry {
-  id: string; day: number; type: 'income' | 'expense'; amount: number;
-  category: string; description: string;
-}
+import { FinancialEntry } from '../types';
 
 interface FinancasModalProps {
   currentDay: number;

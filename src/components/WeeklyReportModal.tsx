@@ -1,18 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FarmWorker } from '../types';
+import { FarmWorker, WeeklyReportData } from '../types';
 
 interface WorkerType { role: string; emoji: string; }
 
-interface WeeklyData {
-  earnings: number; spending: number; milk: number; wool: number;
-  oxSold: number; cheese: number; scarf: number; egg: number;
-  mayo: number; waterCost: number; energyCost: number;
-}
-
 interface WeeklyReportModalProps {
   currentDay: number;
-  weeklyReportData: WeeklyData;
+  weeklyReportData: WeeklyReportData;
   workers: FarmWorker[];
   weeklyTaxPaid: number;
   workerTypes: WorkerType[];

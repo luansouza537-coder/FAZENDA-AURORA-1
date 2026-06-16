@@ -1,9 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BiomeType, LandLot } from '../types';
-
-interface InsuranceState { active: boolean; premium?: number; daysLeft: number; }
-interface MachineState { milkerPurchased: boolean; shearerPurchased: boolean; feederPurchased: boolean; }
+import { BiomeType, LandLot, InsuranceState, MachineState } from '../types';
 
 interface MelhoriasModalProps {
   gold: number;

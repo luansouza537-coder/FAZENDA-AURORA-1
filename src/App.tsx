@@ -63,6 +63,7 @@ import WeeklyReportModal from './components/WeeklyReportModal';
 import StatsModal from './components/StatsModal';
 import FinancasModal from './components/FinancasModal';
 import SellAllModal from './components/SellAllModal';
+import { ReproducoesModal, RankingModal, FairResultModal, AllTimeStatsModal, CruzamentoModal } from './components/SmallModals';
 
 
 interface FloatingText {
@@ -7559,54 +7560,12 @@ function GameApp() {
       </AnimatePresence>
 
       {/* 🐣 MODAL DE HISTÓRICO DE REPRODUÇÕES */}
-      <AnimatePresence>
-        {showReproModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowReproModal(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[999] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#fffbeb] border-8 border-pink-700 rounded-[36px] max-w-md w-full max-h-[80vh] overflow-hidden shadow-2xl flex flex-col relative"
-            >
-              <div className="bg-gradient-to-r from-pink-700 to-pink-900 p-5 border-b-4 border-pink-950 text-center shrink-0">
-                <h3 className="text-white text-xl font-display font-black uppercase tracking-wider">🐣 Histórico de Reproduções</h3>
-                <p className="text-pink-200 text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">Últimos 50 nascimentos registrados</p>
-                <button onClick={() => setShowReproModal(false)}
-                  className="absolute top-4 right-4 text-pink-200 hover:text-white bg-pink-950 hover:bg-pink-800 border-2 border-pink-900 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all text-lg font-bold">✕</button>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-2" style={{ scrollbarWidth: 'thin' }}>
-                {reproHistory.length === 0 ? (
-                  <div className="text-center text-stone-500 text-xs italic py-8">Nenhuma reprodução registrada ainda.</div>
-                ) : reproHistory.map((r, i) => (
-                  <div key={i} className="bg-white border-2 border-pink-200 rounded-xl p-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{r.method === 'natural' ? '🐣' : r.method === 'gestacao' ? '👶' : '🍼'}</span>
-                      <div>
-                        <div className="font-black text-xs text-pink-900">{r.name}</div>
-                        <div className="text-[9px] font-mono text-stone-500">{r.animalType} • {r.method === 'natural' ? 'Natural' : r.method === 'gestacao' ? 'Gestação' : 'Filhote comprado'}</div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-mono text-stone-400 shrink-0">Dia {r.day}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="bg-pink-50 p-4 border-t-2 border-pink-200 flex justify-end shrink-0">
-                <button onClick={() => setShowReproModal(false)}
-                  className="bg-pink-600 hover:bg-pink-500 text-white border-b-4 border-pink-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer">
-                  Fechar
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showReproModal && (
+        <ReproducoesModal
+          reproHistory={reproHistory}
+          onClose={() => setShowReproModal(false)}
+        />
+      )}
 
       {/* 🌟 MODAL DE ESPECIALIZAÇÃO */}
       <AnimatePresence>
@@ -7660,116 +7619,42 @@ function GameApp() {
       </AnimatePresence>
 
       {/* 🏆 MODAL RANKING DE ANIMAIS */}
-      <AnimatePresence>
-        {showRankingModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowRankingModal(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[120] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#fffbeb] border-8 border-[#fbbf24] rounded-[36px] max-w-md w-full max-h-[80vh] overflow-hidden shadow-2xl flex flex-col relative"
-            >
-              <div className="bg-gradient-to-r from-[#78350f] to-[#92400e] p-5 text-center shrink-0">
-                <div className="text-4xl mb-1">🏆</div>
-                <h3 className="text-[#fef3c7] text-xl font-display font-black uppercase tracking-wider">Ranking de Animais</h3>
-                <p className="text-[#fcd57e] text-[11px] font-mono mt-0.5">Por produção semanal</p>
-                <button
-                  onClick={() => setShowRankingModal(false)}
-                  className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-[#78350f] hover:bg-[#92400e] border-2 border-[#fbbf24] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold"
-                >✕</button>
-              </div>
-              <div className="flex-1 overflow-y-auto p-5 space-y-2" style={{ scrollbarWidth: 'thin' }}>
-                {animals.length === 0 ? (
-                  <p className="text-center text-stone-500 font-mono text-sm py-8">Nenhum animal na fazenda ainda.</p>
-                ) : (
-                  [...animals]
-                    .sort((a, b) => (b.weeklyProduction ?? 0) - (a.weeklyProduction ?? 0))
-                    .map((animal, idx) => {
-                      const medals = ['🏆', '🥈', '🥉'];
-                      const medal = idx < 3 ? medals[idx] : `${idx + 1}º`;
-                      const typeEmoji = animal.type === 'vaca' ? '🐄' : animal.type === 'ovelha' ? '🐑' : animal.type === 'boi' ? '🐂' : animal.type === 'galinha' ? '🐔' : animal.type === 'cabra' ? '🐐' : animal.type === 'lhama' ? '🦙' : animal.type === 'pato' ? '🦆' : animal.type === 'ganso' ? '🦢' : animal.type === 'bufalo' ? '🐃' : animal.type === 'pavao' ? '🦚' : animal.type === 'codorna' ? '🐦' : animal.type === 'alpaca' ? '🦙' : animal.type === 'minhoca' ? '🪱' : animal.type === 'caracol' ? '🐌' : animal.type === 'coelho_angora' ? '🐰' : animal.type === 'bicho_seda' ? '🐛' : animal.type === 'ra' ? '🐸' : animal.type === 'avestruz' ? '🦤' : animal.type === 'jacare' ? '🐊' : '🐾';
-                      return (
-                        <div key={animal.id} className={`flex items-center gap-3 p-3 rounded-2xl border-2 ${idx === 0 ? 'bg-amber-50 border-amber-400' : idx === 1 ? 'bg-slate-50 border-slate-300' : idx === 2 ? 'bg-orange-50 border-orange-300' : 'bg-white border-stone-200'}`}>
-                          <span className="text-lg font-black w-8 text-center shrink-0">{medal}</span>
-                          <span className="text-2xl shrink-0">{typeEmoji}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-display font-black text-[#78350f] text-sm truncate">{animal.name}</div>
-                            <div className="text-[10px] font-mono text-stone-500 capitalize">{animal.type}</div>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <div className="font-mono font-black text-emerald-700 text-sm">{animal.weeklyProduction ?? 0} prod.</div>
-                            {animal.isCampiao && <div className="text-[9px] font-black text-amber-600">⭐ Campeão</div>}
-                          </div>
-                        </div>
-                      );
-                    })
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showRankingModal && (
+        <RankingModal
+          animals={animals}
+          onClose={() => setShowRankingModal(false)}
+        />
+      )}
 
-      {/* 🤝 MODAL DE CRUZAMENTO (Layer 2) */}
-      <AnimatePresence>
-        {cruzarModal && (() => {
-          const cfg = REPRODUCAO_CONFIG[cruzarModal.type];
-          const candidates = animals.filter(a => a.type === cruzarModal.type && a.id !== cruzarModal.id && a.isAdult !== false && !reproducaoAtiva.some(r => r.animalId1 === a.id || r.animalId2 === a.id));
-          return (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
-              onClick={() => setCruzarModal(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}
-                className="bg-[#fef3c7] border-4 border-[#fbbf24] rounded-3xl p-6 max-w-sm w-full shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h2 className="font-display font-black text-xl text-[#78350f] uppercase mb-2 flex items-center gap-2">🤝 Reprodução Controlada</h2>
-                <p className="text-[11px] text-stone-600 font-mono mb-3">Gestação: {cfg?.gestacao ?? '?'} dias. Selecione o parceiro para cruzar.</p>
-                {candidates.length === 0 ? (
-                  <p className="text-[11px] text-red-600 font-mono">Nenhum parceiro disponível! Compre outro {cruzarModal.type} adulto.</p>
-                ) : (
-                  <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
-                    {candidates.map(partner => (
-                      <button key={partner.id} type="button"
-                        onClick={() => {
-                          if (partner.type !== cruzarModal.type) {
-                            addLog(`❌ Erro: ${partner.name} é de espécie diferente! Só é possível cruzar animais da mesma espécie.`, 'error');
-                            setCruzarModal(null);
-                            return;
-                          }
-                          setReproducaoAtiva(prev => [...prev, {
-                            animalId1: cruzarModal.animalId,
-                            animalId2: partner.id,
-                            type: cruzarModal.type,
-                            gestacaoEnd: currentDay + (cfg?.gestacao ?? 10),
-                          }]);
-                          addLog(`🤝 Iniciada gestação entre dois ${cruzarModal.type}s! Filhote esperado em ${cfg?.gestacao ?? 10} dias.`, 'success');
-                          addNotification(`🤝 Gestação iniciada! Filhote de ${cruzarModal.type} em ${cfg?.gestacao ?? 10} dias.`, 'success');
-                          setCruzarModal(null);
-                        }}
-                        className="bg-fuchsia-500 hover:bg-fuchsia-600 text-white font-black text-xs uppercase px-4 py-2 rounded-xl border-b-2 border-fuchsia-800 transition-all cursor-pointer"
-                      >
-                        {partner.name} (😊 {Math.floor(partner.happiness)}%)
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <button type="button" onClick={() => setCruzarModal(null)} className="mt-3 w-full bg-stone-300 hover:bg-stone-400 text-stone-800 font-black text-xs uppercase px-4 py-2 rounded-xl border-b-2 border-stone-500 transition-all cursor-pointer">Cancelar</button>
-              </motion.div>
-            </motion.div>
-          );
-        })()}
-      </AnimatePresence>
+      {/* 🤝 MODAL DE CRUZAMENTO */}
+      {cruzarModal && (
+        <CruzamentoModal
+          cruzarModal={cruzarModal}
+          animals={animals}
+          reproducaoAtiva={reproducaoAtiva}
+          reproducaoConfig={REPRODUCAO_CONFIG}
+          currentDay={currentDay}
+          onClose={() => setCruzarModal(null)}
+          onConfirm={(partner) => {
+            const cfg = REPRODUCAO_CONFIG[cruzarModal.type];
+            if (partner.type !== cruzarModal.type) {
+              addLog(`❌ Erro: ${partner.name} é de espécie diferente!`, 'error');
+              setCruzarModal(null);
+              return;
+            }
+            setReproducaoAtiva(prev => [...prev, {
+              animalId1: cruzarModal.animalId,
+              animalId2: partner.id,
+              type: cruzarModal.type,
+              gestacaoEnd: currentDay + (cfg?.gestacao ?? 10),
+            }]);
+            addLog(`🤝 Iniciada gestação entre dois ${cruzarModal.type}s! Filhote esperado em ${cfg?.gestacao ?? 10} dias.`, 'success');
+            addNotification(`🤝 Gestação iniciada! Filhote de ${cruzarModal.type} em ${cfg?.gestacao ?? 10} dias.`, 'success');
+            setCruzarModal(null);
+          }}
+          addLog={addLog}
+        />
+      )}
 
       {/* 📋 MODAL OFERTA DE CONTRATO */}
       <AnimatePresence>
@@ -7790,101 +7675,21 @@ function GameApp() {
       </AnimatePresence>
 
       {/* 🎪 MODAL RESULTADO DA FEIRA */}
-      <AnimatePresence>
-        {showFairResultModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowFairResultModal(null)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[199] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.8, y: 30 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.8, y: 30 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#fffbeb] border-8 border-amber-600 rounded-[36px] max-w-md w-full shadow-2xl overflow-hidden"
-            >
-              <div className="bg-gradient-to-r from-amber-600 to-yellow-700 p-5 text-center">
-                <div className="text-5xl mb-2">🎪</div>
-                <h3 className="text-white text-xl font-display font-black uppercase">Resultado da Feira!</h3>
-                <p className="text-amber-200 text-xs font-mono mt-1">Dia {showFairResultModal.day}</p>
-              </div>
-              <div className="p-6 text-center">
-                <div className="text-4xl font-black text-amber-700 mb-2">+{showFairResultModal.earned} 💰</div>
-                <div className="text-stone-600 font-mono text-sm mb-1">Categoria: {showFairResultModal.category}</div>
-                <div className="text-stone-500 font-mono text-xs mb-4">{showFairResultModal.winner}</div>
-                <button
-                  onClick={() => setShowFairResultModal(null)}
-                  className="bg-amber-500 hover:bg-amber-400 text-white border-b-4 border-amber-700 px-8 py-3 rounded-2xl font-display font-black uppercase text-sm cursor-pointer transition-all hover:scale-105"
-                >
-                  Fechar 🎉
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showFairResultModal && (
+        <FairResultModal
+          result={showFairResultModal}
+          onClose={() => setShowFairResultModal(null)}
+        />
+      )}
 
       {/* 📊 ALL-TIME STATS / RECORDES MODAL */}
       {showAllTimeStats && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setShowAllTimeStats(false)}>
-          <div className="bg-[#064e3b] border-4 border-[#fbbf24] rounded-[32px] p-6 max-w-lg w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h2 className="font-display font-black text-[#fef3c7] text-xl uppercase text-center mb-4">📊 Recordes da Fazenda Aurora</h2>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">💰 Total Faturado</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalEarned}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🌟 Melhor Dia</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{allTimeStats.bestDay}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">📦 Itens Coletados</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalCollected}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🌽 Animais Alimentados</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalFed}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🥛 Leite Produzido</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalMilk ?? 0}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🧶 Lã Coletada</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalWool ?? 0}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🥚 Ovos Coletados</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalEggs ?? 0}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🧀 Queijos Fabricados</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalCheese ?? 0}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🐂 Bois Vendidos</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalOxSold ?? 0}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">📅 Dias Jogados</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{currentDay}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🧣 Cachecóis Tecidos</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalScarf ?? 0}</div>
-              </div>
-              <div className="bg-[#065f46] border-2 border-[#fbbf24] rounded-2xl p-3 text-center">
-                <div className="text-[10px] font-mono text-[#fbbf24] uppercase font-black mb-1">🥣 Maioneses Feitas</div>
-                <div className="text-lg font-black font-mono text-[#fef3c7]">{stats.totalMayo ?? 0}</div>
-              </div>
-            </div>
-            <button onClick={() => setShowAllTimeStats(false)} className="mt-4 w-full bg-[#78350f] text-[#fef3c7] font-black uppercase py-2 rounded-xl border-2 border-[#fbbf24] hover:bg-[#92400e] transition-colors cursor-pointer">Fechar</button>
-          </div>
-        </div>
+        <AllTimeStatsModal
+          stats={stats}
+          allTimeStats={allTimeStats}
+          currentDay={currentDay}
+          onClose={() => setShowAllTimeStats(false)}
+        />
       )}
 
     </div>

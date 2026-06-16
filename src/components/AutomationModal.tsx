@@ -1,14 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface MachineState {
-  milkerPurchased: boolean;
-  milkerActive: boolean;
-  shearerPurchased: boolean;
-  shearerActive: boolean;
-  feederPurchased: boolean;
-  feederActive: boolean;
-}
+import { MachineState } from '../types';
 
 interface AutomationModalProps {
   gold: number;

@@ -149,3 +149,41 @@ export interface FarmStats {
   totalYogurt?: number;
   totalMerchantShopPurchases?: number;
 }
+
+export interface InsuranceState {
+  active: boolean;
+  premium?: number;
+  daysLeft: number;
+}
+
+export interface MachineState {
+  milkerPurchased: boolean;
+  milkerActive: boolean;
+  shearerPurchased: boolean;
+  shearerActive: boolean;
+  feederPurchased: boolean;
+  feederActive: boolean;
+}
+
+export interface FinancialEntry {
+  id: string;
+  day: number;
+  type: 'income' | 'expense';
+  amount: number;
+  category: string;
+  description: string;
+}
+
+export interface WeeklyReportData {
+  earnings: number;
+  spending: number;
+  milk: number;
+  wool: number;
+  oxSold: number;
+  cheese: number;
+  scarf: number;
+  egg: number;
+  mayo: number;
+  waterCost: number;
+  energyCost: number;
+}
