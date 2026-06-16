@@ -5165,19 +5165,22 @@ function GameApp() {
             >
               <div className="flex items-center gap-1" title="🥛 Leite Cru coletado do seu rebanho">
                 <span>🥛</span>
-                <span>{inventory.milk}</span>
+                <span className="min-w-[1.5ch] text-center">{inventory.milk}</span>
               </div>
+              <span className="w-px h-4 bg-[#fbbf24]/50 shrink-0" />
               <div className="flex items-center gap-1" title="🧶 Lã Crua tosquiada das suas ovelhas">
                 <span>🧶</span>
-                <span>{inventory.wool}</span>
+                <span className="min-w-[1.5ch] text-center">{inventory.wool}</span>
               </div>
+              <span className="w-px h-4 bg-[#fbbf24]/50 shrink-0" />
               <div className="flex items-center gap-1" title="🧀 Queijo artesanal curado">
                 <span>🧀</span>
-                <span>{inventory.cheese}</span>
+                <span className="min-w-[1.5ch] text-center">{inventory.cheese}</span>
               </div>
+              <span className="w-px h-4 bg-[#fbbf24]/50 shrink-0" />
               <div className="flex items-center gap-1" title="🧣 Cachecol elegante trançado">
                 <span>🧣</span>
-                <span>{inventory.scarf}</span>
+                <span className="min-w-[1.5ch] text-center">{inventory.scarf}</span>
               </div>
             </div>
 

@@ -299,7 +299,7 @@ export default function GameSidebar({
                   <button
                     onClick={(e) => sellProduct('milk', 1, e)}
                     disabled={inventory.milk < 1}
-                    className="bg-stone-100 hover:bg-stone-250 border border-stone-300 disabled:opacity-40 text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-stone-100 hover:bg-stone-200 border border-stone-300 disabled:opacity-40 disabled:cursor-not-allowed text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-stone-300"
                     title="Vender leite cru. Preço de venda: 5 moedas base."
                   >
                     Vender Leite ({getActualSellPrice('milk')}💰)
@@ -308,7 +308,7 @@ export default function GameSidebar({
                   <button
                     onClick={(e) => sellProduct('wool', 1, e)}
                     disabled={inventory.wool < 1}
-                    className="bg-stone-100 hover:bg-stone-250 border border-stone-300 disabled:opacity-40 text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-stone-100 hover:bg-stone-200 border border-stone-300 disabled:opacity-40 disabled:cursor-not-allowed text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-stone-300"
                     title="Vender lã crua. Preço de venda: 12 moedas base."
                   >
                     Vender Lã ({getActualSellPrice('wool')}💰)
@@ -317,7 +317,7 @@ export default function GameSidebar({
                   <button
                     onClick={(e) => sellProduct('egg', 1, e)}
                     disabled={(inventory.egg ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
                     title="Vender Ovo de Quintal. Preço de venda: 4 moedas base."
                   >
                     Vender Ovo ({getActualSellPrice('egg')}💰)
@@ -326,7 +326,7 @@ export default function GameSidebar({
                   <button
                     onClick={(e) => sellProduct('mayo', 1, e)}
                     disabled={(inventory.mayo ?? 0) < 1}
-                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-350 disabled:opacity-40 text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300"
                     title="Vender Maionese Cremosa. Preço de venda: 10 moedas base."
                   >
                     Vender Maionese ({getActualSellPrice('mayo')}💰)
@@ -336,7 +336,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('cheese', 1, e)}
                     disabled={inventory.cheese < 1}
-                    className="bg-amber-105 hover:bg-amber-150 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm col-span-2"
+                    className="bg-amber-50 hover:bg-amber-200 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2"
                     title="Vende 1 Queijo Básico (feito com 2 leites). Para queijos premium use a Queijaria."
                   >
                     Vender Queijo Básico ({getActualSellPrice('cheese')}💰)
@@ -346,7 +346,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('queijoCoalho', 1, e)}
                     disabled={(inventory.queijoCoalho ?? 0) < 1}
-                    className="bg-amber-100/60 hover:bg-amber-100 border border-amber-350 disabled:opacity-40 text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-amber-100/60 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-stone-300"
                     title="Vende 1 Queijo Coalho."
                   >
                     Vender Q. Coalho ({getActualSellPrice('queijoCoalho')}💰)
@@ -356,7 +356,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('queijoMucarela', 1, e)}
                     disabled={(inventory.queijoMucarela ?? 0) < 1}
-                    className="bg-yellow-105 hover:bg-yellow-150 border border-yellow-350 disabled:opacity-40 text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-yellow-50 hover:bg-yellow-200 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300"
                     title="Vende 1 Queijo Muçarela."
                   >
                     Vender Muçarela ({getActualSellPrice('queijoMucarela')}💰)
@@ -366,7 +366,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('queijoBrie', 1, e)}
                     disabled={(inventory.queijoBrie ?? 0) < 1}
-                    className="bg-orange-105 hover:bg-orange-150 border border-orange-300 disabled:opacity-40 text-orange-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm col-span-2"
+                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2"
                     title="Vende 1 Queijo Brie."
                   >
                     Vender Q. Brie ({getActualSellPrice('queijoBrie')}💰)
@@ -376,7 +376,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('scarf', 1, e)}
                     disabled={inventory.scarf < 1}
-                    className="bg-indigo-100 hover:bg-indigo-150 border border-indigo-300 disabled:opacity-40 text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm col-span-2"
+                    className="bg-indigo-100 hover:bg-indigo-100 border border-indigo-300 disabled:opacity-40 text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2"
                     title="Vende 1 Cachecol elegante."
                   >
                     Vender Cachecol ({getActualSellPrice('scarf')}💰)
@@ -388,7 +388,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('goat_milk', 1, e)}
                     disabled={(inventory.goat_milk ?? 0) < 1}
-                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300"
                     title="Vende 1 Leite de Cabra. Preço base: 38 moedas."
                   >
                     L. Cabra ({getActualSellPrice('goat_milk')}💰)
@@ -400,7 +400,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('llama_wool', 1, e)}
                     disabled={(inventory.llama_wool ?? 0) < 1}
-                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300"
                     title="Vende 1 Lã de Lhama. Preço base: 45 moedas."
                   >
                     L. Lhama ({getActualSellPrice('llama_wool')}💰)
@@ -412,7 +412,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('duck_egg', 1, e)}
                     disabled={(inventory.duck_egg ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
                     title="Vende 1 Ovo de Pato. Preço base: 18 moedas."
                   >
                     Ov. Pato ({getActualSellPrice('duck_egg')}💰)
@@ -424,7 +424,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('goose_egg', 1, e)}
                     disabled={(inventory.goose_egg ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
                     title="Vende 1 Ovo de Ganso. Preço base: 50 moedas."
                   >
                     Ov. Ganso ({getActualSellPrice('goose_egg')}💰)
@@ -436,7 +436,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('buffalo_milk', 1, e)}
                     disabled={(inventory.buffalo_milk ?? 0) < 1}
-                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300"
                     title="Vende 1 Leite de Búfala. Preço base: 55 moedas."
                   >
                     L. Búfala ({getActualSellPrice('buffalo_milk')}💰)
@@ -448,7 +448,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('buffalo_mozzarella', 1, e)}
                     disabled={(inventory.buffalo_mozzarella ?? 0) < 1}
-                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm col-span-2"
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2"
                     title="Vende 1 Muçarela de Búfala. Preço base: 120 moedas."
                   >
                     Muç. Búfala ({getActualSellPrice('buffalo_mozzarella')}💰)
@@ -460,7 +460,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('feather', 1, e)}
                     disabled={(inventory.feather ?? 0) < 1}
-                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 disabled:cursor-not-allowed text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300"
                     title="Vende 1 Pena de Pato/Ganso. Preço base: 15 moedas."
                   >
                     Penas ({getActualSellPrice('feather')}💰)
@@ -472,7 +472,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('peacock_feather', 1, e)}
                     disabled={(inventory.peacock_feather ?? 0) < 1}
-                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300"
                     title="Vende 1 Pena de Pavão. Preço base: 80 moedas."
                   >
                     P. Pavão ({getActualSellPrice('peacock_feather')}💰)
@@ -484,7 +484,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('butter', 1, e)}
                     disabled={(inventory.butter ?? 0) < 1}
-                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300"
                     title="Vende 1 Manteiga. Preço base: 45 moedas."
                   >
                     Manteiga ({getActualSellPrice('butter')}💰)
@@ -496,7 +496,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('yogurt', 1, e)}
                     disabled={(inventory.yogurt ?? 0) < 1}
-                    className="bg-pink-50 hover:bg-pink-100 border border-pink-300 disabled:opacity-40 text-pink-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-pink-50 hover:bg-pink-100 border border-pink-300 disabled:opacity-40 disabled:cursor-not-allowed text-pink-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-pink-300"
                     title="Vende 1 Iogurte. Preço base: 35 moedas."
                   >
                     Iogurte ({getActualSellPrice('yogurt')}💰)
@@ -508,7 +508,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('fertile_egg', 1, e)}
                     disabled={(inventory.fertile_egg ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
                     title="Vende 1 Ovo Fértil. Preço base: 36 moedas."
                   >
                     ✨ Ov. Fértil ({getActualSellPrice('fertile_egg')}💰)
@@ -520,7 +520,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('couro_avestruz', 1, e)}
                     disabled={(inventory.couro_avestruz ?? 0) < 1}
-                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm"
                     title="Vende 1 Couro de Avestruz. Preço base: 300 moedas."
                   >
                     🦤 Couro Avestruz ({getActualSellPrice('couro_avestruz')}💰)
@@ -532,7 +532,7 @@ export default function GameSidebar({
                     type="button"
                     onClick={(e) => sellProduct('couro_jacare', 1, e)}
                     disabled={(inventory.couro_jacare ?? 0) < 1}
-                    className="bg-green-50 hover:bg-green-100 border border-green-300 disabled:opacity-40 text-green-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-green-50 hover:bg-green-100 border border-green-300 disabled:opacity-40 text-green-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm"
                     title="Vende 1 Couro de Jacaré. Preço base: 400 moedas."
                   >
                     🐊 Couro Jacaré ({getActualSellPrice('couro_jacare')}💰)
@@ -541,103 +541,103 @@ export default function GameSidebar({
 
                   {(inventory.queijo_cabra ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('queijo_cabra', 1, e)} disabled={(inventory.queijo_cabra ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
                     🧀 Q.Cabra ({getActualSellPrice('queijo_cabra')}💰)
                   </button>
                   )}
                   {(inventory.iogurte_cabra ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('iogurte_cabra', 1, e)} disabled={(inventory.iogurte_cabra ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
                     🥛 Iog.Cabra ({getActualSellPrice('iogurte_cabra')}💰)
                   </button>
                   )}
                   {(inventory.leite_condensado ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('leite_condensado', 1, e)} disabled={(inventory.leite_condensado ?? 0) < 1}
-                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
                     🥛 L.Condensado ({getActualSellPrice('leite_condensado')}💰)
                   </button>
                   )}
                   {(inventory.tapete_lhama ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('tapete_lhama', 1, e)} disabled={(inventory.tapete_lhama ?? 0) < 1}
-                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
                     🪢 Tapete Lhama ({getActualSellPrice('tapete_lhama')}💰)
                   </button>
                   )}
                   {(inventory.cachecol_angora ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('cachecol_angora', 1, e)} disabled={(inventory.cachecol_angora ?? 0) < 1}
-                    className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 disabled:opacity-40 text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 disabled:opacity-40 disabled:cursor-not-allowed text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-indigo-300">
                     🧣 Cachecol Angorá ({getActualSellPrice('cachecol_angora')}💰)
                   </button>
                   )}
                   {(inventory.tecido_alpaca ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('tecido_alpaca', 1, e)} disabled={(inventory.tecido_alpaca ?? 0) < 1}
-                    className="bg-violet-50 hover:bg-violet-100 border border-violet-300 disabled:opacity-40 text-violet-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-violet-50 hover:bg-violet-100 border border-violet-300 disabled:opacity-40 text-violet-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
                     🧶 Tecido Alpaca ({getActualSellPrice('tecido_alpaca')}💰)
                   </button>
                   )}
                   {(inventory.fio_seda ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('fio_seda', 1, e)} disabled={(inventory.fio_seda ?? 0) < 1}
-                    className="bg-sky-50 hover:bg-sky-100 border border-sky-300 disabled:opacity-40 text-sky-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-sky-50 hover:bg-sky-100 border border-sky-300 disabled:opacity-40 text-sky-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
                     🪡 Fio de Seda ({getActualSellPrice('fio_seda')}💰)
                   </button>
                   )}
                   {(inventory.manta_premium ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('manta_premium', 1, e)} disabled={(inventory.manta_premium ?? 0) < 1}
-                    className="bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm col-span-2">
+                    className="bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
                     ✨ Manta Premium ({getActualSellPrice('manta_premium')}💰)
                   </button>
                   )}
                   {(inventory.pate_pato ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('pate_pato', 1, e)} disabled={(inventory.pate_pato ?? 0) < 1}
-                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
                     🍖 Patê Pato ({getActualSellPrice('pate_pato')}💰)
                   </button>
                   )}
                   {(inventory.ovo_defumado ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('ovo_defumado', 1, e)} disabled={(inventory.ovo_defumado ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
                     🥚 Ov.Defumado ({getActualSellPrice('ovo_defumado')}💰)
                   </button>
                   )}
                   {(inventory.conserva_codorna ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('conserva_codorna', 1, e)} disabled={(inventory.conserva_codorna ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
                     🥚 Conserva Codorna ({getActualSellPrice('conserva_codorna')}💰)
                   </button>
                   )}
                   {(inventory.creme_cosmetico ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('creme_cosmetico', 1, e)} disabled={(inventory.creme_cosmetico ?? 0) < 1}
-                    className="bg-pink-50 hover:bg-pink-100 border border-pink-300 disabled:opacity-40 text-pink-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-pink-50 hover:bg-pink-100 border border-pink-300 disabled:opacity-40 disabled:cursor-not-allowed text-pink-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-pink-300">
                     🧴 Creme Cosm. ({getActualSellPrice('creme_cosmetico')}💰)
                   </button>
                   )}
                   {(inventory.sabonete_natural ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('sabonete_natural', 1, e)} disabled={(inventory.sabonete_natural ?? 0) < 1}
-                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 disabled:cursor-not-allowed text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300">
                     🧼 Sabonete Nat. ({getActualSellPrice('sabonete_natural')}💰)
                   </button>
                   )}
                   {(inventory.almofada_penas ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('almofada_penas', 1, e)} disabled={(inventory.almofada_penas ?? 0) < 1}
-                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
                     🛋️ Almofada Penas ({getActualSellPrice('almofada_penas')}💰)
                   </button>
                   )}
                   {(inventory.colete_couro ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('colete_couro', 1, e)} disabled={(inventory.colete_couro ?? 0) < 1}
-                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
                     🦺 Colete Couro ({getActualSellPrice('colete_couro')}💰)
                   </button>
                   )}
                   {(inventory.bolsa_exotica ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('bolsa_exotica', 1, e)} disabled={(inventory.bolsa_exotica ?? 0) < 1}
-                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm col-span-2">
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
                     👜 Bolsa Exótica ({getActualSellPrice('bolsa_exotica')}💰)
                   </button>
                   )}
                   {(inventory.enfeite_pavao ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('enfeite_pavao', 1, e)} disabled={(inventory.enfeite_pavao ?? 0) < 1}
-                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 disabled:cursor-not-allowed text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300">
                     🦚 Enfeite Pavão ({getActualSellPrice('enfeite_pavao')}💰)
                   </button>
                   )}
@@ -645,7 +645,7 @@ export default function GameSidebar({
                   {/* Biome exclusive products */}
                   {(inventory.peixe ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('peixe' as any, 1, e)} disabled={(inventory.peixe ?? 0) < 1}
-                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300"
                     title="Vende 1 Peixe do Lago. Preço base: 45 moedas.">
                     🐟 Peixe ({getActualSellPrice('peixe' as any)}💰)
                   </button>
@@ -653,7 +653,7 @@ export default function GameSidebar({
 
                   {(inventory.mel ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('mel' as any, 1, e)} disabled={(inventory.mel ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
                     title="Vende 1 Mel da Floresta. Preço base: 80 moedas.">
                     🍯 Mel ({getActualSellPrice('mel' as any)}💰)
                   </button>
@@ -661,7 +661,7 @@ export default function GameSidebar({
 
                   {(inventory.cogumelo ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('cogumelo' as any, 1, e)} disabled={(inventory.cogumelo ?? 0) < 1}
-                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm"
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300"
                     title="Vende 1 Cogumelo da Floresta. Preço base: 35 moedas.">
                     🍄 Cogumelo ({getActualSellPrice('cogumelo' as any)}💰)
                   </button>
@@ -670,31 +670,31 @@ export default function GameSidebar({
                   {/* Biome craft products */}
                   {(inventory.hidromel ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('hidromel' as any, 1, e)} disabled={(inventory.hidromel ?? 0) < 1}
-                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
                     🍺 Hidromel ({getActualSellPrice('hidromel' as any)}💰)
                   </button>
                   )}
                   {(inventory.risoto_cogumelo ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('risoto_cogumelo' as any, 1, e)} disabled={(inventory.risoto_cogumelo ?? 0) < 1}
-                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300">
                     🍄 Risoto ({getActualSellPrice('risoto_cogumelo' as any)}💰)
                   </button>
                   )}
                   {(inventory.conserva_peixe ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('conserva_peixe' as any, 1, e)} disabled={(inventory.conserva_peixe ?? 0) < 1}
-                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
                     🐟 Conserva ({getActualSellPrice('conserva_peixe' as any)}💰)
                   </button>
                   )}
                   {(inventory.mel_envasado ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('mel_envasado' as any, 1, e)} disabled={(inventory.mel_envasado ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
                     🍯 Mel Envasado ({getActualSellPrice('mel_envasado' as any)}💰)
                   </button>
                   )}
                   {(inventory.sopa_cogumelo ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('sopa_cogumelo' as any, 1, e)} disabled={(inventory.sopa_cogumelo ?? 0) < 1}
-                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-98 transition-all cursor-pointer shadow-sm">
+                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
                     🍲 Sopa ({getActualSellPrice('sopa_cogumelo' as any)}💰)
                   </button>
                   )}
@@ -824,7 +824,7 @@ export default function GameSidebar({
                     setLogs([]);
                     triggerAudioResult(() => sfx.playSound('click'));
                   }}
-                  className="text-[10px] font-mono font-black hover:text-red-600 text-[#92400e] cursor-pointer flex items-center gap-1 px-2.5 py-1 bg-[#fef3c7] rounded-lg border-2 border-[#fbbf24] transition-all hover:scale-105 active:translate-y-0.5 shadow-sm uppercase"
+                  className="text-[10px] font-mono font-black text-red-700 cursor-pointer flex items-center gap-1 px-2.5 py-1 bg-red-50 hover:bg-red-100 rounded-lg border-2 border-b-4 border-red-300 transition-all hover:scale-105 active:translate-y-0.5 shadow-sm uppercase"
                 >
                   <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" /> Limpar
                 </button>

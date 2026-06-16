@@ -861,7 +861,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             <button
               type="button"
               onClick={(e) => { e.preventDefault(); onSellAnimal(animal.id, e); }}
-              className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-stone-400 bg-stone-50 text-stone-700 hover:bg-stone-100 cursor-pointer transition-all"
+              className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-b-4 border-orange-400 bg-orange-50 text-orange-800 hover:bg-orange-100 hover:scale-[1.03] active:translate-y-0.5 cursor-pointer transition-all shadow-sm"
               title={`Vender por ~${Math.round(sellPct * 100)}% do valor. Quanto mais velho, menos vale (mín. 10%).`}
             >
               💸 Vender ({Math.round(sellPct * 100)}%)

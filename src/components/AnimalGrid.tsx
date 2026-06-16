@@ -860,11 +860,13 @@ export default function AnimalGrid({
                     {workers.map(worker => {
                       const def = workerTypes.find(w => w.role === worker.role);
                       return (
-                        <div key={worker.id} className="flex items-center gap-1.5 bg-[#064e3b]/80 border border-[#fbbf24]/60 rounded-full px-3 py-1">
-                          <span className="text-base">{def?.emoji ?? '👷'}</span>
-                          <span className="text-[10px] font-mono text-[#fef3c7] font-black">{worker.name}</span>
-                          <span className="text-[9px] text-[#fbbf24] font-mono">-{worker.dailyCost}💰/dia</span>
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <div key={worker.id} className="flex items-center gap-1.5 bg-gradient-to-r from-[#064e3b] to-[#065f46] border-2 border-[#fbbf24]/70 rounded-full pl-2 pr-3 py-1 shadow-sm">
+                          <span className="text-sm leading-none">{def?.emoji ?? '👷'}</span>
+                          <div className="flex flex-col leading-none">
+                            <span className="text-[10px] font-mono text-[#fef3c7] font-black leading-tight">{worker.name}</span>
+                            <span className="text-[8px] text-[#fbbf24]/80 font-mono leading-tight">-{worker.dailyCost}💰/dia</span>
+                          </div>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5"></span>
                         </div>
                       );
                     })}
@@ -883,7 +885,7 @@ export default function AnimalGrid({
                   ].map(f => (
                     <button key={f.value}
                       onClick={() => setAnimalFilter(f.value)}
-                      className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 transition-all ${animalFilter === f.value ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-transparent border-[#fbbf24]/40 text-[#fef3c7]'}`}>
+                      className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 transition-all ${animalFilter === f.value ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-white/5 hover:bg-[#fbbf24]/20 border-[#fbbf24]/40 text-[#fef3c7]/80 hover:text-[#fef3c7] hover:border-[#fbbf24]/70 transition-all'}`}>
                       {f.label}
                     </button>
                   ))}
@@ -896,7 +898,7 @@ export default function AnimalGrid({
                   </select>
                   {(['happiness','production','age','name','ready'] as const).map(s => (
                     <button key={s} onClick={() => { if (animalSort === s) setAnimalSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setAnimalSort(s); setAnimalSortDir(() => 'desc'); }}}
-                      className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalSort === s ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-transparent border-[#fbbf24]/40 text-[#fef3c7]'}`}>
+                      className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalSort === s ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-white/5 hover:bg-[#fbbf24]/20 border-[#fbbf24]/40 text-[#fef3c7]/80 hover:text-[#fef3c7] hover:border-[#fbbf24]/70 transition-all'}`}>
                       {s === 'happiness' ? '😊 Feliz' : s === 'production' ? '📦 Prod' : s === 'age' ? '📅 Idade' : s === 'ready' ? '✅ Prontos' : '🔤 Nome'}
                       {animalSort === s ? (animalSortDir === 'asc' ? ' ↑' : ' ↓') : ''}
                     </button>
