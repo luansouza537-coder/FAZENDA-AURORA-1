@@ -224,6 +224,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
       className={`rounded-[48px] p-6 flex flex-col justify-between hover:translate-y-[-2px] transition-all relative border-4 ${
         isCritical
           ? 'bg-red-50/70 border-red-600 shadow-[0_12px_0_#991b1b]'
+          : animal.happiness === 100
+          ? 'bg-yellow-50 border-yellow-400 shadow-[0_12px_0_#ca8a04] hover:border-yellow-300'
           : 'bg-[#fffbeb] border-[#fbbf24] shadow-[0_12px_0_#d97706] hover:border-[#f59e0b]'
       }`}
     >
@@ -567,7 +569,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           <div className="bg-[#e5e7eb] h-4 rounded-full overflow-hidden mt-1 border-2 border-[#d1d5db] shadow-inner relative cursor-help">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
-                animal.happiness < 30 ? 'bg-red-500 animate-pulse' : 'bg-[#10b981]'
+                animal.happiness < 30 ? 'bg-red-500 animate-pulse' : animal.happiness < 60 ? 'bg-yellow-400' : animal.happiness === 100 ? 'bg-gradient-to-r from-emerald-400 to-yellow-300' : 'bg-emerald-500'
               }`}
               style={{ width: `${animal.happiness}%` }}
             />

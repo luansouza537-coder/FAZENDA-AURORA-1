@@ -190,7 +190,7 @@ export default function GameSidebar({
                               const price = item.priceKey ? getActualSellPrice(item.priceKey) : null;
                               const isEmpty = item.qty === 0;
                               return (
-                                <div key={item.key} className={`bg-white/80 p-2 rounded-xl border border-[#fbbf24] flex flex-col gap-0.5 shadow-inner ${isEmpty ? 'opacity-40' : ''}`}>
+                                <div key={item.key} title={price !== null ? `${item.label}: ${price}💰/unidade${trend && trend.pct !== 0 ? ` (${trend.pct > 0 ? '+' : ''}${trend.pct}% vs ontem)` : ''}` : undefined} className={`bg-white/80 p-2 rounded-xl border border-[#fbbf24] flex flex-col gap-0.5 shadow-inner ${isEmpty ? 'opacity-40' : ''}`}>
                                   <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-[#78350f] uppercase tracking-tight leading-none flex items-center">
                                       {item.label}
@@ -835,8 +835,9 @@ export default function GameSidebar({
                   <div className="text-center text-[#92400e]/50 italic pt-16 font-bold uppercase tracking-wider">
                     Nenhum registro ainda hoje.
                   </div>
-                ) : (
-                  logs.map((log) => {
+                ) : (() => {
+                  let lastDay: number | null = null;
+                  return logs.map((log) => {
                     let textClass = 'text-[#78350f] font-bold';
                     let bgClass = '';
                     if (log.type === 'error') {
@@ -852,20 +853,26 @@ export default function GameSidebar({
                       textClass = 'text-[#854d0e] font-black uppercase';
                       bgClass = 'bg-[#fef9c3] p-2 rounded-xl border-2 border-[#fef08a]';
                     }
-
+                    const showDaySep = log.day !== lastDay;
+                    lastDay = log.day;
                     return (
-                      <div
-                        key={log.id}
-                        className={`pt-2 first:pt-0 ${bgClass} transition-all flex items-start gap-1 pb-1.5`}
-                      >
-                        <span className="text-[9px] bg-[#fde68a] border border-[#fbbf24] text-[#78350f] px-1.5 py-0.5 rounded-md font-black mr-1 inline-block uppercase shrink-0 leading-none">
-                          Dia {log.day}
-                        </span>
-                        <span className={`${textClass} leading-tight`}>{log.message}</span>
+                      <div key={log.id}>
+                        {showDaySep && (
+                          <div className="flex items-center gap-2 my-1.5">
+                            <div className="flex-1 border-t border-[#fbbf24]/50" />
+                            <span className="text-[9px] font-black text-[#92400e] bg-[#fef3c7] border border-[#fbbf24] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                              — Dia {log.day} —
+                            </span>
+                            <div className="flex-1 border-t border-[#fbbf24]/50" />
+                          </div>
+                        )}
+                        <div className={`${bgClass} transition-all flex items-start gap-1 pb-1.5 pt-1`}>
+                          <span className={`${textClass} leading-tight`}>{log.message}</span>
+                        </div>
                       </div>
                     );
-                  })
-                )}
+                  });
+                })()}
                 <div ref={logsEndRef} />
               </div>
 

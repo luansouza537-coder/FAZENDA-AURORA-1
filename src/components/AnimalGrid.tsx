@@ -50,8 +50,8 @@ interface AnimalGridProps {
   calculateBoiValue: (animal: Animal) => number;
   animalFilter: string;
   setAnimalFilter: (v: string) => void;
-  animalSort: 'happiness' | 'production' | 'age' | 'name';
-  setAnimalSort: (v: 'happiness' | 'production' | 'age' | 'name') => void;
+  animalSort: 'happiness' | 'production' | 'age' | 'name' | 'ready';
+  setAnimalSort: (v: 'happiness' | 'production' | 'age' | 'name' | 'ready') => void;
   animalSortDir: 'asc' | 'desc';
   setAnimalSortDir: (fn: (d: 'asc' | 'desc') => 'asc' | 'desc') => void;
   animalViewMode: 'card' | 'list';
@@ -892,10 +892,10 @@ export default function AnimalGrid({
                       <option key={type} value={type}>{type}</option>
                     ))}
                   </select>
-                  {(['happiness','production','age','name'] as const).map(s => (
+                  {(['happiness','production','age','name','ready'] as const).map(s => (
                     <button key={s} onClick={() => { if (animalSort === s) setAnimalSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setAnimalSort(s); setAnimalSortDir(() => 'desc'); }}}
                       className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalSort === s ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-transparent border-[#fbbf24]/40 text-[#fef3c7]'}`}>
-                      {s === 'happiness' ? '😊 Feliz' : s === 'production' ? '📦 Prod' : s === 'age' ? '📅 Idade' : '🔤 Nome'}
+                      {s === 'happiness' ? '😊 Feliz' : s === 'production' ? '📦 Prod' : s === 'age' ? '📅 Idade' : s === 'ready' ? '✅ Prontos' : '🔤 Nome'}
                       {animalSort === s ? (animalSortDir === 'asc' ? ' ↑' : ' ↓') : ''}
                     </button>
                   ))}
@@ -944,9 +944,12 @@ export default function AnimalGrid({
                       })
                       .sort((a, b) => {
                         let cmp = 0;
+                        const isReady = (x: typeof a) =>
+                          (x.hasProducedToday ? 1 : 0) + (x.woolReady ? 1 : 0);
                         if (animalSort === 'happiness') cmp = (a.happiness ?? 0) - (b.happiness ?? 0);
                         else if (animalSort === 'production') cmp = (a.weeklyProduction ?? 0) - (b.weeklyProduction ?? 0);
                         else if (animalSort === 'age') cmp = (a.age ?? 0) - (b.age ?? 0);
+                        else if (animalSort === 'ready') cmp = isReady(a) - isReady(b);
                         else cmp = a.name.localeCompare(b.name);
                         return animalSortDir === 'asc' ? cmp : -cmp;
                       });

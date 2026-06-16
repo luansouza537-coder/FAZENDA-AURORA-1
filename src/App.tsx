@@ -139,7 +139,7 @@ function GameApp() {
 
   // --- FEATURE 1: Animal List Filters ---
   const [animalFilter, setAnimalFilter] = useState<string>('all');
-  const [animalSort, setAnimalSort] = useState<'happiness'|'production'|'age'|'name'>('name');
+  const [animalSort, setAnimalSort] = useState<'happiness'|'production'|'age'|'name'|'ready'>('name');
   const [animalSortDir, setAnimalSortDir] = useState<'asc'|'desc'>('asc');
   const [animalViewMode, setAnimalViewMode] = useState<'card'|'list'>('card');
 
@@ -328,6 +328,7 @@ function GameApp() {
 
   // Improvement 2: Profit Panel
   const [showProfitPanel, setShowProfitPanel] = useState<boolean>(false);
+  const [showSavedToast, setShowSavedToast] = useState<boolean>(false);
 
   // Improvement 4: Ranking Modal
   const [showRankingModal, setShowRankingModal] = useState<boolean>(false);
@@ -2083,6 +2084,8 @@ function GameApp() {
         hasBalanca, hasCisterna, blockNextStorm, blockNextDrought, isencaoMultaCount,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
+      setShowSavedToast(true);
+      setTimeout(() => setShowSavedToast(false), 2000);
     }
   }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent, financialLog]);
 
@@ -5103,7 +5106,7 @@ function GameApp() {
               </h1>
               <div className="flex flex-col mt-0.5">
                 <span className="text-[#fcd57e] text-xs uppercase font-mono font-bold tracking-widest block">
-                  🌾 Nível {farmLevel} ({getFarmTitle(farmLevel)}) • {weather === 'chuva' ? '🌧️ Chuva' : weather === 'sol' ? '☀️ Sol Forte' : '☁️ Nublado'} • {seasonName}
+                  🌾 Nível {farmLevel} ({getFarmTitle(farmLevel)}) • <span className={weather === 'chuva' ? 'animate-bounce inline-block' : weather === 'sol' ? 'animate-spin inline-block' : ''}>{weather === 'chuva' ? '🌧️ Chuva' : weather === 'sol' ? '☀️ Sol Forte' : '☁️ Nublado'}</span> • {seasonName}
                   {nextDayEvent && (
                     <span className="ml-2 text-[#fbbf24] text-[10px]">
                       | Amanhã: {nextDayEvent === 'praga' ? '🐀 Pragas' : nextDayEvent === 'tempestade' ? '⛈️ Tempestade' : nextDayEvent === 'seca' ? '🏜️ Seca' : nextDayEvent === 'geada' ? '❄️ Geada' : nextDayEvent === 'predador' ? '🐺 Predador' : nextDayEvent === 'chuva_leve' ? '🌦️ Chuva Leve' : nextDayEvent === 'sol_forte' ? '☀️ Sol Forte' : nextDayEvent === 'vento_bom' ? '🌬️ Vento Bom' : '🌤️ Tranquilo'}
@@ -5458,6 +5461,29 @@ function GameApp() {
           </div>
 
         </div>
+
+        {/* Melhoria 6: Toast de autosave */}
+        {showSavedToast && (
+          <div className="fixed bottom-4 right-4 z-[9999] bg-emerald-700 text-white text-xs font-mono font-black px-4 py-2 rounded-full shadow-lg flex items-center gap-2 animate-pulse pointer-events-none">
+            ✅ Salvo!
+          </div>
+        )}
+
+        {/* Melhoria 7 + 10: Barra de avisos contextuais */}
+        {(loanActive && loanWeeksLeft <= 1) || nextFairDay - currentDay <= 3 ? (
+          <div className="flex flex-wrap gap-2 px-6 pb-2">
+            {loanActive && loanWeeksLeft <= 1 && (
+              <div className="bg-red-700 border-2 border-red-400 text-white text-[11px] font-mono font-black px-3 py-1.5 rounded-full flex items-center gap-1.5 animate-pulse">
+                🏦 Empréstimo vence em {loanWeeksLeft === 0 ? 'hoje' : `${loanWeeksLeft} semana`}!
+              </div>
+            )}
+            {nextFairDay - currentDay <= 3 && nextFairDay > currentDay && (
+              <div className="bg-amber-600 border-2 border-amber-400 text-white text-[11px] font-mono font-black px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                🎪 Feira em {nextFairDay - currentDay} dia{nextFairDay - currentDay !== 1 ? 's' : ''}!
+              </div>
+            )}
+          </div>
+        ) : null}
 
         {/* --- TRAVEL MERCHANT SPECIAL NOTICE --- */}
         {merchantActive && (
