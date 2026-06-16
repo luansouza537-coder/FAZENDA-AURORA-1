@@ -57,6 +57,10 @@ import MelhoriasModal from './components/MelhoriasModal';
 import QueijariaModal from './components/QueijariaModal';
 import AutomationModal from './components/AutomationModal';
 import MarketModal from './components/MarketModal';
+import AchievementsModal from './components/AchievementsModal';
+import LevelUpModal from './components/LevelUpModal';
+import WeeklyReportModal from './components/WeeklyReportModal';
+import StatsModal from './components/StatsModal';
 
 
 interface FloatingText {
@@ -7283,403 +7287,39 @@ function GameApp() {
       </AnimatePresence>
 
       {/* 🏆 ACHIEVEMENTS GALLERY MODAL */}
-      <AnimatePresence>
-        {showAchievementsModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowAchievementsModal(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[90] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#fffbeb] border-8 border-[#78350f] rounded-[36px] max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative animate-fade-in"
-            >
-              {/* Header */}
-              <div className="bg-[#78350f] p-5 border-b-4 border-[#92400e] text-center shrink-0">
-                <h3 className="text-white text-xl sm:text-2xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2 animate-pulse" style={{ textShadow: '1.5px 1.5px 0px #451a03', animationDuration: '4s' }}>
-                  🏆 Galeria de Medalhas & Conquistas
-                </h3>
-                <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-                  Seus marcos heroicos na Fazenda Aurora
-                </p>
-                <button
-                  onClick={() => {
-                    setShowAchievementsModal(false);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-[#92400e] hover:bg-[#b45309] border-2 border-[#78350f] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all active:scale-95 text-lg font-bold"
-                  title="Fechar"
-                >
-                  ✕
-                </button>
-              </div>
+      {showAchievementsModal && (
+        <AchievementsModal
+          unlockedAchievements={unlockedAchievements}
+          achievementsList={ACHIEVEMENTS_LIST}
+          onClose={() => setShowAchievementsModal(false)}
+          triggerAudioResult={triggerAudioResult} sfx={sfx}
+        />
+      )}
 
-              {/* Progress indicator */}
-              <div className="bg-[#fef3c7] px-6 py-4 border-b-2 border-[#fbbf24] flex items-center justify-between gap-4 shrink-0">
-                <div className="flex-1">
-                  <div className="flex justify-between items-center text-xs font-mono font-bold uppercase text-[#78350f] mb-1">
-                    <span>Progresso de Desbloqueio:</span>
-                    <span>{unlockedAchievements.length} de {ACHIEVEMENTS_LIST.length} ({Math.round((unlockedAchievements.length / ACHIEVEMENTS_LIST.length) * 100)}%)</span>
-                  </div>
-                  <div className="bg-stone-200 h-3 rounded-full overflow-hidden border border-[#d1d5db] shadow-inner">
-                    <div 
-                      className="bg-gradient-to-r from-amber-400 to-yellow-500 h-full transition-all duration-500"
-                      style={{ width: `${(unlockedAchievements.length / ACHIEVEMENTS_LIST.length) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Scrollable grid of achievements */}
-              <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 sm:grid-cols-2 gap-4" style={{ scrollbarWidth: 'thin' }}>
-                {ACHIEVEMENTS_LIST.map((ach) => {
-                  const isUnlocked = unlockedAchievements.includes(ach.id);
-                  return (
-                    <div 
-                      key={ach.id}
-                      className={`border-4 rounded-3xl p-4 flex items-start gap-3 transition-all ${
-                        isUnlocked 
-                          ? 'bg-amber-50/70 border-amber-400 shadow-md translate-y-[-1px]' 
-                          : 'bg-stone-100/50 border-stone-200/80 grayscale opacity-60'
-                      }`}
-                    >
-                      <div className={`rounded-xl w-11 h-11 flex items-center justify-center text-2xl shrink-0 ${
-                        isUnlocked ? 'bg-[#fbbf24] text-white shadow-md' : 'bg-stone-300 text-stone-500'
-                      }`}>
-                        {isUnlocked ? ach.emoji : '🔒'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h4 className={`font-display font-black text-xs sm:text-sm uppercase tracking-wider ${
-                            isUnlocked ? 'text-[#78350f]' : 'text-stone-500'
-                          }`}>
-                            {ach.title}
-                          </h4>
-                          {isUnlocked && <span className="text-[10px] text-amber-600">🏆</span>}
-                        </div>
-                        <p className={`text-xs mt-1 leading-normal ${
-                          isUnlocked ? 'text-stone-600' : 'text-stone-400'
-                        }`}>
-                          {ach.description}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Close footer button */}
-              <div className="bg-[#78350f]/10 p-4 border-t-2 border-[#78350f]/20 flex justify-end shrink-0">
-                <button
-                  onClick={() => {
-                    setShowAchievementsModal(false);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  className="bg-[#10b981] hover:bg-[#059669] text-white border-b-4 border-[#065f46] shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer"
-                >
-                  Voltar à Fazenda
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 🏆 SPECTACULAR LEVEL UP MODAL */}
-      <AnimatePresence>
-        {showLevelUpModal !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => {
-              // BUG 7 FIX: fechar pelo backdrop também concede +100 moedas
-              setShowLevelUpModal(null);
-              setGold(prev => prev + 100);
-            }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[9999] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 30, rotate: -2 }}
-              animate={{ scale: 1, y: 0, rotate: 0 }}
-              exit={{ scale: 0.9, y: 30, rotate: 2 }}
-              transition={{ type: 'spring', damping: 15 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-br from-amber-50 to-amber-100 border-8 border-yellow-500 rounded-[40px] max-w-sm sm:max-w-md w-full overflow-hidden shadow-2xl relative flex flex-col p-6 sm:p-8 text-center"
-            >
-              {/* Top Banner Accent */}
-              <div className="absolute -top-10 -left-10 w-24 h-24 bg-yellow-400 rounded-full blur-xl opacity-50 animate-pulse" />
-              <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-amber-400 rounded-full blur-xl opacity-50 animate-pulse" />
-
-              {/* Header Visual Badge */}
-              <div className="relative mx-auto -mt-12 sm:-mt-16 bg-gradient-to-br from-yellow-400 via-amber-400 to-yellow-600 border-4 border-white w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shadow-xl animate-bounce">
-                <span className="text-4xl sm:text-5xl">🏆</span>
-                <span className="absolute -top-1 -right-1 text-base">✨</span>
-                <span className="absolute -bottom-1 -left-1 text-base">✨</span>
-              </div>
-
-              {/* Title Header */}
-              <h3 className="text-yellow-600 text-sm font-mono tracking-widest font-black uppercase mt-4">
-                LEVEL UP COMPLETED!
-              </h3>
-              
-              <h2 className="text-[#78350f] text-2xl sm:text-3xl font-display font-black leading-tight uppercase mt-1">
-                Fazenda Subiu de Nível!
-              </h2>
-
-              {/* Tier / Title display */}
-              <div className="bg-[#78350f]/15 border-2 border-[#78350f]/20 rounded-2xl px-4 py-2 mt-3 select-none flex items-center justify-center gap-2">
-                <span className="text-xl">⭐</span>
-                <span className="text-[#78350f] font-mono font-black text-xs sm:text-sm uppercase tracking-wide">
-                  Nível {showLevelUpModal} · {getFarmTitle(showLevelUpModal)}
-                </span>
-                <span className="text-xl">⭐</span>
-              </div>
-
-              {/* Perks details lists of the unlocked level */}
-              <div className="mt-5 text-left border-t border-[#78350f]/10 pt-4 flex-1">
-                <p className="text-stone-700 font-bold text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5 justify-center">
-                  ✨ Benefícios & Desbloqueios ✨
-                </p>
-
-                <div className="space-y-2.5">
-                  {getLevelUpDetails(showLevelUpModal).perks.map((perk, i) => (
-                    <motion.div 
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.15 }}
-                      className="flex items-start gap-2 bg-white/70 border border-yellow-300 rounded-xl p-3 shadow-xs"
-                    >
-                      <span className="text-emerald-500 text-base shrink-0">✅</span>
-                      <p className="text-xs sm:text-sm font-bold text-stone-700 font-sans leading-snug">
-                        {perk}
-                      </p>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Awesome Level Reward Extra Gold Gift */}
-              <div className="bg-gradient-to-r from-emerald-500/15 via-emerald-500/5 to-emerald-500/15 border-2 border-emerald-400 rounded-2xl px-4 py-3 mt-4 text-center">
-                <span className="text-xs uppercase font-mono tracking-widest font-extrabold text-emerald-700 block leading-none">
-                  🎁 Bônus de Celebração Real 🎁
-                </span>
-                <span className="text-[#78350f] font-mono font-black text-sm block mt-1">
-                  +100 moedas de ouro creditadas!
-                </span>
-              </div>
-
-              {/* Button footer */}
-              <div className="mt-6 flex justify-center">
-                <button
-                  onClick={(e) => {
-                    // BUG 7 FIX: stopPropagation evita duplo disparo com o backdrop (que já chama setGold)
-                    e.stopPropagation();
-                    setShowLevelUpModal(null);
-                    setGold(prev => prev + 100);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  className="bg-[#10b981] hover:bg-[#059669] text-white border-b-6 border-[#065f46] shadow-lg hover:shadow-xl px-10 py-3 rounded-2xl font-display font-black uppercase text-sm tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer max-w-xs w-full text-center"
-                >
-                  Continuar Fazenda!
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* 🏆 LEVEL UP MODAL */}
+      {showLevelUpModal !== null && (
+        <LevelUpModal
+          level={showLevelUpModal}
+          getFarmTitle={getFarmTitle}
+          getLevelUpDetails={getLevelUpDetails}
+          onClose={() => setShowLevelUpModal(null)}
+          setGold={setGold}
+          triggerAudioResult={triggerAudioResult} sfx={sfx}
+        />
+      )}
 
       {/* 📅 WEEKLY BALANCE SHEET REPORT BOARD */}
       <AnimatePresence>
         {showWeeklyReport && weeklyReportData && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowWeeklyReport(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[999] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#fffbeb] border-8 border-indigo-900 rounded-[36px] max-w-xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
-            >
-              {/* Plaque Header */}
-              <div className="bg-gradient-to-r from-indigo-900 to-indigo-950 p-5 border-b-4 border-indigo-950 text-center shrink-0">
-                <h3 className="text-white text-xl sm:text-2xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2" style={{ textShadow: '1.5px 1.5px 0px #1e1b4b' }}>
-                  📅 Plano de Balanço Semanal
-                </h3>
-                <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-                  Relatório do Dia {currentDay - 7} ao Dia {currentDay - 1} de atividade
-                </p>
-                <button
-                  onClick={() => {
-                    setShowWeeklyReport(false);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-indigo-950 hover:bg-indigo-800 border-2 border-indigo-900 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all active:scale-95 text-lg font-bold"
-                  title="Fechar"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Scrollable report body */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 text-sm font-sans" style={{ scrollbarWidth: 'thin' }}>
-                <div className="text-center font-bold text-[#78350f] uppercase tracking-wide text-xs mb-1">
-                  📊 Resumo Estatístico dos Últimos 7 Dias
-                </div>
-
-                {/* Grid stats */}
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-3 flex items-center gap-3 shadow-xs">
-                    <span className="text-2xl">💰</span>
-                    <div>
-                      <div className="text-[10px] font-mono tracking-wider font-black text-emerald-700 uppercase leading-none">Lucro Bruto</div>
-                      <div className="text-base font-black font-mono text-[#78350f] mt-1">+{weeklyReportData.earnings} moedas</div>
-                    </div>
-                  </div>
-
-                  <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-3 flex items-center gap-3 shadow-xs">
-                    <span className="text-2xl">🌽</span>
-                    <div>
-                      <div className="text-[10px] font-mono tracking-wider font-black text-red-700 uppercase leading-none">Despesas</div>
-                      <div className="text-base font-black font-mono text-[#78350f] mt-1">-{weeklyReportData.spending} moedas</div>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#fef3c7] border-2 border-[#fbbf24] rounded-2xl p-3 flex items-center gap-3 col-span-2 shadow-xs">
-                    <span className="text-2xl">⚖️</span>
-                    <div>
-                      <div className="text-[10px] font-mono tracking-wider font-black text-stone-700 uppercase leading-none">Balanço Líquido</div>
-                      <div className={`text-base font-black font-mono mt-1 ${
-                        (weeklyReportData.earnings - weeklyReportData.spending) >= 0 ? 'text-emerald-700' : 'text-red-600'
-                      }`}>
-                        {(weeklyReportData.earnings - weeklyReportData.spending) >= 0 ? '+' : ''}
-                        {weeklyReportData.earnings - weeklyReportData.spending} moedas de ouro
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Processed/Harvested Items list */}
-                <div className="bg-white/75 border-2 border-[#fbbf24] rounded-2xl p-4 shadow-sm">
-                  <h4 className="font-display font-black text-xs text-[#78350f] uppercase tracking-wider mb-2 border-b border-stone-200 pb-1">
-                    📦 Itens Obtidos & Produzidos
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2 text-xs font-mono text-stone-700">
-                    <div className="flex items-center gap-1.5">
-                      <span>🥛 Leite Ordenhado:</span>
-                      <span className="font-bold text-[#78350f]">{weeklyReportData.milk} baldes</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span>🧶 Novelo de Lã:</span>
-                      <span className="font-bold text-[#78350f]">{weeklyReportData.wool} fardos</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span>🧀 Queijo Nobre:</span>
-                      <span className="font-bold text-yellow-600 font-extrabold">{weeklyReportData.cheese} un</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span>🧣 Cachecóis Tecidos:</span>
-                      <span className="font-bold text-indigo-600 font-extrabold">{weeklyReportData.scarf} un</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span>🥚 Ovos Coletados:</span>
-                      <span className="font-bold text-orange-600">{weeklyReportData.egg || 0} un</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span>🥣 Maionese Pronta:</span>
-                      <span className="font-bold text-[#78350f]">{weeklyReportData.mayo || 0} un</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 col-span-2 border-t border-dashed border-stone-200 pt-1.5 mt-1.5">
-                      <span>🐂 Bois Vendidos na Feira:</span>
-                      <span className="font-bold text-[#78350f]">{weeklyReportData.oxSold} animais</span>
-                    </div>
-                    {weeklyTaxPaid > 0 && (
-                      <div className="flex items-center gap-1.5 col-span-2 text-red-700">
-                        <span>🏛️ Imposto pago:</span>
-                        <span className="font-bold">-{weeklyTaxPaid} moedas</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5 col-span-2 text-blue-700">
-                      <span>💧 Água gasta:</span>
-                      <span className="font-bold">-{weeklyReportData.waterCost || 0} moedas</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 col-span-2 text-amber-700">
-                      <span>⚡ Energia gasta:</span>
-                      <span className="font-bold">-{weeklyReportData.energyCost || 0} moedas</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Workers weekly salary */}
-                {workers.length > 0 && (
-                <div className="bg-white/75 border-2 border-[#fbbf24] rounded-2xl p-4 shadow-sm">
-                  <h4 className="font-display font-black text-xs text-[#78350f] uppercase tracking-wider mb-2 border-b border-stone-200 pb-1">
-                    👷 Salários da Semana
-                  </h4>
-                  <div className="space-y-1.5 text-xs font-mono text-stone-700">
-                    {workers.map(worker => {
-                      const def = WORKER_TYPES.find(w => w.role === worker.role);
-                      return (
-                        <div key={worker.id} className="flex items-center justify-between">
-                          <span>{def?.emoji ?? '👷'} {worker.name} ({worker.role})</span>
-                          <span className="font-bold text-red-600">-{worker.dailyCost * 7} moedas</span>
-                        </div>
-                      );
-                    })}
-                    <div className="flex items-center justify-between border-t border-stone-200 pt-1.5 mt-1">
-                      <span className="font-black uppercase text-stone-800">Total Funcionários:</span>
-                      <span className="font-black text-red-700">-{workers.reduce((sum, w) => sum + w.dailyCost * 7, 0)} moedas</span>
-                    </div>
-                  </div>
-                </div>
-                )}
-
-                {/* Agricultural expert recommendation tip bubble */}
-                <div className="bg-indigo-50 border-2 border-indigo-200 rounded-3xl p-4 text-xs leading-relaxed text-indigo-950 flex gap-2.5 items-start">
-                  <span className="text-xl shrink-0 selection-none">🧙‍♂️</span>
-                  <div>
-                    <div className="font-bold text-indigo-900 uppercase tracking-widest text-[9px] mb-0.5">Dica de Gestão do Consultor:</div>
-                    {(() => {
-                      if (weeklyReportData.cheese === 0 && weeklyReportData.scarf === 0) {
-                        return "Seu Ateliê está ocioso! Transforme seu Leite Cru e Lã Crua em Queijo Nobre e Cachecol. Itens manufaturados dobram seu retorno de moedas!";
-                      }
-                      if (weeklyReportData.earnings < 120) {
-                        return "Faturamento baixo! Compre mais Vacas Leiteiras ou tosquie Ovelhas. Climas de Sol Forte dão leite extra diariamente!";
-                      }
-                      if (weeklyReportData.spending > weeklyReportData.earnings) {
-                        return "Cuidado! Suas despesas excederam o lucro semanal. Certifique-se de vender os Bois Gordos quando atingirem o status Premium na feira!";
-                      }
-                      return "Sua gestão está excelente! Aproveite as visitas periódicas do Mercador Viajante para escoar sua produção manufaturada com bônus de 1.5x moedas!";
-                    })()}
-                  </div>
-                </div>
-              </div>
-
-              {/* Confirm button */}
-              <div className="bg-indigo-900/10 p-4 border-t-2 border-indigo-900/20 flex justify-end shrink-0">
-                <button
-                  onClick={() => {
-                    setShowWeeklyReport(false);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  className="bg-indigo-600 hover:bg-indigo-750 text-white border-b-4 border-indigo-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer"
-                >
-                  Confirmar Balanço
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+          <WeeklyReportModal
+            currentDay={currentDay}
+            weeklyReportData={weeklyReportData}
+            workers={workers}
+            weeklyTaxPaid={weeklyTaxPaid}
+            workerTypes={WORKER_TYPES}
+            onClose={() => setShowWeeklyReport(false)}
+            triggerAudioResult={triggerAudioResult} sfx={sfx}
+          />
         )}
       </AnimatePresence>
 
@@ -8080,157 +7720,14 @@ function GameApp() {
       {/* 📊 STATS / ANALYTICS MODAL */}
       <AnimatePresence>
         {showStatsModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowStatsModal(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[90] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#fffbeb] border-8 border-teal-800 rounded-[36px] max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
-            >
-              <div className="bg-gradient-to-r from-teal-800 to-teal-900 p-5 border-b-4 border-teal-950 text-center shrink-0">
-                <h3 className="text-white text-xl sm:text-2xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
-                  📊 Painel de Estatísticas
-                </h3>
-                <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-                  Histórico de ganhos, produção e desempenho da fazenda
-                </p>
-                <button
-                  onClick={() => setShowStatsModal(false)}
-                  className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-teal-950 hover:bg-teal-800 border-2 border-teal-900 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{ scrollbarWidth: 'thin' }}>
-
-                {/* Resumo Geral */}
-                <div>
-                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-teal-800 mb-3 flex items-center gap-1.5">📋 Resumo Geral</h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-3 text-center">
-                      <div className="text-[9px] font-mono text-emerald-700 uppercase font-black">Total Faturado</div>
-                      <div className="text-base font-black font-mono text-[#78350f] mt-1">💰 {stats.totalEarned}</div>
-                    </div>
-                    <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3 text-center">
-                      <div className="text-[9px] font-mono text-amber-700 uppercase font-black">Melhor Dia</div>
-                      <div className="text-base font-black font-mono text-[#78350f] mt-1">💰 {allTimeStats.bestDay}</div>
-                    </div>
-                    <div className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-3 text-center">
-                      <div className="text-[9px] font-mono text-blue-700 uppercase font-black">Total Coletado</div>
-                      <div className="text-base font-black font-mono text-[#78350f] mt-1">📦 {stats.totalCollected}</div>
-                    </div>
-                    <div className="bg-purple-50 border-2 border-purple-300 rounded-2xl p-3 text-center">
-                      <div className="text-[9px] font-mono text-purple-700 uppercase font-black">Total Alimentados</div>
-                      <div className="text-base font-black font-mono text-[#78350f] mt-1">🌽 {stats.totalFed}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Gráfico de Ganhos Diários */}
-                <div>
-                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-teal-800 mb-3 flex items-center gap-1.5">📈 Ganhos Diários (últimos {earningsHistory.length} dias)</h4>
-                  {earningsHistory.length === 0 ? (
-                    <div className="text-xs text-stone-500 italic text-center py-4">Avance dias para ver o histórico de ganhos.</div>
-                  ) : (
-                    <div className="bg-white border-2 border-teal-200 rounded-2xl p-4">
-                      <div className="flex items-end gap-1.5 h-24 w-full">
-                        {earningsHistory.map((val, i) => {
-                          const maxVal = Math.max(...earningsHistory, 1);
-                          const heightPct = Math.max(5, (val / maxVal) * 100);
-                          return (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-1 group/bar" title={`Dia ${currentDay - earningsHistory.length + i}: ${val} moedas`}>
-                              <div
-                                className="w-full bg-teal-500 rounded-t-md transition-all group-hover/bar:bg-teal-400"
-                                style={{ height: `${heightPct}%` }}
-                              />
-                              <span className="text-[7px] font-mono text-stone-400 leading-none">{val > 0 ? val : '-'}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div className="flex justify-between text-[8px] text-stone-400 font-mono mt-1">
-                        <span>-{earningsHistory.length}d</span>
-                        <span>hoje</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Distribuição de Produtos */}
-                <div>
-                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-teal-800 mb-3 flex items-center gap-1.5">🥧 Produção por Tipo</h4>
-                  <div className="space-y-2">
-                    {[
-                      { label: '🥛 Leite Coletado', val: stats.totalMilk || 0, color: 'bg-blue-400' },
-                      { label: '🧶 Lã Coletada', val: stats.totalWool || 0, color: 'bg-purple-400' },
-                      { label: '🥚 Ovos Coletados', val: stats.totalEggs || 0, color: 'bg-amber-400' },
-                      { label: '🧀 Queijos Fabricados', val: stats.totalCheese || 0, color: 'bg-yellow-500' },
-                      { label: '🧣 Cachecóis Tecidos', val: stats.totalScarf || 0, color: 'bg-indigo-400' },
-                      { label: '🥣 Maioneses Feitas', val: stats.totalMayo || 0, color: 'bg-green-400' },
-                      { label: '🐂 Bois Vendidos', val: stats.totalOxSold || 0, color: 'bg-orange-400' },
-                    ].map(item => {
-                      const maxVal = Math.max(stats.totalMilk || 0, stats.totalWool || 0, stats.totalEggs || 0, stats.totalCheese || 0, stats.totalScarf || 0, stats.totalMayo || 0, stats.totalOxSold || 0, 1);
-                      const widthPct = Math.max(2, (item.val / maxVal) * 100);
-                      return (
-                        <div key={item.label} className="flex items-center gap-2">
-                          <span className="text-[10px] font-mono text-stone-600 w-36 shrink-0">{item.label}</span>
-                          <div className="flex-1 bg-stone-200 h-4 rounded-full overflow-hidden border border-stone-300 flex items-center">
-                            <div className={`${item.color} h-full rounded-full transition-all`} style={{ width: `${widthPct}%` }} />
-                          </div>
-                          <span className="text-[10px] font-mono font-bold text-stone-700 w-8 text-right shrink-0">{item.val}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Prestige Points */}
-              {prestigePoints > 0 && (
-                <div className="px-6 pb-4">
-                  <h4 className="font-display font-black text-xs uppercase tracking-wider text-yellow-700 mb-3 flex items-center gap-1.5">⭐ Pontos de Prestígio</h4>
-                  <div className="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-black font-mono text-yellow-800">⭐ {prestigePoints} pts</span>
-                      <span className="text-[10px] font-mono text-yellow-600">
-                        {prestigePoints >= 500 ? '🌌 LENDA DO AGRO' : prestigePoints >= 300 ? '👑 Mestre' : prestigePoints >= 150 ? '🥇 Experiente' : prestigePoints >= 50 ? '🥈 Reconhecido' : '🌱 Iniciante'}
-                      </span>
-                    </div>
-                    {[
-                      { pts: 50, label: 'Turismo +10%', achieved: prestigePoints >= 50 },
-                      { pts: 150, label: 'Comerciante mais frequente', achieved: prestigePoints >= 150 },
-                      { pts: 300, label: 'Preços +5% permanente', achieved: prestigePoints >= 300 },
-                      { pts: 500, label: 'LENDA DO AGRO', achieved: prestigePoints >= 500 },
-                    ].map(m => (
-                      <div key={m.pts} className="flex items-center gap-2 mb-1">
-                        <span className={`text-[10px] font-mono ${m.achieved ? 'text-yellow-700 font-bold' : 'text-stone-400'}`}>
-                          {m.achieved ? '✅' : '⬜'} {m.pts} pts: {m.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="bg-teal-50 p-4 border-t-2 border-teal-200 flex justify-end shrink-0">
-                <button
-                  onClick={() => setShowStatsModal(false)}
-                  className="bg-teal-600 hover:bg-teal-500 text-white border-b-4 border-teal-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider transition-all hover:scale-105 active:translate-y-0.5 cursor-pointer"
-                >
-                  Fechar Stats
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+          <StatsModal
+            stats={stats}
+            allTimeStats={allTimeStats}
+            earningsHistory={earningsHistory}
+            currentDay={currentDay}
+            prestigePoints={prestigePoints}
+            onClose={() => setShowStatsModal(false)}
+          />
         )}
       </AnimatePresence>
 
