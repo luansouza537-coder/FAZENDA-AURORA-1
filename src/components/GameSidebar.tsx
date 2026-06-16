@@ -179,7 +179,9 @@ export default function GameSidebar({
                 return (
                   <div className="space-y-3 mb-4">
                     {groups.map(group => {
-                      const visibleItems = group.items.filter(item => showEmptyItems || item.qty > 0);
+                      // cheese, scarf e mayo têm craft rápido em "Refinar" — sempre visíveis para fechar o loop visual
+                      const ALWAYS_SHOW = new Set(['cheese', 'scarf', 'mayo']);
+                      const visibleItems = group.items.filter(item => showEmptyItems || item.qty > 0 || ALWAYS_SHOW.has(item.key));
                       if (visibleItems.length === 0) return null;
                       return (
                         <div key={group.title}>
@@ -189,14 +191,18 @@ export default function GameSidebar({
                               const trend = item.priceKey ? getPriceTrend(item.priceKey) : null;
                               const price = item.priceKey ? getActualSellPrice(item.priceKey) : null;
                               const isEmpty = item.qty === 0;
+                              const isCraftable = ALWAYS_SHOW.has(item.key) && isEmpty;
                               return (
-                                <div key={item.key} title={price !== null ? `${item.label}: ${price}💰/unidade${trend && trend.pct !== 0 ? ` (${trend.pct > 0 ? '+' : ''}${trend.pct}% vs ontem)` : ''}` : undefined} className={`bg-white/80 p-2 rounded-xl border border-[#fbbf24] flex flex-col gap-0.5 shadow-inner ${isEmpty ? 'opacity-40' : ''}`}>
+                                <div key={item.key} title={price !== null ? `${item.label}: ${price}💰/unidade${trend && trend.pct !== 0 ? ` (${trend.pct > 0 ? '+' : ''}${trend.pct}% vs ontem)` : ''}` : undefined} className={`bg-white/80 p-2 rounded-xl border flex flex-col gap-0.5 shadow-inner transition-all ${isCraftable ? 'border-emerald-300 bg-emerald-50/40' : isEmpty ? 'border-[#fbbf24] opacity-40' : 'border-[#fbbf24]'}`}>
                                   <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-[#78350f] uppercase tracking-tight leading-none flex items-center">
                                       {item.label}
                                       {item.freshKey && item.qty > 0 && getFreshnessIndicator(item.freshKey)}
                                     </span>
-                                    <span className="font-mono font-black text-blue-700 text-xs bg-blue-50/60 px-1.5 py-0.5 rounded border border-blue-100">{item.qty}u</span>
+                                    {isCraftable
+                                      ? <span className="text-[8px] font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded leading-none">✦ Fabricar ↓</span>
+                                      : <span className="font-mono font-black text-blue-700 text-xs bg-blue-50/60 px-1.5 py-0.5 rounded border border-blue-100">{item.qty}u</span>
+                                    }
                                   </div>
                                   {price !== null && (
                                     <div className="flex items-center gap-1 mt-0.5 flex-wrap">
