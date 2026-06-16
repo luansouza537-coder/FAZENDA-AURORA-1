@@ -11,8 +11,8 @@ import { useFairs } from './hooks/useFairs';
 import { useEconomy } from './hooks/useEconomy';
 import { useFarm, getFarmTitle, getLevelUpDetails, getXpForLevel } from './hooks/useFarm';
 import { useMissions } from './hooks/useMissions';
+import { useWorkers } from './hooks/useWorkers';
 import { ACHIEVEMENTS_LIST } from './data/achievements';
-import { WORKER_TYPES } from './data/workers';
 import { MERCHANT_SPECIAL_ITEMS } from './data/merchantItems';
 import PriceChart from './components/PriceChart';
 import { motion, AnimatePresence } from 'motion/react';
@@ -44,7 +44,7 @@ import {
   Target,
   BarChart2
 } from 'lucide-react';
-import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract, FarmSpecialization, FairResult, FarmWorker, LandLot, BiomeType } from './types';
+import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract, FarmSpecialization, FairResult, LandLot, BiomeType } from './types';
 import { getRandomName, getUniqueOxName } from './names';
 import { sfx } from './utils/audio';
 import SeasonalParticles from './components/SeasonalParticles';
@@ -142,13 +142,6 @@ function GameApp() {
   const [animalViewMode, setAnimalViewMode] = useState<'card'|'list'>('card');
 
   // --- FEATURE 2: Worker NPCs ---
-  const [workers, setWorkers] = useState<FarmWorker[]>(() => {
-    try {
-      const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) return JSON.parse(saved).workers ?? [];
-    } catch(e) {}
-    return [];
-  });
   const [showWorkersModal, setShowWorkersModal] = useState(false);
 
   // --- FEATURE 3: Land Biomes ---
@@ -1892,6 +1885,15 @@ function GameApp() {
       setAnimalFilter('all');
     },
   });
+
+  // --- useWorkers hook ---
+  const {
+    workers,
+    setWorkers,
+    hireWorker,
+    fireWorker,
+    workerTypes,
+  } = useWorkers({ currentDay, addLog });
 
   // --- useMissions hook ---
   const { generateDailyMissions, generateWeeklyMissions, generateEpicMissions } = useMissions({ animals, farmLevel, inventory });
@@ -6220,7 +6222,7 @@ function GameApp() {
                 {workers.length > 0 && (
                   <div className="col-span-full flex flex-wrap gap-2 mb-3">
                     {workers.map(worker => {
-                      const def = WORKER_TYPES.find(w => w.role === worker.role);
+                      const def = workerTypes.find(w => w.role === worker.role);
                       return (
                         <div key={worker.id} className="flex items-center gap-1.5 bg-[#064e3b]/80 border border-[#fbbf24]/60 rounded-full px-3 py-1">
                           <span className="text-base">{def?.emoji ?? '👷'}</span>
@@ -7319,7 +7321,7 @@ function GameApp() {
             weeklyReportData={weeklyReportData}
             workers={workers}
             weeklyTaxPaid={weeklyTaxPaid}
-            workerTypes={WORKER_TYPES}
+            workerTypes={workerTypes}
             onClose={() => setShowWeeklyReport(false)}
             triggerAudioResult={triggerAudioResult} sfx={sfx}
           />
@@ -7390,12 +7392,8 @@ function GameApp() {
           animals={animals}
           currentDay={currentDay}
           onClose={() => setShowWorkersModal(false)}
-          onFireWorker={(id) => { setWorkers(prev => prev.filter(x => x.id !== id)); addLog(`👷 Peão dispensado.`, 'info'); }}
-          onHireWorker={(wt) => {
-            const newWorker: FarmWorker = { id: Math.random().toString(36).substring(2, 9), role: wt.role, name: wt.name, dailyCost: wt.dailyCost, hiredDay: currentDay };
-            setWorkers(prev => [...prev, newWorker]);
-            addLog(`👷 ${wt.name} foi contratado! Custo: -${wt.dailyCost}💰/dia`, 'success');
-          }}
+          onFireWorker={fireWorker}
+          onHireWorker={hireWorker}
         />
       )}
 
