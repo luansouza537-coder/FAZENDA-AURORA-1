@@ -2691,32 +2691,6 @@ function GameApp() {
 
       return copy;
     });
-
-    // Apply climate event mutations directly into finalAnimals (must happen here, not via
-    // separate setAnimals, to avoid being overwritten by the final setAnimals call)
-    if (nextDayEvent === 'tempestade' && !blockNextStorm && !insuranceClimate.active) {
-      finalAnimals.forEach(a => {
-        if (a.isAdult !== false) {
-          a.stressedDays = Math.max(a.stressedDays ?? 0, 1);
-          a.happiness = Math.max(0, a.happiness - 10);
-        }
-      });
-    }
-    if (nextDayEvent === 'geada' && !insuranceClimate.active) {
-      finalAnimals.forEach(a => {
-        if (a.isAdult !== false) {
-          a.happiness = Math.max(0, a.happiness - 20);
-          a.stressedDays = Math.max(a.stressedDays ?? 0, 2);
-        }
-      });
-    }
-    if (predadorTargetId !== null) {
-      const target = finalAnimals.find(a => a.id === predadorTargetId);
-      if (target) {
-        target.stressedDays = 3;
-        target.happiness = Math.max(0, target.happiness - 25);
-      }
-    }
   };
 
   /**
@@ -3742,6 +3716,32 @@ function GameApp() {
         return copy;
       });
 
+      // Apply climate event mutations directly into finalAnimals array
+      // (must happen here so they're included in the final setAnimals call)
+      if (nextDayEvent === 'tempestade' && !blockNextStorm && !insuranceClimate.active) {
+        finalAnimals.forEach(a => {
+          if (a.isAdult !== false) {
+            a.stressedDays = Math.max(a.stressedDays ?? 0, 1);
+            a.happiness = Math.max(0, a.happiness - 10);
+          }
+        });
+      }
+      if (nextDayEvent === 'geada' && !insuranceClimate.active) {
+        finalAnimals.forEach(a => {
+          if (a.isAdult !== false) {
+            a.happiness = Math.max(0, a.happiness - 20);
+            a.stressedDays = Math.max(a.stressedDays ?? 0, 2);
+          }
+        });
+      }
+      if (predadorTargetId !== null) {
+        const target = finalAnimals.find(a => a.id === predadorTargetId);
+        if (target) {
+          target.stressedDays = 3;
+          target.happiness = Math.max(0, target.happiness - 25);
+        }
+      }
+
       // IMPROVEMENT 2: Species-specific climate preferences
       const finalAnimalsWithClimate = finalAnimals.map(a => {
         if (!a.isAdult) return a;
@@ -3783,7 +3783,7 @@ function GameApp() {
         const basePestChance = 0.08;
         const hasDuckAlive = finalAnimals.some(a => a.type === 'pato');
         const pestChance = hasDuckAlive ? basePestChance * 0.6 : basePestChance;
-        if (Math.random() < pestChance) {
+        if (antiPestDays <= 0 && Math.random() < pestChance) {
           const pestItems: Array<keyof typeof inventory> = ['milk', 'goat_milk', 'egg', 'duck_egg', 'goose_egg'];
           const itemLabels: Record<string, string> = { milk: 'leite', goat_milk: 'l.cabra', egg: 'ovos', duck_egg: 'ov.pato', goose_egg: 'ov.ganso' };
           const lossMultiplier = insurance.active ? 0.3 : 1.0;
