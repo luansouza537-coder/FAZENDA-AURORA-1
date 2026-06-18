@@ -844,7 +844,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         )}
 
         {/* Sell Oxen (Ox) */}
-        {animal.type === 'boi' && (
+        {animal.type === 'boi' && animal.isAdult !== false && (
           pendingSellOx ? (
             <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-300 rounded-xl px-2 py-1.5 w-full">
               <span className="text-[9px] font-mono font-black text-red-700 leading-tight flex-1">Vender {animal.name}?<br/><span className="text-red-500">~{valueOfOx}💰</span></span>
@@ -1019,7 +1019,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         )}
 
         {/* Avestruz: coletar pena ou vender */}
-        {animal.type === 'avestruz' && (
+        {animal.type === 'avestruz' && animal.isAdult !== false && (
           <>
             <button type="button" onClick={(e) => { e.preventDefault(); onCollectAvestruzPena(animal.id, e); }} disabled={!animal.woolReady}
               className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
@@ -1045,7 +1045,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         )}
 
         {/* Jacaré: vender */}
-        {animal.type === 'jacare' && (
+        {animal.type === 'jacare' && animal.isAdult !== false && (
           pendingSellJacare ? (
             <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-300 rounded-xl px-2 py-1.5 w-full">
               <span className="text-[9px] font-mono font-black text-red-700 leading-tight flex-1">Abater {animal.name}?{!licencaExotica && ' ⚠️'}</span>

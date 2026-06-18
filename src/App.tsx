@@ -2703,13 +2703,14 @@ function GameApp() {
   /**
    * 5. processarMaturacaoQueijos: Reduz tempo de maturação nos queijos e devolve inventário pronto.
    */
+  type MaturacaoItem = typeof queijosEmMaturacao[number];
   const processarMaturacaoQueijos = (
-    currentMaturacao: { tipo: string; diasRestantes: number }[],
+    currentMaturacao: MaturacaoItem[],
     nextDayVal: number,
     logs: { msg: string; type: LogMessage['type'] }[]
   ) => {
     const readyQueijos: string[] = [];
-    const remaining: { tipo: string; diasRestantes: number }[] = [];
+    const remaining: MaturacaoItem[] = [];
 
     currentMaturacao.forEach(item => {
       const nextDias = item.diasRestantes - 1;
