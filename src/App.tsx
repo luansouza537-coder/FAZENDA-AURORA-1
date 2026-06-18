@@ -329,6 +329,7 @@ function GameApp() {
   // Improvement 2: Profit Panel
   const [showProfitPanel, setShowProfitPanel] = useState<boolean>(false);
   const [showSavedToast, setShowSavedToast] = useState<boolean>(false);
+  const [showEventsPanel, setShowEventsPanel] = useState<boolean>(true);
 
   // Improvement 4: Ranking Modal
   const [showRankingModal, setShowRankingModal] = useState<boolean>(false);
@@ -5424,10 +5425,16 @@ function GameApp() {
               <Target className="w-5 h-5" />
               {(() => {
                 const claimable = missions.filter(m => m.completed && !m.claimed).length;
+                const expiring = missions.filter(m => !m.completed && !m.claimed && m.type === 'daily' && m.expiresOnDay <= currentDay + 1).length;
                 const active = missions.filter(m => !m.completed && !m.claimed).length;
                 if (claimable > 0) return (
                   <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
                     {claimable}
+                  </span>
+                );
+                if (expiring > 0) return (
+                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
+                    {expiring}
                   </span>
                 );
                 if (active > 0) return (
@@ -5596,6 +5603,41 @@ function GameApp() {
             </div>
           </div>
         )}
+
+        {/* --- ACTIVE EVENTS PANEL --- */}
+        {(() => {
+          const activeEvents: { icon: string; label: string; days?: number; color: string }[] = [];
+          if (droughtDaysRemaining > 0) activeEvents.push({ icon: '🏜️', label: 'Seca — custo de água triplicado', days: droughtDaysRemaining, color: 'bg-yellow-800 border-yellow-500' });
+          if (worldEvent) activeEvents.push({ icon: '🌍', label: `${worldEvent.title} — ${worldEvent.priceMult >= 1 ? '+' : ''}${Math.round((worldEvent.priceMult - 1) * 100)}% preços`, days: worldEvent.daysLeft, color: worldEvent.priceMult >= 1 ? 'bg-green-800 border-green-500' : 'bg-red-800 border-red-500' });
+          if (activeMarketEvent) activeEvents.push({ icon: '📊', label: `${activeMarketEvent.title} — +${Math.round((activeMarketEvent.mult - 1) * 100)}% mercado`, days: activeMarketEvent.daysLeft, color: 'bg-blue-800 border-blue-500' });
+          if (fertilityBoostDays > 0) activeEvents.push({ icon: '🧪', label: 'Poção de Fertilidade — 2× produção', days: fertilityBoostDays, color: 'bg-pink-800 border-pink-500' });
+          if (premiumPricesDays > 0) activeEvents.push({ icon: '🏅', label: 'Selo Premium — +25% preços', days: premiumPricesDays, color: 'bg-amber-800 border-amber-500' });
+          if (productionBoostDays > 0) activeEvents.push({ icon: '📚', label: 'Manual Avançado — +15% produção', days: productionBoostDays, color: 'bg-indigo-800 border-indigo-500' });
+          if (antiPestDays > 0) activeEvents.push({ icon: '🧴', label: 'Anti-Pragas ativo', days: antiPestDays, color: 'bg-teal-800 border-teal-500' });
+          if (activeEvents.length === 0) return null;
+          return (
+            <div className="mx-4 sm:mx-6 lg:mx-8 mb-0">
+              <button
+                onClick={() => setShowEventsPanel(p => !p)}
+                className="w-full flex items-center gap-2 px-4 py-2 bg-[#022c22] border border-[#fbbf24]/30 rounded-t-xl text-[#fcd57e] text-xs font-mono font-black uppercase tracking-wider hover:bg-[#033a2c] transition-colors"
+              >
+                <span>⚡ Eventos Ativos ({activeEvents.length})</span>
+                <span className="ml-auto">{showEventsPanel ? '▲' : '▼'}</span>
+              </button>
+              {showEventsPanel && (
+                <div className="flex flex-wrap gap-2 px-4 py-3 bg-[#011a15] border border-t-0 border-[#fbbf24]/30 rounded-b-xl">
+                  {activeEvents.map((ev, i) => (
+                    <div key={i} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-white text-xs font-mono font-bold ${ev.color}`}>
+                      <span>{ev.icon}</span>
+                      <span>{ev.label}</span>
+                      {ev.days !== undefined && <span className="opacity-70">• {ev.days}d</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* --- MAIN GAMEBODY BENTO LAYOUT --- */}
         <div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 bg-transparent">
