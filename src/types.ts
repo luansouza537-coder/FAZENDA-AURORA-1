@@ -84,6 +84,7 @@ export interface Animal {
   lowHappinessDays?: number; // dias consecutivos com happiness < 20 (sem contar morte)
   isSick?: boolean;          // adoeceu de tristeza prolongada (produção reduzida 50%)
   sickDays?: number;         // quantos dias está doente
+  diedFromIllness?: boolean; // marcado para remoção ao fim do dia (morreu de doença)
 }
 
 // Funcionalidade 4: Contratos de fornecimento

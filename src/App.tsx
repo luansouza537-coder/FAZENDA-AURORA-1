@@ -2681,7 +2681,7 @@ function GameApp() {
       if (copy.isSick) {
         copy.sickDays = (copy.sickDays ?? 0) + 1;
         if (copy.sickDays >= 7) {
-          (copy as any).diedFromIllness = true;
+          copy.diedFromIllness = true;
           logs.push({ msg: `💀 ${copy.name} (${copy.type}) não resistiu à doença e morreu após ${copy.sickDays} dias sem tratamento.`, type: 'error' });
         } else if (copy.sickDays === 5) {
           logs.push({ msg: `⚠️ ${copy.name} está crítico! Já são ${copy.sickDays} dias doente — trate urgente antes que morra!`, type: 'error' });
@@ -4079,10 +4079,10 @@ function GameApp() {
         ? finalAnimalsWithAdulthood.map(a => ({ ...a, weeklyProduction: 0 }))
         : finalAnimalsWithAdulthood;
       // Remove animals that died from illness
-      const animalsAfterDeaths = animalsWithWeekly.filter((a: any) => !a.diedFromIllness);
+      const animalsAfterDeaths = animalsWithWeekly.filter(a => !a.diedFromIllness);
       setAnimals(prev => {
-        const idsInComputed = new Set(animalsAfterDeaths.map((a: any) => a.id));
-        const newlyAdded = prev.filter((a: any) => !idsInComputed.has(a.id));
+        const idsInComputed = new Set(animalsAfterDeaths.map(a => a.id));
+        const newlyAdded = prev.filter(a => !idsInComputed.has(a.id));
         return [...animalsAfterDeaths, ...newlyAdded];
       });
       // Apply accumulated wisdom bonuses
@@ -4514,7 +4514,10 @@ function GameApp() {
       // --- SISTEMA DE PEÕES (WORKERS) ---
       if (workers.length > 0) {
         const workerCost = workers.reduce((sum, w) => sum + w.dailyCost, 0);
-        setGold(prev => prev - workerCost);
+        setGold(prev => {
+          if (prev < workerCost) { setDebt(d => d + (workerCost - prev)); return 0; }
+          return prev - workerCost;
+        });
         logsToAdd.push({ msg: `👷 Peões trabalharam hoje! Custo diário: -${workerCost}💰`, type: 'info' });
         addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'trabalhador', description: `Salário de ${workers.length} peão(ões)`, amount: workerCost });
 
@@ -4582,32 +4585,23 @@ function GameApp() {
 
         // --- Ordenhador: coleta leite de vaca/cabra/bufalo adultos; tosquia alpaca quando woolReady ---
         if (workers.some(w => w.role === 'ordenhador')) {
-          let cowMilkCollected = 0;
-          let goatMilkCollected = 0;
-          let buffaloMilkCollected = 0;
-          let alpacaWoolCollected = 0;
-          setAnimals(prev => prev.map(a => {
-            // Skip vacas when ordenhadeira automática is active (it handles them)
-            if (a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday) {
-              if (machines.milkerPurchased && machines.milkerActive) return a;
-              cowMilkCollected++;
+          const cowMilkCollected = finalAnimals.filter(a => a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday && !(machines.milkerPurchased && machines.milkerActive)).length;
+          const goatMilkCollected = finalAnimals.filter(a => a.type === 'cabra' && a.isAdult !== false && a.hasProducedToday).length;
+          const buffaloMilkCollected = finalAnimals.filter(a => a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday).length;
+          const alpacaWoolCollected = finalAnimals.filter(a => a.type === 'alpaca' && a.isAdult !== false && a.woolReady).length;
+          const ordenhadorIds = new Set(finalAnimals.filter(a => {
+            if (a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday && !(machines.milkerPurchased && machines.milkerActive)) return true;
+            if ((a.type === 'cabra' || a.type === 'bufalo') && a.isAdult !== false && a.hasProducedToday) return true;
+            if (a.type === 'alpaca' && a.isAdult !== false && a.woolReady) return true;
+            return false;
+          }).map(a => a.id));
+          if (ordenhadorIds.size > 0) {
+            setAnimals(prev => prev.map(a => {
+              if (!ordenhadorIds.has(a.id)) return a;
+              if (a.type === 'alpaca') return { ...a, woolReady: false, daysSinceLastWool: 0 };
               return { ...a, hasProducedToday: false };
-            }
-            if (a.type === 'cabra' && a.isAdult !== false && a.hasProducedToday) {
-              goatMilkCollected++;
-              return { ...a, hasProducedToday: false };
-            }
-            if (a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday) {
-              buffaloMilkCollected++;
-              return { ...a, hasProducedToday: false };
-            }
-            // Alpaca produces wool (woolReady), not milk — ordenhador tosquia alpaca
-            if (a.type === 'alpaca' && a.isAdult !== false && a.woolReady) {
-              alpacaWoolCollected++;
-              return { ...a, woolReady: false, daysSinceLastWool: 0 };
-            }
-            return a;
-          }));
+            }));
+          }
           if (cowMilkCollected > 0) {
             setInventory(prev => ({ ...prev, milk: prev.milk + cowMilkCollected }));
             logsToAdd.push({ msg: `🥛 Ordenhador coletou +${cowMilkCollected} leite(s) de vaca automaticamente!`, type: 'success' });
@@ -4628,21 +4622,20 @@ function GameApp() {
 
         // --- Tosquiador: coleta lã de ovelha e coelho angorá com chance de premium ---
         if (workers.some(w => w.role === 'tosquiador')) {
-          let woolCollected = 0;
-          let angoraCollected = 0;
-          setAnimals(prev => prev.map(a => {
-            // Skip ovelhas when tosquiadeira elétrica is active (it handles them)
-            if (a.type === 'ovelha' && a.isAdult !== false && a.woolReady) {
-              if (machines.shearerPurchased && machines.shearerActive) return a;
-              woolCollected++;
-              return { ...a, woolReady: false, daysUntilWool: 7, daysSinceLastWool: 0 };
-            }
-            if (a.type === 'coelho_angora' && a.isAdult !== false && a.woolReady) {
-              angoraCollected++;
-              return { ...a, woolReady: false, daysUntilWool: 5, daysSinceLastWool: 0 };
-            }
-            return a;
-          }));
+          const woolCollected = finalAnimals.filter(a => a.type === 'ovelha' && a.isAdult !== false && a.woolReady && !(machines.shearerPurchased && machines.shearerActive)).length;
+          const angoraCollected = finalAnimals.filter(a => a.type === 'coelho_angora' && a.isAdult !== false && a.woolReady).length;
+          const tosquiadorIds = new Set(finalAnimals.filter(a => {
+            if (a.type === 'ovelha' && a.isAdult !== false && a.woolReady && !(machines.shearerPurchased && machines.shearerActive)) return true;
+            if (a.type === 'coelho_angora' && a.isAdult !== false && a.woolReady) return true;
+            return false;
+          }).map(a => a.id));
+          if (tosquiadorIds.size > 0) {
+            setAnimals(prev => prev.map(a => {
+              if (!tosquiadorIds.has(a.id)) return a;
+              const daysUntilWool = a.type === 'coelho_angora' ? 5 : 7;
+              return { ...a, woolReady: false, daysUntilWool, daysSinceLastWool: 0 };
+            }));
+          }
           if (woolCollected > 0) {
             const bonus = Math.random() < 0.1 ? 1 : 0;
             setInventory(prev => ({ ...prev, wool: prev.wool + woolCollected + bonus }));
@@ -4656,32 +4649,25 @@ function GameApp() {
 
         // --- Avicultor: coleta ovos de galinha/codorna/pato; coleta penas de avestruz (woolReady) ---
         if (workers.some(w => w.role === 'avicultor')) {
-          let eggsCollected = 0;
-          let quailEggs = 0;
-          let duckEggs = 0;
-          let ostrichFeathers = 0;
-          setAnimals(prev => prev.map(a => {
-            if (a.type === 'galinha' && a.isAdult !== false && a.hasProducedToday) {
-              eggsCollected++;
+          const eggsCollected = finalAnimals.filter(a => a.type === 'galinha' && a.isAdult !== false && a.hasProducedToday).length;
+          const duckEggs = finalAnimals.filter(a => a.type === 'pato' && a.isAdult !== false && a.hasProducedToday).length;
+          const ostrichFeathers = finalAnimals.filter(a => a.type === 'avestruz' && a.isAdult !== false && a.woolReady).length;
+          const avicultorIds = new Set(finalAnimals.filter(a => {
+            if ((a.type === 'galinha' || a.type === 'pato') && a.isAdult !== false && a.hasProducedToday) return true;
+            if (a.type === 'avestruz' && a.isAdult !== false && a.woolReady) return true;
+            return false;
+          }).map(a => a.id));
+          if (avicultorIds.size > 0) {
+            setAnimals(prev => prev.map(a => {
+              if (!avicultorIds.has(a.id)) return a;
+              if (a.type === 'avestruz') return { ...a, woolReady: false, daysSinceLastWool: 0 };
               return { ...a, hasProducedToday: false };
-            }
-            // codorna: auto-collected daily in main loop (not duplicated here)
-            if (a.type === 'pato' && a.isAdult !== false && a.hasProducedToday) {
-              duckEggs++;
-              return { ...a, hasProducedToday: false };
-            }
-            // Avestruz produces pena_grande via woolReady (not hasProducedToday)
-            if (a.type === 'avestruz' && a.isAdult !== false && a.woolReady) {
-              ostrichFeathers++;
-              return { ...a, woolReady: false, daysSinceLastWool: 0 };
-            }
-            return a;
-          }));
+            }));
+          }
           if (eggsCollected > 0) {
             setInventory(prev => ({ ...prev, egg: prev.egg + eggsCollected }));
             logsToAdd.push({ msg: `🥚 Avicultor coletou +${eggsCollected} ovo(s) de galinha!`, type: 'success' });
           }
-          // quailEggs handled by main loop auto-collect
           if (duckEggs > 0) {
             setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) + duckEggs }));
             logsToAdd.push({ msg: `🥚 Avicultor coletou +${duckEggs} ovo(s) de pato!`, type: 'success' });
