@@ -82,6 +82,7 @@ interface QueijariaModalProps {
   inventory: Inventory;
   queijosEmMaturacao: QueijosEmMaturacao[];
   maxPrateleiras: number;
+  scarfQueue: { diasRestantes: number }[];
   atelieTab: 'queijaria' | 'tecelagem' | 'cozinha' | 'cosmeticos' | 'luxo';
   setAtelieTab: (tab: 'queijaria' | 'tecelagem' | 'cozinha' | 'cosmeticos' | 'luxo') => void;
   racaoOrganicaDays: number;
@@ -94,7 +95,7 @@ interface QueijariaModalProps {
 }
 
 const QueijariaModal: React.FC<QueijariaModalProps> = ({
-  farmLevel, inventory, queijosEmMaturacao, maxPrateleiras,
+  farmLevel, inventory, queijosEmMaturacao, maxPrateleiras, scarfQueue,
   atelieTab, setAtelieTab, racaoOrganicaDays, fertilizanteDays,
   craftActions: c, onClose, onOpenMelhorias, triggerAudioResult, sfx,
 }) => {
@@ -251,7 +252,7 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
               <div className="space-y-2">
                 <h4 className="font-display font-black text-xs uppercase tracking-wider text-indigo-900 mb-2">🧶 Tecelagem & Fibras</h4>
                 {[
-                  { label: 'Cachecol (Lã)', emoji: '🧣', req: `🧶 2 lã (${inventory.wool}/2) • Nv1`, canCraft: inventory.wool >= 2, reqLevel: 1, onClick: (e: React.MouseEvent) => c.craftScarf(e) },
+                  { label: `Cachecol (Lã)${scarfQueue.length > 0 ? ` ⏳ ${scarfQueue.length} em prod.` : ''}`, emoji: '🧣', req: `🧶 2 lã (${inventory.wool}/2) • Pronto em 2 dias${scarfQueue.length > 0 ? ` • Min: ${Math.min(...scarfQueue.map(s => s.diasRestantes))}d` : ''}`, canCraft: inventory.wool >= 2, reqLevel: 1, onClick: (e: React.MouseEvent) => c.craftScarf(e) },
                   { label: 'Tapete de Lhama', emoji: '🪢', req: `🦙 3 Lã Lhama (${inventory.llama_wool ?? 0}/3) • Nv4`, canCraft: farmLevel >= 4 && (inventory.llama_wool ?? 0) >= 3, reqLevel: 4, onClick: (e: React.MouseEvent) => c.craftTapeteLhama(e) },
                   { label: 'Cachecol Angorá', emoji: '🧣', req: `🐇 2 Lã Angorá (${inventory.angora_wool ?? 0}/2) • Nv8`, canCraft: farmLevel >= 8 && (inventory.angora_wool ?? 0) >= 2, reqLevel: 8, onClick: (e: React.MouseEvent) => c.craftCachecolAngora(e) },
                   { label: 'Tecido de Alpaca', emoji: '🧶', req: `🦙 3 Lã Alpaca (${inventory.alpaca_wool ?? 0}/3) • Nv5`, canCraft: farmLevel >= 5 && (inventory.alpaca_wool ?? 0) >= 3, reqLevel: 5, onClick: (e: React.MouseEvent) => c.craftTecidoAlpaca(e) },

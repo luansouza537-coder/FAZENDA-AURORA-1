@@ -302,6 +302,15 @@ export function useInventory({
   // --- ATELIE TAB STATE (UI-only, no persistence) ---
   const [atelieTab, setAtelieTab] = useState<'queijaria' | 'tecelagem' | 'cozinha' | 'cosmeticos' | 'luxo'>('queijaria');
 
+  // --- FILA DE FABRICAÇÃO DE CACHECOL ---
+  const [scarfQueue, setScarfQueue] = useState<{ diasRestantes: number }[]>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) { const parsed = JSON.parse(saved); if (parsed.scarfQueue) return parsed.scarfQueue; }
+    } catch (e) {}
+    return [];
+  });
+
   // --- CRAFT FUNCTIONS ---
 
   const craftBuffaloMozzarella = (event?: React.MouseEvent) => {
@@ -823,23 +832,11 @@ export function useInventory({
       spawnFeedback('❌', 'Falta Lã!', event);
       return;
     }
-
-    setInventory(prev => ({
-      ...prev,
-      wool: prev.wool - 2,
-      scarf: prev.scarf + 1
-    }));
-    setStats(prev => ({
-      ...prev,
-      totalScarf: (prev.totalScarf || 0) + 1
-    }));
-    setWeeklyStats(prev => ({
-      ...prev,
-      scarf: prev.scarf + 1
-    }));
-    addLog(`🧣 Sucesso! Você teceu 2 Novelos em 1 lindo Cachecol elegante!`, 'success');
+    setInventory(prev => ({ ...prev, wool: prev.wool - 2 }));
+    setScarfQueue(prev => [...prev, { diasRestantes: 2 }]);
+    addLog(`🧶 Cachecol em produção! Pronto em 2 dias.`, 'info');
     triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🧣', '+1 Cachecol', event);
+    spawnFeedback('🧶', 'Tecendo... 2d', event);
   };
 
   // --- SELL FUNCTIONS ---
@@ -1403,6 +1400,8 @@ export function useInventory({
     setRacaoOrganicaDays,
     fertilizanteDays,
     setFertilizanteDays,
+    scarfQueue,
+    setScarfQueue,
     // Craft functions
     craftBuffaloMozzarella,
     craftMayonese,

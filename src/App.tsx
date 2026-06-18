@@ -1771,6 +1771,8 @@ function GameApp() {
     setRacaoOrganicaDays,
     fertilizanteDays,
     setFertilizanteDays,
+    scarfQueue,
+    setScarfQueue,
     craftBuffaloMozzarella,
     craftMayonese,
     craftButter,
@@ -2039,6 +2041,7 @@ function GameApp() {
         machines,
         priceHistory,
         queijosEmMaturacao,
+        scarfQueue,
         maxPrateleiras,
         totalQueijosFabricados,
         queijosFabricadosTipos,
@@ -2105,7 +2108,7 @@ function GameApp() {
       setShowSavedToast(true);
       setTimeout(() => setShowSavedToast(false), 2000);
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent, financialLog]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent, financialLog]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 2500;
@@ -4155,6 +4158,21 @@ function GameApp() {
         }, 100);
       }
 
+      // --- FILA DE FABRICAÇÃO DE CACHECOL ---
+      if (scarfQueue.length > 0) {
+        const updatedQueue = scarfQueue.map(s => ({ diasRestantes: s.diasRestantes - 1 }));
+        const readyScarves = updatedQueue.filter(s => s.diasRestantes <= 0).length;
+        const remainingQueue = updatedQueue.filter(s => s.diasRestantes > 0);
+        setScarfQueue(remainingQueue);
+        if (readyScarves > 0) {
+          setInventory(prev => ({ ...prev, scarf: prev.scarf + readyScarves }));
+          setStats(prev => ({ ...prev, totalScarf: (prev.totalScarf || 0) + readyScarves }));
+          setWeeklyStats(prev => ({ ...prev, scarf: prev.scarf + readyScarves }));
+          logsToAdd.push({ msg: `🧣 ${readyScarves} Cachecol(is) ficou(aram) pronto(s)! Disponível no Armazém.`, type: 'success' });
+          setTimeout(() => triggerAudioResult(() => sfx.playSound('collect')), 200);
+        }
+      }
+
       // --- SUBFUNÇÃO 11: Salvar Estado ---
       salvarEstado();
 
@@ -5299,9 +5317,14 @@ function GameApp() {
                 <span className="min-w-[1.5ch] text-center">{inventory.cheese}</span>
               </div>
               <span className="w-px h-4 bg-[#fbbf24]/50 shrink-0" />
-              <div className="flex items-center gap-1" title="🧣 Cachecol elegante trançado">
+              <div className="flex items-center gap-1" title={scarfQueue.length > 0 ? `🧣 Cachecol: ${inventory.scarf} pronto(s) • ${scarfQueue.length} em produção` : '🧣 Cachecol elegante trançado'}>
                 <span>🧣</span>
                 <span className="min-w-[1.5ch] text-center">{inventory.scarf}</span>
+                {scarfQueue.length > 0 && (
+                  <span className="text-[9px] bg-yellow-500 text-white rounded-full px-1 font-bold animate-pulse" title={`${scarfQueue.length} cachecol(is) em produção`}>
+                    ⏳{scarfQueue.length}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -6109,6 +6132,7 @@ function GameApp() {
           inventory={inventory}
           queijosEmMaturacao={queijosEmMaturacao}
           maxPrateleiras={maxPrateleiras}
+          scarfQueue={scarfQueue}
           atelieTab={atelieTab}
           setAtelieTab={setAtelieTab}
           racaoOrganicaDays={racaoOrganicaDays}

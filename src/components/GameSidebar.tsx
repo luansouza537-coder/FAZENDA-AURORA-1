@@ -122,7 +122,7 @@ export default function GameSidebar({
                       { key: 'egg', label: '🥚 Ovo', qty: inventory.egg ?? 0, priceKey: 'egg', freshKey: 'egg' },
                       { key: 'duck_egg', label: '🥚 Ov. Pato', qty: inventory.duck_egg ?? 0, priceKey: 'duck_egg', freshKey: 'duck_egg' },
                       { key: 'goose_egg', label: '🥚 Ov. Ganso', qty: inventory.goose_egg ?? 0, priceKey: 'goose_egg', freshKey: 'goose_egg' },
-                      { key: 'fertile_egg', label: '✨ Ovo Fértil', qty: inventory.fertile_egg ?? 0, priceKey: 'fertile_egg', freshKey: 'fertile_egg' },
+                      { key: 'fertile_egg', label: '✨ Ovo Fértil', qty: inventory.fertile_egg ?? 0, priceKey: 'fertile_egg', freshKey: 'fertile_egg', tooltip: '🐣 Use 3 Ovos Férteis na Incubadora para chocar filhotes! Produzido por galinhas felicidade ≥95.' },
                       { key: 'feather', label: '🪶 Penas', qty: inventory.feather ?? 0, priceKey: 'feather' },
                       { key: 'peacock_feather', label: '🪶 P. Pavão', qty: inventory.peacock_feather ?? 0, priceKey: 'peacock_feather' },
                     ]
@@ -197,7 +197,7 @@ export default function GameSidebar({
                               const isEmpty = item.qty === 0;
                               const isCraftable = ALWAYS_SHOW.has(item.key) && isEmpty;
                               return (
-                                <div key={item.key} title={price !== null ? `${item.label}: ${price}💰/unidade${trend && trend.pct !== 0 ? ` (${trend.pct > 0 ? '+' : ''}${trend.pct}% vs ontem)` : ''}` : undefined} className={`bg-white/80 p-2 rounded-xl border flex flex-col gap-0.5 shadow-inner transition-all ${isCraftable ? 'border-emerald-300 bg-emerald-50/40' : isEmpty ? 'border-[#fbbf24] opacity-40' : 'border-[#fbbf24]'}`}>
+                                <div key={item.key} title={(item as any).tooltip ?? (price !== null ? `${item.label}: ${price}💰/unidade${trend && trend.pct !== 0 ? ` (${trend.pct > 0 ? '+' : ''}${trend.pct}% vs ontem)` : ''}` : undefined)} className={`bg-white/80 p-2 rounded-xl border flex flex-col gap-0.5 shadow-inner transition-all ${isCraftable ? 'border-emerald-300 bg-emerald-50/40' : isEmpty ? 'border-[#fbbf24] opacity-40' : 'border-[#fbbf24]'}`}>
                                   <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-[#78350f] uppercase tracking-tight leading-none flex items-center">
                                       {item.label}
