@@ -2704,12 +2704,12 @@ function GameApp() {
    * 5. processarMaturacaoQueijos: Reduz tempo de maturação nos queijos e devolve inventário pronto.
    */
   const processarMaturacaoQueijos = (
-    currentMaturacao: typeof queijosEmMaturacao,
+    currentMaturacao: { tipo: string; diasRestantes: number }[],
     nextDayVal: number,
     logs: { msg: string; type: LogMessage['type'] }[]
   ) => {
     const readyQueijos: string[] = [];
-    const remaining: typeof queijosEmMaturacao = [];
+    const remaining: { tipo: string; diasRestantes: number }[] = [];
 
     currentMaturacao.forEach(item => {
       const nextDias = item.diasRestantes - 1;
@@ -2721,13 +2721,15 @@ function GameApp() {
     });
 
     readyQueijos.forEach(tipo => {
-      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : tipo === 'parmesao' ? 'Queijo Parmesão' : tipo === 'serra' ? 'Queijo da Serra' : 'Queijo Brie';
+      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : tipo === 'parmesao' ? 'Queijo Parmesão' : tipo === 'serra' ? 'Queijo da Serra' : tipo === 'butter' ? 'Manteiga' : 'Queijo Brie';
+      const emoji = tipo === 'butter' ? '🧈' : tipo === 'yogurt' ? '🥛' : '🧀';
       logs.push({
-        msg: `🧀 Seu fantástico ${label} terminou sua maturação e está pronto para venda!`,
+        msg: `${emoji} Sua ${label} ficou pronta e está disponível no Armazém!`,
         type: 'success'
       });
       // BUG FIX: passa nextDayVal para que a notificação mostre o dia correto
-      setTimeout(() => addNotification(`🧀 ${label} terminou maturação e está pronto para vender!`, 'success', nextDayVal), 0);
+      const emoji2 = tipo === 'butter' ? '🧈' : tipo === 'yogurt' ? '🥛' : '🧀';
+      setTimeout(() => addNotification(`${emoji2} ${label} está pronto para vender!`, 'success', nextDayVal), 0);
     });
 
     return { remaining, readyQueijos };
@@ -4148,7 +4150,7 @@ function GameApp() {
         setInventory(inv => {
           const nextInv = { ...inv };
           readyQueijos.forEach(tipo => {
-            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : 'queijoBrie';
+            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : tipo === 'butter' ? 'butter' : 'queijoBrie';
             nextInv[key] = (nextInv[key] ?? 0) + 1;
           });
           return nextInv;
@@ -5992,11 +5994,6 @@ function GameApp() {
             buyFeed={buyFeed}
             buyFolhaAmoreira={buyFolhaAmoreira}
             sellProduct={sellProduct}
-            craftCheese={craftCheese}
-            craftScarf={craftScarf}
-            craftMayonese={craftMayonese}
-            craftButter={craftButter}
-            craftYogurt={craftYogurt}
             triggerAudioResult={triggerAudioResult}
             sfx={sfx}
           />
@@ -6138,7 +6135,7 @@ function GameApp() {
           racaoOrganicaDays={racaoOrganicaDays}
           fertilizanteDays={fertilizanteDays}
           craftActions={{
-            craftQueijo, craftBuffaloMozzarella, craftButter, craftYogurt,
+            craftCheese, craftQueijo, craftBuffaloMozzarella, craftButter, craftYogurt,
             craftQueijoCabra, craftIogurteCabra, craftLeiteCondensado,
             craftQueijoParmesao, craftQueijoSerra,
             craftScarf, craftTapeteLhama, craftCachecolAngora, craftTecidoAlpaca,

@@ -38,11 +38,6 @@ export interface GameSidebarProps {
   buyFeed: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora', qty: number, e: React.MouseEvent) => void;
   buyFolhaAmoreira: (qty: number, e: React.MouseEvent) => void;
   sellProduct: (itemType: any, qty: number, e: React.MouseEvent) => void;
-  craftCheese: (e?: any) => void;
-  craftScarf: (e?: any) => void;
-  craftMayonese: (e?: any) => void;
-  craftButter: (e?: any) => void;
-  craftYogurt: (e?: any) => void;
   triggerAudioResult: (action: () => void) => void;
   sfx: { playSound: (sound: string) => void };
 }
@@ -68,11 +63,6 @@ export default function GameSidebar({
   buyFeed,
   buyFolhaAmoreira,
   sellProduct,
-  craftCheese,
-  craftScarf,
-  craftMayonese,
-  craftButter,
-  craftYogurt,
   triggerAudioResult,
   sfx,
 }: GameSidebarProps) {
@@ -247,71 +237,9 @@ export default function GameSidebar({
                 );
               })()}
 
-              {/* Advanced Refining/Manufaturing recipes */}
+              {/* Advanced Refining/Manufaturing recipes — removido: toda produção centralizada no Ateliê */}
               <div className="space-y-3 border-t border-dashed border-[#fbbf24]/50 pt-3">
-                <h4 className="text-[11px] font-sans font-black uppercase text-[#92400e] tracking-wider mb-2">Refinar Matérias-Primas:</h4>
-
-                <div className="flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      craftCheese(e);
-                    }}
-                    className="bg-[#10b981] hover:bg-[#059669] text-white border-b-2 border-[#065f46] py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider cursor-pointer active:translate-y-0.5 transition-all shadow-sm"
-                    title="Requer 2 Leites Crus. Fabrica 1 Queijo Básico. Queijaria produz variedades mais valiosas. [Atalho rápido: Tecla 1]"
-                  >
-                    🧀 Queijo Básico (🥛x2) <span className="text-[9px] text-[#fef3c7] ml-1 opacity-80">[Atalho: 1]</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      craftScarf(e);
-                    }}
-                    className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white border-b-2 border-[#5b21b6] py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider cursor-pointer active:translate-y-0.5 transition-all shadow-sm"
-                    title="Requer 2 Novelos de Lã Crua. Tece 1 Cachecol elegante. [Atalho rápido: Tecla 2]"
-                  >
-                    🧣 Tecer Cachecol (🧶x2) <span className="text-[9px] text-[#fef3c7] ml-1 opacity-80">[Atalho: 2]</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      craftMayonese(e);
-                    }}
-                    className="bg-amber-500 hover:bg-amber-400 text-white border-b-2 border-amber-700 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider cursor-pointer active:translate-y-0.5 transition-all shadow-sm"
-                    title="Requer 2 Ovos caipiras. Prepara 1 Maionese cremosa. [Atalho rápido: Tecla 3]"
-                  >
-                    🥣 Maionese Cremosa (🥚x2) <span className="text-[9px] text-[#fef3c7] ml-1 opacity-80">[Atalho: 3]</span>
-                  </button>
-
-                  {farmLevel >= 2 && (
-                    <button
-                      type="button"
-                      onClick={(e) => { e.preventDefault(); craftButter(e); }}
-                      className="bg-yellow-500 hover:bg-yellow-400 text-white border-b-2 border-yellow-700 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider cursor-pointer active:translate-y-0.5 transition-all shadow-sm"
-                      title="Requer 2 Leites. Fabrica 1 Manteiga artesanal (45💰)."
-                    >
-                      🧈 Manteiga (🥛x2)
-                    </button>
-                  )}
-
-                  {farmLevel >= 2 && (
-                    <button
-                      type="button"
-                      onClick={(e) => { e.preventDefault(); craftYogurt(e); }}
-                      className="bg-pink-500 hover:bg-pink-400 text-white border-b-2 border-pink-700 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider cursor-pointer active:translate-y-0.5 transition-all shadow-sm"
-                      title="Requer 1 Leite. Fermenta em 1 dia para 1 Iogurte (35💰)."
-                    >
-                      🥛 Iogurte (🥛x1, 1 dia)
-                    </button>
-                  )}
-                </div>
-
-                <h4 className="text-[11px] font-sans font-black uppercase text-[#92400e] tracking-wider pt-2 mb-2 border-t border-[#fbbf24]/30">Vendas Diretas p/ a Feira:</h4>
+                <h4 className="text-[11px] font-sans font-black uppercase text-[#92400e] tracking-wider pt-2 mb-2">Vendas Diretas p/ a Feira:</h4>
 
                 <div className="grid grid-cols-2 gap-2">
                   <button

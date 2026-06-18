@@ -41,6 +41,7 @@ interface Inventory {
 }
 
 export interface CraftActions {
+  craftCheese: (e?: React.MouseEvent) => void;
   craftQueijo: (tipo: string, e?: React.MouseEvent) => void;
   craftBuffaloMozzarella: (e?: React.MouseEvent) => void;
   craftButter: (e?: React.MouseEvent) => void;
@@ -187,13 +188,14 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                   ) : (
                     <div className="grid grid-cols-1 gap-2">
                       {queijosEmMaturacao.map((item, idx) => {
-                        const totalDays = item.tipo === 'coalho' ? 1 : item.tipo === 'mucarela' ? 3 : item.tipo === 'buffalo_mozzarella' ? 2 : item.tipo === 'yogurt' ? 1 : item.tipo === 'parmesao' ? 15 : item.tipo === 'serra' ? 20 : 7;
+                        const totalDays = item.tipo === 'coalho' ? 1 : item.tipo === 'mucarela' ? 3 : item.tipo === 'buffalo_mozzarella' ? 2 : item.tipo === 'yogurt' ? 1 : item.tipo === 'butter' ? 1 : item.tipo === 'parmesao' ? 15 : item.tipo === 'serra' ? 20 : 7;
                         const elapsed = totalDays - item.diasRestantes;
                         const progressPct = Math.min(100, Math.round((elapsed / totalDays) * 100));
-                        const label = item.tipo === 'coalho' ? 'Queijo Coalho' : item.tipo === 'mucarela' ? 'Queijo Muçarela' : item.tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : item.tipo === 'yogurt' ? 'Iogurte' : item.tipo === 'parmesao' ? 'Queijo Parmesão' : item.tipo === 'serra' ? 'Queijo da Serra' : 'Queijo Brie';
+                        const label = item.tipo === 'coalho' ? 'Queijo Coalho' : item.tipo === 'mucarela' ? 'Queijo Muçarela' : item.tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : item.tipo === 'yogurt' ? 'Iogurte' : item.tipo === 'butter' ? 'Manteiga' : item.tipo === 'parmesao' ? 'Queijo Parmesão' : item.tipo === 'serra' ? 'Queijo da Serra' : 'Queijo Brie';
+                        const maturIcon = item.tipo === 'butter' ? '🧈' : item.tipo === 'yogurt' ? '🥛' : '🧀';
                         return (
                           <div key={idx} className="bg-white border-2 border-amber-100 rounded-xl p-3 flex items-center gap-3">
-                            <span className="text-2xl">🧀</span>
+                            <span className="text-2xl">{maturIcon}</span>
                             <div className="flex-1">
                               <div className="flex items-center justify-between">
                                 <span className="font-display font-black text-xs uppercase text-[#78350f]">{label}</span>
@@ -213,11 +215,12 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                   <h4 className="font-display font-black text-xs uppercase tracking-wider text-[#78350f] mb-2">📖 Receitas</h4>
                   <div className="grid grid-cols-1 gap-2">
                     {[
+                      { label: 'Queijo Básico', emoji: '🧀', req: `🥛 2 leite (${inventory.milk}/2) • Instantâneo`, canCraft: inventory.milk >= 2, reqLevel: 1, onClick: (e: React.MouseEvent) => c.craftCheese(e) },
                       { label: 'Queijo Coalho', emoji: '🧀', req: `🥛 3 leite (${inventory.milk}/3) • ⌛ 1d`, canCraft: inventory.milk >= 3 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 1, onClick: (e: React.MouseEvent) => c.craftQueijo('coalho', e) },
                       { label: 'Queijo Muçarela', emoji: '🧀', req: `🥛 5 leite (${inventory.milk}/5) • ⌛ 3d • Nv3`, canCraft: farmLevel >= 3 && inventory.milk >= 5 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 3, onClick: (e: React.MouseEvent) => c.craftQueijo('mucarela', e) },
                       { label: 'Queijo Brie', emoji: '🧀', req: `🥛 8 leite (${inventory.milk}/8) • ⌛ 7d • Nv5`, canCraft: farmLevel >= 5 && inventory.milk >= 8 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 5, onClick: (e: React.MouseEvent) => c.craftQueijo('brie', e) },
                       { label: 'Muçarela Búfala', emoji: '🧀', req: `🥛 3 L.Búfala (${inventory.buffalo_milk ?? 0}/3) • ⌛ 2d • Nv4`, canCraft: farmLevel >= 4 && (inventory.buffalo_milk ?? 0) >= 3 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 4, onClick: (e: React.MouseEvent) => c.craftBuffaloMozzarella(e) },
-                      { label: 'Manteiga', emoji: '🧈', req: `🥛 2 leite (${inventory.milk}/2) • Nv2`, canCraft: farmLevel >= 2 && inventory.milk >= 2, reqLevel: 2, onClick: (e: React.MouseEvent) => c.craftButter(e) },
+                      { label: 'Manteiga', emoji: '🧈', req: `🥛 2 leite (${inventory.milk}/2) • ⌛ 1d • Nv2`, canCraft: farmLevel >= 2 && inventory.milk >= 2 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 2, onClick: (e: React.MouseEvent) => c.craftButter(e) },
                       { label: 'Iogurte', emoji: '🥛', req: `🥛 1 leite (${inventory.milk}/1) • ⌛ 1d • Nv2`, canCraft: farmLevel >= 2 && inventory.milk >= 1 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 2, onClick: (e: React.MouseEvent) => c.craftYogurt(e) },
                       { label: 'Queijo de Cabra', emoji: '🧀', req: `🐐 3 L.Cabra (${inventory.goat_milk ?? 0}/3) • Nv3`, canCraft: farmLevel >= 3 && (inventory.goat_milk ?? 0) >= 3, reqLevel: 3, onClick: (e: React.MouseEvent) => c.craftQueijoCabra(e) },
                       { label: 'Iogurte de Cabra', emoji: '🥛', req: `🐐 2 L.Cabra (${inventory.goat_milk ?? 0}/2) • Nv4`, canCraft: farmLevel >= 4 && (inventory.goat_milk ?? 0) >= 2, reqLevel: 4, onClick: (e: React.MouseEvent) => c.craftIogurteCabra(e) },

@@ -227,7 +227,7 @@ export function useInventory({
   });
 
   // --- QUEIJARIA STATES ---
-  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt' | 'parmesao' | 'serra'; diasRestantes: number }[]>(() => {
+  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt' | 'parmesao' | 'serra' | 'butter'; diasRestantes: number }[]>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
       if (saved) {
@@ -380,11 +380,17 @@ export function useInventory({
       if (event) spawnFeedback('❌', 'Falta Leite!', event);
       return;
     }
-    setInventory(prev => ({ ...prev, milk: prev.milk - 2, butter: (prev.butter ?? 0) + 1 }));
-    setStats(prev => ({ ...prev, totalButter: (prev.totalButter || 0) + 1 }));
-    addLog('🧈 Você transformou 2 leites em 1 manteiga artesanal!', 'success');
+    if (queijosEmMaturacao.length >= maxPrateleiras) {
+      addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, milk: prev.milk - 2 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'butter', diasRestantes: 1 }]);
+    addLog('🧈 Manteiga em preparo! Ficará pronta em 1 dia.', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
-    if (event) spawnFeedback('🧈', '+1 Manteiga', event);
+    if (event) spawnFeedback('🧈', 'Preparando... 1d', event);
   };
 
   const craftYogurt = (event?: React.MouseEvent) => {
