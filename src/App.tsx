@@ -5293,9 +5293,24 @@ function GameApp() {
                 🌦️ {insuranceClimate.daysLeft}d
               </div>
             )}
+            {droughtDaysRemaining > 0 && (
+              <div className="bg-yellow-700 border-3 border-yellow-500 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seca ativa: custo de água triplicado por mais ${droughtDaysRemaining} dia${droughtDaysRemaining > 1 ? 's' : ''}`}>
+                🏜️ {droughtDaysRemaining}d
+              </div>
+            )}
             {worldEvent && (
-              <div className={`border-3 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1 ${worldEvent.priceMult >= 1 ? 'bg-green-600 border-green-400' : 'bg-red-600 border-red-400'}`} title={worldEvent.title}>
-                🌍 {worldEvent.daysLeft}d
+              <div className="relative group">
+                <div className={`border-3 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1 cursor-help ${worldEvent.priceMult >= 1 ? 'bg-green-600 border-green-400' : 'bg-red-600 border-red-400'}`}>
+                  🌍 {worldEvent.daysLeft}d
+                </div>
+                <div className="absolute top-full right-0 mt-2 w-60 bg-gray-900 border border-gray-600 rounded-xl p-3 text-xs text-white hidden group-hover:block z-50 shadow-2xl pointer-events-none">
+                  <div className="font-bold text-sm mb-1">{worldEvent.title}</div>
+                  <div className="text-gray-300 mb-2 leading-relaxed">{worldEvent.desc}</div>
+                  <div className={`font-bold text-sm ${worldEvent.priceMult >= 1 ? 'text-green-400' : 'text-red-400'}`}>
+                    {worldEvent.priceMult >= 1 ? `+${Math.round((worldEvent.priceMult - 1) * 100)}%` : `-${Math.round((1 - worldEvent.priceMult) * 100)}%`} nos preços
+                  </div>
+                  <div className="text-gray-400 mt-1">⏳ {worldEvent.daysLeft} dia{worldEvent.daysLeft > 1 ? 's' : ''} restante{worldEvent.daysLeft > 1 ? 's' : ''}</div>
+                </div>
               </div>
             )}
             {loanActive && (
