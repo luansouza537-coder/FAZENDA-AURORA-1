@@ -5422,11 +5422,21 @@ function GameApp() {
               title="Missões e objetivos"
             >
               <Target className="w-5 h-5" />
-              {missions.filter(m => m.completed && !m.claimed).length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                  !
-                </span>
-              )}
+              {(() => {
+                const claimable = missions.filter(m => m.completed && !m.claimed).length;
+                const active = missions.filter(m => !m.completed && !m.claimed).length;
+                if (claimable > 0) return (
+                  <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                    {claimable}
+                  </span>
+                );
+                if (active > 0) return (
+                  <span className="absolute -top-1 -right-1 bg-purple-300 text-purple-900 text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                    {active}
+                  </span>
+                );
+                return null;
+              })()}
             </button>
 
             {/* 📊 Stats Button */}
@@ -5688,6 +5698,7 @@ function GameApp() {
             setLogs={setLogs}
             logsContainerRef={logsContainerRef}
             logsEndRef={logsEndRef}
+            worldEvent={worldEvent}
             getPriceTrend={getPriceTrend}
             getActualSellPrice={getActualSellPrice}
             getFreshnessIndicator={getFreshnessIndicator}

@@ -26,6 +26,9 @@ export interface GameSidebarProps {
   logsContainerRef: React.RefObject<HTMLDivElement>;
   logsEndRef: React.RefObject<HTMLDivElement>;
 
+  // Active world event (for price highlight)
+  worldEvent: { id: string; title: string; desc: string; daysLeft: number; priceMult: number; items: string[] } | null;
+
   // Functions
   getPriceTrend: (itemType: string) => { symbol: string; color: string; pct: number };
   getActualSellPrice: (itemType: string) => number;
@@ -56,6 +59,7 @@ export default function GameSidebar({
   setLogs,
   logsContainerRef,
   logsEndRef,
+  worldEvent,
   getPriceTrend,
   getActualSellPrice,
   getFreshnessIndicator,
@@ -220,6 +224,14 @@ export default function GameSidebar({
                                       {trend && trend.pct <= -15 && (
                                         <span className="text-[8px] font-black px-1 py-0.5 rounded bg-red-400 text-white" title="Preço caindo! Melhor vender agora">
                                           📉 Vender já!
+                                        </span>
+                                      )}
+                                      {worldEvent && item.priceKey && worldEvent.items.includes(item.priceKey) && (
+                                        <span
+                                          className={`text-[8px] font-black px-1 py-0.5 rounded animate-pulse ${worldEvent.priceMult >= 1 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}
+                                          title={`${worldEvent.title}: ${worldEvent.priceMult >= 1 ? '+' : ''}${Math.round((worldEvent.priceMult - 1) * 100)}% por mais ${worldEvent.daysLeft}d`}
+                                        >
+                                          🌍 {worldEvent.priceMult >= 1 ? '+' : ''}{Math.round((worldEvent.priceMult - 1) * 100)}%
                                         </span>
                                       )}
                                     </div>
