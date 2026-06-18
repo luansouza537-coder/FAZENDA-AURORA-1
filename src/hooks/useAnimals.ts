@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Animal, AnimalType, AnimalTrait, FarmSpecialization, FarmStats, LogMessage } from '../types';
-import { getRandomName, getUniqueOxName } from '../names';
+import { getRandomName, getUniqueOxName, getUniquePorcoName } from '../names';
 import { sfx } from '../utils/audio';
 
 // ---- Inventory type (mirrors the shape in App.tsx) ----
@@ -152,7 +152,7 @@ export function useAnimals({
         const parsed = JSON.parse(saved);
         if (parsed.animals && parsed.animals.length > 0) {
           // BUG FIX: inicializa age/maxAge para animais de saves antigos que não tinham esses campos
-          const baseMaxAge: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60 };
+          const baseMaxAge: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, porco: 120 };
           return parsed.animals.map((a: Animal) => ({
             ...a,
             age: a.age ?? 0,
@@ -198,7 +198,7 @@ export function useAnimals({
 
   // Helper: get feed type and label for an animal type
   const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora'; feedLabel: string } => {
-    if (type === 'vaca' || type === 'boi' || type === 'bufalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
+    if (type === 'vaca' || type === 'boi' || type === 'bufalo' || type === 'porco') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
     if (type === 'ovelha' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return { feedType: 'racaoOvinos', feedLabel: 'Ração de Ovinos' };
     if (type === 'galinha' || type === 'codorna' || type === 'pavao') return { feedType: 'racaoAves', feedLabel: 'Ração de Aves' };
     if (type === 'pato' || type === 'ganso') return { feedType: 'racaoAquatica', feedLabel: 'Ração Aquática' };
@@ -231,6 +231,7 @@ export function useAnimals({
     if (type === 'ra') basePrice = 130;
     if (type === 'avestruz') basePrice = 600;
     if (type === 'jacare') basePrice = 900;
+    if (type === 'porco') basePrice = 100;
 
     // Specialization purchase penalty
     const purchasePenalty =
@@ -295,7 +296,7 @@ export function useAnimals({
 
     let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' = 'racaoBovina';
     let feedLabel = 'Ração Bovina';
-    if (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+    if (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo' || animal.type === 'porco') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
     else if (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
     else if (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
     else if (animal.type === 'pato' || animal.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
@@ -905,6 +906,45 @@ export function useAnimals({
     spawnFeedback('💰', `+${value} 💰`, event);
   };
 
+  const calculatePorcoValue = (porco: Animal): number => {
+    const growthFactor = porco.weightGain || 0.0;
+    let base = 40 + (growthFactor * 160); // Max 200 base
+    let happinessBonus = (porco.happiness / 100) * 25; // Max 25 bonus
+    let finalValueBase = Math.floor(base + happinessBonus);
+    if (farmLevel >= 5) finalValueBase += 3;
+    if (farmLevel > 5) finalValueBase *= (1.0 + (farmLevel - 5) * 0.04);
+    return Math.max(15, Math.round(finalValueBase * getCarneMultiplier()));
+  };
+
+  const sellPorco = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'porco') return;
+    if (animal.isAdult === false) {
+      addLog('🐷 O filhote precisa crescer antes de ser vendido!', 'error');
+      return;
+    }
+    const value = calculatePorcoValue(animal);
+    setGold(prev => prev + value);
+    setDailyEarning(prev => prev + value);
+    setStats(prev => ({
+      ...prev,
+      totalEarned: prev.totalEarned + value,
+      totalSold: prev.totalSold + 1,
+      totalMerchantTrades: merchantActive ? ((prev as any).totalMerchantTrades || 0) + 1 : ((prev as any).totalMerchantTrades || 0)
+    }));
+    setWeeklyStats((prev: any) => ({
+      ...prev,
+      earnings: prev.earnings + value,
+    }));
+    setWeeklySales((prev: any) => ({ ...prev, carne: (prev.carne || 0) + 1 }));
+    setAnimals(prev => prev.filter(a => a.id !== id));
+    addLog(`💰 ${animal.name} (Porco) foi vendido por ${value} moedas!`, 'success');
+    triggerAudioResult(() => sfx.playSound('sell_animal'));
+    triggerConfetti(event);
+    spawnFeedback('💰', `+${value} 💰`, event);
+  };
+
   // Sell Animal — any adult at depreciated value (filhotes blocked)
   const sellAnimal = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -990,6 +1030,7 @@ export function useAnimals({
     if (type === 'ra' && farmLevel < 12) { addLog('🔒 Rã requer Nível 12!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'avestruz' && farmLevel < 15) { addLog('🔒 Avestruz requer Nível 15!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'jacare' && farmLevel < 18) { addLog('🔒 Jacaré requer Nível 18!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'porco' && farmLevel < 4) { addLog('🔒 Porco requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
 
     // Verificar ração disponível
     const { feedType, feedLabel } = getAnimalFeedType(type);
@@ -1001,14 +1042,14 @@ export function useAnimals({
       return;
     }
 
-    const name = type === 'boi' ? getUniqueOxName(animals) : getRandomName(type);
+    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : getRandomName(type);
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
 
     // Custom initial stats
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80
 
     // F1: maxAge por tipo com variação ±20%
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400, porco: 120 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -1030,6 +1071,7 @@ export function useAnimals({
       ...(type === 'ovelha' && { daysUntilWool: 3, daysSinceLastWool: 2, woolReady: false }),
       ...(type === 'galinha' && { hasProducedToday: false }),
       ...(type === 'boi' && { weightGain: 0.10 }),
+      ...(type === 'porco' && { weightGain: 0.10 }),
       ...(type === 'cabra' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'lhama' && { woolAccumulated: 0 }),
       ...(type === 'pato' && { hasProducedToday: false, feathersReady: false }),
@@ -1084,6 +1126,7 @@ export function useAnimals({
   const FILHOTE_CONFIG: Partial<Record<AnimalType, { price: number; daysToAdult: number }>> = {
     vaca: { price: 60, daysToAdult: 10 },
     boi: { price: 75, daysToAdult: 15 },
+    porco: { price: 50, daysToAdult: 10 },
     bufalo: { price: 110, daysToAdult: 12 },
     cabra: { price: 55, daysToAdult: 8 },
     pavao: { price: 175, daysToAdult: 20 },
@@ -1131,10 +1174,10 @@ export function useAnimals({
       return;
     }
 
-    const name = type === 'boi' ? getUniqueOxName(animals) : getRandomName(type);
+    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : getRandomName(type);
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
     const happiness = Math.floor(Math.random() * 21) + 60;
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400, porco: 120 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -1156,6 +1199,7 @@ export function useAnimals({
       hasProducedToday: false,
       ...(type === 'ovelha' && { daysUntilWool: 3, daysSinceLastWool: 0, woolReady: false }),
       ...(type === 'boi' && { weightGain: 0.05 }),
+      ...(type === 'porco' && { weightGain: 0.05 }),
       ...(type === 'cabra' && { isLactating: false, lactationCycle: 0 }),
       ...(type === 'lhama' && { woolAccumulated: 0 }),
       ...(type === 'bufalo' && { heatStress: false }),
@@ -1193,6 +1237,8 @@ export function useAnimals({
     getAnimalPurchasePrice,
     getCarneMultiplier,
     calculateBoiValue,
+    calculatePorcoValue,
+    sellPorco,
     calcFairScore,
     feedAnimal,
     collectEgg,

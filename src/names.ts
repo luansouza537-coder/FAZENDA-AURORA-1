@@ -49,6 +49,28 @@ export function getRandomName(type: string): string {
   return list[Math.floor(Math.random() * list.length)];
 }
 
+export function getUniquePorcoName(currentAnimals: { type: string; name: string }[]): string {
+  const existingNumbers = new Set(
+    currentAnimals
+      .filter(a => a.type === 'porco')
+      .map(a => {
+        const match = a.name.match(/Porco\s+(\d+)/i);
+        return match ? parseInt(match[1], 10) : null;
+      })
+      .filter((n): n is number => n !== null)
+  );
+
+  let attempts = 0;
+  while (attempts < 1000) {
+    const r = Math.floor(Math.random() * 200) + 1;
+    if (!existingNumbers.has(r)) {
+      return `Porco ${r}`;
+    }
+    attempts++;
+  }
+  return `Porco ${Math.floor(Math.random() * 200) + 1}`;
+}
+
 export function getUniqueOxName(currentAnimals: { type: string; name: string }[]): string {
   const existingNumbers = new Set(
     currentAnimals

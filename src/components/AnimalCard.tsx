@@ -42,6 +42,8 @@ export interface AnimalListRowProps {
   onCollectEgg: (id: number, e: React.MouseEvent) => void;
   onSellOx: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
+  calculatePorcoValue: (animal: Animal) => number;
+  onSellPorco: (id: number, e: React.MouseEvent) => void;
 }
 
 export const AnimalListRow: React.FC<AnimalListRowProps> = ({
@@ -54,15 +56,19 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   onCollectEgg,
   onSellOx,
   calculateBoiValue,
+  calculatePorcoValue,
+  onSellPorco,
 }) => {
   const noHungerAnimal = ['minhoca','caracol'].includes(animal.type);
   const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
+  const valueOfPorcoRow = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
   const isReady =
     (animal.type === 'vaca' && animal.hasProducedToday) ||
     (animal.type === 'ovelha' && animal.woolReady) ||
     (animal.type === 'galinha' && animal.hasProducedToday) ||
     (animal.type === 'boi' && (animal.weightGain || 0) >= 0.8) ||
+    (animal.type === 'porco' && (animal.weightGain || 0) >= 0.8) ||
     (animal.type === 'cabra' && animal.isLactating && animal.hasProducedToday) ||
     (animal.type === 'pato' && animal.hasProducedToday) ||
     (animal.type === 'bufalo' && animal.hasProducedToday);
@@ -70,7 +76,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
     vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐',
     lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
     codorna: '🐦', alpaca: '🦙', minhoca: '🪱', caracol: '🐌',
-    coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊',
+    coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊', porco: '🐷',
   };
   return (
     <div
@@ -92,7 +98,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
       <div className="flex items-center gap-1 ml-auto">
         <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>
         {!noHungerAnimal && <span className="text-[10px] font-mono text-stone-500">🍽️{animal.hunger}%</span>}
-        {animal.type === 'boi' && <span className="text-[10px] font-mono text-stone-500">🔥{Math.floor((animal.weightGain||0)*100)}%</span>}
+        {(animal.type === 'boi' || animal.type === 'porco') && <span className="text-[10px] font-mono text-stone-500">🔥{Math.floor((animal.weightGain||0)*100)}%</span>}
         {isCritical && <span className="text-[9px] bg-red-500 text-white font-black px-1.5 py-0.5 rounded-full animate-pulse">⚠️</span>}
         {isReady && <span className="text-[9px] bg-green-500 text-white font-black px-1.5 py-0.5 rounded-full">✅ Pronto</span>}
       </div>
@@ -114,6 +120,9 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
         )}
         {animal.type === 'boi' && animal.isAdult !== false && (
           <button onClick={e => onSellOx(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-red-100 border border-red-300 text-red-800 hover:bg-red-200 cursor-pointer">💰{valueOfOx}</button>
+        )}
+        {animal.type === 'porco' && animal.isAdult !== false && (
+          <button onClick={e => onSellPorco(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-red-100 border border-red-300 text-red-800 hover:bg-red-200 cursor-pointer">💰{valueOfPorcoRow}</button>
         )}
       </div>
     </div>
@@ -153,6 +162,8 @@ export interface AnimalCardProps {
   onSellAnimal: (id: number, e: React.MouseEvent) => void;
   onRetireAnimal: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
+  calculatePorcoValue: (animal: Animal) => number;
+  onSellPorco: (id: number, e: React.MouseEvent) => void;
   getAnimalDailyProfit: (type: AnimalType) => DailyProfit;
   getTraitInfo: (trait: AnimalTrait) => TraitInfo;
   getLifePhase: (animal: { age?: number; maxAge?: number; isAdult?: boolean; adulthoodDay?: number }) => LifePhase;
@@ -197,6 +208,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onSellAnimal,
   onRetireAnimal,
   calculateBoiValue,
+  calculatePorcoValue,
+  onSellPorco,
   getAnimalDailyProfit,
   getTraitInfo,
   getLifePhase,
@@ -213,9 +226,11 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const [pendingSellOx, setPendingSellOx] = useState(false);
   const [pendingSellAvestruz, setPendingSellAvestruz] = useState(false);
   const [pendingSellJacare, setPendingSellJacare] = useState(false);
+  const [pendingSellPorco, setPendingSellPorco] = useState(false);
 
   const isEditing = editingId === animal.id;
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
+  const valueOfPorco = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
 
   const noHungerAnimal = ['minhoca', 'caracol'].includes(animal.type);
   const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
@@ -865,8 +880,30 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           )
         )}
 
-        {/* Vender Animal — qualquer adulto exceto boi, avestruz, jacaré e cabra (cabra tem botão próprio após coleta) */}
-        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && (() => {
+        {/* Sell Porco */}
+        {animal.type === 'porco' && animal.isAdult !== false && (
+          pendingSellPorco ? (
+            <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-300 rounded-xl px-2 py-1.5 w-full">
+              <span className="text-[9px] font-mono font-black text-red-700 leading-tight flex-1">Vender {animal.name}?<br/><span className="text-red-500">~{valueOfPorco}💰</span></span>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellPorco(false); onSellPorco(animal.id, e); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellPorco(false); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); setPendingSellPorco(true); }}
+              className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+              title={`Vender Porco: retorna moedas baseadas no peso. 💰 ~${valueOfPorco}`}
+            >
+              💰 Vender
+            </button>
+          )
+        )}
+
+        {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré e cabra (cabra tem botão próprio após coleta) */}
+        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && (() => {
           const age = animal.age ?? 0;
           const maxAge = animal.maxAge ?? 90;
           const lifeFraction = Math.min(1, age / maxAge);
@@ -910,7 +947,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         })()}
 
         {/* Aposentar Animal (75%+ vida útil, exceto boi) */}
-        {animal.isAdult !== false && animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75 && animal.type !== 'boi' && (
+        {animal.isAdult !== false && animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75 && animal.type !== 'boi' && animal.type !== 'porco' && (
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); onRetireAnimal(animal.id, e); }}

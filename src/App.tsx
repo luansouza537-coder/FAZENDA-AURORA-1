@@ -2405,21 +2405,32 @@ function GameApp() {
         if (copy.hunger > 65) gain += 0.025;
         if (copy.happiness > 70) gain += 0.015;
         if (copy.hunger < 20) gain -= 0.02;
-        
-        if (copy.isBestFriend) {
-          gain += 0.05;
-        }
-        
+        if (copy.isBestFriend) gain += 0.05;
         if (copy.hunger < 12) {
-          gain = -0.015; // Perda real de peso se estiver faminto
+          gain = -0.015;
         } else {
           gain = Math.min(0.07, Math.max(0, gain));
         }
-        
         copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.15) + gain));
-
         if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
-          logs.push({ msg: `🏆 ${copy.name} (Boi) atingiu o peso ideal de abate! Você obterá valor máximo na venda!`, type: 'success' });
+          logs.push({ msg: `🏆 ${copy.name} (Boi) atingiu o peso ideal! Você obterá valor máximo na venda!`, type: 'success' });
+        }
+      }
+      else if (copy.type === 'porco') {
+        // Porcos engordam ~2.5x mais rápido que bois
+        let gain = 0.05;
+        if (copy.hunger > 65) gain += 0.04;
+        if (copy.happiness > 70) gain += 0.02;
+        if (copy.hunger < 20) gain -= 0.03;
+        if (copy.isBestFriend) gain += 0.05;
+        if (copy.hunger < 12) {
+          gain = -0.02;
+        } else {
+          gain = Math.min(0.12, Math.max(0, gain));
+        }
+        copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.10) + gain));
+        if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
+          logs.push({ msg: `🐖 ${copy.name} (Porco) atingiu o peso ideal! Você obterá valor máximo na venda!`, type: 'success' });
         }
       }
       else if (copy.type === 'galinha') {
@@ -4992,7 +5003,7 @@ function GameApp() {
   // Improvement 2: Daily profit helper
   const getAnimalDailyProfit = (type: AnimalType): { revenue: number, cost: number, profit: number } => {
     const feedCostMap: Record<string, number> = {
-      vaca: 4, boi: 4, bufalo: 4,
+      vaca: 4, boi: 4, bufalo: 4, porco: 2,
       ovelha: 3, cabra: 3, lhama: 3, alpaca: 3,
       galinha: 3, codorna: 3, pavao: 3,
       pato: 4, ganso: 4,
@@ -5005,6 +5016,7 @@ function GameApp() {
     if (type === 'vaca') revenue = getItemBaseSellPrice('milk') * 1; // ~1/day
     else if (type === 'ovelha') revenue = getItemBaseSellPrice('wool') / 3; // every 3 days
     else if (type === 'boi') revenue = 0; // sell on maturity
+    else if (type === 'porco') revenue = 0; // sell on maturity
     else if (type === 'galinha') revenue = getItemBaseSellPrice('egg') * 1;
     else if (type === 'cabra') revenue = getItemBaseSellPrice('goat_milk') * 2 * (20/35); // 20d lactation / 35d cycle
     else if (type === 'lhama') revenue = getItemBaseSellPrice('llama_wool') / 30; // per season
@@ -5933,6 +5945,8 @@ function GameApp() {
             collectEgg={collectEgg}
             sellOx={sellOx}
             calculateBoiValue={calculateBoiValue}
+            calculatePorcoValue={calculatePorcoValue}
+            sellPorco={sellPorco}
             animalFilter={animalFilter}
             setAnimalFilter={setAnimalFilter}
             animalSort={animalSort}
