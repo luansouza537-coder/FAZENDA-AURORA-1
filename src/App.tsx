@@ -2691,6 +2691,32 @@ function GameApp() {
 
       return copy;
     });
+
+    // Apply climate event mutations directly into finalAnimals (must happen here, not via
+    // separate setAnimals, to avoid being overwritten by the final setAnimals call)
+    if (nextDayEvent === 'tempestade' && !blockNextStorm && !insuranceClimate.active) {
+      finalAnimals.forEach(a => {
+        if (a.isAdult !== false) {
+          a.stressedDays = Math.max(a.stressedDays ?? 0, 1);
+          a.happiness = Math.max(0, a.happiness - 10);
+        }
+      });
+    }
+    if (nextDayEvent === 'geada' && !insuranceClimate.active) {
+      finalAnimals.forEach(a => {
+        if (a.isAdult !== false) {
+          a.happiness = Math.max(0, a.happiness - 20);
+          a.stressedDays = Math.max(a.stressedDays ?? 0, 2);
+        }
+      });
+    }
+    if (predadorTargetId !== null) {
+      const target = finalAnimals.find(a => a.id === predadorTargetId);
+      if (target) {
+        target.stressedDays = 3;
+        target.happiness = Math.max(0, target.happiness - 25);
+      }
+    }
   };
 
   /**
@@ -3601,6 +3627,19 @@ function GameApp() {
       // Pavão: bônus de felicidade e preço (verificamos aqui)
       const peacockCount = survivorsAfterAge.filter(a => a.type === 'pavao' && a.happiness > 80).length;
 
+      // Pre-compute climate event overrides so they're baked into finalAnimals pipeline
+      // (avoids being overwritten by the final setAnimals call later in advanceDay)
+      let predadorTargetId: number | null = null;
+      if (nextDayEvent === 'tempestade' && !blockNextStorm && !insuranceClimate.active) {
+        // overrides applied per-animal below
+      }
+      if (nextDayEvent === 'predador') {
+        const vulnerable = survivorsAfterAge.filter(a => a.isAdult !== false && !['boi', 'jacare', 'bufalo'].includes(a.type));
+        if (vulnerable.length > 0) {
+          predadorTargetId = vulnerable[Math.floor(Math.random() * vulnerable.length)].id;
+        }
+      }
+
       const finalAnimals = survivorsAfterAge.map(a => {
         const copy = { ...a };
 
@@ -3786,6 +3825,7 @@ function GameApp() {
       // MECHANIC 2: Aplicar evento pré-sorteado do dia atual + sortear próximo
       {
         // Aplicar o evento que foi sorteado ontem para hoje
+        // Climate events — mutations already applied in finalAnimals pipeline above
         if (nextDayEvent === 'tempestade') {
           if (blockNextStorm) {
             logsToAdd.push({ msg: `☂️ Tempestade chegou, mas a Cobertura Provisória protegeu a fazenda!`, type: 'success' });
@@ -3793,34 +3833,23 @@ function GameApp() {
           } else if (insuranceClimate.active) {
             logsToAdd.push({ msg: `🌦️ Tempestade chegou, mas o Seguro Climático protegeu seus animais!`, type: 'success' });
           } else {
-            // Reduz produção do dia em 50%: seta flag de estresse em todos os adultos
-            setAnimals(prev => prev.map(a =>
-              a.isAdult !== false ? { ...a, stressedDays: Math.max(a.stressedDays ?? 0, 1), happiness: Math.max(0, a.happiness - 10) } : a
-            ));
             logsToAdd.push({ msg: `⛈️ Tempestade! Animais estressados — produção reduzida e -10 felicidade hoje.`, type: 'error' });
             setTimeout(() => addNotification('⛈️ Tempestade! Produção reduzida hoje.', 'warning', nextDayValue), 0);
-            addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'evento', description: '⛈️ Tempestade — produção reduzida', amount: 0 });
           }
         } else if (nextDayEvent === 'geada') {
           if (insuranceClimate.active) {
             logsToAdd.push({ msg: `🌦️ Geada chegou, mas o Seguro Climático protegeu seus animais!`, type: 'success' });
           } else {
-            setAnimals(prev => prev.map(a =>
-              a.isAdult !== false ? { ...a, happiness: Math.max(0, a.happiness - 20), stressedDays: Math.max(a.stressedDays ?? 0, 2) } : a
-            ));
             logsToAdd.push({ msg: `❄️ Geada! Todos os animais perderam 20 de felicidade e ficaram estressados por 2 dias.`, type: 'error' });
             setTimeout(() => addNotification('❄️ Geada! -20 felicidade e estresse nos animais.', 'warning', nextDayValue), 0);
-            addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'evento', description: '❄️ Geada — felicidade reduzida', amount: 0 });
           }
         } else if (nextDayEvent === 'predador') {
-          const vulnerableAnimals = finalAnimals.filter(a => a.isAdult !== false && !['boi', 'jacare', 'bufalo'].includes(a.type));
-          if (vulnerableAnimals.length > 0) {
-            const target = vulnerableAnimals[Math.floor(Math.random() * vulnerableAnimals.length)];
-            setAnimals(prev => prev.map(a =>
-              a.id === target.id ? { ...a, stressedDays: 3, happiness: Math.max(0, a.happiness - 25) } : a
-            ));
-            logsToAdd.push({ msg: `🐺 Predador atacou a fazenda! ${target.name} ficou assustado — estressado por 3 dias e -25 felicidade.`, type: 'error' });
-            setTimeout(() => addNotification(`🐺 Predador! ${target.name} ficou estressado.`, 'warning', nextDayValue), 0);
+          if (predadorTargetId !== null) {
+            const target = finalAnimals.find(a => a.id === predadorTargetId);
+            if (target) {
+              logsToAdd.push({ msg: `🐺 Predador atacou a fazenda! ${target.name} ficou assustado — estressado por 3 dias e -25 felicidade.`, type: 'error' });
+              setTimeout(() => addNotification(`🐺 Predador! ${target.name} ficou estressado.`, 'warning', nextDayValue), 0);
+            }
           } else {
             logsToAdd.push({ msg: `🐺 Predador rondou a fazenda, mas não encontrou animais vulneráveis!`, type: 'event' });
           }
