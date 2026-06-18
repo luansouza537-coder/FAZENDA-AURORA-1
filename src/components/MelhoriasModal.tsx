@@ -30,11 +30,6 @@ interface MelhoriasModalProps {
   feederLevel: number;
   landBiomes: LandLot[];
   biomeWeeklyIncome: Record<string, number>;
-  loanActive: boolean;
-  loanAmount: number;
-  loanInterestRate: number;
-  loanWeeksLeft: number;
-  loanDaysUntilInterest: number;
   onClose: () => void;
   setGold: (fn: (prev: number) => number) => void;
   setLandLots: (v: number) => void;
@@ -59,11 +54,6 @@ interface MelhoriasModalProps {
   setShearerLevel: (fn: (prev: number) => number) => void;
   setFeederLevel: (fn: (prev: number) => number) => void;
   setLandBiomes: (fn: (prev: LandLot[]) => LandLot[]) => void;
-  setLoanActive: (v: boolean) => void;
-  setLoanAmount: (v: number) => void;
-  setLoanInterestRate: (v: number) => void;
-  setLoanWeeksLeft: (v: number) => void;
-  setLoanDaysUntilInterest: (v: number) => void;
   addLog: (msg: string, type: string) => void;
   triggerAudioResult: (fn: () => void) => void;
   sfx: { playSound: (s: string) => void };
@@ -256,41 +246,6 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 </button>
               </div>
             ))}
-
-            {/* Empréstimo */}
-            <div className="bg-white border-4 border-violet-300 rounded-3xl p-4">
-              <h4 className="font-display font-black text-sm uppercase text-violet-800 mb-1">🏦 Banco Rural — Empréstimo</h4>
-              {p.loanActive ? (
-                <div className="space-y-1">
-                  <p className="text-xs text-stone-500 font-mono">Empréstimo ativo: <strong>{p.loanAmount.toLocaleString()}💰</strong></p>
-                  <p className="text-xs text-stone-500 font-mono">Juros semanais: <strong>{Math.round(p.loanInterestRate * 100)}%</strong> — Próximo em {p.loanDaysUntilInterest}d</p>
-                  <p className="text-xs text-stone-500 font-mono">Semanas restantes: <strong>{p.loanWeeksLeft}</strong></p>
-                  <button disabled={p.gold < p.loanAmount}
-                    onClick={() => { if (p.gold >= p.loanAmount) { p.setGold(prev => prev - p.loanAmount); p.setLoanActive(false); p.setLoanAmount(0); p.setLoanWeeksLeft(0); p.addLog(`🏦 Empréstimo quitado antecipadamente! -${p.loanAmount}💰`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); setTimeout(() => p.checkAndUnlockAchievement('loan_paid'), 0); } }}
-                    className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer mt-2 ${p.gold >= p.loanAmount ? 'bg-violet-500 hover:bg-violet-400 text-white border-violet-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
-                  >
-                    Quitar Antecipado ({p.loanAmount.toLocaleString()}💰)
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-xs text-stone-500 font-mono">Receba ouro agora e pague juros semanais. Escolha o valor:</p>
-                  {[
-                    { amount: 500, rate: 0.05, weeks: 4, label: 'Pequeno (500💰, 5%/sem, 4 sem)' },
-                    { amount: 1500, rate: 0.08, weeks: 5, label: 'Médio (1.500💰, 8%/sem, 5 sem)' },
-                    { amount: 4000, rate: 0.12, weeks: 6, label: 'Grande (4.000💰, 12%/sem, 6 sem)' },
-                    { amount: 10000, rate: 0.15, weeks: 8, label: 'Mega (10.000💰, 15%/sem, 8 sem)' },
-                  ].map(opt => (
-                    <button key={opt.amount}
-                      onClick={() => { p.setGold(prev => prev + opt.amount); p.setLoanActive(true); p.setLoanAmount(opt.amount); p.setLoanInterestRate(opt.rate); p.setLoanWeeksLeft(opt.weeks); p.setLoanDaysUntilInterest(7); p.addLog(`🏦 Empréstimo de ${opt.amount}💰 obtido! Juros: ${Math.round(opt.rate*100)}%/semana por ${opt.weeks} semanas.`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); setTimeout(() => p.checkAndUnlockAchievement('loan_taken'), 0); }}
-                      className="w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 bg-violet-500 hover:bg-violet-400 text-white border-violet-700 transition-all cursor-pointer"
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
 
             {/* Oficina de Automação */}
             {(p.machines.milkerPurchased || p.machines.shearerPurchased || p.machines.feederPurchased) && (

@@ -6158,8 +6158,25 @@ function GameApp() {
       {showFinancasModal && (
         <FinancasModal
           currentDay={currentDay}
+          farmLevel={farmLevel}
           financialLog={financialLog}
+          gold={gold}
+          loanActive={loanActive}
+          loanAmount={loanAmount}
+          loanInterestRate={loanInterestRate}
+          loanWeeksLeft={loanWeeksLeft}
+          loanDaysUntilInterest={loanDaysUntilInterest}
           onClose={() => setShowFinancasModal(false)}
+          setGold={setGold}
+          setLoanActive={setLoanActive}
+          setLoanAmount={setLoanAmount}
+          setLoanInterestRate={setLoanInterestRate}
+          setLoanWeeksLeft={setLoanWeeksLeft}
+          setLoanDaysUntilInterest={setLoanDaysUntilInterest}
+          addLog={addLog}
+          triggerAudioResult={triggerAudioResult}
+          sfx={sfx}
+          checkAndUnlockAchievement={checkAndUnlockAchievement}
         />
       )}
 
@@ -6195,8 +6212,6 @@ function GameApp() {
           hasExportCenter={hasExportCenter} hasAcademia={hasAcademia} licencaExotica={licencaExotica}
           machines={machines} milkerLevel={milkerLevel} shearerLevel={shearerLevel} feederLevel={feederLevel}
           landBiomes={landBiomes} biomeWeeklyIncome={biomeWeeklyIncome}
-          loanActive={loanActive} loanAmount={loanAmount} loanInterestRate={loanInterestRate}
-          loanWeeksLeft={loanWeeksLeft} loanDaysUntilInterest={loanDaysUntilInterest}
           onClose={() => setShowUpgradesModal(false)}
           setGold={setGold} setLandLots={setLandLots} setWellLevel={setWellLevel}
           setSolarLevel={setSolarLevel} setIrrigationLevel={setIrrigationLevel}
@@ -6209,9 +6224,6 @@ function GameApp() {
           setLicencaExotica={setLicencaExotica}
           setMilkerLevel={setMilkerLevel} setShearerLevel={setShearerLevel} setFeederLevel={setFeederLevel}
           setLandBiomes={setLandBiomes}
-          setLoanActive={setLoanActive} setLoanAmount={setLoanAmount}
-          setLoanInterestRate={setLoanInterestRate} setLoanWeeksLeft={setLoanWeeksLeft}
-          setLoanDaysUntilInterest={setLoanDaysUntilInterest}
           addLog={addLog} triggerAudioResult={triggerAudioResult} sfx={sfx}
           checkAndUnlockAchievement={checkAndUnlockAchievement}
         />
