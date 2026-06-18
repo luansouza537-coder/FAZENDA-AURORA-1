@@ -272,9 +272,11 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         <span className="absolute top-1 right-1 text-[8px] bg-orange-500 text-white px-1.5 py-0.5 rounded-full font-black z-10">😰 Estressado ({animal.stressedDays}d)</span>
       )}
 
-      {/* IMPROVEMENT 9: Sick badge */}
+      {/* IMPROVEMENT 9: Sick badge with day counter */}
       {animal.isSick && (
-        <span className="absolute top-6 left-1 text-[8px] bg-red-600 text-white px-1.5 py-0.5 rounded-full font-black animate-pulse z-10">🤒 Doente</span>
+        <span className={`absolute top-6 left-1 text-[8px] px-1.5 py-0.5 rounded-full font-black animate-pulse z-10 ${(animal.sickDays ?? 0) >= 5 ? 'bg-red-900 text-yellow-300 border border-yellow-400' : 'bg-red-600 text-white'}`}>
+          🤒 Doente {(animal.sickDays ?? 0) > 0 ? `${animal.sickDays}d` : ''}{(animal.sickDays ?? 0) >= 5 ? ' ⚠️' : ''}
+        </span>
       )}
 
       {/* IMPROVEMENT 6: Premium quality badge */}

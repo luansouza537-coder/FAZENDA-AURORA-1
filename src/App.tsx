@@ -489,6 +489,15 @@ function GameApp() {
     return [];
   });
   const [showMissionsModal, setShowMissionsModal] = useState<boolean>(false);
+  const [vetVisitActive, setVetVisitActive] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).vetVisitActive ?? false; } catch(e) {} return false;
+  });
+  const [daysSinceVetVisit, setDaysSinceVetVisit] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).daysSinceVetVisit ?? 0; } catch(e) {} return 0;
+  });
+  const [nextVetVisitDay, setNextVetVisitDay] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).nextVetVisitDay ?? 5; } catch(e) {} return 5;
+  });
 
   // --- FUNCIONALIDADE 4: Notificações persistentes ---
   interface GameNotification {
@@ -2046,6 +2055,9 @@ function GameApp() {
         queijariaNivel,
         nextDayEvent,
         activeMarketEvent,
+        vetVisitActive,
+        daysSinceVetVisit,
+        nextVetVisitDay,
         hasStable,
         hasSilo,
         hasFridge,
@@ -2664,6 +2676,12 @@ function GameApp() {
       }
       if (copy.isSick) {
         copy.sickDays = (copy.sickDays ?? 0) + 1;
+        if (copy.sickDays >= 7) {
+          (copy as any).diedFromIllness = true;
+          logs.push({ msg: `💀 ${copy.name} (${copy.type}) não resistiu à doença e morreu após ${copy.sickDays} dias sem tratamento.`, type: 'error' });
+        } else if (copy.sickDays === 5) {
+          logs.push({ msg: `⚠️ ${copy.name} está crítico! Já são ${copy.sickDays} dias doente — trate urgente antes que morra!`, type: 'error' });
+        }
       }
 
       // IMPROVEMENT 1: Critical happiness log
@@ -3105,6 +3123,27 @@ function GameApp() {
         });
         const shuffled = [...availableMerchItems].sort(() => Math.random() - 0.5);
         setMerchantSpecialItems(shuffled.slice(0, 4).map(i => i.id));
+      }
+
+      // --- VETERINÁRIO VISITANTE (níveis 1-9, sem veterinário contratado) ---
+      {
+        const hasVetWorker = workers.some(w => w.role === 'veterinario');
+        if (farmLevel < 10 && !hasVetWorker) {
+          const newDaysSinceVet = daysSinceVetVisit + 1;
+          if (newDaysSinceVet >= nextVetVisitDay) {
+            setVetVisitActive(true);
+            setDaysSinceVetVisit(0);
+            setNextVetVisitDay(5 + Math.floor(Math.random() * 3));
+            logsToAdd.push({ msg: `💉 O Veterinário Visitante chegou! Cure seus animais doentes hoje.`, type: 'event' });
+            setTimeout(() => addNotification('💉 Veterinário Visitante chegou! Cure seus animais doentes hoje.', 'event', nextDayValue), 0);
+          } else {
+            setVetVisitActive(false);
+            setDaysSinceVetVisit(newDaysSinceVet);
+          }
+        } else {
+          setVetVisitActive(false);
+          setDaysSinceVetVisit(0);
+        }
       }
 
       // Toques sonoros contextuais
@@ -3964,10 +4003,12 @@ function GameApp() {
       const animalsWithWeekly = nextDayValue % 7 === 0
         ? finalAnimalsWithAdulthood.map(a => ({ ...a, weeklyProduction: 0 }))
         : finalAnimalsWithAdulthood;
+      // Remove animals that died from illness
+      const animalsAfterDeaths = animalsWithWeekly.filter((a: any) => !a.diedFromIllness);
       setAnimals(prev => {
-        const idsInComputed = new Set(animalsWithWeekly.map((a: any) => a.id));
+        const idsInComputed = new Set(animalsAfterDeaths.map((a: any) => a.id));
         const newlyAdded = prev.filter((a: any) => !idsInComputed.has(a.id));
-        return [...animalsWithWeekly, ...newlyAdded];
+        return [...animalsAfterDeaths, ...newlyAdded];
       });
       // Apply accumulated wisdom bonuses
       if (Object.values(wisdomBonusUpdates).some(v => v > 0)) {
@@ -5654,6 +5695,93 @@ function GameApp() {
             </div>
           );
         })()}
+
+        {/* --- VETERINÁRIO VISITANTE --- */}
+        {vetVisitActive && (
+          <div className="mx-6 mt-3 bg-gradient-to-r from-teal-800 to-emerald-900 border-x-8 border-y-4 border-teal-400 rounded-2xl p-4 shadow-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">💉</span>
+              <h3 className="text-teal-100 font-display font-black text-sm uppercase tracking-wider">Veterinário Visitante</h3>
+              <span className="text-[10px] text-teal-300 font-mono ml-auto">Disponível hoje apenas!</span>
+            </div>
+            {animals.filter(a => a.isSick).length === 0 ? (
+              <p className="text-teal-200 text-xs font-mono mb-3">✅ Nenhum animal doente no momento. Aproveite os itens preventivos!</p>
+            ) : (
+              <div className="mb-3">
+                <p className="text-teal-200 text-xs font-mono mb-2">🤒 Animais doentes — curar individualmente por 15💰:</p>
+                <div className="flex flex-wrap gap-2">
+                  {animals.filter(a => a.isSick).map(animal => (
+                    <button
+                      key={animal.id}
+                      onClick={() => {
+                        if (gold < 15) { addLog('💰 Moedas insuficientes! Cura custa 15💰.', 'error'); return; }
+                        setGold(prev => prev - 15);
+                        setAnimals(prev => prev.map(a => a.id === animal.id ? { ...a, isSick: false, sickDays: 0, lowHappinessDays: 0 } : a));
+                        addLog(`💉 ${animal.name} foi curado pelo veterinário por 15💰!`, 'success');
+                        addFinancialEntry({ day: currentDay, type: 'expense', category: 'custo_diario', description: `💉 Cura veterinária — ${animal.name}`, amount: 15 });
+                        triggerAudioResult(() => sfx.playSound('coin'));
+                      }}
+                      disabled={gold < 15}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-700 hover:bg-teal-600 disabled:bg-stone-700 disabled:text-stone-400 text-white text-xs font-mono font-bold rounded-xl border-b-2 border-teal-900 transition-all cursor-pointer"
+                    >
+                      💉 {animal.name} — 15💰 {(animal.sickDays ?? 0) >= 5 ? '⚠️' : ''}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {animals.some(a => a.isSick) && (() => {
+                const sickCount = animals.filter(a => a.isSick).length;
+                const cost = sickCount * 12;
+                return (
+                  <button
+                    onClick={() => {
+                      if (gold < cost) { addLog(`💰 Moedas insuficientes! Curar todos custa ${cost}💰.`, 'error'); return; }
+                      setGold(prev => prev - cost);
+                      setAnimals(prev => prev.map(a => a.isSick ? { ...a, isSick: false, sickDays: 0, lowHappinessDays: 0 } : a));
+                      addLog(`💉 ${sickCount} animais curados por ${cost}💰!`, 'success');
+                      addFinancialEntry({ day: currentDay, type: 'expense', category: 'custo_diario', description: `💉 Cura veterinária — ${sickCount} animais`, amount: cost });
+                      triggerAudioResult(() => sfx.playSound('coin'));
+                    }}
+                    disabled={gold < cost}
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-stone-700 disabled:text-stone-400 text-white text-xs font-mono font-bold rounded-xl border-b-2 border-emerald-900 transition-all cursor-pointer"
+                  >
+                    🩺 Curar Todos ({cost}💰)
+                  </button>
+                );
+              })()}
+              <button
+                onClick={() => {
+                  if (gold < 25) { addLog('💰 Moedas insuficientes! Vacina custa 25💰.', 'error'); return; }
+                  setGold(prev => prev - 25);
+                  setEpidemicPrevented(true);
+                  addLog('🛡️ Vacina preventiva aplicada! Próxima epidemia será bloqueada.', 'success');
+                  addFinancialEntry({ day: currentDay, type: 'expense', category: 'custo_diario', description: '🛡️ Vacina preventiva', amount: 25 });
+                  triggerAudioResult(() => sfx.playSound('coin'));
+                }}
+                disabled={gold < 25}
+                className="px-3 py-1.5 bg-blue-700 hover:bg-blue-600 disabled:bg-stone-700 disabled:text-stone-400 text-white text-xs font-mono font-bold rounded-xl border-b-2 border-blue-900 transition-all cursor-pointer"
+              >
+                🛡️ Vacina Preventiva — 25💰
+              </button>
+              <button
+                onClick={() => {
+                  if (gold < 20) { addLog('💰 Moedas insuficientes! Suplemento custa 20💰.', 'error'); return; }
+                  setGold(prev => prev - 20);
+                  setAnimals(prev => prev.map(a => ({ ...a, happiness: Math.min(100, a.happiness + 15), stressedDays: 0 })));
+                  addLog('🌿 Suplemento de saúde aplicado! +15 felicidade e estresse removido de todos.', 'success');
+                  addFinancialEntry({ day: currentDay, type: 'expense', category: 'custo_diario', description: '🌿 Suplemento de saúde', amount: 20 });
+                  triggerAudioResult(() => sfx.playSound('coin'));
+                }}
+                disabled={gold < 20}
+                className="px-3 py-1.5 bg-green-700 hover:bg-green-600 disabled:bg-stone-700 disabled:text-stone-400 text-white text-xs font-mono font-bold rounded-xl border-b-2 border-green-900 transition-all cursor-pointer"
+              >
+                🌿 Suplemento Saúde — 20💰
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* --- NEXT DAY EVENT WARNING BANNER --- */}
         {nextDayEvent && ['praga', 'tempestade', 'seca', 'geada', 'predador'].includes(nextDayEvent) && (
