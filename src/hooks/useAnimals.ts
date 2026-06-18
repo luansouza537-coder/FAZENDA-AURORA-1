@@ -753,6 +753,7 @@ export function useAnimals({
       return a;
     }));
 
+    setProductFreshness((prev: any) => ({ ...prev, wool: 3 }));
     addLog(`🧶 ${animal.name} foi tosquiada! Adicionado +${woolBonus} lã(s) crua(s) no Armazém.`, 'success');
     setFarmXp(prev => prev + woolBonus);
     triggerAudioResult(() => sfx.playSound('shear'));
