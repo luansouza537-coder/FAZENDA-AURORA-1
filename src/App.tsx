@@ -3704,27 +3704,43 @@ function GameApp() {
       {
         const basePestChance = 0.08;
         const hasDuckAlive = finalAnimals.some(a => a.type === 'pato');
-        const pestChance = hasDuckAlive ? basePestChance * 0.6 : basePestChance; // 40% redução com pato
+        const pestChance = hasDuckAlive ? basePestChance * 0.6 : basePestChance;
         if (Math.random() < pestChance) {
           const pestItems: Array<keyof typeof inventory> = ['milk', 'goat_milk', 'egg', 'duck_egg', 'goose_egg'];
-          let totalLost = 0;
-          const lossMultiplier = insurance.active ? 0.3 : 1.0; // seguro reduz 70%
-          const pestLossFraction = (0.10 + Math.random() * 0.15) * lossMultiplier; // 10–25%, modificado pelo seguro
+          const itemLabels: Record<string, string> = { milk: 'leite', goat_milk: 'l.cabra', egg: 'ovos', duck_egg: 'ov.pato', goose_egg: 'ov.ganso' };
+          const lossMultiplier = insurance.active ? 0.3 : 1.0;
+          const pestLossFraction = (0.10 + Math.random() * 0.15) * lossMultiplier;
+          // Compute losses upfront for detailed reporting and financial entry
+          const lostDetails: string[] = [];
+          let estimatedGoldLoss = 0;
+          pestItems.forEach(key => {
+            const current = (inventory[key] ?? 0) as number;
+            if (current > 0) {
+              const lost = Math.floor(current * pestLossFraction);
+              if (lost > 0) {
+                lostDetails.push(`${lost} ${itemLabels[key]}`);
+                estimatedGoldLoss += lost * getActualSellPrice(key as string);
+              }
+            }
+          });
           setInventory(prev => {
             const next = { ...prev };
             pestItems.forEach(key => {
               const current = (prev[key] ?? 0) as number;
               if (current > 0) {
                 const lost = Math.floor(current * pestLossFraction);
-                totalLost += lost;
                 (next as any)[key] = Math.max(0, current - lost);
               }
             });
             return next;
           });
-          const insuranceTxt = insurance.active ? ' (Seguro reduziu 70% das perdas!)' : '';
-          logsToAdd.push({ msg: `🐀 Pragas invadiram o celeiro! Perdeu itens perecíveis.${insuranceTxt}`, type: 'error' });
-          setTimeout(() => addNotification(`🐀 Pragas invadiram o celeiro! Itens perecíveis afetados.${insuranceTxt}`, 'warning', nextDayValue), 0);
+          const detailTxt = lostDetails.length > 0 ? ` Perdidos: ${lostDetails.join(', ')}.` : '';
+          const insuranceTxt = insurance.active ? ' Seguro reduziu 70%!' : '';
+          logsToAdd.push({ msg: `🐀 Pragas invadiram o celeiro!${detailTxt}${insuranceTxt}`, type: 'error' });
+          setTimeout(() => addNotification(`🐀 Pragas!${detailTxt}${insuranceTxt}`, 'warning', nextDayValue), 0);
+          if (estimatedGoldLoss > 0) {
+            addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'evento', description: `🐀 Pragas — ${lostDetails.join(', ')} (~${Math.round(estimatedGoldLoss)}💰 perdidos${insurance.active ? ', seguro ativo' : ''})`, amount: Math.round(estimatedGoldLoss) });
+          }
         }
       }
 
@@ -4057,8 +4073,8 @@ function GameApp() {
         if (currentDrought > 0) {
           logsToAdd.push({ msg: `🏜️ Seca prolongada! Custo de água triplicado este dia.`, type: 'error' });
           setDroughtDaysRemaining(prev => prev - 1);
-          // Additional water cost handled below via extra gold deduction
-          // BUG FIX: gera dívida se ouro insuficiente (consistente com o sistema de dívida)
+          const droughtExtraCost = waterCost * 2;
+          addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'evento', description: `🏜️ Seca — custo extra de água (${droughtExtraCost}💰)`, amount: droughtExtraCost });
           setGold(prev => {
             const cost = waterCost * 2;
             if (prev < cost) {
@@ -5639,9 +5655,22 @@ function GameApp() {
           );
         })()}
 
+        {/* --- NEXT DAY EVENT WARNING BANNER --- */}
+        {nextDayEvent && ['praga', 'tempestade', 'seca', 'geada', 'predador'].includes(nextDayEvent) && (
+          <div className="mx-4 sm:mx-6 lg:mx-8 mb-2 flex items-center gap-2 px-4 py-2.5 bg-red-900/80 border border-red-500 rounded-xl text-red-100 text-xs font-mono font-bold animate-pulse">
+            <span className="text-base">
+              {nextDayEvent === 'praga' ? '🐀' : nextDayEvent === 'tempestade' ? '⛈️' : nextDayEvent === 'seca' ? '🏜️' : nextDayEvent === 'geada' ? '❄️' : '🐺'}
+            </span>
+            <span>
+              <span className="uppercase font-black">Alerta para amanhã:</span>{' '}
+              {nextDayEvent === 'praga' ? 'Pragas! Proteja o celeiro — itens perecíveis em risco.' : nextDayEvent === 'tempestade' ? 'Tempestade se aproximando! Produção pode ser afetada.' : nextDayEvent === 'seca' ? 'Seca prevista! Custo de água vai triplicar por 3 dias.' : nextDayEvent === 'geada' ? 'Geada! Produção de animais pode ser reduzida.' : 'Predador! Animais em perigo — verifique o rebanho.'}
+            </span>
+          </div>
+        )}
+
         {/* --- MAIN GAMEBODY BENTO LAYOUT --- */}
         <div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 bg-transparent">
-          
+
           {/* --- LEFT HAND SIDE: ACTIVE ANIMALS (8/12 Cols) --- */}
           <AnimalGrid
             animals={animals}
