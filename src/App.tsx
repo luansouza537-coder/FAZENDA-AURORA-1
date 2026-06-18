@@ -268,6 +268,9 @@ function GameApp() {
 
   const [showFairResultModal, setShowFairResultModal] = useState<FairResult | null>(null);
 
+  const [lastTheftDay, setLastTheftDay] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).lastTheftDay ?? 0; } catch(e) {} return 0;
+  });
   const [lastEpidemicDay, setLastEpidemicDay] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -2068,6 +2071,7 @@ function GameApp() {
         hasTourism,
         nextFairDay,
         fairResults,
+        lastTheftDay,
         lastEpidemicDay,
         droughtDaysRemaining,
         licencaExotica,
@@ -3091,6 +3095,8 @@ function GameApp() {
       if (levelUpOccurred) {
         setFarmLevel(newLevel);
         setShowLevelUpModal(newLevel);
+        setInsuranceClimate(prev => ({ active: true, daysLeft: (prev.active ? prev.daysLeft : 0) + 3 }));
+        logsToAdd.push({ msg: `🌦️ Nível ${newLevel} desbloqueado! Seguro Climático grátis por 3 dias!`, type: 'success' });
         setTimeout(() => addNotification(`🏆 Fazenda subiu para o Nível ${newLevel}! (${newFarmXp} XP total)`, 'success', nextDayValue), 0);
         setTimeout(() => triggerBigNotification(`NÍVEL ${newLevel}!`, `Sua fazenda evoluiu! Novos benefícios desbloqueados.`, '🏆'), 300);
         // Mostrar modal de especialização ao atingir nível 2 pela primeira vez
@@ -3729,7 +3735,7 @@ function GameApp() {
       if (nextDayEvent === 'geada' && !insuranceClimate.active) {
         finalAnimals.forEach(a => {
           if (a.isAdult !== false) {
-            a.happiness = Math.max(0, a.happiness - 20);
+            a.happiness = Math.max(0, a.happiness - 15);
             a.stressedDays = Math.max(a.stressedDays ?? 0, 2);
           }
         });
@@ -3738,7 +3744,7 @@ function GameApp() {
         const target = finalAnimals.find(a => a.id === predadorTargetId);
         if (target) {
           target.stressedDays = 3;
-          target.happiness = Math.max(0, target.happiness - 25);
+          target.happiness = Math.max(0, target.happiness - 15);
         }
       }
 
@@ -3780,14 +3786,14 @@ function GameApp() {
 
       // MECHANIC 1: Sistema de Pragas (Pato reduz probabilidade)
       {
-        const basePestChance = 0.08;
+        const basePestChance = 0.05;
         const hasDuckAlive = finalAnimals.some(a => a.type === 'pato');
         const pestChance = hasDuckAlive ? basePestChance * 0.6 : basePestChance;
         if (antiPestDays <= 0 && Math.random() < pestChance) {
           const pestItems: Array<keyof typeof inventory> = ['milk', 'goat_milk', 'egg', 'duck_egg', 'goose_egg'];
           const itemLabels: Record<string, string> = { milk: 'leite', goat_milk: 'l.cabra', egg: 'ovos', duck_egg: 'ov.pato', goose_egg: 'ov.ganso' };
           const lossMultiplier = insurance.active ? 0.3 : 1.0;
-          const pestLossFraction = (0.10 + Math.random() * 0.15) * lossMultiplier;
+          const pestLossFraction = (0.05 + Math.random() * 0.10) * lossMultiplier; // cap 15%
           // Compute losses upfront for detailed reporting and financial entry
           const lostDetails: string[] = [];
           let estimatedGoldLoss = 0;
@@ -4207,11 +4213,12 @@ function GameApp() {
         }
       }
 
-      // Roubo noturno (4% de chance, não ocorre nos primeiros 5 dias)
-      if (currentDay > 5 && Math.random() < 0.04) {
+      // Roubo noturno (4% de chance, não ocorre nos primeiros 5 dias, cooldown 5 dias)
+      if (currentDay > 5 && (currentDay - lastTheftDay) >= 5 && Math.random() < 0.04) {
         if (insuranceTheft.active) {
           logsToAdd.push({ msg: `🛡️ Tentativa de roubo! Seguro contra Roubo bloqueou o ladrão!`, type: 'success' });
           setTimeout(() => addNotification(`🛡️ Tentativa de roubo bloqueada pelo seguro!`, 'success', nextDayValue), 0);
+          setLastTheftDay(nextDayValue);
         } else {
           const stolenPercent = 0.2 + Math.random() * 0.2;
           setInventory(prev => ({
@@ -4227,6 +4234,7 @@ function GameApp() {
           }));
           logsToAdd.push({ msg: `🦹 Roubo noturno! Perdeu ${Math.round(stolenPercent * 100)}% do inventário de produtos!`, type: 'error' });
           setTimeout(() => addNotification(`🦹 Roubo noturno! Perdeu ${Math.round(stolenPercent * 100)}% do inventário!`, 'warning', nextDayValue), 0);
+          setLastTheftDay(nextDayValue);
         }
       }
 
@@ -4864,7 +4872,7 @@ function GameApp() {
       // --- MAIS EVENTOS POSITIVOS ALEATÓRIOS ---
       if (Math.random() < 0.12) {
         const positiveChances = [
-          () => { const bonus = 30 + Math.floor(Math.random() * 70); setGold(prev => prev + bonus); logsToAdd.push({ msg: `🍀 Sorte! Um visitante deixou uma gorjeta de ${bonus} moedas!`, type: 'success' }); },
+          () => { const bonus = Math.round((30 + Math.floor(Math.random() * 70)) * (1 + (farmLevel - 1) * 0.1)); setGold(prev => prev + bonus); logsToAdd.push({ msg: `🍀 Sorte! Um visitante deixou uma gorjeta de ${bonus} moedas!`, type: 'success' }); },
           () => { setAnimals(prev => prev.map(a => a.happiness < 100 ? { ...a, happiness: Math.min(100, a.happiness + 15) } : a)); logsToAdd.push({ msg: `☀️ Dia ensolarado perfeito! Todos os animais ficaram mais felizes (+15 felicidade)!`, type: 'success' }); },
           () => { setInventory((prev: any) => ({ ...prev, racaoBovina: (prev.racaoBovina ?? 0) + 5, racaoOvinos: (prev.racaoOvinos ?? 0) + 5, racaoAves: (prev.racaoAves ?? 0) + 5 })); logsToAdd.push({ msg: `🎁 Doação! Um vizinho deixou 5 de cada ração na sua porta!`, type: 'success' }); },
           () => { const xp = 15 + Math.floor(Math.random() * 20); setFarmXp(prev => prev + xp); logsToAdd.push({ msg: `📖 Insight! Aprendeu novas técnicas de fazenda (+${xp} XP)!`, type: 'success' }); },
