@@ -227,7 +227,7 @@ export function useInventory({
   });
 
   // --- QUEIJARIA STATES ---
-  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt' | 'parmesao' | 'serra' | 'butter'; diasRestantes: number }[]>(() => {
+  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt' | 'parmesao' | 'serra' | 'butter' | 'queijo_cabra' | 'iogurte_cabra'; diasRestantes: number }[]>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
       if (saved) {
@@ -424,22 +424,26 @@ export function useInventory({
     if (event) event.preventDefault();
     if (farmLevel < 3) { addLog('🧀 Queijo de Cabra requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.goat_milk ?? 0) < 3) { addLog('🐐 Falta Leite de Cabra! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Cabra!', event); return; }
-    setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 3, queijo_cabra: (prev.queijo_cabra ?? 0) + 1 }));
-    addLog('🧀 Você fabricou 1 Queijo de Cabra com 3 leites de cabra!', 'success');
+    if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
+    setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 3 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'queijo_cabra', diasRestantes: 2 }]);
+    addLog('🧀 Queijo de Cabra em maturação! Pronto em 2 dias.', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🧀', '+1 Queijo Cabra', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+    spawnFeedback('🧀', 'Maturando... 2d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   const craftIogurteCabra = (event?: React.MouseEvent) => {
     if (event) event.preventDefault();
     if (farmLevel < 4) { addLog('🥛 Iogurte de Cabra requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.goat_milk ?? 0) < 2) { addLog('🐐 Falta Leite de Cabra! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Cabra!', event); return; }
-    setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 2, iogurte_cabra: (prev.iogurte_cabra ?? 0) + 1 }));
-    addLog('🥛 Você fabricou 1 Iogurte de Cabra com 2 leites de cabra!', 'success');
+    if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
+    setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 2 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'iogurte_cabra', diasRestantes: 1 }]);
+    addLog('🥛 Iogurte de Cabra em fermentação! Pronto em 1 dia.', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🥛', '+1 Iogurte Cabra', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+    spawnFeedback('🥛', 'Fermentando... 1d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   const craftLeiteCondensado = (event?: React.MouseEvent) => {

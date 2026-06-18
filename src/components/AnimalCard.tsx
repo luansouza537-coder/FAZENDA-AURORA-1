@@ -865,8 +865,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           )
         )}
 
-        {/* Vender Animal — qualquer adulto exceto boi (que tem sellOx) */}
-        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'avestruz' && animal.type !== 'jacare' && (() => {
+        {/* Vender Animal — qualquer adulto exceto boi, avestruz, jacaré e cabra (cabra tem botão próprio após coleta) */}
+        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && (() => {
           const age = animal.age ?? 0;
           const maxAge = animal.maxAge ?? 90;
           const lifeFraction = Math.min(1, age / maxAge);
@@ -921,8 +921,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           </button>
         )}
 
-        {/* Coletar Leite de Cabra */}
-        {animal.type === 'cabra' && (
+        {/* Coletar Leite de Cabra — apenas adultas */}
+        {animal.type === 'cabra' && animal.isAdult !== false && (
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); onCollectGoatMilk(animal.id, e); }}
@@ -933,6 +933,35 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             🥛 Leite Cabra
           </button>
         )}
+
+        {/* Vender Cabra — aparece após botão de coleta */}
+        {animal.type === 'cabra' && animal.isAdult !== false && (() => {
+          const age = animal.age ?? 0;
+          const maxAge = animal.maxAge ?? 90;
+          const lifeFraction = Math.min(1, age / maxAge);
+          const sellPct = Math.max(0.10, 0.80 - lifeFraction * 0.70);
+          if (pendingSell) {
+            return (
+              <div className="flex items-center gap-1.5 bg-orange-50 border-2 border-orange-300 rounded-xl px-2 py-1.5 animate-pulse-once">
+                <span className="text-[9px] font-mono font-black text-orange-700 leading-tight">
+                  Vender {animal.name}?<br/>
+                  <span className="text-orange-500">~{Math.round(sellPct * 100)}% do valor</span>
+                </span>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); onSellAnimal(animal.id, e); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+              </div>
+            );
+          }
+          return (
+            <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(true); }}
+              className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-b-4 border-orange-400 bg-orange-50 text-orange-800 hover:bg-orange-100 hover:scale-[1.03] active:translate-y-0.5 cursor-pointer transition-all shadow-sm"
+              title={`Vender por ~${Math.round(sellPct * 100)}% do valor.`}>
+              💸 Vender ({Math.round(sellPct * 100)}%)
+            </button>
+          );
+        })()}
 
         {/* Coletar Lã de Lhama */}
         {animal.type === 'lhama' && (

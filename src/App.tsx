@@ -731,7 +731,7 @@ function GameApp() {
       // BUG 14 FIX: removida chave duplicada 'meat'
       carne: [150, 150, 150, 150, 150, 150, 150],
       // BUG FIX: novos produtos incluídos no histórico
-      goat_milk: [38, 38, 38, 38, 38, 38, 38],
+      goat_milk: [14, 14, 14, 14, 14, 14, 14],
       llama_wool: [45, 45, 45, 45, 45, 45, 45],
       duck_egg: [18, 18, 18, 18, 18, 18, 18],
       goose_egg: [50, 50, 50, 50, 50, 50, 50],
@@ -1571,7 +1571,7 @@ function GameApp() {
     if (itemType === 'mayo') {
       return 14;  // era 16 — proporcional ao ovo
     }
-    if (itemType === 'goat_milk') return farmLevel >= 4 ? 42 : 38;
+    if (itemType === 'goat_milk') return farmLevel >= 4 ? 16 : 14;
     if (itemType === 'llama_wool') return 45;
     if (itemType === 'duck_egg') return farmLevel >= 5 ? 22 : 18;
     if (itemType === 'goose_egg') return 50;
@@ -2722,14 +2722,14 @@ function GameApp() {
     });
 
     readyQueijos.forEach(tipo => {
-      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : tipo === 'parmesao' ? 'Queijo Parmesão' : tipo === 'serra' ? 'Queijo da Serra' : tipo === 'butter' ? 'Manteiga' : 'Queijo Brie';
-      const emoji = tipo === 'butter' ? '🧈' : tipo === 'yogurt' ? '🥛' : '🧀';
+      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : tipo === 'queijo_cabra' ? 'Queijo de Cabra' : tipo === 'iogurte_cabra' ? 'Iogurte de Cabra' : tipo === 'parmesao' ? 'Queijo Parmesão' : tipo === 'serra' ? 'Queijo da Serra' : tipo === 'butter' ? 'Manteiga' : 'Queijo Brie';
+      const emoji = tipo === 'butter' ? '🧈' : tipo === 'yogurt' || tipo === 'iogurte_cabra' ? '🥛' : '🧀';
       logs.push({
         msg: `${emoji} Sua ${label} ficou pronta e está disponível no Armazém!`,
         type: 'success'
       });
       // BUG FIX: passa nextDayVal para que a notificação mostre o dia correto
-      const emoji2 = tipo === 'butter' ? '🧈' : tipo === 'yogurt' ? '🥛' : '🧀';
+      const emoji2 = tipo === 'butter' ? '🧈' : tipo === 'yogurt' || tipo === 'iogurte_cabra' ? '🥛' : '🧀';
       setTimeout(() => addNotification(`${emoji2} ${label} está pronto para vender!`, 'success', nextDayVal), 0);
     });
 
@@ -2750,7 +2750,7 @@ function GameApp() {
       { product: 'wool', basePrice: 12, minLevel: 1 },
       { product: 'egg', basePrice: 4, minLevel: 1 },
       { product: 'cheese', basePrice: 20, minLevel: 2 },
-      { product: 'goat_milk', basePrice: 38, minLevel: 4 },
+      { product: 'goat_milk', basePrice: 14, minLevel: 4 },
       { product: 'buffalo_milk', basePrice: 55, minLevel: 6 },
       { product: 'queijoCoalho', basePrice: 28, minLevel: 3 },
       { product: 'queijoMucarela', basePrice: 28, minLevel: 4 },
@@ -4151,7 +4151,7 @@ function GameApp() {
         setInventory(inv => {
           const nextInv = { ...inv };
           readyQueijos.forEach(tipo => {
-            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : tipo === 'butter' ? 'butter' : 'queijoBrie';
+            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'queijo_cabra' ? 'queijo_cabra' : tipo === 'iogurte_cabra' ? 'iogurte_cabra' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : tipo === 'butter' ? 'butter' : 'queijoBrie';
             nextInv[key] = (nextInv[key] ?? 0) + 1;
           });
           return nextInv;

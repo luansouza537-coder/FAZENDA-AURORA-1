@@ -434,14 +434,18 @@ export function useAnimals({
       spawnFeedback('⏳', 'Secagem', event);
       return;
     }
+    if (animal.isAdult === false) {
+      addLog(`🐐 ${animal.name} ainda é filhote e não produz leite!`, 'error');
+      spawnFeedback('🍼', 'Filhote!', event);
+      return;
+    }
     if (!animal.hasProducedToday) {
       addLog(`🐐 ${animal.name} já teve o leite coletado hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
       return;
     }
 
-    const filhoteMultiplier = animal.isAdult === false ? 0.5 : 1.0;
-    let qty = Math.ceil(2 * filhoteMultiplier);
+    let qty = 2;
     if (animal.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
     qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
@@ -451,8 +455,7 @@ export function useAnimals({
     setProductFreshness((prev: any) => ({ ...prev, goat_milk: 3 }));
     setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + qty }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false } : a));
-    const filhotePrefixGoat = animal.isAdult === false ? '🍼 ' : '';
-    addLog(`${filhotePrefixGoat}🐐 ${animal.name} produziu ${qty} leite(s) de cabra!`, 'success');
+    addLog(`🐐 ${animal.name} produziu ${qty} leite(s) de cabra!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (soundEnabled) sfx.playAnimalSound('cabra');
     spawnFeedback('🥛', `+${qty} Leite Cabra`, event);
