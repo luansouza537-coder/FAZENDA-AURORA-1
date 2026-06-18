@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Pencil, Scissors, Utensils } from 'lucide-react';
 import type { Animal, AnimalType, AnimalTrait } from '../types';
@@ -209,6 +209,11 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onStartRename,
   addLog,
 }) => {
+  const [pendingSell, setPendingSell] = useState(false);
+  const [pendingSellOx, setPendingSellOx] = useState(false);
+  const [pendingSellAvestruz, setPendingSellAvestruz] = useState(false);
+  const [pendingSellJacare, setPendingSellJacare] = useState(false);
+
   const isEditing = editingId === animal.id;
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
 
@@ -840,17 +845,24 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
         {/* Sell Oxen (Ox) */}
         {animal.type === 'boi' && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              onSellOx(animal.id, e);
-            }}
-            className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
-            title={`Vender Boi: venda imediata na Feira. Retorna moedas baseadas no peso (%): 💰 ~${valueOfOx}`}
-          >
-            💰 Vender
-          </button>
+          pendingSellOx ? (
+            <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-300 rounded-xl px-2 py-1.5 w-full">
+              <span className="text-[9px] font-mono font-black text-red-700 leading-tight flex-1">Vender {animal.name}?<br/><span className="text-red-500">~{valueOfOx}💰</span></span>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellOx(false); onSellOx(animal.id, e); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellOx(false); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); setPendingSellOx(true); }}
+              className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+              title={`Vender Boi: venda imediata na Feira. Retorna moedas baseadas no peso (%): 💰 ~${valueOfOx}`}
+            >
+              💰 Vender
+            </button>
+          )
         )}
 
         {/* Vender Animal — qualquer adulto exceto boi (que tem sellOx) */}
@@ -859,10 +871,36 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           const maxAge = animal.maxAge ?? 90;
           const lifeFraction = Math.min(1, age / maxAge);
           const sellPct = Math.max(0.10, 0.80 - lifeFraction * 0.70);
+
+          if (pendingSell) {
+            return (
+              <div className="flex items-center gap-1.5 bg-orange-50 border-2 border-orange-300 rounded-xl px-2 py-1.5 animate-pulse-once">
+                <span className="text-[9px] font-mono font-black text-orange-700 leading-tight">
+                  Vender {animal.name}?<br/>
+                  <span className="text-orange-500">~{Math.round(sellPct * 100)}% do valor</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setPendingSell(false); onSellAnimal(animal.id, e); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all"
+                >
+                  ✅
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setPendingSell(false); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all"
+                >
+                  ❌
+                </button>
+              </div>
+            );
+          }
+
           return (
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); onSellAnimal(animal.id, e); }}
+              onClick={(e) => { e.preventDefault(); setPendingSell(true); }}
               className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-b-4 border-orange-400 bg-orange-50 text-orange-800 hover:bg-orange-100 hover:scale-[1.03] active:translate-y-0.5 cursor-pointer transition-all shadow-sm"
               title={`Vender por ~${Math.round(sellPct * 100)}% do valor. Quanto mais velho, menos vale (mín. 10%).`}
             >
@@ -988,21 +1026,41 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               title={animal.woolReady ? 'Coletar pena grande' : 'Aguarde'}>
               🪶 Pena Grande
             </button>
-            <button type="button" onClick={(e) => { e.preventDefault(); onSellAvestruz(animal.id, e); }}
-              className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
-              title="Abater avestruz (+180💰 + 1 carne)">
-              💰 Abater
-            </button>
+            {pendingSellAvestruz ? (
+              <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-300 rounded-xl px-2 py-1.5 flex-1">
+                <span className="text-[9px] font-mono font-black text-red-700 leading-tight flex-1">Abater {animal.name}?</span>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellAvestruz(false); onSellAvestruz(animal.id, e); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellAvestruz(false); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+              </div>
+            ) : (
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellAvestruz(true); }}
+                className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+                title="Abater avestruz (+180💰 + 1 carne)">
+                💰 Abater
+              </button>
+            )}
           </>
         )}
 
         {/* Jacaré: vender */}
         {animal.type === 'jacare' && (
-          <button type="button" onClick={(e) => { e.preventDefault(); onSellJacare(animal.id, e); }}
-            className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
-            title={`Abater jacaré (+250💰 + 1 carne). ${!licencaExotica ? '⚠️ Sem licença: risco de fiscalização!' : '✅ Licenciado'}`}>
-            🐊 Abater {!licencaExotica && '⚠️'}
-          </button>
+          pendingSellJacare ? (
+            <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-300 rounded-xl px-2 py-1.5 w-full">
+              <span className="text-[9px] font-mono font-black text-red-700 leading-tight flex-1">Abater {animal.name}?{!licencaExotica && ' ⚠️'}</span>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellJacare(false); onSellJacare(animal.id, e); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellJacare(false); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+            </div>
+          ) : (
+            <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellJacare(true); }}
+              className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+              title={`Abater jacaré (+250💰 + 1 carne). ${!licencaExotica ? '⚠️ Sem licença: risco de fiscalização!' : '✅ Licenciado'}`}>
+              🐊 Abater {!licencaExotica && '⚠️'}
+            </button>
+          )
         )}
 
         {/* Cruzar (Layer 2: Reprodução Controlada) */}
