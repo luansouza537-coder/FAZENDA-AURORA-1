@@ -201,6 +201,10 @@ function GameApp() {
     };
   });
 
+  const [shownMilestones, setShownMilestones] = useState<number[]>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).shownMilestones ?? []; } catch(e) {} return [];
+  });
+
   // merchantActive, daysSinceMerchant, nextMerchantDay moved to useEconomy
 
   // --- EXPANDED MERCHANT SHOP ---
@@ -918,6 +922,7 @@ function GameApp() {
     setLoanInterestRate(0.1);
     setLoanWeeksLeft(0);
     setLoanDaysUntilInterest(7);
+    setShownMilestones([]);
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -2108,12 +2113,13 @@ function GameApp() {
         financialLog,
         suplementoMineralDays, salMineralDays, seloOrganicodays, silagemDays,
         hasBalanca, hasCisterna, blockNextStorm, blockNextDrought, isencaoMultaCount,
+        shownMilestones,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
       setShowSavedToast(true);
       setTimeout(() => setShowSavedToast(false), 2000);
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent, financialLog]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 2500;
@@ -3113,14 +3119,49 @@ function GameApp() {
           if (debugMode) logsToAdd.push({ msg: `🌌 [DEBUG] +${prestigeGained} Prestígio (nível máximo)`, type: 'system' });
         }
       }
+      // --- FEATURE 1: mensagens narrativas por nível ---
+      const LEVEL_NARRATIVES: Record<number, string> = {
+        2:  'Os vizinhos começaram a falar da sua fazenda...',
+        3:  'Um mercador passou e comprou seus produtos! A fama cresce.',
+        4:  'Sua fazenda já tem nome na vizinhança. Continue assim!',
+        5:  'A Fazenda Aurora apareceu no jornal regional! 🗞️',
+        6:  'Fornecedores de longe começam a bater à sua porta.',
+        7:  'Você já é referência no município. Seus métodos são copiados.',
+        8:  'A prefeitura pediu uma visita técnica à sua fazenda!',
+        9:  'Sua produção chama atenção de compradores da capital.',
+        10: 'Uma década de progresso! A Fazenda Aurora é lendária na região.',
+        12: 'Exportadores internacionais têm interesse nos seus produtos.',
+        15: 'Você virou caso de estudo em escolas agrárias do país.',
+        20: '🌌 IMPÉRIO AURORA — Você alcançou o pico da produção rural!',
+      };
+
       const { newLevel, levelUpOccurred } = verificarNivelFazenda(nextDayValue, farmLevel, newFarmXp, logsToAdd);
       if (levelUpOccurred) {
         setFarmLevel(newLevel);
         setShowLevelUpModal(newLevel);
         setInsuranceClimate(prev => ({ active: true, daysLeft: (prev.active ? prev.daysLeft : 0) + 3 }));
         logsToAdd.push({ msg: `🌦️ Nível ${newLevel} desbloqueado! Seguro Climático grátis por 3 dias!`, type: 'success' });
+        const narrative = LEVEL_NARRATIVES[newLevel] ?? 'Sua fazenda continua crescendo!';
         setTimeout(() => addNotification(`🏆 Fazenda subiu para o Nível ${newLevel}! (${newFarmXp} XP total)`, 'success', nextDayValue), 0);
-        setTimeout(() => triggerBigNotification(`NÍVEL ${newLevel}!`, `Sua fazenda evoluiu! Novos benefícios desbloqueados.`, '🏆'), 300);
+        setTimeout(() => triggerBigNotification(`NÍVEL ${newLevel}!`, narrative, '🏆'), 300);
+
+        // --- FEATURE 6: fanfarra de desbloqueio de animal/funcionalidade ---
+        const UNLOCK_FANFARE: Record<number, string> = {
+          3:  '🦆 Pato de Quintal & 🐦 Codorna desbloqueados!',
+          4:  '🐷 Porco de Engorda desbloqueado!',
+          5:  '🦙 Alpaca desbloqueada!',
+          6:  '🪱 Minhoca desbloqueada!',
+          7:  '🐌 Caracol desbloqueado!',
+          8:  '🐰 Coelho Angorá desbloqueado!',
+          10: '🐛 Bicho-da-Seda desbloqueado!',
+          12: '🐸 Rã desbloqueada!',
+          15: '🦤 Avestruz desbloqueada!',
+          18: '🐊 Jacaré desbloqueado!',
+        };
+        if (UNLOCK_FANFARE[newLevel]) {
+          setTimeout(() => addNotification(`🔓 ${UNLOCK_FANFARE[newLevel]} Vá à loja comprar!`, 'event', nextDayValue), 600);
+        }
+
         // Mostrar modal de especialização ao atingir nível 2 pela primeira vez
         if (newLevel === 2 && specialization === null) {
           setTimeout(() => setShowSpecializationModal(true), 800);
@@ -3129,6 +3170,42 @@ function GameApp() {
         if (newLevel === 20) {
           setTimeout(() => checkAndUnlockAchievement('level_20'), 0);
           setTimeout(() => addNotification('🌌 PARABÉNS! Você atingiu o Nível 20 — IMPÉRIO AURORA! Você é uma lenda!', 'success', nextDayValue), 0);
+        }
+      }
+
+      // --- FEATURE 3: marcos no log ---
+      const GOLD_MILESTONES = [500, 1000, 5000, 10000, 50000, 100000];
+      const currentTotalEarned = stats.totalEarned;
+      for (const milestone of GOLD_MILESTONES) {
+        if (currentTotalEarned >= milestone && !shownMilestones.includes(milestone)) {
+          const msgs: Record<number, string> = {
+            500:    '🌱 Primeiros 500💰 ganhos! A jornada começa.',
+            1000:   '💰 1.000💰 ganhos! Sua fazenda está decolando.',
+            5000:   '🚀 5.000💰 ganhos! Você é um fazendeiro de verdade.',
+            10000:  '🏆 10.000💰 ganhos! A Fazenda Aurora é próspera.',
+            50000:  '👑 50.000💰 ganhos! Um império rural em formação.',
+            100000: '🌟 100.000💰 ganhos! Lenda da fazenda!',
+          };
+          logsToAdd.push({ msg: msgs[milestone], type: 'event' });
+          setTimeout(() => addNotification(msgs[milestone], 'success', nextDayValue), 0);
+          setShownMilestones(prev => [...prev, milestone]);
+          break; // um marco por dia para não sobrecarregar
+        }
+      }
+      const animalMilestones = [5, 10, 20];
+      const animalCount = animals.length;
+      for (const milestone of animalMilestones) {
+        const key = milestone + 10000;
+        if (animalCount >= milestone && !shownMilestones.includes(key)) {
+          const msgs: Record<number, string> = {
+            5:  '🐾 5 animais na fazenda! O rebanho está crescendo.',
+            10: '🐾 10 animais! Sua fazenda está cheia de vida.',
+            20: '🐾 20 animais! Um rebanho impressionante.',
+          };
+          logsToAdd.push({ msg: msgs[milestone], type: 'event' });
+          setTimeout(() => addNotification(msgs[milestone], 'success', nextDayValue), 0);
+          setShownMilestones(prev => [...prev, key]);
+          break;
         }
       }
 
