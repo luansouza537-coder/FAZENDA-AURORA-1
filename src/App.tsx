@@ -913,6 +913,11 @@ function GameApp() {
     setDroughtDaysRemaining(0);
     setWorkers([]);
     setLandBiomes([]);
+    setLoanActive(false);
+    setLoanAmount(0);
+    setLoanInterestRate(0.1);
+    setLoanWeeksLeft(0);
+    setLoanDaysUntilInterest(7);
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
