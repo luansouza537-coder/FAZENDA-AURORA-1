@@ -175,6 +175,9 @@ export interface AnimalCardProps {
   onSaveRename: (id: number) => void;
   onStartRename: (id: number, currentName: string) => void;
   addLog: (msg: string, type?: string) => void;
+  sendToAbatedouro?: (animalId: string, animalType: 'boi' | 'porco') => void;
+  abatedouroUnlocked?: boolean;
+  hasCertSanitario?: boolean;
 }
 
 export const AnimalCard: React.FC<AnimalCardProps> = ({
@@ -221,6 +224,9 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onSaveRename,
   onStartRename,
   addLog,
+  sendToAbatedouro,
+  abatedouroUnlocked,
+  hasCertSanitario,
 }) => {
   const [pendingSell, setPendingSell] = useState(false);
   const [pendingSellOx, setPendingSellOx] = useState(false);
@@ -899,6 +905,18 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           )
         )}
 
+        {/* Abatedouro — Boi */}
+        {animal.type === 'boi' && animal.isAdult !== false && abatedouroUnlocked && hasCertSanitario && sendToAbatedouro && (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); sendToAbatedouro(String(animal.id), 'boi'); }}
+            className="bg-[#7f1d1d] hover:bg-[#991b1b] border-b-4 border-[#450a0a] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+            title="Enviar ao Abatedouro — registra entrega no contrato mensal"
+          >
+            🏭 Abatedouro
+          </button>
+        )}
+
         {/* Sell Porco */}
         {animal.type === 'porco' && animal.isAdult !== false && (
           pendingSellPorco ? (
@@ -919,6 +937,18 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               💰 Vender
             </button>
           )
+        )}
+
+        {/* Abatedouro — Porco */}
+        {animal.type === 'porco' && animal.isAdult !== false && abatedouroUnlocked && hasCertSanitario && sendToAbatedouro && (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); sendToAbatedouro(String(animal.id), 'porco'); }}
+            className="bg-[#7f1d1d] hover:bg-[#991b1b] border-b-4 border-[#450a0a] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+            title="Enviar ao Abatedouro — registra entrega no contrato mensal"
+          >
+            🏭 Abatedouro
+          </button>
         )}
 
         {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré e cabra (cabra tem botão próprio após coleta) */}

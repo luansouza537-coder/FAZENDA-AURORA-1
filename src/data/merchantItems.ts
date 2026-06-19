@@ -1,7 +1,7 @@
 export const MERCHANT_SPECIAL_ITEMS = [
   { id: 'racao_premium',        label: '🥣 Ração Premium',              desc: '+10 de cada tipo de ração no Armazém',                           price: 40,  effect: 'premium_feed' },
   { id: 'bebedouro',            label: '🪣 Bebedouro Automático',        desc: 'Animais nunca ficam com sede',                                   price: 150, effect: 'bebedouro',            oneTime: true },
-  { id: 'cert_sanitario',       label: '📜 Certificado Sanitário',       desc: '+10% preço de venda de carne permanente',                        price: 200, effect: 'cert_sanitario',       oneTime: true },
+  { id: 'cert_sanitario',       label: '📜 Certificado Sanitário',       desc: '+10% preço de venda de carne permanente',                        price: 800, effect: 'cert_sanitario',       oneTime: true },
   { id: 'licenca_exotica_item', label: '📋 Licença Exótica',             desc: 'Permite criar Jacaré legalmente',                                price: 280, effect: 'licenca_exotica',      oneTime: true },
   { id: 'licenca_criadouro',    label: '📜 Licença de Criadouro',        desc: 'Permite reprodução controlada de Vaca, Cabra, Ovelha e Galinha', price: 400, effect: 'licenca_criadouro',    oneTime: true },
   { id: 'kit_primeiros_socorros',label: '🩺 Kit de Primeiros Socorros',  desc: 'Cura todos os animais doentes instantaneamente',                  price: 120, effect: 'cure_all_sick' },

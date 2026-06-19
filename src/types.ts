@@ -90,7 +90,7 @@ export interface Animal {
 // Funcionalidade 4: Contratos de fornecimento
 export interface Contract {
   id: string;
-  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'feather' | 'angora_wool' | 'alpaca_wool' | 'muco' | 'seda_bruta' | 'mel_envasado';
+  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'feather' | 'angora_wool' | 'alpaca_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'boi' | 'porco' | 'boi_porco';
   quantity: number;
   delivered: number;
   pricePerUnit: number;
@@ -107,6 +107,14 @@ export interface Contract {
   description?: string;
   missedWeeks?: number;
   catalogId?: string;
+  cycleType?: 'weekly' | 'monthly';
+  cycleLengthDays?: number;
+  cycleStartDay?: number;
+  cycleDeliveredStart?: number;
+  monthlyGoalBoi?: number;
+  monthlyGoalPorco?: number;
+  suspendedUntilDay?: number;
+  baseMarket?: number;
 }
 
 export interface LogMessage {

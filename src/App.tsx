@@ -471,6 +471,9 @@ function GameApp() {
   const [hasCisterna, setHasCisterna] = useState<boolean>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasCisterna ?? false; } catch(e) {} return false;
   });
+  const [abatedouroUnlocked, setAbatedouroUnlocked] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).abatedouroUnlocked ?? false; } catch(e) {} return false;
+  });
   const [blockNextStorm, setBlockNextStorm] = useState<boolean>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).blockNextStorm ?? false; } catch(e) {} return false;
   });
@@ -2127,7 +2130,8 @@ function GameApp() {
         worldEvent,
         financialLog,
         suplementoMineralDays, silagemDays,
-        hasCisterna, blockNextStorm, blockNextDrought, isencaoMultaCount,
+        hasCisterna, abatedouroUnlocked, blockNextStorm, blockNextDrought, isencaoMultaCount,
+
         shownMilestones,
         vehicleTiers,
       };
@@ -2135,7 +2139,7 @@ function GameApp() {
       setShowSavedToast(true);
       setTimeout(() => setShowSavedToast(false), 2000);
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 2500;
@@ -2789,6 +2793,9 @@ function GameApp() {
     { catalogId: 'lc_8', client: 'Distribuidora Colmeia', product: 'mel_envasado' as const, description: 'Distribui mel envasado para bares e restaurantes da região. Volume modesto, contrato longo e seguro.', baseMarket: 80, pricePerUnit: 115, weeklyGoal: 3, durationDays: 90, minLevel: 10, completionBonus: 2500, completionXP: 200 },
     { catalogId: 'lc_9', client: 'Instituto Gastronômico', product: 'queijoBrie' as const, description: 'Escola de gastronomia de prestígio. Queijos maturados nas aulas — qualidade constante obrigatória.', baseMarket: 65, pricePerUnit: 95, weeklyGoal: 3, durationDays: 90, minLevel: 12, completionBonus: 3500, completionXP: 250 },
     { catalogId: 'lc_10', client: 'Exportadora Premium Aurora', product: 'seda_bruta' as const, description: 'O maior contrato da sua carreira. Uma empresa internacional descobriu seus produtos e quer fornecimento exclusivo por três meses. Não decepcione.', baseMarket: 100, pricePerUnit: 150, weeklyGoal: 5, durationDays: 90, minLevel: 15, completionBonus: 5000, completionXP: 400 },
+    { catalogId: 'ab_1', client: 'Frigorífico Vale Verde', product: 'boi' as const, description: 'O maior processador regional da área. Exigem regularidade acima de tudo — 6 bois por mês, sem exceções. Cada trimestre consecutivo cumprido rende bônus crescente de fidelidade.', baseMarket: 300, pricePerUnit: 360, weeklyGoal: 6, durationDays: 90, minLevel: 10, completionBonus: 3000, completionXP: 250, cycleType: 'monthly' as const, cycleLengthDays: 28 },
+    { catalogId: 'ab_2', client: 'Carnes Família Souza', product: 'porco' as const, description: 'Distribuidora de linguiças e defumados para mais de 200 açougues do estado. Pagam na entrega, mas não aceitam porco fora do peso. Meta: 10 porcos por mês.', baseMarket: 180, pricePerUnit: 234, weeklyGoal: 10, durationDays: 60, minLevel: 10, completionBonus: 2000, completionXP: 200, cycleType: 'monthly' as const, cycleLengthDays: 28 },
+    { catalogId: 'ab_3', client: 'Golden Dragon Exports', product: 'boi_porco' as const, description: 'Consórcio de importadores de Xangai que busca carne certificada da América do Sul. +55% acima da base. Meta: 4 bois e 8 porcos por mês. Falhar suspende o contrato por 7 dias. Completar 60 dias sem falha rende 2.000💰 bônus extra.', baseMarket: 300, pricePerUnit: 465, weeklyGoal: 12, durationDays: 60, minLevel: 12, completionBonus: 5000, completionXP: 400, cycleType: 'monthly' as const, cycleLengthDays: 28, monthlyGoalBoi: 4, monthlyGoalPorco: 8 },
   ] as const;
 
   const signLongContract = (catalogId: string) => {
@@ -2817,10 +2824,39 @@ function GameApp() {
       completionBonus: cat.completionBonus,
       completionXP: cat.completionXP,
       missedWeeks: 0,
+      cycleType: (cat as any).cycleType,
+      cycleLengthDays: (cat as any).cycleLengthDays,
+      cycleStartDay: (cat as any).cycleType === 'monthly' ? currentDay : undefined,
+      cycleDeliveredStart: (cat as any).cycleType === 'monthly' ? 0 : undefined,
+      monthlyGoalBoi: (cat as any).monthlyGoalBoi,
+      monthlyGoalPorco: (cat as any).monthlyGoalPorco,
+      baseMarket: (cat as any).baseMarket,
     };
     setContracts(prev => [...prev, newContract]);
-    addLog(`📜 Contrato assinado com ${cat.client}! Meta: ${cat.weeklyGoal} un/${cat.product}/semana por ${cat.durationDays} dias.`, 'success');
+    const cycleLabel = (cat as any).cycleType === 'monthly' ? `${cat.weeklyGoal} animais/mês` : `${cat.weeklyGoal} un/${cat.product}/semana`;
+    addLog(`📜 Contrato assinado com ${cat.client}! Meta: ${cycleLabel} por ${cat.durationDays} dias.`, 'success');
     triggerAudioResult(() => sfx.playSound('levelup'));
+  };
+
+  const sendToAbatedouro = (animalId: string, animalType: 'boi' | 'porco') => {
+    if (!abatedouroUnlocked) { addLog('🏭 Abatedouro não desbloqueado ainda.', 'error'); return; }
+    if (!hasCertSanitario) { addLog('📜 Certificado Sanitário necessário para usar o Abatedouro.', 'error'); return; }
+    const animal = animals.find(a => a.id === animalId);
+    if (!animal) return;
+    const activeContract = contracts.find(c =>
+      c.active && c.cycleType === 'monthly' &&
+      (c.product === animalType || c.product === 'boi_porco') &&
+      (!c.suspendedUntilDay || currentDay >= c.suspendedUntilDay)
+    );
+    if (!activeContract) { addLog(`🏭 Nenhum contrato do Abatedouro ativo para ${animalType === 'boi' ? 'Boi' : 'Porco'}. Assine um contrato na aba Contratos.`, 'error'); return; }
+    setAnimals(prev => prev.filter(a => a.id !== animalId));
+    setContracts(prev => prev.map(c =>
+      c.id === activeContract.id ? { ...c, delivered: c.delivered + 1 } : c
+    ));
+    const progress = activeContract.delivered + 1;
+    const goal = activeContract.weeklyGoal ?? 0;
+    addLog(`🥩 ${animal.name} enviado ao ${activeContract.client}. Progresso mensal: ${progress}/${goal}.`, 'success');
+    triggerAudioResult(() => sfx.playSound('sell'));
   };
 
   // F4: gerar contrato pelo comerciante
@@ -3639,6 +3675,36 @@ function GameApp() {
         }));
       }
 
+      // --- ABATEDOURO CONTRACTS: Liquidação mensal (28 dias) ---
+      setContracts(prev => prev.map(c => {
+        if (c.cycleType !== 'monthly' || !c.active) return c;
+        if (c.suspendedUntilDay && nextDayValue < c.suspendedUntilDay) return c;
+        const cycleStart = c.cycleStartDay ?? 0;
+        const cycleDays = c.cycleLengthDays ?? 28;
+        const dayInCycle = nextDayValue - cycleStart;
+        if (dayInCycle > 0 && dayInCycle % cycleDays === 0) {
+          const deliveredThisCycle = c.delivered - (c.cycleDeliveredStart ?? 0);
+          const goal = c.weeklyGoal ?? 0;
+          if (deliveredThisCycle >= goal) {
+            const baseP = c.baseMarket ?? 0;
+            const premium = Math.max(0, c.pricePerUnit - baseP);
+            const bonus = Math.floor(deliveredThisCycle * premium);
+            longContractBonusForGold += bonus;
+            logsToAdd.push({ msg: `🥩 "${c.client}": meta mensal cumprida (${deliveredThisCycle}/${goal})! +${bonus}💰 prêmio.`, type: 'success' });
+            return { ...c, cycleDeliveredStart: c.delivered };
+          } else {
+            const penalty = 300;
+            longContractBonusForGold -= penalty;
+            logsToAdd.push({ msg: `🥩 "${c.client}": meta mensal não cumprida (${deliveredThisCycle}/${goal}). -${penalty}💰 multa.`, type: 'error' });
+            if (c.catalogId === 'ab_3') {
+              return { ...c, cycleDeliveredStart: c.delivered, suspendedUntilDay: nextDayValue + 7 };
+            }
+            return { ...c, cycleDeliveredStart: c.delivered };
+          }
+        }
+        return c;
+      }));
+
       // Água: base mínima + escala com número de animais. Poço reduz até 75%.
       const baseWaterCost = isWeeklyBillDay ? Math.round(8 + animals.length * 2 + irrigationLevel * 4) : 0;
       const waterDiscount = Math.min(wellLevel * 0.15 + (hasCisterna ? 0.3 : 0), 0.90);
@@ -3648,7 +3714,7 @@ function GameApp() {
       const milkerEnergy = machines.milkerPurchased && machines.milkerActive ? 18 : 0;
       const shearerEnergy = machines.shearerPurchased && machines.shearerActive ? 14 : 0;
       const feederEnergy = machines.feederPurchased && machines.feederActive ? 10 : 0;
-      const infraEnergy = (hasFridge ? 12 : 0) + (hasSilo ? 6 : 0) + (hasStable ? 8 : 0) + (hasBebedouro ? 5 : 0) + (queijariaNivel > 0 ? queijariaNivel * 6 : 0);
+      const infraEnergy = (hasFridge ? 12 : 0) + (hasSilo ? 6 : 0) + (hasStable ? 8 : 0) + (hasBebedouro ? 5 : 0) + (queijariaNivel > 0 ? queijariaNivel * 6 : 0) + (abatedouroUnlocked ? 25 : 0);
       const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy + infraEnergy;
       const energyDiscount = solarLevel === 1 ? 0.4 : solarLevel === 2 ? 0.7 : solarLevel >= 3 ? 1.0 : 0;
       const energyCost = isWeeklyBillDay && machineEnergyCost > 0 ? Math.round(machineEnergyCost * (1 - energyDiscount)) : 0;
@@ -6098,6 +6164,9 @@ function GameApp() {
             triggerAudioResult={triggerAudioResult}
             sfx={sfx}
             initGame={initGame}
+            sendToAbatedouro={sendToAbatedouro}
+            abatedouroUnlocked={abatedouroUnlocked}
+            hasCertSanitario={hasCertSanitario}
           />
 
           {/* --- RIGHT HAND SIDE: COOPERATIVE WORKSHOP (ATELIÊ) & ACTION LOGS (4/12 Cols) --- */}
@@ -6365,6 +6434,8 @@ function GameApp() {
           vehicleTiers={vehicleTiers}
           setVehicleTier={setVehicleTier}
           getFreightMultiplier={getFreightMultiplier}
+          abatedouroUnlocked={abatedouroUnlocked}
+          setAbatedouroUnlocked={setAbatedouroUnlocked}
           ownedOneTimeEffects={[
             ...(hasBebedouro ? ['bebedouro'] : []),
             ...(hasCertSanitario ? ['cert_sanitario'] : []),

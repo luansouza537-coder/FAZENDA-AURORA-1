@@ -64,6 +64,8 @@ interface MelhoriasModalProps {
   getFreightMultiplier: (cat: string) => number;
   ownedOneTimeEffects: string[];
   onBuyConsumivel: (item: typeof MERCHANT_SPECIAL_ITEMS[number]) => void;
+  abatedouroUnlocked: boolean;
+  setAbatedouroUnlocked: (v: boolean) => void;
 }
 
 const VEHICLE_CATEGORIES = [
@@ -415,6 +417,33 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 {p.licencaExotica ? '✅ Licença Obtida' : p.farmLevel < 18 ? '🔒 Requer Nível 18 (500💰)' : 'Obter Licença (500💰)'}
               </button>
             </div>
+
+            {/* 🏭 ABATEDOURO */}
+            {p.farmLevel >= 10 && (
+              <div className="bg-white border-4 border-red-300 rounded-3xl p-4">
+                <h4 className="font-display font-black text-sm uppercase text-red-800 mb-1">🏭 Abatedouro Parceiro</h4>
+                <p className="text-xs text-stone-500 font-mono mb-3">Frigorífico externo que processa bois e porcos engordados. Desbloqueia os contratos de abate — os mais lucrativos do jogo. Requer Certificado Sanitário. Custo fixo: +25💰/dia de energia.</p>
+                {!p.ownedOneTimeEffects.includes('cert_sanitario') ? (
+                  <div className="text-xs text-amber-700 font-mono bg-amber-50 border border-amber-200 rounded-xl p-3">⚠️ Requer Certificado Sanitário (disponível em Consumíveis)</div>
+                ) : p.abatedouroUnlocked ? (
+                  <div className="text-xs text-green-700 font-mono bg-green-50 border border-green-200 rounded-xl p-3">✅ Abatedouro ativo — contratos disponíveis na aba Contratos</div>
+                ) : (
+                  <button
+                    disabled={p.gold < 8000}
+                    onClick={() => {
+                      if (p.gold < 8000) return;
+                      p.setGold(prev => prev - 8000);
+                      p.setAbatedouroUnlocked(true);
+                      p.addLog('🏭 Abatedouro Parceiro contratado! Contratos de abate agora disponíveis.', 'success');
+                      p.triggerAudioResult(() => p.sfx.playSound('levelup'));
+                    }}
+                    className={`text-xs font-mono font-black py-2 px-4 rounded-xl border-b-2 transition-all cursor-pointer ${p.gold >= 8000 ? 'bg-red-600 hover:bg-red-500 text-white border-red-800' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  >
+                    {p.gold >= 8000 ? 'Contratar Abatedouro (8.000💰)' : `Precisa de 8.000💰`}
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* 🚚 FROTAS DE TRANSPORTE */}
             <div className="bg-white border-4 border-slate-300 rounded-3xl p-4">
