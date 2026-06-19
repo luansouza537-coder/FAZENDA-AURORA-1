@@ -456,12 +456,6 @@ function GameApp() {
   });
 
   // --- EFEITOS DO MERCADOR EXTRAS ---
-  const [fertilityBoostDays, setFertilityBoostDays] = useState<number>(() => {
-    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).fertilityBoostDays ?? 0; } catch(e) {} return 0;
-  });
-  const [premiumPricesDays, setPremiumPricesDays] = useState<number>(() => {
-    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).premiumPricesDays ?? 0; } catch(e) {} return 0;
-  });
   const [productionBoostDays, setProductionBoostDays] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).productionBoostDays ?? 0; } catch(e) {} return 0;
   });
@@ -471,17 +465,8 @@ function GameApp() {
   const [suplementoMineralDays, setSuplementoMineralDays] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).suplementoMineralDays ?? 0; } catch(e) {} return 0;
   });
-  const [salMineralDays, setSalMineralDays] = useState<number>(() => {
-    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).salMineralDays ?? 0; } catch(e) {} return 0;
-  });
-  const [seloOrganicodays, setSeloOrganicoDays] = useState<number>(() => {
-    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).seloOrganicodays ?? 0; } catch(e) {} return 0;
-  });
   const [silagemDays, setSilagemDays] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).silagemDays ?? 0; } catch(e) {} return 0;
-  });
-  const [hasBalanca, setHasBalanca] = useState<boolean>(() => {
-    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasBalanca ?? false; } catch(e) {} return false;
   });
   const [hasCisterna, setHasCisterna] = useState<boolean>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasCisterna ?? false; } catch(e) {} return false;
@@ -1730,12 +1715,7 @@ function GameApp() {
     const marketBonus = activeMarketEvent && activeMarketEvent.items.includes(itemType) ? activeMarketEvent.mult : 1.0;
     // Evento mundial ativo
     const worldEventBonus = worldEvent && worldEvent.items.includes(itemType) ? worldEvent.priceMult : 1.0;
-    // Selo de qualidade premium do mercador
-    const premiumPricesBonus = premiumPricesDays > 0 ? 1.25 : 1.0;
-    // Selo Orgânico (+20%) e Balança de Precisão (+5%)
-    const seloOrganicoBonus = seloOrganicodays > 0 ? 1.20 : 1.0;
-    const balancaBonus = hasBalanca ? 1.05 : 1.0;
-    let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * marketBonus * worldEventBonus * premiumPricesBonus * seloOrganicoBonus * balancaBonus;
+    let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * marketBonus * worldEventBonus;
     if (merchantActive) {
       finalPrice *= 1.5;
     }
@@ -2149,11 +2129,11 @@ function GameApp() {
         loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest,
         insuranceTheft, insuranceClimate,
         milkerLevel, shearerLevel, feederLevel,
-        fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays,
+        productionBoostDays, antiPestDays,
         worldEvent,
         financialLog,
-        suplementoMineralDays, salMineralDays, seloOrganicodays, silagemDays,
-        hasBalanca, hasCisterna, blockNextStorm, blockNextDrought, isencaoMultaCount,
+        suplementoMineralDays, silagemDays,
+        hasCisterna, blockNextStorm, blockNextDrought, isencaoMultaCount,
         shownMilestones,
         vehicleTiers,
       };
@@ -2161,7 +2141,7 @@ function GameApp() {
       setShowSavedToast(true);
       setTimeout(() => setShowSavedToast(false), 2000);
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 2500;
@@ -2355,7 +2335,7 @@ function GameApp() {
 
       // Animals that don't eat: skip hunger processing. Sal Mineral e Silagem evitam perda de fome.
       const noHungerTypes = ['minhoca', 'caracol'];
-      const skipHunger = noHungerTypes.includes(copy.type) || salMineralDays > 0 || silagemDays > 0;
+      const skipHunger = noHungerTypes.includes(copy.type) || silagemDays > 0;
 
       // Perda de fome diária: 12 + random 0-7 (gulosa consome +20%)
       const baseHungerLoss = 12 + Math.floor(Math.random() * 8);
@@ -3311,7 +3291,6 @@ function GameApp() {
           if (item.effect === 'cert_sanitario' && hasCertSanitario) return false;
           if (item.effect === 'licenca_exotica' && licencaExotica) return false;
           if (item.effect === 'licenca_criadouro' && licencaCriadouro) return false;
-          if (item.effect === 'balanca_precisao' && hasBalanca) return false;
           if (item.effect === 'cisterna' && hasCisterna) return false;
           return true;
         });
@@ -3426,11 +3405,9 @@ function GameApp() {
             else if (a.trait === 'preguicosa') totalLeite = Math.max(1, Math.round(totalLeite * 0.85));
             // Nível da ordenhadeira: +20% por nível adicional (Nv2=+20%, Nv3=+40%)
             const milkerBonus = 1 + (milkerLevel - 1) * 0.2;
-            // Poção de fertilidade
-            const fertilityMult = fertilityBoostDays > 0 ? 2 : 1;
             // Manual de produção
             const productionMult = productionBoostDays > 0 ? 1.15 : 1;
-            totalLeite = Math.round(totalLeite * milkerBonus * fertilityMult * productionMult);
+            totalLeite = Math.round(totalLeite * milkerBonus * productionMult);
             milkCollected += totalLeite;
             milkedCows++;
             return { ...a, hasProducedToday: false };
@@ -5077,13 +5054,9 @@ function GameApp() {
       }
 
       // --- EFEITOS DO MERCADOR: decrementar dias ---
-      if (fertilityBoostDays > 0) setFertilityBoostDays(prev => prev - 1);
-      if (premiumPricesDays > 0) setPremiumPricesDays(prev => prev - 1);
       if (productionBoostDays > 0) setProductionBoostDays(prev => prev - 1);
       if (antiPestDays > 0) setAntiPestDays(prev => prev - 1);
       if (suplementoMineralDays > 0) setSuplementoMineralDays(prev => prev - 1);
-      if (salMineralDays > 0) setSalMineralDays(prev => prev - 1);
-      if (seloOrganicodays > 0) setSeloOrganicoDays(prev => prev - 1);
       if (silagemDays > 0) setSilagemDays(prev => prev - 1);
 
       // --- EVENTOS DO MUNDO ---
@@ -5948,27 +5921,14 @@ function GameApp() {
                         else if (item.effect === 'licenca_exotica') { setLicencaExotica(true); addLog('📋 Licença Exótica obtida! Agora pode criar Jacaré legalmente.', 'success'); }
                         else if (item.effect === 'licenca_criadouro') { setLicencaCriadouro(true); addLog('📜 Licença de Criadouro obtida! Reprodução controlada desbloqueada.', 'success'); }
                         else if (item.effect === 'cure_all_sick') { setAnimals(prev => prev.map(a => ({ ...a, isSick: false }))); addLog('🩺 Todos os animais doentes foram curados!', 'success'); }
-                        else if (item.effect === 'fertility_3days') { setFertilityBoostDays(prev => prev + 3); addLog('🧪 Poção de Fertilidade ativa! 2x produção por 3 dias!', 'success'); }
-                        else if (item.effect === 'premium_prices_5days') { setPremiumPricesDays(prev => prev + 5); addLog('🏅 Selo de Qualidade Premium ativo! +25% preços por 5 dias!', 'success'); }
-                        else if (item.effect === 'treasure_map') {
-                          const bonus = 200 + Math.floor(Math.random() * 401);
-                          setGold(prev => prev + bonus);
-                          addLog(`🗺️ Mapa do Tesouro! Encontrou ${bonus} moedas enterradas na fazenda!`, 'success');
-                        }
                         else if (item.effect === 'anti_pest_14days') { setAntiPestDays(prev => prev + 14); addLog('🧴 Antídoto Anti-Pragas ativo por 14 dias!', 'success'); }
-                        else if (item.effect === 'happiness_boost') { setAnimals(prev => prev.map(a => ({ ...a, happiness: Math.min(100, a.happiness + 30) }))); addLog('✨ Elixir da Felicidade! +30 felicidade a todos!', 'success'); }
                         else if (item.effect === 'production_boost_7days') { setProductionBoostDays(prev => prev + 7); addLog('📚 Manual de Produção Avançada! +15% produção por 7 dias!', 'success'); }
-                        else if (item.effect === 'suplemento_mineral_7days') { setSuplementoMineralDays(prev => prev + 7); addLog('💊 Suplemento Mineral aplicado! +20% produção de leite por 7 dias!', 'success'); }
+                        else if (item.effect === 'suplemento_mineral_7days') { setSuplementoMineralDays(prev => prev + 7); addLog('💊 Suplemento Mineral aplicado! +20% produção de leite e ovos por 7 dias!', 'success'); }
                         else if (item.effect === 'cure_one_sick') { const sick = animals.find(a => a.isSick); if (sick) { setAnimals(prev => prev.map(a => a.id === sick.id ? { ...a, isSick: false } : a)); addLog(`🩹 ${sick.name} foi curado com a bandagem veterinária!`, 'success'); } else addLog('🩹 Nenhum animal doente no momento.', 'info'); }
-                        else if (item.effect === 'sal_mineral_3days') { setSalMineralDays(prev => prev + 3); addLog('🧂 Sal mineral disponível! Animais não perdem fome por 3 dias!', 'success'); }
-                        else if (item.effect === 'selo_organico_7days') { setSeloOrganicoDays(prev => prev + 7); addLog('🌿 Selo Orgânico ativo! +20% preço de venda por 7 dias!', 'success'); }
-                        else if (item.effect === 'balanca_precisao') { setHasBalanca(true); addLog('⚖️ Balança de Precisão instalada! +5% preço de venda permanente!', 'success'); }
                         else if (item.effect === 'cisterna') { setHasCisterna(true); addLog('🪣 Cisterna de Água instalada! -30% conta de água semanal!', 'success'); }
-                        else if (item.effect === 'block_storm') { setBlockNextStorm(true); addLog('☂️ Cobertura Provisória montada! Próxima tempestade não afetará a produção!', 'success'); }
-                        else if (item.effect === 'block_drought') { setBlockNextDrought(true); addLog('💧 Bomba d\'Água pronta! Próxima seca não reduzirá felicidade dos animais!', 'success'); }
+                        else if (item.effect === 'block_storm_drought') { setBlockNextStorm(true); setBlockNextDrought(true); addLog('🛡️ Kit de Proteção Climática pronto! Próxima tempestade e seca não afetarão a fazenda!', 'success'); }
                         else if (item.effect === 'silagem_5days') { setSilagemDays(prev => prev + 5); addLog('🌽 Silagem Premium estocada! Animais não consomem ração por 5 dias!', 'success'); }
-                        else if (item.effect === 'garantir_mercador') { setDaysSinceMerchant(6); addLog('📰 Anúncio publicado! O Mercador retornará garantido no próximo ciclo!', 'success'); }
-                        else if (item.effect === 'isencao_multa_2x') { setIsencaoMultaCount(prev => prev + 2); addLog('🚚 Contrato de Transporte ativo! Próximas 2 multas por entrega vencida serão isentas!', 'success'); }
+                        else if (item.effect === 'isencao_multa_2x') { setIsencaoMultaCount(prev => prev + 3); addLog('🚚 Contrato de Transporte ativo! Próximas 3 multas por entrega vencida serão isentas!', 'success'); }
                         else if (item.effect === 'rare_animal_bait') { addLog('🎯 Isca preparada! Um animal raro pode aparecer amanhã com 50% de desconto!', 'success'); }
                         setMerchantSpecialItems(prev => prev.filter(id => id !== item.id));
                         setStats(prev => ({ ...prev, totalMerchantShopPurchases: (prev.totalMerchantShopPurchases ?? 0) + 1 }));
@@ -5993,8 +5953,6 @@ function GameApp() {
           if (droughtDaysRemaining > 0) activeEvents.push({ icon: '🏜️', label: 'Seca — custo de água triplicado', days: droughtDaysRemaining, color: 'bg-yellow-800 border-yellow-500' });
           if (worldEvent) activeEvents.push({ icon: '🌍', label: `${worldEvent.title} — ${worldEvent.priceMult >= 1 ? '+' : ''}${Math.round((worldEvent.priceMult - 1) * 100)}% preços`, days: worldEvent.daysLeft, color: worldEvent.priceMult >= 1 ? 'bg-green-800 border-green-500' : 'bg-red-800 border-red-500' });
           if (activeMarketEvent) activeEvents.push({ icon: '📊', label: `${activeMarketEvent.title} — +${Math.round((activeMarketEvent.mult - 1) * 100)}% mercado`, days: activeMarketEvent.daysLeft, color: 'bg-blue-800 border-blue-500' });
-          if (fertilityBoostDays > 0) activeEvents.push({ icon: '🧪', label: 'Poção de Fertilidade — 2× produção', days: fertilityBoostDays, color: 'bg-pink-800 border-pink-500' });
-          if (premiumPricesDays > 0) activeEvents.push({ icon: '🏅', label: 'Selo Premium — +25% preços', days: premiumPricesDays, color: 'bg-amber-800 border-amber-500' });
           if (productionBoostDays > 0) activeEvents.push({ icon: '📚', label: 'Manual Avançado — +15% produção', days: productionBoostDays, color: 'bg-indigo-800 border-indigo-500' });
           if (antiPestDays > 0) activeEvents.push({ icon: '🧴', label: 'Anti-Pragas ativo', days: antiPestDays, color: 'bg-teal-800 border-teal-500' });
           if (activeEvents.length === 0) return null;
