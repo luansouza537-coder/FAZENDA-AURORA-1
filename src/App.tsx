@@ -807,7 +807,7 @@ function GameApp() {
     setDailyEarning(0);
     setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0, waterCost: 0, energyCost: 0 });
     setWeeklySales({ milk: 0, wool: 0, cheese: 0, scarf: 0, carne: 0, egg: 0, mayo: 0, queijoCoalho: 0, queijoMucarela: 0, queijoBrie: 0 });
-    setPreviousPrices({ milk: 5, wool: 12, cheese: 20, scarf: 30, carne: 150, egg: 4, mayo: 16, queijoCoalho: 14, queijoMucarela: 28, queijoBrie: 65 });
+    setPreviousPrices({ milk: 5, wool: 12, cheese: 20, scarf: 30, carne: 150, egg: 4, mayo: 16, queijoCoalho: 35, queijoMucarela: 55, queijoBrie: 90 });
     setMachines({
       milkerPurchased: false,
       milkerActive: false,
@@ -1588,10 +1588,10 @@ function GameApp() {
       return 35;  // era 28
     }
     if (itemType === 'queijoMucarela') {
-      return 40;  // era 28 — diferencia os tipos
+      return 55;
     }
     if (itemType === 'queijoBrie') {
-      return 45;  // era 65 — acessível cedo demais
+      return 90;
     }
     if (itemType === 'scarf') {
       return 30;
@@ -2791,7 +2791,7 @@ function GameApp() {
     { catalogId: 'lc_6', client: 'Exportadora Fibras Raras', product: 'alpaca_wool' as const, description: 'Empresa que exporta fibras premium para a Europa. Demanda constante, clientes exigentes.', baseMarket: 65, pricePerUnit: 92, weeklyGoal: 3, durationDays: 60, minLevel: 6, completionBonus: 1200, completionXP: 120 },
     { catalogId: 'lc_7', client: 'Farmácia Natural Raízes', product: 'muco' as const, description: 'Laboratório de cosméticos naturais. O muco é ingrediente raro e valioso — e eles sabem disso.', baseMarket: 120, pricePerUnit: 165, weeklyGoal: 2, durationDays: 60, minLevel: 8, completionBonus: 1500, completionXP: 130 },
     { catalogId: 'lc_8', client: 'Distribuidora Colmeia', product: 'mel_envasado' as const, description: 'Distribui mel envasado para bares e restaurantes da região. Volume modesto, contrato longo e seguro.', baseMarket: 80, pricePerUnit: 115, weeklyGoal: 3, durationDays: 90, minLevel: 10, completionBonus: 2500, completionXP: 200 },
-    { catalogId: 'lc_9', client: 'Instituto Gastronômico', product: 'queijoBrie' as const, description: 'Escola de gastronomia de prestígio. Queijos maturados nas aulas — qualidade constante obrigatória.', baseMarket: 65, pricePerUnit: 95, weeklyGoal: 3, durationDays: 90, minLevel: 12, completionBonus: 3500, completionXP: 250 },
+    { catalogId: 'lc_9', client: 'Instituto Gastronômico', product: 'queijoBrie' as const, description: 'Escola de gastronomia de prestígio. Queijos maturados nas aulas — qualidade constante obrigatória.', baseMarket: 90, pricePerUnit: 130, weeklyGoal: 3, durationDays: 90, minLevel: 12, completionBonus: 3500, completionXP: 250 },
     { catalogId: 'lc_10', client: 'Exportadora Premium Aurora', product: 'seda_bruta' as const, description: 'O maior contrato da sua carreira. Uma empresa internacional descobriu seus produtos e quer fornecimento exclusivo por três meses. Não decepcione.', baseMarket: 100, pricePerUnit: 150, weeklyGoal: 5, durationDays: 90, minLevel: 15, completionBonus: 5000, completionXP: 400 },
     { catalogId: 'ab_1', client: 'Frigorífico Vale Verde', product: 'boi' as const, description: 'O maior processador regional da área. Exigem regularidade acima de tudo — 6 bois por mês, sem exceções. Cada trimestre consecutivo cumprido rende bônus crescente de fidelidade.', baseMarket: 300, pricePerUnit: 360, weeklyGoal: 6, durationDays: 90, minLevel: 10, completionBonus: 3000, completionXP: 250, cycleType: 'monthly' as const, cycleLengthDays: 28 },
     { catalogId: 'ab_2', client: 'Carnes Família Souza', product: 'porco' as const, description: 'Distribuidora de linguiças e defumados para mais de 200 açougues do estado. Pagam na entrega, mas não aceitam porco fora do peso. Meta: 10 porcos por mês.', baseMarket: 180, pricePerUnit: 234, weeklyGoal: 10, durationDays: 60, minLevel: 10, completionBonus: 2000, completionXP: 200, cycleType: 'monthly' as const, cycleLengthDays: 28 },
@@ -3642,7 +3642,7 @@ function GameApp() {
       // --- LONG CONTRACTS: Liquidação semanal de prêmios ---
       let longContractBonusForGold = 0;
       if (isWeeklyBillDay) {
-        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, queijoCoalho: 28, butter: 45, alpaca_wool: 65, muco: 120, mel_envasado: 80, queijoBrie: 65, seda_bruta: 100 };
+        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, queijoCoalho: 35, butter: 45, alpaca_wool: 65, muco: 120, mel_envasado: 80, queijoBrie: 90, seda_bruta: 100 };
         contracts.forEach(c => {
           if (c.contractType !== 'long' || !c.active) return;
           const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
