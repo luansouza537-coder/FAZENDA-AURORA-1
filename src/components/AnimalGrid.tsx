@@ -93,6 +93,9 @@ interface AnimalGridProps {
   triggerAudioResult: (fn: () => void) => void;
   sfx: { playSound: (name: string) => void };
   initGame: () => void;
+  sendToAbatedouro?: (animalId: string, animalType: 'boi' | 'porco') => void;
+  abatedouroUnlocked?: boolean;
+  hasCertSanitario?: boolean;
 }
 
 export default function AnimalGrid({
@@ -178,6 +181,9 @@ export default function AnimalGrid({
   triggerAudioResult,
   sfx,
   initGame,
+  sendToAbatedouro,
+  abatedouroUnlocked,
+  hasCertSanitario,
 }: AnimalGridProps) {
   return (
           <div className="lg:col-span-8 flex flex-col gap-6">
@@ -1061,6 +1067,9 @@ export default function AnimalGrid({
                         onSaveRename={saveRename}
                         onStartRename={startRename}
                         addLog={addLog}
+                        sendToAbatedouro={sendToAbatedouro}
+                        abatedouroUnlocked={abatedouroUnlocked}
+                        hasCertSanitario={hasCertSanitario}
                       />
                     ));
                   })()}

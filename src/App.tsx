@@ -963,7 +963,13 @@ function GameApp() {
           if (prev >= 100) {
             clearInterval(interval);
             setTimeout(() => {
-              setCurrentScreen('title');
+              const autoLoad = localStorage.getItem('aurora_import_autoload');
+              if (autoLoad && localStorage.getItem('aurora_farm_save')) {
+                localStorage.removeItem('aurora_import_autoload');
+                setCurrentScreen('game');
+              } else {
+                setCurrentScreen('title');
+              }
             }, 300);
             return 100;
           }
@@ -1335,8 +1341,10 @@ function GameApp() {
       reader.onload = (ev) => {
         try {
           const text = ev.target?.result as string;
-          JSON.parse(text); // valida JSON antes de salvar
+          const parsed = JSON.parse(text);
+          if (!parsed || typeof parsed !== 'object') throw new Error('invalid');
           localStorage.setItem('aurora_farm_save', text);
+          localStorage.setItem('aurora_import_autoload', '1');
           addLog('✅ Save importado! Recarregando...', 'success');
           setTimeout(() => window.location.reload(), 1000);
         } catch {

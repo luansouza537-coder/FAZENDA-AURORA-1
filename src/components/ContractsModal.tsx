@@ -33,6 +33,7 @@ const PRODUCT_LABELS: Record<string, string> = {
   buffalo_milk: '🐃 Leite de Búfala', duck_egg: '🦆 Ovo de Pato', quail_egg: '🐦 Ovo de Codorna',
   feather: '🪶 Penas', angora_wool: '🐇 Lã Angorá', alpaca_wool: '🦙 Lã de Alpaca',
   muco: '🐌 Muco de Caracol', seda_bruta: '🐛 Seda Bruta', mel_envasado: '🍯 Mel Envasado',
+  boi: '🐂 Boi (Carne)', porco: '🐷 Porco (Carne)', boi_porco: '🥩 Boi + Porco (Misto)',
 };
 
 export const ContractsModal: React.FC<ContractsModalProps> = ({
