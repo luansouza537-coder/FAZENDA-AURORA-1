@@ -198,6 +198,85 @@ class SoundFXManager {
     }
   }
 
+  // Ambiente: pássaros ao amanhecer (3 chiados rápidos aleatórios)
+  public playBirds() {
+    if (this.isMuted) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      const baseFreqs = [1800, 2200, 2600, 1600, 2000];
+      for (let i = 0; i < 3; i++) {
+        const delay = i * (0.18 + Math.random() * 0.12);
+        const freq = baseFreqs[Math.floor(Math.random() * baseFreqs.length)];
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + delay);
+        osc.frequency.linearRampToValueAtTime(freq * 1.15, t + delay + 0.06);
+        osc.frequency.linearRampToValueAtTime(freq * 0.9, t + delay + 0.13);
+        gain.gain.setValueAtTime(0, t + delay);
+        gain.gain.linearRampToValueAtTime(0.04, t + delay + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.18);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t + delay);
+        osc.stop(t + delay + 0.2);
+      }
+    } catch (e) {}
+  }
+
+  // Ambiente: grilos à noite (chirp suave duplo)
+  public playCrickets() {
+    if (this.isMuted) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      for (let i = 0; i < 2; i++) {
+        const delay = i * 0.14;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(3200, t + delay);
+        gain.gain.setValueAtTime(0.015, t + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t + delay);
+        osc.stop(t + delay + 0.09);
+      }
+    } catch (e) {}
+  }
+
+  // Som de chuva/tempestade sintético
+  public playThunder() {
+    if (this.isMuted) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      // Ruído branco curto para simular trovão
+      const bufferSize = this.ctx.sampleRate * 0.6;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      const source = this.ctx.createBufferSource();
+      source.buffer = buffer;
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(400, t);
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+      source.start(t);
+    } catch (e) {}
+  }
+
   private playTone(freq: number, duration: number, type: OscillatorType, time: number) {
     if (!this.ctx) return;
     const osc = this.ctx.createOscillator();
@@ -218,3 +297,81 @@ class SoundFXManager {
 }
 
 export const sfx = new SoundFXManager();
+
+// ─── Music Manager ────────────────────────────────────────────────────────────
+class MusicManager {
+  private current: HTMLAudioElement | null = null;
+  private currentTrack: string | null = null;
+  public muted: boolean = false;
+  public volume: number = 0.18; // volume padrão baixo
+
+  private tracks: Record<string, string> = {
+    titulo:  '/audio/titulo.mp3',
+    fazenda: '/audio/fazenda.mp3',
+  };
+
+  play(track: string) {
+    if (this.muted) return;
+    if (this.currentTrack === track && this.current && !this.current.paused) return;
+
+    this.stop();
+    const src = this.tracks[track];
+    if (!src) return;
+
+    const audio = new Audio(src);
+    audio.loop = true;
+    audio.volume = 0;
+    audio.play().then(() => {
+      this.fadeVolumeTo(audio, this.volume, 1500);
+    }).catch(() => {});
+
+    this.current = audio;
+    this.currentTrack = track;
+  }
+
+  stop() {
+    if (!this.current) return;
+    const audio = this.current;
+    this.fadeVolumeTo(audio, 0, 800, () => {
+      audio.pause();
+      audio.src = '';
+    });
+    this.current = null;
+    this.currentTrack = null;
+  }
+
+  setMuted(muted: boolean) {
+    this.muted = muted;
+    if (muted) {
+      if (this.current) this.current.volume = 0;
+    } else {
+      if (this.current) this.fadeVolumeTo(this.current, this.volume, 800);
+    }
+  }
+
+  setVolume(vol: number) {
+    this.volume = vol;
+    if (this.current && !this.muted) {
+      this.current.volume = vol;
+    }
+  }
+
+  private fadeVolumeTo(audio: HTMLAudioElement, target: number, durationMs: number, onDone?: () => void) {
+    const steps = 20;
+    const interval = durationMs / steps;
+    const start = audio.volume;
+    const delta = (target - start) / steps;
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      audio.volume = Math.max(0, Math.min(1, start + delta * step));
+      if (step >= steps) {
+        clearInterval(timer);
+        audio.volume = target;
+        onDone?.();
+      }
+    }, interval);
+  }
+}
+
+export const music = new MusicManager();

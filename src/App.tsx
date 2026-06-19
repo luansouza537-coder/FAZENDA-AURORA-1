@@ -46,7 +46,7 @@ import {
 } from 'lucide-react';
 import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract, FarmSpecialization, FairResult, LandLot, BiomeType } from './types';
 import { getRandomName, getUniqueOxName } from './names';
-import { sfx } from './utils/audio';
+import { sfx, music } from './utils/audio';
 import SeasonalParticles from './components/SeasonalParticles';
 import { ContractsModal, PendingContractModal } from './components/ContractsModal';
 import { AnimalCard, AnimalListRow } from './components/AnimalCard';
@@ -110,6 +110,14 @@ function GameApp() {
     try {
       const saved = localStorage.getItem('sound_enabled');
       if (saved) return JSON.parse(saved) !== false;
+    } catch (e) {}
+    return true;
+  });
+
+  const [musicEnabled, setMusicEnabled] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('music_enabled');
+      if (saved !== null) return JSON.parse(saved) !== false;
     } catch (e) {}
     return true;
   });
@@ -985,6 +993,22 @@ function GameApp() {
     sfx.isMuted = !soundEnabled;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Persiste preferência de música
+  useEffect(() => {
+    localStorage.setItem('music_enabled', JSON.stringify(musicEnabled));
+    music.setMuted(!musicEnabled);
+  }, [musicEnabled]);
+
+  // Troca de trilha conforme a tela
+  useEffect(() => {
+    if (!musicEnabled) return;
+    if (currentScreen === 'title' || currentScreen === 'splash') {
+      music.play('titulo');
+    } else if (currentScreen === 'game') {
+      music.play('fazenda');
+    }
+  }, [currentScreen, musicEnabled]);
 
   // Unlocks audio context on user interaction to abide by modern browser policies
   useEffect(() => {
@@ -3105,6 +3129,11 @@ function GameApp() {
   const advanceDay = (event: React.MouseEvent) => {
     try {
       spawnFeedback('🌞', 'Dia Avançou!', event);
+      // Sons ambiente: pássaros ao amanhecer, grilos ao entardecer
+      if (!sfx.isMuted) {
+        setTimeout(() => sfx.playBirds(), 300);
+        setTimeout(() => sfx.playCrickets(), 1200);
+      }
 
       let logsToAdd: { msg: string; type: LogMessage['type'] }[] = [];
 
@@ -4110,6 +4139,7 @@ function GameApp() {
           } else {
             logsToAdd.push({ msg: `⛈️ Tempestade! Animais estressados — produção reduzida e -10 felicidade hoje.`, type: 'error' });
             setTimeout(() => addNotification('⛈️ Tempestade! Produção reduzida hoje.', 'warning', nextDayValue), 0);
+            if (!sfx.isMuted) { setTimeout(() => sfx.playThunder(), 200); setTimeout(() => sfx.playThunder(), 900); }
           }
         } else if (nextDayEvent === 'geada') {
           if (insuranceClimate.active) {
@@ -5509,7 +5539,23 @@ function GameApp() {
               <p className="text-white/60 text-xs font-mono tracking-wider uppercase">
                 💡 Dica: mantenha a felicidade em 100% por 3 dias para virar Melhor Amigo!
               </p>
-              <p className="text-[#fcd57e] text-[10px] font-mono mt-1 opacity-70 uppercase tracking-widest">
+              <div className="flex items-center justify-center gap-3 mt-3">
+                <button
+                  onClick={() => setMusicEnabled(prev => !prev)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-bold transition-all border-2 ${musicEnabled ? 'bg-white/20 border-white/40 text-white' : 'bg-white/5 border-white/20 text-white/40'}`}
+                  title={musicEnabled ? 'Desativar música' : 'Ativar música'}
+                >
+                  {musicEnabled ? '🎵' : '🎶'} {musicEnabled ? 'Música ON' : 'Música OFF'}
+                </button>
+                <button
+                  onClick={() => { const nw = !soundEnabled; setSoundEnabled(nw); sfx.isMuted = !nw; }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-bold transition-all border-2 ${soundEnabled ? 'bg-white/20 border-white/40 text-white' : 'bg-white/5 border-white/20 text-white/40'}`}
+                  title={soundEnabled ? 'Desativar efeitos' : 'Ativar efeitos'}
+                >
+                  {soundEnabled ? '🔊' : '🔇'} {soundEnabled ? 'Sons ON' : 'Sons OFF'}
+                </button>
+              </div>
+              <p className="text-[#fcd57e] text-[10px] font-mono mt-2 opacity-70 uppercase tracking-widest">
                 Fazenda Aurora • 2026 Edition
               </p>
             </div>
@@ -5792,8 +5838,17 @@ function GameApp() {
               <span>Vender Tudo</span>
             </button>
 
+            {/* Music Toggle */}
+            <button
+              onClick={() => setMusicEnabled(prev => !prev)}
+              className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${musicEnabled ? 'bg-[#ffcd7e] hover:bg-[#fbc550]' : 'bg-[#e5c88e] opacity-60 hover:opacity-80'}`}
+              title={musicEnabled ? "Desativar música" : "Ativar música"}
+            >
+              {musicEnabled ? '🎵' : '🎶'}
+            </button>
+
             {/* Sound Toggle */}
-            <button 
+            <button
               onClick={() => {
                 const nw = !soundEnabled;
                 setSoundEnabled(nw);
