@@ -411,18 +411,29 @@ function GameApp() {
   });
   const setVehicleTier = (cat: string, tier: number) => setVehicleTiers(prev => ({ ...prev, [cat]: tier }));
   const FREIGHT_PENALTY: Record<string, number[]> = {
-    animais:   [0.20, 0.10, 0],
-    laticinios:[0.18, 0.09, 0],
-    ovos:      [0.15, 0.07, 0],
-    texteis:   [0.12, 0.06, 0],
-    carnes:    [0.18, 0.09, 0],
-    organicos: [0.10, 0.05, 0],
-    luxo:      [0.15, 0.07, 0],
+    animais:   [0.12, 0.06, 0],
+    laticinios:[0.10, 0.05, 0],
+    ovos:      [0.08, 0.04, 0],
+    texteis:   [0.07, 0.03, 0],
+    carnes:    [0.10, 0.05, 0],
+    organicos: [0.05, 0.02, 0],
+    luxo:      [0.08, 0.04, 0],
+  };
+  const FREIGHT_WINTER_EXTRA: Record<string, number[]> = {
+    animais:   [0.08, 0.04, 0],
+    laticinios:[0.08, 0.04, 0],
+    ovos:      [0.06, 0.03, 0],
+    texteis:   [0.04, 0.02, 0],
+    carnes:    [0.08, 0.04, 0],
+    organicos: [0.03, 0.01, 0],
+    luxo:      [0.06, 0.03, 0],
   };
   const getFreightMultiplier = (cat: string): number => {
     const tier = vehicleTiers[cat] ?? 0;
-    const penalty = FREIGHT_PENALTY[cat]?.[tier] ?? 0;
-    return 1 - penalty;
+    const basePenalty = FREIGHT_PENALTY[cat]?.[tier] ?? 0;
+    const isWinter = Math.floor(((currentDay - 1) % 120) / 30) === 3;
+    const winterExtra = isWinter ? (FREIGHT_WINTER_EXTRA[cat]?.[tier] ?? 0) : 0;
+    return 1 - (basePenalty + winterExtra);
   };
 
   // --- SEGUROS EXTRAS ---
