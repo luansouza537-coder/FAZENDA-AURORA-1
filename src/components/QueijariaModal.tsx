@@ -215,7 +215,7 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                   <h4 className="font-display font-black text-xs uppercase tracking-wider text-[#78350f] mb-2">📖 Receitas</h4>
                   <div className="grid grid-cols-1 gap-2">
                     {[
-                      { label: 'Queijo Básico', emoji: '🧀', req: `🥛 2 leite (${inventory.milk}/2) • Instantâneo`, canCraft: inventory.milk >= 2, reqLevel: 1, onClick: (e: React.MouseEvent) => c.craftCheese(e) },
+                      { label: 'Queijo Básico', emoji: '🧀', req: `🥛 3 leite (${inventory.milk}/3) • Instantâneo`, canCraft: inventory.milk >= 3, reqLevel: 1, onClick: (e: React.MouseEvent) => c.craftCheese(e) },
                       { label: 'Queijo Coalho', emoji: '🧀', req: `🥛 3 leite (${inventory.milk}/3) • ⌛ 3d`, canCraft: inventory.milk >= 3 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 1, onClick: (e: React.MouseEvent) => c.craftQueijo('coalho', e) },
                       { label: 'Queijo Muçarela', emoji: '🧀', req: `🥛 5 leite (${inventory.milk}/5) • ⌛ 6d • Nv3`, canCraft: farmLevel >= 3 && inventory.milk >= 5 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 3, onClick: (e: React.MouseEvent) => c.craftQueijo('mucarela', e) },
                       { label: 'Queijo Brie', emoji: '🧀', req: `🥛 8 leite (${inventory.milk}/8) • ⌛ 12d • Nv5`, canCraft: farmLevel >= 5 && inventory.milk >= 8 && queijosEmMaturacao.length < maxPrateleiras, reqLevel: 5, onClick: (e: React.MouseEvent) => c.craftQueijo('brie', e) },

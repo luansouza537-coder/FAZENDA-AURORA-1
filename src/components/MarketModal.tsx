@@ -102,7 +102,7 @@ const MarketModal: React.FC<MarketModalProps> = ({
             {([
               { key: 'milk', label: '🥛 Leite Cru', base: m.getItemBaseSellPrice('milk'), desc: 'Produzido por vacas leiteiras comuns.', formula: 'Sazonalidade: Verão (-20%) | Clima: Chuva (-10%), Sol (+10%)' },
               { key: 'wool', label: '🧶 Lã Crua', base: m.getItemBaseSellPrice('wool'), desc: 'Tosquiada das ovelhas de pelagem densa.', formula: 'Sazonalidade: Inverno (+30%) | Clima: Chuva (Sem lã / -20% valor)' },
-              { key: 'cheese', label: '🧀 Queijo Nobre', base: m.getItemBaseSellPrice('cheese'), desc: 'Feito com carinho no Ateliê com 2 leites.', formula: 'Sazonalidade: Outono (+15%) | Clima: Sem impacto' },
+              { key: 'cheese', label: '🧀 Queijo Nobre', base: m.getItemBaseSellPrice('cheese'), desc: 'Feito com carinho no Ateliê com 3 leites.', formula: 'Sazonalidade: Outono (+15%) | Clima: Sem impacto' },
               { key: 'scarf', label: '🧣 Cachecol Elegante', base: m.getItemBaseSellPrice('scarf'), desc: 'Tecido com cuidado no Ateliê com 2 lãs.', formula: 'Sazonalidade: Primavera (+10%) | Clima: Sem impacto' },
               { key: 'egg', label: '🥚 Ovo de Quintal', base: m.getItemBaseSellPrice('egg'), desc: 'Produzido por galinhas felizes e bem alimentadas.', formula: 'Sazonalidade: Primavera (+25%), Inverno (-25%) | Clima: Chuva (-10%), Sol (+10%)' },
               { key: 'mayo', label: '🥣 Maionese Cremosa', base: m.getItemBaseSellPrice('mayo'), desc: 'Preparada misturando 2 ovos de quintal no Ateliê.', formula: 'Sazonalidade: Verão (+15%) | Clima: Sem impacto' },

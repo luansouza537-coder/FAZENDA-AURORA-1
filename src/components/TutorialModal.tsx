@@ -114,7 +114,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
                   <strong>💖 Status Melhor Amigo:</strong> Se mantiver a felicidade do animal em <strong className="text-rose-600">100% por 3 dias consecutivos</strong>, ele se torna seu melhor amigo de forma permanente (dando bônus: +1 leite para vaca, lã a cada 2 dias para ovelha, e ganho acelerado de peso para o boi). Cuidado! Se a felicidade cair abaixo de 80% por 2 dias, o status de melhor amigo será perdido.
                 </li>
                 <li>
-                  <strong>🧀 Ateliê de Queijo:</strong> Combine <strong>2 Leites Crus</strong> no Ateliê para fabricar 1 <strong>Queijo Nobre</strong> (vende por 15 moedas base, aumentando ainda mais o lucro!).
+                  <strong>🧀 Ateliê de Queijo:</strong> Combine <strong>3 Leites Crus</strong> no Ateliê para fabricar 1 <strong>Queijo Nobre</strong> (vende por 15 moedas base, aumentando ainda mais o lucro!).
                 </li>
                 <li>
                   <strong>🧣 Ateliê de Costura:</strong> Combine <strong>2 Lãs Cruas</strong> no Ateliê para costurar 1 elegante <strong>Cachecol</strong> (vende por 30 moedas base!).

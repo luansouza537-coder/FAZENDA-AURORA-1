@@ -678,8 +678,8 @@ export function useInventory({
   // Main crafting functions
   const craftCheese = (event?: React.MouseEvent) => {
     if (event && event.preventDefault) event.preventDefault();
-    if (inventory.milk < 2) {
-      addLog(`🥛 Leite insuficiente! Você precisa de pelo menos 2 Baldes de Leite Cru.`, 'error');
+    if (inventory.milk < 3) {
+      addLog(`🥛 Leite insuficiente! Você precisa de pelo menos 3 Baldes de Leite Cru.`, 'error');
       triggerAudioResult(() => sfx.playSound('error'));
       spawnFeedback('❌', 'Falta Leite!', event);
       return;
@@ -687,7 +687,7 @@ export function useInventory({
 
     setInventory(prev => ({
       ...prev,
-      milk: prev.milk - 2,
+      milk: prev.milk - 3,
       cheese: prev.cheese + 1
     }));
     setStats(prev => ({
@@ -698,7 +698,7 @@ export function useInventory({
       ...prev,
       cheese: prev.cheese + 1
     }));
-    addLog(`🧀 Sucesso! Você transformou 2 Leites Crus em 1 Queijo de alta qualidade!`, 'success');
+    addLog(`🧀 Sucesso! Você transformou 3 Leites Crus em 1 Queijo de alta qualidade!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧀', '+1 Queijo', event);
   };

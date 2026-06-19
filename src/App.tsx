@@ -683,7 +683,7 @@ function GameApp() {
       racaoBovina: 5,
       racaoOvinos: 5,
       racaoAves: 5,
-      racaoAquatica: 0,
+      racaoAquatica: 3,
       racaoCoelho: 0,
       racaoCarnivora: 0,
       racaoSuina: 0,

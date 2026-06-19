@@ -115,7 +115,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
         {animal.type === 'ovelha' && animal.woolReady && (
           <button onClick={e => onCollectWool(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-purple-100 border border-purple-300 text-purple-800 hover:bg-purple-200 cursor-pointer">🧶</button>
         )}
-        {(animal.type === 'galinha' || animal.type === 'codorna') && animal.hasProducedToday && (
+        {animal.type === 'galinha' && animal.hasProducedToday && (
           <button onClick={e => onCollectEgg(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-yellow-100 border border-yellow-300 text-yellow-800 hover:bg-yellow-200 cursor-pointer">🥚</button>
         )}
         {animal.type === 'boi' && animal.isAdult !== false && (
@@ -354,7 +354,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
           {/* Animal Badge */}
           <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'minhoca' ? '🪱 Minhoca' : animal.type === 'caracol' ? '🐌 Caracol' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : '🐾 Animal'}
+            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'minhoca' ? '🪱 Minhoca' : animal.type === 'caracol' ? '🐌 Caracol' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
           {animal.trait && (() => {
@@ -454,6 +454,25 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             )}
             {animal.type === 'boi' && (
               <span className="select-none">{getBoiEmoji(animal.weightGain || 0.15)}</span>
+            )}
+            {animal.type === 'porco' && (
+              <div className="flex flex-col gap-1 w-full uppercase">
+                <div className="flex justify-between items-center w-full">
+                  <span className="flex items-center gap-1 text-[11px]">
+                    📈 Peso: <span className="font-mono font-black ml-1 text-xs">{Math.floor((animal.weightGain || 0) * 100)}%</span>
+                  </span>
+                  {renderGrowthBadge(animal.weightGain || 0)}
+                </div>
+                <div className="w-full bg-[#e5e7eb] h-2.5 rounded-full overflow-hidden mt-1 border border-stone-300 relative">
+                  <div
+                    className="h-full bg-gradient-to-r from-pink-400 to-red-500 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.floor((animal.weightGain || 0) * 100)}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-[#78350f]/80 font-mono text-left border-t border-[#fbbf24]/50 pt-1 mt-1.5 leading-none self-start w-full">
+                  Valor atual de venda: 💰 ~{valueOfPorco} moedas
+                </div>
+              </div>
             )}
             {animal.type === 'cabra' && (
               <>
@@ -780,9 +799,9 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             return <span className="text-[10px] text-stone-400 font-mono italic flex-1 flex items-center justify-center">Sem ração necessária 🌿</span>;
           }
           // BUG FIX: novos animais usam a ração correta na UI
-          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
+          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
           const feedQty = inventory[feedType] ?? 0;
-          const label = feedType === 'racaoBovina' ? 'Ração Bovina' : feedType === 'racaoOvinos' ? 'Ração de Ovinos' : feedType === 'racaoAves' ? 'Ração de Aves' : feedType === 'racaoAquatica' ? 'Ração Aquática' : feedType === 'racaoCoelho' ? 'Ração de Coelhos' : 'Ração Carnívora';
+          const label = feedType === 'racaoBovina' ? 'Ração Bovina' : feedType === 'racaoSuina' ? 'Ração Suína' : feedType === 'racaoOvinos' ? 'Ração de Ovinos' : feedType === 'racaoAves' ? 'Ração de Aves' : feedType === 'racaoAquatica' ? 'Ração Aquática' : feedType === 'racaoCoelho' ? 'Ração de Coelhos' : 'Ração Carnívora';
           return (
             <button
               type="button"
@@ -903,7 +922,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         )}
 
         {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré e cabra (cabra tem botão próprio após coleta) */}
-        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && (() => {
+        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'lhama' && (() => {
           const age = animal.age ?? 0;
           const maxAge = animal.maxAge ?? 90;
           const lifeFraction = Math.min(1, age / maxAge);
@@ -1012,6 +1031,35 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             🧶 Lã Lhama ({animal.woolAccumulated ?? 0}u)
           </button>
         )}
+
+        {/* Vender Lhama — após botão de coleta de lã */}
+        {animal.type === 'lhama' && animal.isAdult !== false && (() => {
+          const age = animal.age ?? 0;
+          const maxAge = animal.maxAge ?? 90;
+          const lifeFraction = Math.min(1, age / maxAge);
+          const sellPct = Math.max(0.10, 0.80 - lifeFraction * 0.70);
+          if (pendingSell) {
+            return (
+              <div className="flex items-center gap-1.5 bg-orange-50 border-2 border-orange-300 rounded-xl px-2 py-1.5">
+                <span className="text-[9px] font-mono font-black text-orange-700 leading-tight">
+                  Vender {animal.name}?<br/>
+                  <span className="text-orange-500">~{Math.round(sellPct * 100)}% do valor</span>
+                </span>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); onSellAnimal(animal.id, e); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+              </div>
+            );
+          }
+          return (
+            <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(true); }}
+              className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-b-4 border-orange-400 bg-orange-50 text-orange-800 hover:bg-orange-100 hover:scale-[1.03] active:translate-y-0.5 cursor-pointer transition-all shadow-sm"
+              title={`Vender por ~${Math.round(sellPct * 100)}% do valor.`}>
+              💸 Vender ({Math.round(sellPct * 100)}%)
+            </button>
+          );
+        })()}
 
         {/* Coletar Ovo de Pato */}
         {animal.type === 'pato' && (

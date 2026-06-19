@@ -286,7 +286,7 @@ export default function GameSidebar({
                     onClick={(e) => sellProduct('cheese', 1, e)}
                     disabled={inventory.cheese < 1}
                     className="bg-amber-50 hover:bg-amber-200 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2"
-                    title="Vende 1 Queijo Básico (feito com 2 leites). Para queijos premium use a Queijaria."
+                    title="Vende 1 Queijo Básico (feito com 3 leites). Para queijos premium use a Queijaria."
                   >
                     Vender Queijo Básico ({getActualSellPrice('cheese')}💰)
                   </button>
