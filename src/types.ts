@@ -134,6 +134,7 @@ export interface FarmWorker {
   name: string;
   dailyCost: number;
   hiredDay: number;
+  lastAction?: string;
 }
 
 export type BiomeType = 'pasto' | 'lago' | 'floresta' | 'pomar';

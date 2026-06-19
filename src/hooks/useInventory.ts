@@ -34,7 +34,48 @@ export interface UseInventoryProps {
   getFreightMultiplier?: (cat: string) => number;
   addFinancialEntry?: (entry: { day: number; type: 'income' | 'expense'; amount: number; category: string; description: string }) => void;
   currentDay?: number;
+  addCraftCost?: (energy: number, water: number) => void;
 }
+
+// Custo de energia (💡) e água (💧) por produto craftado
+const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
+  mayo:             { energy: 1, water: 0 },
+  butter:           { energy: 1, water: 0 },
+  yogurt:           { energy: 1, water: 1 },
+  buffalo_mozzarella:{ energy: 1, water: 0 },
+  queijo_cabra:     { energy: 1, water: 0 },
+  iogurte_cabra:    { energy: 1, water: 1 },
+  leite_condensado: { energy: 2, water: 0 },
+  tapete_lhama:     { energy: 2, water: 0 },
+  cachecol_angora:  { energy: 1, water: 0 },
+  tecido_alpaca:    { energy: 2, water: 0 },
+  fio_seda:         { energy: 1, water: 0 },
+  manta_premium:    { energy: 3, water: 0 },
+  pate_pato:        { energy: 1, water: 0 },
+  ovo_defumado:     { energy: 2, water: 0 },
+  conserva_codorna: { energy: 1, water: 1 },
+  creme_cosmetico:  { energy: 1, water: 1 },
+  sabonete_natural: { energy: 1, water: 1 },
+  racao_organica:   { energy: 1, water: 1 },
+  fertilizante:     { energy: 1, water: 1 },
+  almofada_penas:   { energy: 1, water: 0 },
+  colete_couro:     { energy: 2, water: 0 },
+  bolsa_exotica:    { energy: 2, water: 0 },
+  enfeite_pavao:    { energy: 1, water: 0 },
+  cheese:           { energy: 1, water: 0 },
+  queijoCoalho:     { energy: 2, water: 0 },
+  queijoMucarela:   { energy: 2, water: 0 },
+  queijoBrie:       { energy: 2, water: 0 },
+  queijo_parmesao:  { energy: 2, water: 0 },
+  queijo_serra:     { energy: 2, water: 0 },
+  kit_gourmet:      { energy: 2, water: 1 },
+  scarf:            { energy: 2, water: 0 },
+  hidromel:         { energy: 1, water: 1 },
+  risoto_cogumelo:  { energy: 1, water: 2 },
+  conserva_peixe:   { energy: 1, water: 1 },
+  mel_envasado:     { energy: 1, water: 0 },
+  sopa_cogumelo:    { energy: 1, water: 2 },
+};
 
 export function useInventory({
   gold,
@@ -60,7 +101,13 @@ export function useInventory({
   getFreightMultiplier,
   addFinancialEntry,
   currentDay,
+  addCraftCost,
 }: UseInventoryProps) {
+
+  const applyCraftCost = (product: string) => {
+    const c = CRAFT_COSTS[product];
+    if (c && addCraftCost) addCraftCost(c.energy, c.water);
+  };
 
   const PRODUCT_FREIGHT_CAT: Record<string, string> = {
     milk: 'laticinios', goat_milk: 'laticinios', buffalo_milk: 'laticinios',
@@ -364,6 +411,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) - 3 }));
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'buffalo_mozzarella', diasRestantes: 5 }]);
     setTotalQueijosFabricados(prev => prev + 1);
+    applyCraftCost('buffalo_mozzarella');
     addLog('🧀 Iniciou a maturação de Muçarela de Búfala (5 dias).', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', 'Muçarela Búfala', event);
@@ -391,6 +439,7 @@ export function useInventory({
       ...prev,
       mayo: (prev.mayo ?? 0) + 1
     }));
+    applyCraftCost('mayo');
     addLog(`🥣 Sucesso! Você misturou vitoriosamente 2 Ovos em 1 pote de Maionese cremosa!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥣', '+1 Maionese', event);
@@ -417,6 +466,7 @@ export function useInventory({
     }
     setInventory(prev => ({ ...prev, milk: prev.milk - 2 }));
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'butter', diasRestantes: 1 }]);
+    applyCraftCost('butter');
     addLog('🧈 Manteiga em preparo! Ficará pronta em 1 dia.', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧈', 'Preparando... 1d', event);
@@ -443,6 +493,7 @@ export function useInventory({
     }
     setInventory(prev => ({ ...prev, milk: prev.milk - 1 }));
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'yogurt', diasRestantes: 2 }]);
+    applyCraftCost('yogurt');
     addLog('🥛 Iogurte em fermentação! Ficará pronto em 2 dias.', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🥛', 'Fermentando...', event);
@@ -456,6 +507,7 @@ export function useInventory({
     if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
     setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 3 }));
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'queijo_cabra', diasRestantes: 2 }]);
+    applyCraftCost('queijo_cabra');
     addLog('🧀 Queijo de Cabra em maturação! Pronto em 2 dias.', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -469,6 +521,7 @@ export function useInventory({
     if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
     setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 2 }));
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'iogurte_cabra', diasRestantes: 1 }]);
+    applyCraftCost('iogurte_cabra');
     addLog('🥛 Iogurte de Cabra em fermentação! Pronto em 1 dia.', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -481,6 +534,7 @@ export function useInventory({
     if ((inventory.milk ?? 0) < 4) { addLog('🥛 Falta Leite! Precisa de 4.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Leite!', event); return; }
     if ((inventory.butter ?? 0) < 1) { addLog('🧈 Falta Manteiga! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Manteiga!', event); return; }
     setInventory(prev => ({ ...prev, milk: prev.milk - 4, butter: (prev.butter ?? 0) - 1, leite_condensado: (prev.leite_condensado ?? 0) + 1 }));
+    applyCraftCost('leite_condensado');
     addLog('🥛 Você fabricou 1 Leite Condensado com 4 leites e 1 manteiga!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -493,6 +547,7 @@ export function useInventory({
     if (farmLevel < 4) { addLog('🧶 Tapete de Lhama requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.llama_wool ?? 0) < 3) { addLog('🦙 Falta Lã de Lhama! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Lhama!', event); return; }
     setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) - 3, tapete_lhama: (prev.tapete_lhama ?? 0) + 1 }));
+    applyCraftCost('tapete_lhama');
     addLog('🪢 Você teceu 1 Tapete de Lhama com 3 lãs de lhama!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -504,6 +559,7 @@ export function useInventory({
     if (farmLevel < 8) { addLog('🧣 Cachecol Angorá requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.angora_wool ?? 0) < 2) { addLog('🐇 Falta Lã Angorá! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Angorá!', event); return; }
     setInventory(prev => ({ ...prev, angora_wool: (prev.angora_wool ?? 0) - 2, cachecol_angora: (prev.cachecol_angora ?? 0) + 1 }));
+    applyCraftCost('cachecol_angora');
     addLog('🧣 Você confeccionou 1 Cachecol Angorá com 2 lãs angorá!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -515,6 +571,7 @@ export function useInventory({
     if (farmLevel < 5) { addLog('🧶 Tecido de Alpaca requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.alpaca_wool ?? 0) < 3) { addLog('🦙 Falta Lã de Alpaca! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Alpaca!', event); return; }
     setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) - 3, tecido_alpaca: (prev.tecido_alpaca ?? 0) + 1 }));
+    applyCraftCost('tecido_alpaca');
     addLog('🧶 Você teceu 1 Tecido de Alpaca com 3 lãs de alpaca!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -526,6 +583,7 @@ export function useInventory({
     if (farmLevel < 10) { addLog('🪡 Fio de Seda requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.seda_bruta ?? 0) < 2) { addLog('🪲 Falta Seda Bruta! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Seda Bruta!', event); return; }
     setInventory(prev => ({ ...prev, seda_bruta: (prev.seda_bruta ?? 0) - 2, fio_seda: (prev.fio_seda ?? 0) + 1 }));
+    applyCraftCost('fio_seda');
     addLog('🪡 Você fiou 1 Fio de Seda com 2 sedas brutas!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -539,6 +597,7 @@ export function useInventory({
     if ((inventory.cachecol_angora ?? 0) < 1) { addLog('🧣 Falta Cachecol Angorá! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Cachecol!', event); return; }
     if ((inventory.tecido_alpaca ?? 0) < 1) { addLog('🧶 Falta Tecido de Alpaca! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Tecido!', event); return; }
     setInventory(prev => ({ ...prev, fio_seda: (prev.fio_seda ?? 0) - 1, cachecol_angora: (prev.cachecol_angora ?? 0) - 1, tecido_alpaca: (prev.tecido_alpaca ?? 0) - 1, manta_premium: (prev.manta_premium ?? 0) + 1 }));
+    applyCraftCost('manta_premium');
     addLog('✨ Você criou 1 Manta Premium! Uma obra-prima têxtil!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -552,6 +611,7 @@ export function useInventory({
     if ((inventory.duck_egg ?? 0) < 2) { addLog('🦆 Falta Ovo de Pato! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ovo Pato!', event); return; }
     if ((inventory.butter ?? 0) < 1) { addLog('🧈 Falta Manteiga! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Manteiga!', event); return; }
     setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) - 2, butter: (prev.butter ?? 0) - 1, pate_pato: (prev.pate_pato ?? 0) + 1 }));
+    applyCraftCost('pate_pato');
     addLog('🍖 Você preparou 1 Patê de Pato gourmet!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -563,6 +623,7 @@ export function useInventory({
     if (farmLevel < 6) { addLog('🥚 Ovo Defumado requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.goose_egg ?? 0) < 1) { addLog('🪿 Falta Ovo de Ganso! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ov.Ganso!', event); return; }
     setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) - 1, ovo_defumado: (prev.ovo_defumado ?? 0) + 1 }));
+    applyCraftCost('ovo_defumado');
     addLog('🥚 Você defumou 1 Ovo de Ganso com maestria!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -574,6 +635,7 @@ export function useInventory({
     if (farmLevel < 4) { addLog('🥚 Conserva de Codorna requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.quail_egg ?? 0) < 6) { addLog('🐦 Falta Ovo de Codorna! Precisa de 6.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ov.Codorna!', event); return; }
     setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) - 6, conserva_codorna: (prev.conserva_codorna ?? 0) + 1 }));
+    applyCraftCost('conserva_codorna');
     addLog('🥚 Você preparou 1 Conserva de Codorna com 6 ovos!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -587,6 +649,7 @@ export function useInventory({
     if ((inventory.muco ?? 0) < 2) { addLog('🐌 Falta Muco de Caracol! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Muco!', event); return; }
     if ((inventory.goat_milk ?? 0) < 1) { addLog('🐐 Falta Leite de Cabra! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Cabra!', event); return; }
     setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 2, goat_milk: (prev.goat_milk ?? 0) - 1, creme_cosmetico: (prev.creme_cosmetico ?? 0) + 1 }));
+    applyCraftCost('creme_cosmetico');
     addLog('🧴 Você formulou 1 Creme Cosmético de luxo!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -600,6 +663,7 @@ export function useInventory({
     if ((inventory.butter ?? 0) < 1) { addLog('🧈 Falta Manteiga! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Manteiga!', event); return; }
     if ((inventory.milk ?? 0) < 1) { addLog('🥛 Falta Leite! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Leite!', event); return; }
     setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 1, butter: (prev.butter ?? 0) - 1, milk: prev.milk - 1, sabonete_natural: (prev.sabonete_natural ?? 0) + 1 }));
+    applyCraftCost('sabonete_natural');
     addLog('🧼 Você produziu 1 Sabonete Natural artesanal!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -612,6 +676,7 @@ export function useInventory({
     if ((inventory.humus ?? 0) < 2) { addLog('🪱 Falta Húmus! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Húmus!', event); return; }
     setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) - 2 }));
     setRacaoOrganicaDays(prev => prev + 3);
+    applyCraftCost('racao_organica');
     addLog('🌿 Ração Orgânica ativa por 3 dias! Animais consomem 50% menos ração.', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -624,6 +689,7 @@ export function useInventory({
     if ((inventory.humus ?? 0) < 3) { addLog('🪱 Falta Húmus! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Húmus!', event); return; }
     setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) - 3 }));
     setFertilizanteDays(prev => prev + 5);
+    applyCraftCost('fertilizante');
     addLog('🌱 Fertilizante aplicado! +15% produção por 5 dias.', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -637,6 +703,7 @@ export function useInventory({
     if ((inventory.feather ?? 0) < 3) { addLog('🪶 Falta Penas! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Penas!', event); return; }
     if ((inventory.pena_grande ?? 0) < 2) { addLog('🦤 Falta Pena Grande! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta P.Grande!', event); return; }
     setInventory(prev => ({ ...prev, feather: (prev.feather ?? 0) - 3, pena_grande: (prev.pena_grande ?? 0) - 2, almofada_penas: (prev.almofada_penas ?? 0) + 1 }));
+    applyCraftCost('almofada_penas');
     addLog('🛋️ Você confeccionou 1 Almofada de Penas luxuosa!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -648,6 +715,7 @@ export function useInventory({
     if (farmLevel < 15) { addLog('🦺 Colete de Couro requer Nível 15!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.couro_avestruz ?? 0) < 1) { addLog('🦤 Falta Couro de Avestruz! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Couro Avestruz!', event); return; }
     setInventory(prev => ({ ...prev, couro_avestruz: (prev.couro_avestruz ?? 0) - 1, colete_couro: (prev.colete_couro ?? 0) + 1 }));
+    applyCraftCost('colete_couro');
     addLog('🦺 Você confeccionou 1 Colete de Couro de alta costura!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -659,6 +727,7 @@ export function useInventory({
     if (farmLevel < 18) { addLog('👜 Bolsa Exótica requer Nível 18!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.couro_jacare ?? 0) < 1) { addLog('🐊 Falta Couro de Jacaré! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Couro Jacaré!', event); return; }
     setInventory(prev => ({ ...prev, couro_jacare: (prev.couro_jacare ?? 0) - 1, bolsa_exotica: (prev.bolsa_exotica ?? 0) + 1 }));
+    applyCraftCost('bolsa_exotica');
     addLog('👜 Você criou 1 Bolsa Exótica de couro de jacaré!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -671,6 +740,7 @@ export function useInventory({
     if ((inventory.peacock_feather ?? 0) < 2) { addLog('🦚 Falta Pena de Pavão! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta P.Pavão!', event); return; }
     if ((inventory.pena_grande ?? 0) < 1) { addLog('🦤 Falta Pena Grande! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta P.Grande!', event); return; }
     setInventory(prev => ({ ...prev, peacock_feather: (prev.peacock_feather ?? 0) - 2, pena_grande: (prev.pena_grande ?? 0) - 1, enfeite_pavao: (prev.enfeite_pavao ?? 0) + 1 }));
+    applyCraftCost('enfeite_pavao');
     addLog('🦚 Você criou 1 Enfeite de Pavão deslumbrante!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
@@ -700,6 +770,7 @@ export function useInventory({
       ...prev,
       cheese: prev.cheese + 1
     }));
+    applyCraftCost('cheese');
     addLog(`🧀 Sucesso! Você transformou 3 Leites Crus em 1 Queijo de alta qualidade!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧀', '+1 Queijo', event);
@@ -757,6 +828,7 @@ export function useInventory({
       cheese: (prev.cheese ?? 0) + 1
     }));
 
+    applyCraftCost(tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : 'queijoBrie');
     addLog(`🧀 Você iniciou a maturação de ${label}. Ficará pronto em ${diasMaturation} dia(s).`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', `Iniciou ${label}`, event);
@@ -789,6 +861,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, milk: prev.milk - 10, queijoCoalho: (prev.queijoCoalho ?? 0) - 2 }));
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'parmesao', diasRestantes: 15 }]);
     setStats(prev => ({ ...prev, totalCheese: (prev.totalCheese || 0) + 1 }));
+    applyCraftCost('queijo_parmesao');
     addLog('🧀 Iniciou maturação do Queijo Parmesão. Ficará pronto em 15 dias.', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', 'Iniciou Parmesão', event);
@@ -821,6 +894,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 6, milk: prev.milk - 4 }));
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'serra', diasRestantes: 20 }]);
     setStats(prev => ({ ...prev, totalCheese: (prev.totalCheese || 0) + 1 }));
+    applyCraftCost('queijo_serra');
     addLog('🧀 Iniciou maturação do Queijo da Serra. Ficará pronto em 20 dias.', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', 'Iniciou Q. Serra', event);
@@ -858,6 +932,7 @@ export function useInventory({
       mel: (prev.mel ?? 0) - 2,
       kit_gourmet: (prev.kit_gourmet ?? 0) + 1,
     }));
+    applyCraftCost('kit_gourmet');
     addLog('🎁 Kit Gourmet Premiado montado! Vale 900 moedas.', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🎁', '+1 Kit Gourmet', event);
@@ -873,6 +948,7 @@ export function useInventory({
     }
     setInventory(prev => ({ ...prev, wool: prev.wool - 2 }));
     setScarfQueue(prev => [...prev, { diasRestantes: 2 }]);
+    applyCraftCost('scarf');
     addLog(`🧶 Cachecol em produção! Pronto em 2 dias.`, 'info');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧶', 'Tecendo... 2d', event);
@@ -1361,6 +1437,7 @@ export function useInventory({
     if (farmLevel < 8) { addLog('🍺 Hidromel requer Nível 8!', 'error'); return; }
     if ((inventory.mel ?? 0) < 2 || (inventory.milk ?? 0) < 3) { addLog('🍺 Precisa: 2 Mel + 3 Leite', 'error'); return; }
     setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) - 2, milk: prev.milk - 3, hidromel: (prev.hidromel ?? 0) + 1 }));
+    applyCraftCost('hidromel');
     addLog('🍺 Hidromel artesanal produzido! (+180💰)', 'success');
     setFarmXp(prev => prev + 5);
     spawnFeedback('🍺', 'Hidromel!', event);
@@ -1370,6 +1447,7 @@ export function useInventory({
     if (farmLevel < 5) { addLog('🍄 Risoto requer Nível 5!', 'error'); return; }
     if ((inventory.cogumelo ?? 0) < 3) { addLog('🍄 Precisa: 3 Cogumelos', 'error'); return; }
     setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) - 3, risoto_cogumelo: (prev.risoto_cogumelo ?? 0) + 1 }));
+    applyCraftCost('risoto_cogumelo');
     addLog('🍄 Risoto de Cogumelo preparado! (+120💰)', 'success');
     setFarmXp(prev => prev + 3);
     spawnFeedback('🍄', 'Risoto!', event);
@@ -1379,6 +1457,7 @@ export function useInventory({
     if (farmLevel < 4) { addLog('🐟 Conserva requer Nível 4!', 'error'); return; }
     if ((inventory.peixe ?? 0) < 2) { addLog('🐟 Precisa: 2 Peixe', 'error'); return; }
     setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 2, conserva_peixe: (prev.conserva_peixe ?? 0) + 1 }));
+    applyCraftCost('conserva_peixe');
     addLog('🐟 Conserva de Peixe envasada! (+95💰)', 'success');
     setFarmXp(prev => prev + 3);
     spawnFeedback('🐟', 'Conserva!', event);
@@ -1388,6 +1467,7 @@ export function useInventory({
     if (farmLevel < 3) { addLog('🍯 Mel Envasado requer Nível 3!', 'error'); return; }
     if ((inventory.mel ?? 0) < 3) { addLog('🍯 Precisa: 3 Mel', 'error'); return; }
     setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) - 3, mel_envasado: (prev.mel_envasado ?? 0) + 1 }));
+    applyCraftCost('mel_envasado');
     addLog('🍯 Mel Envasado produzido! (+200💰)', 'success');
     setFarmXp(prev => prev + 4);
     spawnFeedback('🍯', 'Mel!', event);
@@ -1397,6 +1477,7 @@ export function useInventory({
     if (farmLevel < 3) { addLog('🍲 Sopa requer Nível 3!', 'error'); return; }
     if ((inventory.cogumelo ?? 0) < 2) { addLog('🍲 Precisa: 2 Cogumelos', 'error'); return; }
     setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) - 2, sopa_cogumelo: (prev.sopa_cogumelo ?? 0) + 1 }));
+    applyCraftCost('sopa_cogumelo');
     addLog('🍲 Sopa de Cogumelo preparada! (+80💰)', 'success');
     setFarmXp(prev => prev + 2);
     spawnFeedback('🍲', 'Sopa!', event);

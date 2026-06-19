@@ -1270,6 +1270,8 @@ function GameApp() {
   // Este ref será atribuído ali; o useEffect do auto-avanço o usa aqui.
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const advanceDayRef = useRef<(e: React.MouseEvent) => void>(() => {});
+  const craftEnergyRef = useRef<number>(0);
+  const craftWaterRef = useRef<number>(0);
 
   // Initialize missions on first load if empty
   useEffect(() => {
@@ -1887,6 +1889,10 @@ function GameApp() {
     getFreightMultiplier,
     addFinancialEntry,
     currentDay,
+    addCraftCost: (energy: number, water: number) => {
+      craftEnergyRef.current += energy;
+      craftWaterRef.current += water;
+    },
   });
 
   // --- useAnimals hook ---
@@ -3778,34 +3784,39 @@ function GameApp() {
       const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy + infraEnergy;
       const energyDiscount = solarLevel === 1 ? 0.4 : solarLevel === 2 ? 0.7 : solarLevel >= 3 ? 1.0 : 0;
       const energyCost = isWeeklyBillDay && machineEnergyCost > 0 ? Math.round(machineEnergyCost * (1 - energyDiscount)) : 0;
+      const craftEnergy = isWeeklyBillDay ? craftEnergyRef.current : 0;
+      const craftWater = isWeeklyBillDay ? craftWaterRef.current : 0;
+      if (isWeeklyBillDay) { craftEnergyRef.current = 0; craftWaterRef.current = 0; }
+      const totalWaterCost = waterCost + craftWater;
+      const totalEnergyCost = energyCost + craftEnergy;
 
       // Acumular no weeklyStats
       if (isWeeklyBillDay) {
         setWeeklyStats(prev => ({
           ...prev,
-          waterCost: (prev.waterCost || 0) + waterCost,
-          energyCost: (prev.energyCost || 0) + energyCost,
+          waterCost: (prev.waterCost || 0) + totalWaterCost,
+          energyCost: (prev.energyCost || 0) + totalEnergyCost,
         }));
       }
 
       // Verificar se pode pagar água e energia
-      const canAffordWater = isWeeklyBillDay ? gold >= waterCost : true;
-      const canAffordEnergy = isWeeklyBillDay ? gold >= energyCost : true;
+      const canAffordWater = isWeeklyBillDay ? gold >= totalWaterCost : true;
+      const canAffordEnergy = isWeeklyBillDay ? gold >= totalEnergyCost : true;
 
       if (isWeeklyBillDay) {
-        if (!canAffordWater && waterCost > 0) {
+        if (!canAffordWater && totalWaterCost > 0) {
           logsToAdd.push({ msg: '💧 Sem moedas para pagar a conta de água semanal! Animais sofrendo.', type: 'error' });
           setTimeout(() => {
             setAnimals(al => al.map(a => ({ ...a, happiness: Math.max(0, a.happiness - 8) })));
           }, 0);
-        } else if (waterCost > 0) {
-          logsToAdd.push({ msg: `💧 Conta de água semanal: -${waterCost}💰 (${animals.length} animais).`, type: 'system' });
+        } else if (totalWaterCost > 0) {
+          logsToAdd.push({ msg: `💧 Conta de água semanal: -${totalWaterCost}💰 (${animals.length} animais${craftWater > 0 ? ` + ${craftWater} produção` : ''}).`, type: 'system' });
         }
 
-        if (!canAffordEnergy && energyCost > 0) {
+        if (!canAffordEnergy && totalEnergyCost > 0) {
           logsToAdd.push({ msg: '⚡ Sem moedas para pagar a conta de energia semanal! Infraestrutura afetada.', type: 'error' });
-        } else if (energyCost > 0) {
-          logsToAdd.push({ msg: `⚡ Conta de energia semanal: -${energyCost}💰 (máquinas + infra).`, type: 'system' });
+        } else if (totalEnergyCost > 0) {
+          logsToAdd.push({ msg: `⚡ Conta de energia semanal: -${totalEnergyCost}💰 (máquinas + infra${craftEnergy > 0 ? ` + ${craftEnergy} produção` : ''}).`, type: 'system' });
         }
       }
 
@@ -3813,7 +3824,7 @@ function GameApp() {
       // BUG 2 FIX: usa callback funcional para não sobrescrever ouro com valor de closure stale
       // BUG FIX: taxAmount incluído aqui para evitar setGold duplo com gold stale no cálculo do imposto
       setGold(prev => {
-        const totalCosts = maintCost + contractPenaltyForGold + taxAmount + waterCost + energyCost - longContractBonusForGold;
+        const totalCosts = maintCost + contractPenaltyForGold + taxAmount + totalWaterCost + totalEnergyCost - longContractBonusForGold;
         const newGold = prev - totalCosts + globalGoldBonus;
         if (newGold < 0) {
           // Acumular dívida em vez de ir para negativo (sem juros aqui; juros aplicados no bloco de dívida abaixo)
@@ -3834,17 +3845,17 @@ function GameApp() {
 
       // --- DEBUG MODE: fluxo de ouro diário ---
       if (debugMode) {
-        const totalCostsDebug = maintCost + contractPenaltyForGold + taxAmount + waterCost + energyCost - longContractBonusForGold;
+        const totalCostsDebug = maintCost + contractPenaltyForGold + taxAmount + totalWaterCost + totalEnergyCost - longContractBonusForGold;
         const workerCostDebug = workers.reduce((s, w) => s + w.dailyCost, 0);
         logsToAdd.push({
-          msg: `🔍 [DEBUG Dia ${nextDayValue}] Entradas: +${globalGoldBonus}💰 | Saídas: água=${waterCost} energia=${energyCost} maint=${maintCost} imposto=${taxAmount} multa=${contractPenaltyForGold} workers=${workerCostDebug} | Net: ${globalGoldBonus - totalCostsDebug >= 0 ? '+' : ''}${globalGoldBonus - totalCostsDebug}💰`,
+          msg: `🔍 [DEBUG Dia ${nextDayValue}] Entradas: +${globalGoldBonus}💰 | Saídas: água=${totalWaterCost} energia=${totalEnergyCost} maint=${maintCost} imposto=${taxAmount} multa=${contractPenaltyForGold} workers=${workerCostDebug} | Net: ${globalGoldBonus - totalCostsDebug >= 0 ? '+' : ''}${globalGoldBonus - totalCostsDebug}💰`,
           type: 'system'
         });
       }
 
       // --- Registrar custos diários no log financeiro ---
-      if (waterCost > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'custo_diario', description: 'Conta de água', amount: waterCost });
-      if (energyCost > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'custo_diario', description: 'Conta de energia', amount: energyCost });
+      if (totalWaterCost > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'custo_diario', description: 'Conta de água', amount: totalWaterCost });
+      if (totalEnergyCost > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'custo_diario', description: 'Conta de energia', amount: totalEnergyCost });
       if (maintCost > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'custo_diario', description: 'Manutenção de máquinas', amount: maintCost });
       if (taxAmount > 0) addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'imposto', description: 'Imposto municipal (5% dos lucros)', amount: taxAmount });
 
@@ -5060,6 +5071,21 @@ function GameApp() {
             setQueijosEmMaturacao(prev => [...prev, { tipo: 'coalho', diasRestantes: 1 }]);
           }
         }
+
+        // --- Atualizar lastAction de cada trabalhador ---
+        setWorkers(prev => prev.map(w => {
+          let action = w.lastAction ?? '';
+          if (w.role === 'tratador') action = `Dia ${nextDayValue}: alimentou animais`;
+          if (w.role === 'tratador_exotico') action = `Dia ${nextDayValue}: cuidou de animais exóticos`;
+          if (w.role === 'veterinario') action = `Dia ${nextDayValue}: curou e inspecionou animais`;
+          if (w.role === 'ordenhador') action = `Dia ${nextDayValue}: ordenhou vacas, cabras e búfalas`;
+          if (w.role === 'tosquiador') action = `Dia ${nextDayValue}: tosquiou ovelhas e coelhos angorá`;
+          if (w.role === 'avicultor') action = `Dia ${nextDayValue}: coletou ovos e penas`;
+          if (w.role === 'composteiro') action = `Dia ${nextDayValue}: supervisionou compostagem`;
+          if (w.role === 'queijeiro') action = inventory.milk >= 3 ? `Dia ${nextDayValue}: produziu queijo coalho` : `Dia ${nextDayValue}: sem leite suficiente`;
+          if (w.role === 'comerciante_residente') action = `Dia ${nextDayValue}: negociando no mercado`;
+          return { ...w, lastAction: action };
+        }));
       }
 
       // --- BIOME BONUSES ---

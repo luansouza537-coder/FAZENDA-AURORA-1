@@ -49,12 +49,17 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                   {workers.map(w => {
                     const wt = WORKER_TYPES.find(t => t.role === w.role);
                     return (
-                      <div key={w.id} className="flex items-center justify-between bg-[#022c22] rounded-xl px-3 py-2">
-                        <span className="text-[#fef3c7] font-mono text-sm">{wt?.emoji} {w.name}</span>
-                        <span className="text-[#fbbf24] font-mono text-xs">-{w.dailyCost}💰/dia</span>
-                        <button onClick={() => onFireWorker(w.id)} className="text-red-400 text-xs font-black px-2 py-1 rounded-lg border border-red-400/40 hover:bg-red-400/20 cursor-pointer">
-                          Dispensar
-                        </button>
+                      <div key={w.id} className="bg-[#022c22] rounded-xl px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#fef3c7] font-mono text-sm">{wt?.emoji} {w.name}</span>
+                          <span className="text-[#fbbf24] font-mono text-xs">-{w.dailyCost}💰/dia</span>
+                          <button onClick={() => onFireWorker(w.id)} className="text-red-400 text-xs font-black px-2 py-1 rounded-lg border border-red-400/40 hover:bg-red-400/20 cursor-pointer">
+                            Dispensar
+                          </button>
+                        </div>
+                        {w.lastAction && (
+                          <p className="text-[#6ee7b7] font-mono text-[10px] mt-1 truncate opacity-80">↳ {w.lastAction}</p>
+                        )}
                       </div>
                     );
                   })}
