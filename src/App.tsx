@@ -2870,7 +2870,7 @@ function GameApp() {
     triggerAudioResult(() => sfx.playSound('levelup'));
   };
 
-  const sendToAbatedouro = (animalId: string, animalType: 'boi' | 'porco') => {
+  const sendToAbatedouro = (animalId: number, animalType: 'boi' | 'porco') => {
     if (!abatedouroUnlocked) { addLog('🏭 Abatedouro não desbloqueado ainda.', 'error'); return; }
     if (!hasCertSanitario) { addLog('📜 Certificado Sanitário necessário para usar o Abatedouro.', 'error'); return; }
     const animal = animals.find(a => a.id === animalId);
@@ -2881,13 +2881,23 @@ function GameApp() {
       (!c.suspendedUntilDay || currentDay >= c.suspendedUntilDay)
     );
     if (!activeContract) { addLog(`🏭 Nenhum contrato do Abatedouro ativo para ${animalType === 'boi' ? 'Boi' : 'Porco'}. Assine um contrato na aba Contratos.`, 'error'); return; }
+    const payment = activeContract.pricePerUnit;
     setAnimals(prev => prev.filter(a => a.id !== animalId));
-    setContracts(prev => prev.map(c =>
-      c.id === activeContract.id ? { ...c, delivered: c.delivered + 1 } : c
-    ));
+    setGold(prev => prev + payment);
+    setWeeklyStats(prev => ({ ...prev, income: prev.income + payment }));
+    setContracts(prev => prev.map(c => {
+      if (c.id !== activeContract.id) return c;
+      return {
+        ...c,
+        delivered: c.delivered + 1,
+        deliveredBoi: animalType === 'boi' ? (c.deliveredBoi ?? 0) + 1 : (c.deliveredBoi ?? 0),
+        deliveredPorco: animalType === 'porco' ? (c.deliveredPorco ?? 0) + 1 : (c.deliveredPorco ?? 0),
+      };
+    }));
     const progress = activeContract.delivered + 1;
     const goal = activeContract.weeklyGoal ?? 0;
-    addLog(`🥩 ${animal.name} enviado ao ${activeContract.client}. Progresso mensal: ${progress}/${goal}.`, 'success');
+    addFinancialEntry({ day: currentDay, type: 'income', amount: payment, category: 'venda', description: `Abatedouro: ${animal.name} → ${activeContract.client}` });
+    addLog(`🥩 ${animal.name} enviado ao ${activeContract.client}. +${payment}💰 | Progresso: ${progress}/${goal} animais.`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));
   };
 
@@ -2905,9 +2915,9 @@ function GameApp() {
       { product: 'cheese', basePrice: 20, minLevel: 2 },
       { product: 'goat_milk', basePrice: 14, minLevel: 4 },
       { product: 'buffalo_milk', basePrice: 55, minLevel: 6 },
-      { product: 'queijoCoalho', basePrice: 28, minLevel: 3 },
-      { product: 'queijoMucarela', basePrice: 28, minLevel: 4 },
-      { product: 'queijoBrie', basePrice: 65, minLevel: 5 },
+      { product: 'queijoCoalho', basePrice: 35, minLevel: 3 },
+      { product: 'queijoMucarela', basePrice: 55, minLevel: 4 },
+      { product: 'queijoBrie', basePrice: 90, minLevel: 5 },
       { product: 'butter', basePrice: 45, minLevel: 3 },
       { product: 'yogurt', basePrice: 35, minLevel: 3 },
       { product: 'duck_egg', basePrice: 18, minLevel: 4 },
@@ -3129,10 +3139,10 @@ function GameApp() {
   const advanceDay = (event: React.MouseEvent) => {
     try {
       spawnFeedback('🌞', 'Dia Avançou!', event);
-      // Sons ambiente: pássaros ao amanhecer, grilos ao entardecer
+      // Sons ambiente: pássaros ao amanhecer, grilos ocasionais ao entardecer
       if (!sfx.isMuted) {
         setTimeout(() => sfx.playBirds(), 300);
-        setTimeout(() => sfx.playCrickets(), 1200);
+        if (Math.random() < 0.4) setTimeout(() => sfx.playCrickets(), 1200);
       }
 
       let logsToAdd: { msg: string; type: LogMessage['type'] }[] = [];
@@ -3679,7 +3689,7 @@ function GameApp() {
       // --- LONG CONTRACTS: Liquidação semanal de prêmios ---
       let longContractBonusForGold = 0;
       if (isWeeklyBillDay) {
-        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, queijoCoalho: 35, butter: 45, alpaca_wool: 65, muco: 120, mel_envasado: 80, queijoBrie: 90, seda_bruta: 100 };
+        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, queijoCoalho: 35, queijoMucarela: 55, queijoBrie: 90, butter: 45, alpaca_wool: 65, muco: 120, mel_envasado: 80, seda_bruta: 100 };
         contracts.forEach(c => {
           if (c.contractType !== 'long' || !c.active) return;
           const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
@@ -3721,22 +3731,35 @@ function GameApp() {
         const dayInCycle = nextDayValue - cycleStart;
         if (dayInCycle > 0 && dayInCycle % cycleDays === 0) {
           const deliveredThisCycle = c.delivered - (c.cycleDeliveredStart ?? 0);
+          const deliveredBoiThisCycle = (c.deliveredBoi ?? 0) - (c.deliveredBoiStart ?? 0);
+          const deliveredPorcoThisCycle = (c.deliveredPorco ?? 0) - (c.deliveredPorcoStart ?? 0);
           const goal = c.weeklyGoal ?? 0;
-          if (deliveredThisCycle >= goal) {
-            const baseP = c.baseMarket ?? 0;
-            const premium = Math.max(0, c.pricePerUnit - baseP);
-            const bonus = Math.floor(deliveredThisCycle * premium);
-            longContractBonusForGold += bonus;
-            logsToAdd.push({ msg: `🥩 "${c.client}": meta mensal cumprida (${deliveredThisCycle}/${goal})! +${bonus}💰 prêmio.`, type: 'success' });
-            return { ...c, cycleDeliveredStart: c.delivered };
+          // Golden Dragon valida boi e porco separadamente
+          const goalMet = c.catalogId === 'ab_3'
+            ? deliveredBoiThisCycle >= (c.monthlyGoalBoi ?? 0) && deliveredPorcoThisCycle >= (c.monthlyGoalPorco ?? 0)
+            : deliveredThisCycle >= goal;
+          const cycleReset = {
+            cycleDeliveredStart: c.delivered,
+            deliveredBoiStart: c.deliveredBoi ?? 0,
+            deliveredPorcoStart: c.deliveredPorco ?? 0,
+          };
+          if (goalMet) {
+            // Bônus de fidelidade: 10% do valor pago no ciclo (pagamento por unidade já foi imediato)
+            const loyaltyBonus = Math.floor(deliveredThisCycle * c.pricePerUnit * 0.10);
+            longContractBonusForGold += loyaltyBonus;
+            logsToAdd.push({ msg: `🥩 "${c.client}": meta mensal cumprida (${deliveredThisCycle}/${goal})! +${loyaltyBonus}💰 bônus fidelidade.`, type: 'success' });
+            return { ...c, ...cycleReset };
           } else {
             const penalty = 300;
             longContractBonusForGold -= penalty;
-            logsToAdd.push({ msg: `🥩 "${c.client}": meta mensal não cumprida (${deliveredThisCycle}/${goal}). -${penalty}💰 multa.`, type: 'error' });
+            const detail = c.catalogId === 'ab_3'
+              ? `bois: ${deliveredBoiThisCycle}/${c.monthlyGoalBoi ?? 0}, porcos: ${deliveredPorcoThisCycle}/${c.monthlyGoalPorco ?? 0}`
+              : `${deliveredThisCycle}/${goal}`;
+            logsToAdd.push({ msg: `🥩 "${c.client}": meta mensal não cumprida (${detail}). -${penalty}💰 multa.`, type: 'error' });
             if (c.catalogId === 'ab_3') {
-              return { ...c, cycleDeliveredStart: c.delivered, suspendedUntilDay: nextDayValue + 7 };
+              return { ...c, ...cycleReset, suspendedUntilDay: nextDayValue + 7 };
             }
-            return { ...c, cycleDeliveredStart: c.delivered };
+            return { ...c, ...cycleReset };
           }
         }
         return c;

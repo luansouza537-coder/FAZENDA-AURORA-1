@@ -111,6 +111,10 @@ export interface Contract {
   cycleLengthDays?: number;
   cycleStartDay?: number;
   cycleDeliveredStart?: number;
+  deliveredBoi?: number;
+  deliveredPorco?: number;
+  deliveredBoiStart?: number;
+  deliveredPorcoStart?: number;
   monthlyGoalBoi?: number;
   monthlyGoalPorco?: number;
   suspendedUntilDay?: number;

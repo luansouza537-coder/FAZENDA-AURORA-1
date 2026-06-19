@@ -93,7 +93,7 @@ interface AnimalGridProps {
   triggerAudioResult: (fn: () => void) => void;
   sfx: { playSound: (name: string) => void };
   initGame: () => void;
-  sendToAbatedouro?: (animalId: string, animalType: 'boi' | 'porco') => void;
+  sendToAbatedouro?: (animalId: number, animalType: 'boi' | 'porco') => void;
   abatedouroUnlocked?: boolean;
   hasCertSanitario?: boolean;
 }
@@ -266,15 +266,17 @@ export default function AnimalGrid({
                   📂 CARREGAR
                 </button>
 
-                {/* DEBUG MODE TOGGLE */}
-                <button
-                  type="button"
-                  onClick={() => setDebugMode(prev => !prev)}
-                  className={`${debugMode ? 'bg-orange-600 border-orange-900' : 'bg-stone-800 border-stone-950'} text-white border-b-4 px-3 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer`}
-                  title="Modo Debug: mostra fluxo de ouro detalhado no log a cada dia"
-                >
-                  {debugMode ? '🔍 DEBUG ON' : '🔍 DEBUG'}
-                </button>
+                {/* DEBUG MODE TOGGLE — apenas em ambiente de desenvolvimento */}
+                {import.meta.env.DEV && (
+                  <button
+                    type="button"
+                    onClick={() => setDebugMode(prev => !prev)}
+                    className={`${debugMode ? 'bg-orange-600 border-orange-900' : 'bg-stone-800 border-stone-950'} text-white border-b-4 px-3 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer`}
+                    title="Modo Debug: mostra fluxo de ouro detalhado no log a cada dia"
+                  >
+                    {debugMode ? '🔍 DEBUG ON' : '🔍 DEBUG'}
+                  </button>
+                )}
 
                 {/* ADVANCE DAY */}
                 <button
