@@ -58,7 +58,20 @@ interface MelhoriasModalProps {
   triggerAudioResult: (fn: () => void) => void;
   sfx: { playSound: (s: string) => void };
   checkAndUnlockAchievement: (id: string) => void;
+  vehicleTiers: Record<string, number>;
+  setVehicleTier: (cat: string, tier: number) => void;
+  getFreightMultiplier: (cat: string) => number;
 }
+
+const VEHICLE_CATEGORIES = [
+  { key: 'animais',    label: '🐄 Animais Vivos',           desc: 'Boi, porco e outros animais engordados',           penalty: [20, 10, 0], vehicles: ['Carrocinha', 'Caminhão Boiadeiro', 'Carreta Dupla'],       prices: [0, 800, 3000] },
+  { key: 'laticinios', label: '🧀 Laticínios (Refrigerado)', desc: 'Leite, queijos, manteiga e derivados',             penalty: [18, 9,  0], vehicles: ['Caixote de Gelo', 'Baú Refrigerado', 'Câmara Frigorífica'], prices: [0, 600, 2500] },
+  { key: 'ovos',      label: '🥚 Ovos e Derivados',         desc: 'Ovos, maionese, patê e conservas de ovo',          penalty: [15, 7,  0], vehicles: ['Cesto de Palha', 'Caixote Acolchoado', 'Van de Ovos'],       prices: [0, 300, 1200] },
+  { key: 'texteis',   label: '🧶 Têxteis e Fios',           desc: 'Lãs, cachecóis, tapetes e tecidos',               penalty: [12, 6,  0], vehicles: ['Mochila de Fazenda', 'Furgão Coberto', 'Trailer Têxtil'],    prices: [0, 300, 1200] },
+  { key: 'carnes',    label: '🥩 Carnes e Proteínas',       desc: 'Carne de avestruz, jacaré, rã e peixe',           penalty: [18, 9,  0], vehicles: ['Caminhão Simples', 'Baú Frigorífico', 'Carreta Frigorífica'],prices: [0, 600, 2500] },
+  { key: 'organicos', label: '🌿 Orgânicos e Naturais',     desc: 'Mel, cogumelo, húmus, muco e seda bruta',         penalty: [10, 5,  0], vehicles: ['Carroça de Mão', 'Carrinho Motorizado', 'Furgão Verde'],     prices: [0, 200, 800]  },
+  { key: 'luxo',      label: '💎 Luxo, Exóticos e Gourmet', desc: 'Penas, couros, cosméticos e kits premium',        penalty: [15, 7,  0], vehicles: ['Caixinha de Papelão', 'Maleta Segura', 'Transportadora Premium'], prices: [0, 500, 2000] },
+];
 
 const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
   return (
@@ -351,6 +364,61 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               >
                 {p.licencaExotica ? '✅ Licença Obtida' : p.farmLevel < 18 ? '🔒 Requer Nível 18 (500💰)' : 'Obter Licença (500💰)'}
               </button>
+            </div>
+
+            {/* 🚚 FROTAS DE TRANSPORTE */}
+            <div className="bg-white border-4 border-slate-300 rounded-3xl p-4">
+              <h4 className="font-display font-black text-sm uppercase text-slate-800 mb-1">🚚 Frotas de Transporte</h4>
+              <p className="text-xs text-stone-500 font-mono mb-3">Cada categoria de produto tem seu próprio veículo. Sem upgrade, uma % do valor é perdida em frete.</p>
+              <div className="space-y-3">
+                {VEHICLE_CATEGORIES.map(({ key, label, desc, penalty, vehicles, prices }) => {
+                  const currentTier = p.vehicleTiers[key] ?? 0;
+                  return (
+                    <div key={key} className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <div className="font-display font-black text-xs text-slate-800">{label}</div>
+                          <div className="text-[10px] text-stone-500 font-mono">{desc}</div>
+                        </div>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${currentTier === 2 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          {currentTier === 2 ? '✅ Sem frete' : `-${penalty[currentTier]}% frete`}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1">
+                        {vehicles.map((vName, tier) => {
+                          const isOwned = currentTier >= tier;
+                          const isCurrent = currentTier === tier;
+                          const canBuy = currentTier === tier - 1 && p.gold >= prices[tier];
+                          const locked = currentTier < tier - 1;
+                          return (
+                            <button
+                              key={tier}
+                              disabled={isOwned || (!canBuy && !locked)}
+                              onClick={() => {
+                                if (canBuy) {
+                                  p.setGold(prev => prev - prices[tier]);
+                                  p.setVehicleTier(key, tier);
+                                  p.addLog(`🚚 ${vName} adquirido! Frete de ${label}: -${penalty[tier]}%.`, 'success');
+                                  p.triggerAudioResult(() => p.sfx.playSound('levelup'));
+                                }
+                              }}
+                              className={`text-[10px] font-mono font-black py-1.5 px-1 rounded-xl border-b-2 transition-all text-center cursor-pointer ${
+                                isOwned ? 'bg-green-100 border-green-300 text-green-700' :
+                                canBuy ? 'bg-slate-600 hover:bg-slate-500 text-white border-slate-800' :
+                                'bg-stone-100 border-stone-200 text-stone-400 cursor-not-allowed opacity-60'
+                              }`}
+                            >
+                              {isOwned ? `✅ ${vName}` : locked ? `🔒 ${vName}` : `${vName} (${prices[tier].toLocaleString()}💰)`}
+                              {isCurrent && !isOwned && <><br/><span className="text-[9px] opacity-70">atual</span></>}
+                              {tier > 0 && <><br/><span className="text-[9px] opacity-60">{penalty[tier] === 0 ? 'grátis!' : `-${penalty[tier]}%`}</span></>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
           </div>

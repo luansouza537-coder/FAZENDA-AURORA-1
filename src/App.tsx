@@ -405,6 +405,26 @@ function GameApp() {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).loanDaysUntilInterest ?? 7; } catch(e) {} return 7;
   });
 
+  // --- CUSTO DE FRETE: Tiers de Veículo por Categoria ---
+  const [vehicleTiers, setVehicleTiers] = useState<Record<string, number>>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).vehicleTiers ?? {}; } catch(e) {} return {};
+  });
+  const setVehicleTier = (cat: string, tier: number) => setVehicleTiers(prev => ({ ...prev, [cat]: tier }));
+  const FREIGHT_PENALTY: Record<string, number[]> = {
+    animais:   [0.20, 0.10, 0],
+    laticinios:[0.18, 0.09, 0],
+    ovos:      [0.15, 0.07, 0],
+    texteis:   [0.12, 0.06, 0],
+    carnes:    [0.18, 0.09, 0],
+    organicos: [0.10, 0.05, 0],
+    luxo:      [0.15, 0.07, 0],
+  };
+  const getFreightMultiplier = (cat: string): number => {
+    const tier = vehicleTiers[cat] ?? 0;
+    const penalty = FREIGHT_PENALTY[cat]?.[tier] ?? 0;
+    return 1 - penalty;
+  };
+
   // --- SEGUROS EXTRAS ---
   const [insuranceTheft, setInsuranceTheft] = useState<{ active: boolean; daysLeft: number }>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).insuranceTheft ?? { active: false, daysLeft: 0 }; } catch(e) {} return { active: false, daysLeft: 0 };
@@ -923,6 +943,7 @@ function GameApp() {
     setLoanWeeksLeft(0);
     setLoanDaysUntilInterest(7);
     setShownMilestones([]);
+    setVehicleTiers({});
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -1841,6 +1862,7 @@ function GameApp() {
     updateMissionProgress,
     worldEvent,
     checkAndUnlockAchievement,
+    getFreightMultiplier,
   });
 
   // --- useAnimals hook ---
@@ -1913,6 +1935,7 @@ function GameApp() {
     onFilhoteAdded: () => {
       setAnimalFilter('all');
     },
+    getFreightMultiplier,
   });
 
   // --- useWorkers hook ---
@@ -2114,12 +2137,13 @@ function GameApp() {
         suplementoMineralDays, salMineralDays, seloOrganicodays, silagemDays,
         hasBalanca, hasCisterna, blockNextStorm, blockNextDrought, isencaoMultaCount,
         shownMilestones,
+        vehicleTiers,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
       setShowSavedToast(true);
       setTimeout(() => setShowSavedToast(false), 2000);
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, fertilityBoostDays, premiumPricesDays, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 2500;
@@ -6322,6 +6346,9 @@ function GameApp() {
           setLandBiomes={setLandBiomes}
           addLog={addLog} triggerAudioResult={triggerAudioResult} sfx={sfx}
           checkAndUnlockAchievement={checkAndUnlockAchievement}
+          vehicleTiers={vehicleTiers}
+          setVehicleTier={setVehicleTier}
+          getFreightMultiplier={getFreightMultiplier}
         />
       )}
 

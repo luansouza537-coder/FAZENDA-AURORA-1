@@ -111,6 +111,7 @@ export interface UseAnimalsProps {
   triggerConfetti: (event?: React.MouseEvent) => void;
   onFilhoteBought?: (type: AnimalType, name: string) => void;
   onFilhoteAdded?: () => void;
+  getFreightMultiplier?: (cat: string) => number;
 }
 
 export function useAnimals({
@@ -144,6 +145,7 @@ export function useAnimals({
   triggerConfetti,
   onFilhoteBought,
   onFilhoteAdded,
+  getFreightMultiplier,
 }: UseAnimalsProps) {
   const [animals, setAnimals] = useState<Animal[]>(() => {
     try {
@@ -835,7 +837,8 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'avestruz') return;
     const basePrice = 180;
-    const price = specialization === 'exotica' ? Math.round(basePrice * 1.25) : basePrice;
+    const freightMult = getFreightMultiplier ? getFreightMultiplier('animais') : 1;
+    const price = Math.floor((specialization === 'exotica' ? Math.round(basePrice * 1.25) : basePrice) * freightMult);
     setGold(prev => prev + price);
     setDailyEarning(prev => prev + price);
     setInventory(prev => ({ ...prev, carne_avestruz: (prev.carne_avestruz ?? 0) + 1 }));
@@ -852,7 +855,8 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'jacare') return;
     const basePrice = 250;
-    const price = specialization === 'exotica' ? Math.round(basePrice * 1.25) : basePrice;
+    const freightMult = getFreightMultiplier ? getFreightMultiplier('animais') : 1;
+    const price = Math.floor((specialization === 'exotica' ? Math.round(basePrice * 1.25) : basePrice) * freightMult);
     setGold(prev => prev + price);
     setDailyEarning(prev => prev + price);
     setInventory(prev => ({ ...prev, carne_jacare: (prev.carne_jacare ?? 0) + 1 }));
@@ -873,7 +877,7 @@ export function useAnimals({
       return;
     }
 
-    const value = calculateBoiValue(animal);
+    const value = Math.floor(calculateBoiValue(animal) * (getFreightMultiplier ? getFreightMultiplier('animais') : 1));
 
     setGold(prev => prev + value);
     setDailyEarning(prev => prev + value);
@@ -924,7 +928,7 @@ export function useAnimals({
       addLog('🐷 O filhote precisa crescer antes de ser vendido!', 'error');
       return;
     }
-    const value = calculatePorcoValue(animal);
+    const value = Math.floor(calculatePorcoValue(animal) * (getFreightMultiplier ? getFreightMultiplier('animais') : 1));
     setGold(prev => prev + value);
     setDailyEarning(prev => prev + value);
     setStats(prev => ({
@@ -961,7 +965,8 @@ export function useAnimals({
     // Value depreciates linearly from 80% (young) to 10% (near end of life)
     const lifeFraction = Math.min(1, age / maxAge);
     const sellPct = Math.max(0.10, 0.80 - lifeFraction * 0.70);
-    const value = Math.max(5, Math.round(purchasePrice * sellPct));
+    const freightMult = getFreightMultiplier ? getFreightMultiplier('animais') : 1;
+    const value = Math.max(5, Math.floor(purchasePrice * sellPct * freightMult));
     setAnimals(prev => prev.filter(a => a.id !== id));
     setGold(prev => prev + value);
     addLog(`💰 ${animal.name} foi vendido por ${value}💰 (${Math.round(sellPct * 100)}% do valor original).`, 'success');

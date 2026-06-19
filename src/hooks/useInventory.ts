@@ -31,6 +31,7 @@ export interface UseInventoryProps {
   worldEvent?: { priceMult: number } | null;
   checkAndUnlockAchievement?: (id: string) => void;
   updateMissionProgress: (key: any, amount?: number, overrideDay?: number) => void;
+  getFreightMultiplier?: (cat: string) => number;
 }
 
 export function useInventory({
@@ -54,7 +55,29 @@ export function useInventory({
   updateMissionProgress,
   worldEvent,
   checkAndUnlockAchievement,
+  getFreightMultiplier,
 }: UseInventoryProps) {
+
+  const PRODUCT_FREIGHT_CAT: Record<string, string> = {
+    milk: 'laticinios', goat_milk: 'laticinios', buffalo_milk: 'laticinios',
+    butter: 'laticinios', yogurt: 'laticinios', iogurte_cabra: 'laticinios',
+    leite_condensado: 'laticinios', cheese: 'laticinios', queijoCoalho: 'laticinios',
+    queijoMucarela: 'laticinios', queijoBrie: 'laticinios', buffalo_mozzarella: 'laticinios',
+    queijo_cabra: 'laticinios', queijo_parmesao: 'laticinios', queijo_serra: 'laticinios',
+    egg: 'ovos', duck_egg: 'ovos', goose_egg: 'ovos', quail_egg: 'ovos',
+    fertile_egg: 'ovos', mayo: 'ovos', pate_pato: 'ovos', ovo_defumado: 'ovos', conserva_codorna: 'ovos',
+    wool: 'texteis', llama_wool: 'texteis', alpaca_wool: 'texteis', angora_wool: 'texteis',
+    scarf: 'texteis', tapete_lhama: 'texteis', cachecol_angora: 'texteis',
+    tecido_alpaca: 'texteis', fio_seda: 'texteis', manta_premium: 'texteis',
+    coxa_ra: 'carnes', carne_avestruz: 'carnes', carne_jacare: 'carnes', peixe: 'carnes',
+    humus: 'organicos', muco: 'organicos', mel: 'organicos', mel_envasado: 'organicos',
+    cogumelo: 'organicos', seda_bruta: 'organicos',
+    feather: 'luxo', peacock_feather: 'luxo', pena_grande: 'luxo', couro_avestruz: 'luxo',
+    couro_jacare: 'luxo', creme_cosmetico: 'luxo', sabonete_natural: 'luxo',
+    almofada_penas: 'luxo', colete_couro: 'luxo', bolsa_exotica: 'luxo', enfeite_pavao: 'luxo',
+    hidromel: 'luxo', risoto_cogumelo: 'luxo', conserva_peixe: 'luxo',
+    sopa_cogumelo: 'luxo', kit_gourmet: 'luxo',
+  };
 
   // --- INVENTORY STATE ---
   const [inventory, setInventory] = useState<InventoryState>(() => {
@@ -861,7 +884,8 @@ export function useInventory({
     }
 
     const pricePerUnit = getActualSellPrice(itemType);
-    const profit = pricePerUnit * qty;
+    const freightMult = getFreightMultiplier ? getFreightMultiplier(PRODUCT_FREIGHT_CAT[itemType as string] ?? 'luxo') : 1;
+    const profit = Math.floor(pricePerUnit * qty * freightMult);
 
     setInventory(prev => ({
       ...prev,
@@ -1114,43 +1138,43 @@ export function useInventory({
     const bolsaExoticaPrice = getDynamicTransactionPrice('bolsa_exotica');
     const enfeitePavaoPrice = getDynamicTransactionPrice('enfeite_pavao');
 
-    const totalEarningCalculated =
-      (milkQty * milkPrice) +
-      (woolQty * woolPrice) +
-      (cheeseQty * cheesePrice) +
-      (scarfQty * scarfPrice) +
-      (eggQty * eggPrice) +
-      (mayoQty * mayoPrice) +
-      (coalhoQty * coalhoPrice) +
-      (mucarelaQty * mucarelaPrice) +
-      (brieQty * briePrice) +
-      (goatMilkQty * goatMilkPrice) +
-      (llamaWoolQty * llamaWoolPrice) +
-      (duckEggQty * duckEggPrice) +
-      (gooseEggQty * gooseEggPrice) +
-      (buffaloMilkQty * buffaloMilkPrice) +
-      (buffaloMozzQty * buffaloMozzPrice) +
-      (featherQty * featherPrice) +
-      (peacockFeatherQty * peacockFeatherPrice) +
-      (butterQty * butterPrice) +
-      (yogurtQty * yogurtPrice) +
-      (fertileEggQty * fertileEggPrice) +
-      (peixeQty * peixePrice) + (melQty * melPrice) + (cogumeloQty * cogumeloPrice) +
-      (hidromelQty * hidromelPrice) + (risotoQty * risotoPrice) + (conservaPeixeQty * conservaPeixePrice) +
-      (melEnvasadoQty * melEnvasadoPrice) + (sopaCogumeloQty * sopaCogumeloPrice) +
-      (quailEggQty * quailEggPrice) + (alpacaWoolQty * alpacaWoolPrice) + (humusQty * humusPrice) +
-      (mucoQty * mucoPrice) + (angoraWoolQty * angoraWoolPrice) + (sedaBrutaQty * sedaBrutaPrice) +
-      (coxaRaQty * coxaRaPrice) + (carneAvestruzQty * carneAvestruzPrice) + (penaGrandeQty * penaGrandePrice) +
-      (couroAvestruzQty * couroAvestruzPrice) + (carneJacareQty * carneJacarePrice) + (couroJacareQty * couroJacarePrice) +
-      (queijoCabraQty * queijoCabraPrice) + (iogurteCabraQty * iogurteCabraPrice) + (leiteCondensadoQty * leiteCondensadoPrice) +
-      (tapeteLhamaQty * tapeteLhamaPrice) + (cachecolAngoraQty * cachecolAngoraPrice) + (tecidoAlpacaQty * tecidoAlpacaPrice) +
-      (fioSedaQty * fioSedaPrice) + (mantaPremiumQty * mantaPremiumPrice) + (patePatoQty * patePatoPrice) +
-      (ovoDefumadoQty * ovoDefumadoPrice) + (conservaCodornaQty * conservaCodornaPrice) + (cremeCosmeticoQty * cremeCosmeticoPrice) +
-      (saboneteNaturalQty * saboneteNaturalPrice) + (almofadaPenasQty * almofadaPenasPrice) + (coleteCouroQty * coleteCouroPrice) +
-      (bolsaExoticaQty * bolsaExoticaPrice) + (enfeitePavaoQty * enfeitePavaoPrice) +
-      (queijoParmesaoQty * getDynamicTransactionPrice('queijo_parmesao' as any)) +
-      (queijoSerraQty * getDynamicTransactionPrice('queijo_serra' as any)) +
-      (kitGourmetQty * getDynamicTransactionPrice('kit_gourmet' as any));
+    const _lm = getFreightMultiplier ? getFreightMultiplier('laticinios') : 1;
+    const _em = getFreightMultiplier ? getFreightMultiplier('ovos') : 1;
+    const _tm = getFreightMultiplier ? getFreightMultiplier('texteis') : 1;
+    const _cm = getFreightMultiplier ? getFreightMultiplier('carnes') : 1;
+    const _om = getFreightMultiplier ? getFreightMultiplier('organicos') : 1;
+    const _xm = getFreightMultiplier ? getFreightMultiplier('luxo') : 1;
+
+    const totalEarningCalculated = Math.floor(
+      (milkQty * milkPrice + goatMilkQty * goatMilkPrice + buffaloMilkQty * buffaloMilkPrice +
+       butterQty * butterPrice + yogurtQty * yogurtPrice +
+       cheeseQty * cheesePrice + coalhoQty * coalhoPrice + mucarelaQty * mucarelaPrice +
+       brieQty * briePrice + buffaloMozzQty * buffaloMozzPrice + queijoCabraQty * queijoCabraPrice +
+       iogurteCabraQty * iogurteCabraPrice + leiteCondensadoQty * leiteCondensadoPrice +
+       queijoParmesaoQty * getDynamicTransactionPrice('queijo_parmesao' as any) +
+       queijoSerraQty * getDynamicTransactionPrice('queijo_serra' as any)) * _lm +
+      (eggQty * eggPrice + duckEggQty * duckEggPrice + gooseEggQty * gooseEggPrice +
+       quailEggQty * quailEggPrice + fertileEggQty * fertileEggPrice +
+       mayoQty * mayoPrice + patePatoQty * patePatoPrice +
+       ovoDefumadoQty * ovoDefumadoPrice + conservaCodornaQty * conservaCodornaPrice) * _em +
+      (woolQty * woolPrice + llamaWoolQty * llamaWoolPrice + alpacaWoolQty * alpacaWoolPrice +
+       angoraWoolQty * angoraWoolPrice + scarfQty * scarfPrice + tapeteLhamaQty * tapeteLhamaPrice +
+       cachecolAngoraQty * cachecolAngoraPrice + tecidoAlpacaQty * tecidoAlpacaPrice +
+       fioSedaQty * fioSedaPrice + mantaPremiumQty * mantaPremiumPrice) * _tm +
+      (coxaRaQty * coxaRaPrice + carneAvestruzQty * carneAvestruzPrice +
+       carneJacareQty * carneJacarePrice + peixeQty * peixePrice) * _cm +
+      (humusQty * humusPrice + mucoQty * mucoPrice + melQty * melPrice +
+       melEnvasadoQty * melEnvasadoPrice + cogumeloQty * cogumeloPrice + sedaBrutaQty * sedaBrutaPrice) * _om +
+      (featherQty * featherPrice + peacockFeatherQty * peacockFeatherPrice +
+       penaGrandeQty * penaGrandePrice + couroAvestruzQty * couroAvestruzPrice +
+       couroJacareQty * couroJacarePrice + cremeCosmeticoQty * cremeCosmeticoPrice +
+       saboneteNaturalQty * saboneteNaturalPrice + almofadaPenasQty * almofadaPenasPrice +
+       coleteCouroQty * coleteCouroPrice + bolsaExoticaQty * bolsaExoticaPrice +
+       enfeitePavaoQty * enfeitePavaoPrice + hidromelQty * hidromelPrice +
+       risotoQty * risotoPrice + conservaPeixeQty * conservaPeixePrice +
+       sopaCogumeloQty * sopaCogumeloPrice +
+       kitGourmetQty * getDynamicTransactionPrice('kit_gourmet' as any)) * _xm
+    );
 
     if (totalEarningCalculated <= 0) return;
 
