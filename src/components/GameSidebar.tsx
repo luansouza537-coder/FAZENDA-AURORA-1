@@ -34,12 +34,13 @@ export interface GameSidebarProps {
   getActualSellPrice: (itemType: string) => number;
   getFreshnessIndicator: (key: 'milk' | 'egg' | 'goat_milk' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'fertile_egg') => React.ReactNode;
   getEstacaoKey: (day: number) => 'primavera' | 'verao' | 'outono' | 'inverno';
-  getFeedPriceWithModifiers: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora', day?: number) => number;
-  buyFeed: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora', qty: number, e: React.MouseEvent) => void;
+  getFeedPriceWithModifiers: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina', day?: number) => number;
+  buyFeed: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina', qty: number, e: React.MouseEvent) => void;
   buyFolhaAmoreira: (qty: number, e: React.MouseEvent) => void;
   sellProduct: (itemType: any, qty: number, e: React.MouseEvent) => void;
   triggerAudioResult: (action: () => void) => void;
   sfx: { playSound: (sound: string) => void };
+  onOpenAtelier: () => void;
 }
 
 export default function GameSidebar({
@@ -65,17 +66,19 @@ export default function GameSidebar({
   sellProduct,
   triggerAudioResult,
   sfx,
+  onOpenAtelier,
 }: GameSidebarProps) {
   return (
           <div className="lg:col-span-4 flex flex-col gap-6">
 
             {/* --- ATELIÊ & ARMAZÉM DE PROCESSAMENTO --- */}
             <div className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-5 shadow-[0_12px_0_#d97706] flex flex-col">
-              <div className="flex items-center gap-2 border-b-2 border-[#fbbf24] pb-2 mb-4">
-                <ChefHat className="w-5 h-5 text-[#78350f]" />
-                <h3 className="text-base sm:text-lg font-display font-black text-[#78350f] uppercase tracking-wider">
+              <div className="flex items-center gap-2 border-b-2 border-[#fbbf24] pb-2 mb-4 cursor-pointer group" onClick={onOpenAtelier}>
+                <ChefHat className="w-5 h-5 text-[#78350f] group-hover:text-amber-600 transition-colors" />
+                <h3 className="text-base sm:text-lg font-display font-black text-[#78350f] uppercase tracking-wider group-hover:text-amber-600 transition-colors">
                   Ateliê & Armazém
                 </h3>
+                <span className="ml-auto text-[10px] text-amber-600 font-mono font-bold opacity-0 group-hover:opacity-100 transition-opacity">↗ Abrir</span>
               </div>
 
               {/* Toggle mostrar vazios */}

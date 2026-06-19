@@ -686,6 +686,7 @@ function GameApp() {
       racaoAquatica: 0,
       racaoCoelho: 0,
       racaoCarnivora: 0,
+      racaoSuina: 0,
       queijoCoalho: 0,
       queijoMucarela: 0,
       queijoBrie: 0,
@@ -1377,17 +1378,18 @@ function GameApp() {
   // feedAnimal moved to useAnimals hook
 
   // Feed pricing helpers
-  const getFeedBasePrice = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora'): number => {
+  const getFeedBasePrice = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina'): number => {
     if (type === 'racaoBovina') return 4;
     if (type === 'racaoOvinos') return 3;
     if (type === 'racaoAves') return 3;
     if (type === 'racaoAquatica') return 4;
     if (type === 'racaoCoelho') return 3;
     if (type === 'racaoCarnivora') return 6;
+    if (type === 'racaoSuina') return 3;
     return 2;
   };
 
-  const getFeedPriceWithModifiers = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora', day = currentDay): number => {
+  const getFeedPriceWithModifiers = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina', day = currentDay): number => {
     let base = getFeedBasePrice(type);
 
     // Desconto de 10% no nível 4 ou superior
@@ -1416,7 +1418,7 @@ function GameApp() {
 
   // Buy feed packages with bulk discounts
   const buyFeed = (
-    type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora',
+    type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina',
     quantity: 1 | 10 | 50,
     event: React.MouseEvent
   ) => {
@@ -1451,7 +1453,7 @@ function GameApp() {
       spending: prev.spending + totalCost
     }));
     
-    const feedLabel = type === 'racaoBovina' ? 'Ração Bovina 🌾' : type === 'racaoOvinos' ? 'Ração de Ovinos 🐐' : type === 'racaoAves' ? 'Ração de Aves 🐔' : type === 'racaoAquatica' ? 'Ração Aquática 🦆' : type === 'racaoCoelho' ? 'Ração de Coelhos 🐰' : 'Ração Carnívora 🍖';
+    const feedLabel = type === 'racaoBovina' ? 'Ração Bovina 🌾' : type === 'racaoOvinos' ? 'Ração de Ovinos 🐐' : type === 'racaoAves' ? 'Ração de Aves 🐔' : type === 'racaoAquatica' ? 'Ração Aquática 🦆' : type === 'racaoCoelho' ? 'Ração de Coelhos 🐰' : type === 'racaoSuina' ? 'Ração Suína 🐷' : 'Ração Carnívora 🍖';
     addLog(`🛍️ Compra realizada: +${quantity}u de ${feedLabel} por ${totalCost} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🌽', `-${totalCost}💰`, event);
@@ -1874,6 +1876,8 @@ function GameApp() {
     worldEvent,
     checkAndUnlockAchievement,
     getFreightMultiplier,
+    addFinancialEntry,
+    currentDay,
   });
 
   // --- useAnimals hook ---
@@ -1949,6 +1953,7 @@ function GameApp() {
       setAnimalFilter('all');
     },
     getFreightMultiplier,
+    addFinancialEntry,
   });
 
   // --- useWorkers hook ---
@@ -2278,9 +2283,10 @@ function GameApp() {
       updatedAnimals = updatedAnimals.map(a => {
         if (noFeedAnimals.includes(a.type)) return a;
         if (a.isAdult === false) return a; // filhotes não consomem ração industrial
-        let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' = 'racaoBovina';
+        let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' = 'racaoBovina';
         let feedLabel = 'Ração Bovina';
         if (a.type === 'vaca' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+        else if (a.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
         else if (a.type === 'ovelha' || a.type === 'cabra' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
         else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
         else if (a.type === 'pato' || a.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
@@ -4773,6 +4779,7 @@ function GameApp() {
         if (workers.some(w => w.role === 'tratador')) {
           const getFeedKeyForType2 = (type: string): keyof typeof inventory => {
             if (type === 'vaca' || type === 'boi' || type === 'bufalo') return 'racaoBovina';
+            if (type === 'porco') return 'racaoSuina';
             if (type === 'ovelha' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
             if (type === 'galinha' || type === 'codorna' || type === 'pavao') return 'racaoAves';
             if (type === 'pato' || type === 'ganso') return 'racaoAquatica';
@@ -5012,11 +5019,13 @@ function GameApp() {
         const hasAquatico = finalAnimals.some(a => ['pato','ganso'].includes(a.type));
         const hasCoelho = finalAnimals.some(a => a.type === 'coelho_angora');
         const hasCarnivoro = finalAnimals.some(a => ['jacare','avestruz'].includes(a.type));
+        const hasSuino = finalAnimals.some(a => a.type === 'porco');
         if (hasBovinos && (inventory.racaoBovina ?? 0) <= 3) feedAlerts.push('🌾 Ração Bovina');
         if (hasOvinos && (inventory.racaoOvinos ?? 0) <= 3) feedAlerts.push('🐐 Ração de Ovinos');
         if (hasAves && (inventory.racaoAves ?? 0) <= 3) feedAlerts.push('🐔 Ração de Aves');
         if (hasAquatico && (inventory.racaoAquatica ?? 0) <= 3) feedAlerts.push('🦆 Ração Aquática');
         if (hasCoelho && (inventory.racaoCoelho ?? 0) <= 3) feedAlerts.push('🐰 Ração de Coelhos');
+        if (hasSuino && (inventory.racaoSuina ?? 0) <= 3) feedAlerts.push('🐷 Ração Suína');
         if (hasCarnivoro && (inventory.racaoCarnivora ?? 0) <= 3) feedAlerts.push('🍖 Ração Carnívora');
         if (feedAlerts.length > 0 && nextDayValue % 3 === 0) {
           logsToAdd.push({ msg: `⚠️ Estoque baixo! Menos de 3 unidades: ${feedAlerts.join(', ')}. Reabasteça nas lojas!`, type: 'error' });
@@ -6227,6 +6236,7 @@ function GameApp() {
             sellProduct={sellProduct}
             triggerAudioResult={triggerAudioResult}
             sfx={sfx}
+            onOpenAtelier={() => setShowQueijariaModal(true)}
           />
 
         </div>

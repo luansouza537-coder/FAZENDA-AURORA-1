@@ -32,6 +32,8 @@ export interface UseInventoryProps {
   checkAndUnlockAchievement?: (id: string) => void;
   updateMissionProgress: (key: any, amount?: number, overrideDay?: number) => void;
   getFreightMultiplier?: (cat: string) => number;
+  addFinancialEntry?: (entry: { day: number; type: 'income' | 'expense'; amount: number; category: string; description: string }) => void;
+  currentDay?: number;
 }
 
 export function useInventory({
@@ -56,6 +58,8 @@ export function useInventory({
   worldEvent,
   checkAndUnlockAchievement,
   getFreightMultiplier,
+  addFinancialEntry,
+  currentDay,
 }: UseInventoryProps) {
 
   const PRODUCT_FREIGHT_CAT: Record<string, string> = {
@@ -894,6 +898,9 @@ export function useInventory({
 
     setGold(prev => prev + profit);
     setDailyEarning(prev => prev + profit);
+    const freightCost = Math.floor(pricePerUnit * qty) - profit;
+    addFinancialEntry?.({ day: currentDay ?? 0, type: 'income', amount: profit, category: 'venda', description: `Venda: ${qty}x ${String(itemType)}` });
+    if (freightCost > 0) addFinancialEntry?.({ day: currentDay ?? 0, type: 'expense', amount: freightCost, category: 'outro', description: `Frete: ${String(itemType)}` });
     setStats(prev => ({
       ...prev,
       totalEarned: prev.totalEarned + profit,

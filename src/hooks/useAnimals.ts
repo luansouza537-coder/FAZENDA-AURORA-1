@@ -22,6 +22,7 @@ export type InventoryState = {
   racaoAquatica: number;
   racaoCoelho: number;
   racaoCarnivora: number;
+  racaoSuina: number;
   queijoCoalho: number;
   queijoMucarela: number;
   queijoBrie: number;
@@ -112,6 +113,7 @@ export interface UseAnimalsProps {
   onFilhoteBought?: (type: AnimalType, name: string) => void;
   onFilhoteAdded?: () => void;
   getFreightMultiplier?: (cat: string) => number;
+  addFinancialEntry?: (entry: { day: number; type: 'income' | 'expense'; amount: number; category: string; description: string }) => void;
 }
 
 export function useAnimals({
@@ -146,6 +148,7 @@ export function useAnimals({
   onFilhoteBought,
   onFilhoteAdded,
   getFreightMultiplier,
+  addFinancialEntry,
 }: UseAnimalsProps) {
   const [animals, setAnimals] = useState<Animal[]>(() => {
     try {
@@ -199,8 +202,9 @@ export function useAnimals({
   };
 
   // Helper: get feed type and label for an animal type
-  const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora'; feedLabel: string } => {
-    if (type === 'vaca' || type === 'boi' || type === 'bufalo' || type === 'porco') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
+  const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina'; feedLabel: string } => {
+    if (type === 'vaca' || type === 'boi' || type === 'bufalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
+    if (type === 'porco') return { feedType: 'racaoSuina', feedLabel: 'Ração Suína' };
     if (type === 'ovelha' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return { feedType: 'racaoOvinos', feedLabel: 'Ração de Ovinos' };
     if (type === 'galinha' || type === 'codorna' || type === 'pavao') return { feedType: 'racaoAves', feedLabel: 'Ração de Aves' };
     if (type === 'pato' || type === 'ganso') return { feedType: 'racaoAquatica', feedLabel: 'Ração Aquática' };
@@ -840,6 +844,7 @@ export function useAnimals({
     const freightMult = getFreightMultiplier ? getFreightMultiplier('animais') : 1;
     const price = Math.floor((specialization === 'exotica' ? Math.round(basePrice * 1.25) : basePrice) * freightMult);
     setGold(prev => prev + price);
+    addFinancialEntry?.({ day: currentDay, type: 'income', amount: price, category: 'venda', description: `Venda: ${animal.name} (Avestruz)` });
     setDailyEarning(prev => prev + price);
     setInventory(prev => ({ ...prev, carne_avestruz: (prev.carne_avestruz ?? 0) + 1 }));
     setAnimals(prev => prev.filter(a => a.id !== id));
@@ -858,6 +863,7 @@ export function useAnimals({
     const freightMult = getFreightMultiplier ? getFreightMultiplier('animais') : 1;
     const price = Math.floor((specialization === 'exotica' ? Math.round(basePrice * 1.25) : basePrice) * freightMult);
     setGold(prev => prev + price);
+    addFinancialEntry?.({ day: currentDay, type: 'income', amount: price, category: 'venda', description: `Venda: ${animal.name} (Jacaré)` });
     setDailyEarning(prev => prev + price);
     setInventory(prev => ({ ...prev, carne_jacare: (prev.carne_jacare ?? 0) + 1 }));
     setAnimals(prev => prev.filter(a => a.id !== id));
@@ -881,6 +887,7 @@ export function useAnimals({
 
     setGold(prev => prev + value);
     setDailyEarning(prev => prev + value);
+    addFinancialEntry?.({ day: currentDay, type: 'income', amount: value, category: 'venda', description: `Venda: ${animal.name} (Boi)` });
     setStats(prev => ({
       ...prev,
       totalEarned: prev.totalEarned + value,
@@ -930,6 +937,7 @@ export function useAnimals({
     }
     const value = Math.floor(calculatePorcoValue(animal) * (getFreightMultiplier ? getFreightMultiplier('animais') : 1));
     setGold(prev => prev + value);
+    addFinancialEntry?.({ day: currentDay, type: 'income', amount: value, category: 'venda', description: `Venda: ${animal.name} (Porco)` });
     setDailyEarning(prev => prev + value);
     setStats(prev => ({
       ...prev,
@@ -969,6 +977,7 @@ export function useAnimals({
     const value = Math.max(5, Math.floor(purchasePrice * sellPct * freightMult));
     setAnimals(prev => prev.filter(a => a.id !== id));
     setGold(prev => prev + value);
+    addFinancialEntry?.({ day: currentDay, type: 'income', amount: value, category: 'venda', description: `Venda: ${animal.name} (${animal.type})` });
     addLog(`💰 ${animal.name} foi vendido por ${value}💰 (${Math.round(sellPct * 100)}% do valor original).`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));
     spawnFeedback('💰', `+${value}💰`, event);
