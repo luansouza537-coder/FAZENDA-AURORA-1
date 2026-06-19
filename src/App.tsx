@@ -1896,6 +1896,8 @@ function GameApp() {
     sellAvestruz,
     sellJacare,
     sellOx,
+    sellPorco,
+    calculatePorcoValue,
     sellAnimal,
     retireAnimal,
     buyAnimal,
