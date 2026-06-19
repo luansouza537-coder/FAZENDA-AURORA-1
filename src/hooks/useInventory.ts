@@ -159,6 +159,7 @@ export function useInventory({
           queijo_parmesao: inv.queijo_parmesao ?? 0,
           queijo_serra: inv.queijo_serra ?? 0,
           kit_gourmet: inv.kit_gourmet ?? 0,
+          racaoSuina: inv.racaoSuina ?? 0,
         };
       }
     } catch (e) {}
@@ -231,6 +232,7 @@ export function useInventory({
       queijo_parmesao: 0,
       queijo_serra: 0,
       kit_gourmet: 0,
+      racaoSuina: 0,
     };
   });
 
