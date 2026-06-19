@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BiomeType, LandLot, InsuranceState, MachineState } from '../types';
+import { MERCHANT_SPECIAL_ITEMS } from '../data/merchantItems';
 
 interface MelhoriasModalProps {
   gold: number;
@@ -61,6 +62,8 @@ interface MelhoriasModalProps {
   vehicleTiers: Record<string, number>;
   setVehicleTier: (cat: string, tier: number) => void;
   getFreightMultiplier: (cat: string) => number;
+  ownedOneTimeEffects: string[];
+  onBuyConsumivel: (item: typeof MERCHANT_SPECIAL_ITEMS[number]) => void;
 }
 
 const VEHICLE_CATEGORIES = [
@@ -74,6 +77,8 @@ const VEHICLE_CATEGORIES = [
 ];
 
 const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
+  const [activeTab, setActiveTab] = useState<'infraestrutura' | 'consumiveis'>('infraestrutura');
+
   return (
     <AnimatePresence>
       <motion.div
@@ -87,10 +92,55 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
           className="bg-[#fffbeb] border-8 border-orange-800 rounded-[36px] max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
         >
           <div className="bg-gradient-to-r from-orange-700 to-amber-800 p-5 border-b-4 border-orange-950 text-center shrink-0">
-            <h3 className="text-white text-xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">🔧 Melhorias da Fazenda</h3>
-            <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">Expanda o terreno, instale infraestrutura e proteja sua fazenda</p>
+            <h3 className="text-white text-xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">🏪 Loja da Fazenda</h3>
+            <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">Infraestrutura permanente e consumíveis para sua fazenda</p>
             <button onClick={p.onClose} className="absolute top-4 right-4 text-[#fcd57e] bg-orange-950 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
           </div>
+
+          {/* Tabs */}
+          <div className="flex border-b-4 border-orange-200 shrink-0 bg-orange-50">
+            <button
+              onClick={() => setActiveTab('infraestrutura')}
+              className={`flex-1 py-3 text-xs font-display font-black uppercase tracking-wider transition-colors cursor-pointer ${activeTab === 'infraestrutura' ? 'bg-orange-700 text-white' : 'text-orange-700 hover:bg-orange-100'}`}
+            >
+              🔧 Infraestrutura
+            </button>
+            <button
+              onClick={() => setActiveTab('consumiveis')}
+              className={`flex-1 py-3 text-xs font-display font-black uppercase tracking-wider transition-colors cursor-pointer ${activeTab === 'consumiveis' ? 'bg-orange-700 text-white' : 'text-orange-700 hover:bg-orange-100'}`}
+            >
+              🛒 Consumíveis
+            </button>
+          </div>
+
+          {activeTab === 'consumiveis' ? (
+            <div className="flex-1 overflow-y-auto p-6">
+              <p className="text-xs text-stone-500 font-mono mb-4">Itens disponíveis a qualquer momento. Itens únicos só podem ser comprados uma vez.</p>
+              <div className="grid grid-cols-2 gap-3">
+                {MERCHANT_SPECIAL_ITEMS.map(item => {
+                  const isOwned = item.oneTime && p.ownedOneTimeEffects.includes(item.effect);
+                  const canAfford = p.gold >= item.price;
+                  return (
+                    <div key={item.id} className={`bg-white border-2 rounded-2xl p-3 flex flex-col gap-1.5 ${isOwned ? 'border-green-300 opacity-70' : 'border-orange-200'}`}>
+                      <span className="text-sm font-black text-stone-800">{item.label}</span>
+                      <span className="text-[10px] text-stone-500 font-mono flex-1">{item.desc}</span>
+                      {item.oneTime && <span className="text-[9px] text-amber-600 font-mono font-bold uppercase">único</span>}
+                      <button
+                        disabled={isOwned || !canAfford}
+                        onClick={() => p.onBuyConsumivel(item)}
+                        className={`mt-1 text-[11px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 transition-all cursor-pointer
+                          ${isOwned ? 'bg-green-100 border-green-300 text-green-700 cursor-not-allowed' :
+                            canAfford ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-700' :
+                            'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                      >
+                        {isOwned ? '✅ Adquirido' : `${item.price}💰 Comprar`}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
 
             {/* Expansão de Terreno */}
@@ -438,9 +488,10 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             </div>
 
           </div>
+          )} {/* end infraestrutura tab */}
           <div className="bg-orange-50 p-4 border-t border-orange-100 flex justify-end shrink-0">
             <button onClick={p.onClose} className="bg-orange-600 hover:bg-orange-500 text-white border-b-4 border-orange-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider cursor-pointer">
-              Fechar Melhorias
+              Fechar Loja
             </button>
           </div>
         </motion.div>

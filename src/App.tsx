@@ -1666,9 +1666,6 @@ function GameApp() {
     const weatherMult = getWeatherMultiplier(itemType, w);
     const marketBonus2 = activeMarketEvent && activeMarketEvent.items.includes(itemType) ? activeMarketEvent.mult : 1.0;
     let finalPrice = base * offerMult2 * seasonMult * weatherMult * marketBonus2;
-    if (merchantActive) {
-      finalPrice *= 1.5;
-    }
     if (farmLevel > 5) {
       // Reputação: +5% por nível 6-10, +3% por nível 11-20
       const bonusPct = farmLevel <= 10
@@ -1716,9 +1713,6 @@ function GameApp() {
     // Evento mundial ativo
     const worldEventBonus = worldEvent && worldEvent.items.includes(itemType) ? worldEvent.priceMult : 1.0;
     let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * marketBonus * worldEventBonus;
-    if (merchantActive) {
-      finalPrice *= 1.5;
-    }
     if (farmLevel > 5) {
       // Reputação: +5% por nível 6-10, +3% por nível 11-20
       const bonusPct = farmLevel <= 10
@@ -5608,17 +5602,17 @@ function GameApp() {
               )}
             </button>
 
-            {/* 🔧 Melhorias Button */}
+            {/* 🏪 Loja Button */}
             <button
               onClick={() => {
                 setShowUpgradesModal(true);
                 triggerAudioResult(() => sfx.playSound('click'));
               }}
               className="bg-orange-600 border-3 border-orange-400 hover:bg-orange-500 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#7c2d12] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
-              title="Melhorias da Fazenda: poço, solar, irrigação, terreno"
+              title="Loja da Fazenda: infraestrutura, consumíveis e upgrades"
             >
-              <span>🔧</span>
-              <span>Melhorias</span>
+              <span>🏪</span>
+              <span>Loja</span>
             </button>
 
             {/* 👷 Peões Button */}
@@ -5882,70 +5876,6 @@ function GameApp() {
         ) : null}
 
         {/* --- TRAVEL MERCHANT SPECIAL NOTICE --- */}
-        {merchantActive && (
-          <div className="bg-gradient-to-r from-purple-800 to-indigo-900 border-x-8 border-y-4 border-yellow-400 p-3 mx-6 rounded-2xl flex items-center justify-between text-yellow-300 font-extrabold text-sm shadow-lg animate-pulse uppercase select-none font-sans">
-            <span className="flex items-center gap-2">🧙‍♂️ MERCADOR VIAJANTE NA ÁREA: Todos os produtos brutos, manufaturados e bois valem 1.5x moedas hoje!</span>
-            <span className="text-xs bg-yellow-400 text-purple-950 px-2.5 py-1 rounded-lg">Bônus Ativo!</span>
-          </div>
-        )}
-
-        {/* --- MERCHANT SPECIAL SHOP --- */}
-        {merchantActive && merchantSpecialItems.length > 0 && (
-          <div className="mx-6 mt-3 bg-[#064e3b]/90 border-4 border-[#fbbf24] rounded-2xl p-4 shadow-lg">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xl">🧙‍♂️</span>
-              <h3 className="text-[#fef3c7] font-display font-black text-sm uppercase tracking-wider">Loja Especial do Mercador</h3>
-              <span className="text-[10px] text-[#fbbf24] font-mono ml-auto">Disponível hoje apenas!</span>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {merchantSpecialItems.map(itemId => {
-                const item = MERCHANT_SPECIAL_ITEMS.find(i => i.id === itemId);
-                if (!item) return null;
-                return (
-                  <div key={item.id} className="bg-[#022c22] border border-[#fbbf24]/50 rounded-xl p-3 flex flex-col gap-1">
-                    <span className="text-sm font-black text-[#fef3c7]">{item.label}</span>
-                    <span className="text-[10px] text-[#fef3c7]/70 font-mono">{item.desc}</span>
-                    <button
-                      onClick={() => {
-                        if (gold < item.price) { addLog(`💰 Moedas insuficientes! Precisa de ${item.price} moedas.`, 'error'); return; }
-                        setGold(prev => prev - item.price);
-                        addLog(`🧙‍♂️ Comprou ${item.label} por ${item.price}💰!`, 'success');
-                        if (item.effect === 'prevent_epidemic') { setEpidemicPrevented(true); addLog('💉 Próxima epidemia será prevenida!', 'success'); }
-                        else if (item.effect === 'fertilizante_7days') { setFertilizanteDays((prev: number) => prev + 7); addLog('🌱 +7 dias de fertilizante adicionados!', 'success'); }
-                        else if (item.effect === 'premium_feed') {
-                          setInventory((prev: any) => ({ ...prev, racaoBovina: (prev.racaoBovina ?? 0) + 10, racaoOvinos: (prev.racaoOvinos ?? 0) + 10, racaoAves: (prev.racaoAves ?? 0) + 10, racaoAquatica: (prev.racaoAquatica ?? 0) + 10, racaoCoelho: (prev.racaoCoelho ?? 0) + 10, racaoCarnivora: (prev.racaoCarnivora ?? 0) + 10 }));
-                          addLog('🥣 +10 de cada ração adicionadas ao Armazém!', 'success');
-                        }
-                        else if (item.effect === 'bebedouro') { setHasBebedouro(true); addLog('🪣 Bebedouro Automático instalado! Animais sempre hidratados.', 'success'); }
-                        else if (item.effect === 'cert_sanitario') { setHasCertSanitario(true); addLog('📜 Certificado Sanitário adquirido! +10% preço de carne permanente.', 'success'); }
-                        else if (item.effect === 'licenca_exotica') { setLicencaExotica(true); addLog('📋 Licença Exótica obtida! Agora pode criar Jacaré legalmente.', 'success'); }
-                        else if (item.effect === 'licenca_criadouro') { setLicencaCriadouro(true); addLog('📜 Licença de Criadouro obtida! Reprodução controlada desbloqueada.', 'success'); }
-                        else if (item.effect === 'cure_all_sick') { setAnimals(prev => prev.map(a => ({ ...a, isSick: false }))); addLog('🩺 Todos os animais doentes foram curados!', 'success'); }
-                        else if (item.effect === 'anti_pest_14days') { setAntiPestDays(prev => prev + 14); addLog('🧴 Antídoto Anti-Pragas ativo por 14 dias!', 'success'); }
-                        else if (item.effect === 'production_boost_7days') { setProductionBoostDays(prev => prev + 7); addLog('📚 Manual de Produção Avançada! +15% produção por 7 dias!', 'success'); }
-                        else if (item.effect === 'suplemento_mineral_7days') { setSuplementoMineralDays(prev => prev + 7); addLog('💊 Suplemento Mineral aplicado! +20% produção de leite e ovos por 7 dias!', 'success'); }
-                        else if (item.effect === 'cure_one_sick') { const sick = animals.find(a => a.isSick); if (sick) { setAnimals(prev => prev.map(a => a.id === sick.id ? { ...a, isSick: false } : a)); addLog(`🩹 ${sick.name} foi curado com a bandagem veterinária!`, 'success'); } else addLog('🩹 Nenhum animal doente no momento.', 'info'); }
-                        else if (item.effect === 'cisterna') { setHasCisterna(true); addLog('🪣 Cisterna de Água instalada! -30% conta de água semanal!', 'success'); }
-                        else if (item.effect === 'block_storm_drought') { setBlockNextStorm(true); setBlockNextDrought(true); addLog('🛡️ Kit de Proteção Climática pronto! Próxima tempestade e seca não afetarão a fazenda!', 'success'); }
-                        else if (item.effect === 'silagem_5days') { setSilagemDays(prev => prev + 5); addLog('🌽 Silagem Premium estocada! Animais não consomem ração por 5 dias!', 'success'); }
-                        else if (item.effect === 'isencao_multa_2x') { setIsencaoMultaCount(prev => prev + 3); addLog('🚚 Contrato de Transporte ativo! Próximas 3 multas por entrega vencida serão isentas!', 'success'); }
-                        else if (item.effect === 'rare_animal_bait') { addLog('🎯 Isca preparada! Um animal raro pode aparecer amanhã com 50% de desconto!', 'success'); }
-                        setMerchantSpecialItems(prev => prev.filter(id => id !== item.id));
-                        setStats(prev => ({ ...prev, totalMerchantShopPurchases: (prev.totalMerchantShopPurchases ?? 0) + 1 }));
-                        if (((stats.totalMerchantShopPurchases ?? 0) + 1) >= 10) setTimeout(() => checkAndUnlockAchievement('merchant_loyal'), 0);
-                        triggerAudioResult(() => sfx.playSound('sell'));
-                      }}
-                      disabled={gold < item.price}
-                      className="mt-auto bg-[#fbbf24] hover:bg-[#f59e0b] disabled:bg-stone-600 disabled:text-stone-400 text-[#78350f] font-black text-[10px] uppercase px-3 py-1.5 rounded-lg border-b-2 border-[#b45309] disabled:border-stone-700 transition-all cursor-pointer"
-                    >
-                      {item.price}💰 Comprar
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* --- ACTIVE EVENTS PANEL --- */}
         {(() => {
@@ -6435,6 +6365,36 @@ function GameApp() {
           vehicleTiers={vehicleTiers}
           setVehicleTier={setVehicleTier}
           getFreightMultiplier={getFreightMultiplier}
+          ownedOneTimeEffects={[
+            ...(hasBebedouro ? ['bebedouro'] : []),
+            ...(hasCertSanitario ? ['cert_sanitario'] : []),
+            ...(licencaExotica ? ['licenca_exotica'] : []),
+            ...(licencaCriadouro ? ['licenca_criadouro'] : []),
+            ...(hasCisterna ? ['cisterna'] : []),
+          ]}
+          onBuyConsumivel={(item) => {
+            if (gold < item.price) { addLog(`💰 Moedas insuficientes! Precisa de ${item.price} moedas.`, 'error'); return; }
+            setGold(prev => prev - item.price);
+            addLog(`🛒 Comprou ${item.label} por ${item.price}💰!`, 'success');
+            if (item.effect === 'premium_feed') {
+              setInventory((prev: any) => ({ ...prev, racaoBovina: (prev.racaoBovina ?? 0) + 10, racaoOvinos: (prev.racaoOvinos ?? 0) + 10, racaoAves: (prev.racaoAves ?? 0) + 10, racaoAquatica: (prev.racaoAquatica ?? 0) + 10, racaoCoelho: (prev.racaoCoelho ?? 0) + 10, racaoCarnivora: (prev.racaoCarnivora ?? 0) + 10, racaoSuina: (prev.racaoSuina ?? 0) + 10 }));
+              addLog('🥣 +10 de cada ração adicionadas ao Armazém!', 'success');
+            }
+            else if (item.effect === 'bebedouro') { setHasBebedouro(true); addLog('🪣 Bebedouro Automático instalado! Animais sempre hidratados.', 'success'); }
+            else if (item.effect === 'cert_sanitario') { setHasCertSanitario(true); addLog('📜 Certificado Sanitário adquirido! +10% preço de carne permanente.', 'success'); }
+            else if (item.effect === 'licenca_exotica') { setLicencaExotica(true); addLog('📋 Licença Exótica obtida! Agora pode criar Jacaré legalmente.', 'success'); }
+            else if (item.effect === 'licenca_criadouro') { setLicencaCriadouro(true); addLog('📜 Licença de Criadouro obtida! Reprodução controlada desbloqueada.', 'success'); }
+            else if (item.effect === 'cure_all_sick') { setAnimals(prev => prev.map(a => ({ ...a, isSick: false }))); addLog('🩺 Todos os animais doentes foram curados!', 'success'); }
+            else if (item.effect === 'anti_pest_14days') { setAntiPestDays(prev => prev + 14); addLog('🧴 Antídoto Anti-Pragas ativo por 14 dias!', 'success'); }
+            else if (item.effect === 'production_boost_7days') { setProductionBoostDays(prev => prev + 7); addLog('📚 Manual de Produção Avançada! +15% produção por 7 dias!', 'success'); }
+            else if (item.effect === 'suplemento_mineral_7days') { setSuplementoMineralDays(prev => prev + 7); addLog('💊 Suplemento Mineral aplicado! +20% produção de leite e ovos por 7 dias!', 'success'); }
+            else if (item.effect === 'cure_one_sick') { const sick = animals.find(a => a.isSick); if (sick) { setAnimals(prev => prev.map(a => a.id === sick.id ? { ...a, isSick: false } : a)); addLog(`🩹 ${sick.name} foi curado com a bandagem veterinária!`, 'success'); } else addLog('🩹 Nenhum animal doente no momento.', 'info'); }
+            else if (item.effect === 'cisterna') { setHasCisterna(true); addLog('🪣 Cisterna de Água instalada! -30% conta de água semanal!', 'success'); }
+            else if (item.effect === 'block_storm_drought') { setBlockNextStorm(true); setBlockNextDrought(true); addLog('🛡️ Kit de Proteção Climática pronto! Próxima tempestade e seca não afetarão a fazenda!', 'success'); }
+            else if (item.effect === 'silagem_5days') { setSilagemDays(prev => prev + 5); addLog('🌽 Silagem Premium estocada! Animais não consomem ração por 5 dias!', 'success'); }
+            else if (item.effect === 'isencao_multa_2x') { setIsencaoMultaCount(prev => prev + 3); addLog('🚚 Contrato de Transporte ativo! Próximas 3 multas por entrega vencida serão isentas!', 'success'); }
+            triggerAudioResult(() => sfx.playSound('sell'));
+          }}
         />
       )}
 
