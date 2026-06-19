@@ -918,9 +918,10 @@ export function useInventory({
     }));
 
     // F4: deduzir da entrega de contratos ativos
-    const contractProductMap: Record<string, 'milk' | 'wool' | 'egg' | 'cheese'> = {
+    const contractProductMap: Record<string, Contract['product']> = {
       milk: 'milk', wool: 'wool', egg: 'egg',
-      cheese: 'cheese', queijoCoalho: 'cheese', queijoMucarela: 'cheese', queijoBrie: 'cheese'
+      cheese: 'cheese', queijoCoalho: 'queijoCoalho', queijoMucarela: 'queijoMucarela', queijoBrie: 'queijoBrie',
+      butter: 'butter', alpaca_wool: 'alpaca_wool', muco: 'muco', mel_envasado: 'mel_envasado', seda_bruta: 'seda_bruta',
     };
     const contractProduct = contractProductMap[itemType as string];
     if (contractProduct) {

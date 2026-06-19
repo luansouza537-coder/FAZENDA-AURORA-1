@@ -2797,6 +2797,52 @@ function GameApp() {
 
   // getLevelUpGoldCost, verificarNivelFazenda — moved to useFarm hook
 
+  // --- CATÁLOGO DE CONTRATOS FIXOS ---
+  const LONG_CONTRACT_CATALOG = [
+    { catalogId: 'lc_1', client: 'Laticínios Central', product: 'milk' as const, description: 'Uma cooperativa regional que abastece mercados da cidade. Pontualidade é tudo para eles.', baseMarket: 5, pricePerUnit: 8, weeklyGoal: 8, durationDays: 30, minLevel: 1, completionBonus: 200, completionXP: 30 },
+    { catalogId: 'lc_2', client: 'Padaria Dona Rosa', product: 'egg' as const, description: 'Padaria de família há três gerações. Precisa de ovos frescos toda semana, sem falta.', baseMarket: 4, pricePerUnit: 6, weeklyGoal: 12, durationDays: 30, minLevel: 1, completionBonus: 180, completionXP: 25 },
+    { catalogId: 'lc_3', client: 'Ateliê Fios do Sul', product: 'wool' as const, description: 'Costureiras artesanais que transformam sua lã em peças vendidas na capital. Exigentes com regularidade.', baseMarket: 12, pricePerUnit: 17, weeklyGoal: 5, durationDays: 45, minLevel: 2, completionBonus: 380, completionXP: 50 },
+    { catalogId: 'lc_4', client: 'Mercado São Bento', product: 'queijoCoalho' as const, description: 'Um mercado local que quer queijo artesanal na prateleira. Pequeno volume, relação duradoura.', baseMarket: 28, pricePerUnit: 40, weeklyGoal: 4, durationDays: 45, minLevel: 3, completionBonus: 500, completionXP: 60 },
+    { catalogId: 'lc_5', client: 'Hotel Fazenda Verde', product: 'butter' as const, description: 'Resort rural que serve café colonial todos os dias. A manteiga da casa tem que ser artesanal.', baseMarket: 45, pricePerUnit: 65, weeklyGoal: 3, durationDays: 60, minLevel: 5, completionBonus: 1000, completionXP: 100 },
+    { catalogId: 'lc_6', client: 'Exportadora Fibras Raras', product: 'alpaca_wool' as const, description: 'Empresa que exporta fibras premium para a Europa. Demanda constante, clientes exigentes.', baseMarket: 65, pricePerUnit: 92, weeklyGoal: 3, durationDays: 60, minLevel: 6, completionBonus: 1200, completionXP: 120 },
+    { catalogId: 'lc_7', client: 'Farmácia Natural Raízes', product: 'muco' as const, description: 'Laboratório de cosméticos naturais. O muco é ingrediente raro e valioso — e eles sabem disso.', baseMarket: 120, pricePerUnit: 165, weeklyGoal: 2, durationDays: 60, minLevel: 8, completionBonus: 1500, completionXP: 130 },
+    { catalogId: 'lc_8', client: 'Distribuidora Colmeia', product: 'mel_envasado' as const, description: 'Distribui mel envasado para bares e restaurantes da região. Volume modesto, contrato longo e seguro.', baseMarket: 80, pricePerUnit: 115, weeklyGoal: 3, durationDays: 90, minLevel: 10, completionBonus: 2500, completionXP: 200 },
+    { catalogId: 'lc_9', client: 'Instituto Gastronômico', product: 'queijoBrie' as const, description: 'Escola de gastronomia de prestígio. Queijos maturados nas aulas — qualidade constante obrigatória.', baseMarket: 65, pricePerUnit: 95, weeklyGoal: 3, durationDays: 90, minLevel: 12, completionBonus: 3500, completionXP: 250 },
+    { catalogId: 'lc_10', client: 'Exportadora Premium Aurora', product: 'seda_bruta' as const, description: 'O maior contrato da sua carreira. Uma empresa internacional descobriu seus produtos e quer fornecimento exclusivo por três meses. Não decepcione.', baseMarket: 100, pricePerUnit: 150, weeklyGoal: 5, durationDays: 90, minLevel: 15, completionBonus: 5000, completionXP: 400 },
+  ] as const;
+
+  const signLongContract = (catalogId: string) => {
+    const cat = LONG_CONTRACT_CATALOG.find(c => c.catalogId === catalogId);
+    if (!cat) return;
+    if (farmLevel < cat.minLevel) { addLog(`🔒 Nível ${cat.minLevel} necessário para assinar com ${cat.client}.`, 'error'); return; }
+    const alreadyActive = contracts.some(c => c.contractType === 'long' && c.active && c.catalogId === catalogId);
+    if (alreadyActive) { addLog(`📜 Já existe um contrato ativo com ${cat.client}!`, 'error'); return; }
+    const weeks = Math.round(cat.durationDays / 7);
+    const totalQty = cat.weeklyGoal * weeks;
+    const newContract: Contract = {
+      id: `long_${catalogId}_${Date.now()}`,
+      catalogId,
+      contractType: 'long',
+      product: cat.product,
+      quantity: totalQty,
+      delivered: 0,
+      pricePerUnit: cat.pricePerUnit,
+      deadline: currentDay + cat.durationDays,
+      penalty: 0,
+      active: true,
+      client: cat.client,
+      description: cat.description,
+      weeklyGoal: cat.weeklyGoal,
+      weekStartDelivered: 0,
+      completionBonus: cat.completionBonus,
+      completionXP: cat.completionXP,
+      missedWeeks: 0,
+    };
+    setContracts(prev => [...prev, newContract]);
+    addLog(`📜 Contrato assinado com ${cat.client}! Meta: ${cat.weeklyGoal} un/${cat.product}/semana por ${cat.durationDays} dias.`, 'success');
+    triggerAudioResult(() => sfx.playSound('levelup'));
+  };
+
   // F4: gerar contrato pelo comerciante
   const generateMerchantContract = (nextDayVal: number) => {
     if (contracts.filter(c => c.active).length >= 3) return; // Máx 3 contratos
@@ -3580,6 +3626,42 @@ function GameApp() {
       // --- FUNCIONALIDADE 1: Contas semanais de água e energia (a cada 7 dias) ---
       const isWeeklyBillDay = nextDayValue % 7 === 0;
 
+      // --- LONG CONTRACTS: Liquidação semanal de prêmios ---
+      let longContractBonusForGold = 0;
+      if (isWeeklyBillDay) {
+        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, queijoCoalho: 28, butter: 45, alpaca_wool: 65, muco: 120, mel_envasado: 80, queijoBrie: 65, seda_bruta: 100 };
+        contracts.forEach(c => {
+          if (c.contractType !== 'long' || !c.active) return;
+          const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
+          const goal = c.weeklyGoal ?? 0;
+          const basePrice = LONG_BASE_PRICES[c.product] ?? 0;
+          const premium = Math.max(0, c.pricePerUnit - basePrice);
+          if (deliveredThisWeek >= goal) {
+            const bonus = Math.floor(deliveredThisWeek * premium);
+            longContractBonusForGold += bonus;
+            logsToAdd.push({ msg: `📜 "${c.client}": semana cumprida (${deliveredThisWeek}/${goal} un)! +${bonus}💰 prêmio.`, type: 'success' });
+          } else if (deliveredThisWeek > 0) {
+            const bonus = Math.floor(deliveredThisWeek * premium * 0.5);
+            longContractBonusForGold += bonus;
+            logsToAdd.push({ msg: `📜 "${c.client}": entrega parcial (${deliveredThisWeek}/${goal} un). +${bonus}💰 prêmio parcial.`, type: 'info' });
+          } else {
+            logsToAdd.push({ msg: `📜 "${c.client}": nenhuma entrega esta semana! Contrato em risco.`, type: 'info' });
+          }
+        });
+        setContracts(prev => prev.map(c => {
+          if (c.contractType !== 'long' || !c.active) return c;
+          const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
+          const goal = c.weeklyGoal ?? 0;
+          const missed = deliveredThisWeek < goal * 0.5;
+          const newMissed = missed ? (c.missedWeeks ?? 0) + 1 : 0;
+          if (newMissed >= 2) {
+            logsToAdd.push({ msg: `📜 Contrato com "${c.client}" cancelado por 2 semanas sem entrega mínima.`, type: 'error' });
+            return { ...c, active: false, weekStartDelivered: c.delivered, missedWeeks: newMissed };
+          }
+          return { ...c, weekStartDelivered: c.delivered, missedWeeks: newMissed };
+        }));
+      }
+
       // Água: base mínima + escala com número de animais. Poço reduz até 75%.
       const baseWaterCost = isWeeklyBillDay ? Math.round(8 + animals.length * 2 + irrigationLevel * 4) : 0;
       const waterDiscount = Math.min(wellLevel * 0.15 + (hasCisterna ? 0.3 : 0), 0.90);
@@ -3628,7 +3710,7 @@ function GameApp() {
       // BUG 2 FIX: usa callback funcional para não sobrescrever ouro com valor de closure stale
       // BUG FIX: taxAmount incluído aqui para evitar setGold duplo com gold stale no cálculo do imposto
       setGold(prev => {
-        const totalCosts = maintCost + contractPenaltyForGold + taxAmount + waterCost + energyCost;
+        const totalCosts = maintCost + contractPenaltyForGold + taxAmount + waterCost + energyCost - longContractBonusForGold;
         const newGold = prev - totalCosts + globalGoldBonus;
         if (newGold < 0) {
           // Acumular dívida em vez de ir para negativo (sem juros aqui; juros aplicados no bloco de dívida abaixo)
@@ -3649,7 +3731,7 @@ function GameApp() {
 
       // --- DEBUG MODE: fluxo de ouro diário ---
       if (debugMode) {
-        const totalCostsDebug = maintCost + contractPenaltyForGold + taxAmount + waterCost + energyCost;
+        const totalCostsDebug = maintCost + contractPenaltyForGold + taxAmount + waterCost + energyCost - longContractBonusForGold;
         const workerCostDebug = workers.reduce((s, w) => s + w.dailyCost, 0);
         logsToAdd.push({
           msg: `🔍 [DEBUG Dia ${nextDayValue}] Entradas: +${globalGoldBonus}💰 | Saídas: água=${waterCost} energia=${energyCost} maint=${maintCost} imposto=${taxAmount} multa=${contractPenaltyForGold} workers=${workerCostDebug} | Net: ${globalGoldBonus - totalCostsDebug >= 0 ? '+' : ''}${globalGoldBonus - totalCostsDebug}💰`,
@@ -4236,16 +4318,31 @@ function GameApp() {
       // de forma síncrona aqui (usando o array `contracts` da closure), e o setContracts
       // abaixo apenas marca inativos — sem side-effects no updater.
       contracts.forEach(c => {
-        if (c.active && nextDayValue > c.deadline && c.delivered < c.quantity) {
-          logsToAdd.push({ msg: `📋 Contrato vencido! Multa de -${c.penalty} moedas por não entregar ${c.quantity - c.delivered} un de ${c.product}!`, type: 'error' });
-          setTimeout(() => addNotification(`📋 Contrato expirou! Multa de -${c.penalty} moedas aplicada!`, 'warning', nextDayValue), 0);
+        if (!c.active) return;
+        if (nextDayValue > c.deadline) {
+          if (c.contractType === 'long') {
+            const completionRate = c.quantity > 0 ? c.delivered / c.quantity : 0;
+            if (completionRate >= 0.8) {
+              const bonus = c.completionBonus ?? 0;
+              const xp = c.completionXP ?? 0;
+              if (bonus > 0) {
+                setGold(prev => prev + bonus);
+                setFarmXp(prev => prev + xp);
+                logsToAdd.push({ msg: `🏆 Contrato com "${c.client}" concluído com sucesso! Bônus: +${bonus}💰 +${xp} XP!`, type: 'success' });
+                setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success', nextDayValue), 0);
+              }
+            } else {
+              logsToAdd.push({ msg: `📜 Contrato com "${c.client}" encerrado. Entrega insuficiente (${Math.round(completionRate * 100)}%) — sem bônus.`, type: 'info' });
+            }
+          } else if (c.delivered < c.quantity) {
+            logsToAdd.push({ msg: `📋 Contrato vencido! Multa de -${c.penalty} moedas por não entregar ${c.quantity - c.delivered} un de ${c.product}!`, type: 'error' });
+            setTimeout(() => addNotification(`📋 Contrato expirou! Multa de -${c.penalty} moedas aplicada!`, 'warning', nextDayValue), 0);
+          }
         }
       });
       setContracts(prev => prev.map(c => {
         if (!c.active) return c;
-        if (nextDayValue > c.deadline && c.delivered < c.quantity) {
-          return { ...c, active: false };
-        }
+        if (nextDayValue > c.deadline) return { ...c, active: false };
         return c;
       }));
 
@@ -6316,7 +6413,15 @@ function GameApp() {
       {/* 📋 CONTRATOS MODAL */}
       <AnimatePresence>
         {showContractsModal && (
-          <ContractsModal contracts={contracts} currentDay={currentDay} onClose={() => setShowContractsModal(false)} />
+          <ContractsModal
+            contracts={contracts}
+            currentDay={currentDay}
+            farmLevel={farmLevel}
+            gold={gold}
+            longContractCatalog={LONG_CONTRACT_CATALOG as any}
+            onSignLongContract={signLongContract}
+            onClose={() => setShowContractsModal(false)}
+          />
         )}
       </AnimatePresence>
 
