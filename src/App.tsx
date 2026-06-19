@@ -5062,13 +5062,87 @@ function GameApp() {
           }
         }
 
-        // --- Queijeiro: converte 3 leites em 1 queijo coalho (entra na maturação de 1 dia) ---
-        if (workers.some(w => w.role === 'queijeiro')) {
-          const currentMilk = inventory.milk ?? 0;
-          if (currentMilk >= 3) {
-            logsToAdd.push({ msg: `🧀 Queijeiro colocou 1 Queijo Coalho para maturar (pronto amanhã)!`, type: 'success' });
-            setInventory(prev => ({ ...prev, milk: (prev.milk ?? 0) - 3 }));
-            setQueijosEmMaturacao(prev => [...prev, { tipo: 'coalho', diasRestantes: 1 }]);
+        // --- Queijeiro: converte 3 leites em 1 queijo coalho por queijeiro contratado ---
+        const queijeirosCount = workers.filter(w => w.role === 'queijeiro').length;
+        let queijeiroAction = `Dia ${nextDayValue}: sem leite suficiente`;
+        if (queijeirosCount > 0) {
+          let milkPool = inventory.milk ?? 0;
+          let queijosFeitos = 0;
+          for (let i = 0; i < queijeirosCount; i++) {
+            if (milkPool >= 3) { milkPool -= 3; queijosFeitos++; }
+          }
+          if (queijosFeitos > 0) {
+            setInventory(prev => ({ ...prev, milk: (prev.milk ?? 0) - queijosFeitos * 3 }));
+            setQueijosEmMaturacao(prev => [
+              ...prev,
+              ...Array.from({ length: queijosFeitos }, () => ({ tipo: 'coalho' as const, diasRestantes: 1 })),
+            ]);
+            logsToAdd.push({ msg: `🧀 ${queijeirosCount > 1 ? `${queijeirosCount} Queijeiros colocaram` : 'Queijeiro colocou'} ${queijosFeitos} Queijo(s) Coalho para maturar!`, type: 'success' });
+            queijeiroAction = `Dia ${nextDayValue}: produziu ${queijosFeitos} queijo(s) coalho`;
+          }
+        }
+
+        // --- Artesão: produz 1 item têxtil por artesão (prioridade: Manta > Fio > Tecido > Angorá > Tapete > Cachecol) ---
+        const artesaosCount = workers.filter(w => w.role === 'artesao').length;
+        let artesaoAction = `Dia ${nextDayValue}: sem materiais disponíveis`;
+        if (artesaosCount > 0) {
+          let artesaosLeft = artesaosCount;
+          let artesaoItens: string[] = [];
+          const inv = { ...inventory } as Record<string, number>;
+          const tryTextile = (key: string, consume: [string, number][], produce: string, label: string) => {
+            while (artesaosLeft > 0 && consume.every(([k, n]) => (inv[k] ?? 0) >= n)) {
+              consume.forEach(([k, n]) => { inv[k] = (inv[k] ?? 0) - n; });
+              inv[produce] = (inv[produce] ?? 0) + 1;
+              artesaoItens.push(label);
+              artesaosLeft--;
+            }
+          };
+          tryTextile('manta_premium',   [['fio_seda',1],['cachecol_angora',1],['tecido_alpaca',1]], 'manta_premium',   'Manta Premium');
+          tryTextile('fio_seda',        [['seda_bruta',2]],                                          'fio_seda',        'Fio de Seda');
+          tryTextile('tecido_alpaca',   [['alpaca_wool',3]],                                         'tecido_alpaca',   'Tecido de Alpaca');
+          tryTextile('cachecol_angora', [['angora_wool',2]],                                         'cachecol_angora', 'Cachecol Angorá');
+          tryTextile('tapete_lhama',    [['llama_wool',3]],                                          'tapete_lhama',    'Tapete de Lhama');
+          tryTextile('scarf',           [['wool',2]],                                                'scarf',           'Cachecol');
+          if (artesaoItens.length > 0) {
+            setInventory(prev => {
+              const next = { ...prev } as Record<string, number>;
+              Object.keys(inv).forEach(k => { next[k] = inv[k]; });
+              return next as typeof inventory;
+            });
+            logsToAdd.push({ msg: `🧵 ${artesaosCount > 1 ? `${artesaosCount} Artesãos produziram` : 'Artesão produziu'}: ${artesaoItens.join(', ')}!`, type: 'success' });
+            artesaoAction = `Dia ${nextDayValue}: produziu ${artesaoItens.join(', ')}`;
+          }
+        }
+
+        // --- Cozinheiro: produz 1 item gastronômico por cozinheiro (prioridade: Hidromel > Mel > Risoto > Conserva Peixe > Sopa > Maionese) ---
+        const cozinheirosCount = workers.filter(w => w.role === 'cozinheiro').length;
+        let cozinheiroAction = `Dia ${nextDayValue}: sem ingredientes disponíveis`;
+        if (cozinheirosCount > 0) {
+          let cooksLeft = cozinheirosCount;
+          let cookItens: string[] = [];
+          const cinv = { ...inventory } as Record<string, number>;
+          const tryCook = (consume: [string, number][], produce: string, label: string) => {
+            while (cooksLeft > 0 && consume.every(([k, n]) => (cinv[k] ?? 0) >= n)) {
+              consume.forEach(([k, n]) => { cinv[k] = (cinv[k] ?? 0) - n; });
+              cinv[produce] = (cinv[produce] ?? 0) + 1;
+              cookItens.push(label);
+              cooksLeft--;
+            }
+          };
+          tryCook([['mel',2],['milk',3]],        'hidromel',       'Hidromel');
+          tryCook([['mel',3]],                    'mel_envasado',   'Mel Envasado');
+          tryCook([['cogumelo',3]],               'risoto_cogumelo','Risoto de Cogumelo');
+          tryCook([['peixe',2]],                  'conserva_peixe', 'Conserva de Peixe');
+          tryCook([['cogumelo',2]],               'sopa_cogumelo',  'Sopa de Cogumelo');
+          tryCook([['egg',2]],                    'mayo',           'Maionese');
+          if (cookItens.length > 0) {
+            setInventory(prev => {
+              const next = { ...prev } as Record<string, number>;
+              Object.keys(cinv).forEach(k => { next[k] = cinv[k]; });
+              return next as typeof inventory;
+            });
+            logsToAdd.push({ msg: `👨‍🍳 ${cozinheirosCount > 1 ? `${cozinheirosCount} Cozinheiros produziram` : 'Cozinheiro produziu'}: ${cookItens.join(', ')}!`, type: 'success' });
+            cozinheiroAction = `Dia ${nextDayValue}: produziu ${cookItens.join(', ')}`;
           }
         }
 
@@ -5082,7 +5156,9 @@ function GameApp() {
           if (w.role === 'tosquiador') action = `Dia ${nextDayValue}: tosquiou ovelhas e coelhos angorá`;
           if (w.role === 'avicultor') action = `Dia ${nextDayValue}: coletou ovos e penas`;
           if (w.role === 'composteiro') action = `Dia ${nextDayValue}: supervisionou compostagem`;
-          if (w.role === 'queijeiro') action = inventory.milk >= 3 ? `Dia ${nextDayValue}: produziu queijo coalho` : `Dia ${nextDayValue}: sem leite suficiente`;
+          if (w.role === 'queijeiro') action = queijeiroAction;
+          if (w.role === 'artesao') action = artesaoAction;
+          if (w.role === 'cozinheiro') action = cozinheiroAction;
           if (w.role === 'comerciante_residente') action = `Dia ${nextDayValue}: negociando no mercado`;
           return { ...w, lastAction: action };
         }));

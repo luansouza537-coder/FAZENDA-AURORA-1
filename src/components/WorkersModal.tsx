@@ -117,41 +117,49 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
             <div className="space-y-3">
               <h4 className="text-[#fbbf24] font-black text-xs uppercase">Disponíveis para Contratar</h4>
               {WORKER_TYPES.map(wt => {
-                const alreadyHired = workers.some(w => w.role === wt.role);
+                const SCALABLE_ROLES = ['queijeiro', 'artesao', 'cozinheiro'];
+                const maxPerRole = SCALABLE_ROLES.includes(wt.role) ? 3 : 1;
+                const hiredCount = workers.filter(w => w.role === wt.role).length;
+                const alreadyHired = hiredCount > 0;
+                const atRoleMax = hiredCount >= maxPerRole;
                 const maxSlots = Math.max(1, Math.floor(farmLevel / 3));
                 const atMax = workers.length >= maxSlots;
                 const levelOk = farmLevel >= wt.minLevel;
-                const canHire = !alreadyHired && !atMax && levelOk;
+                const canHire = !atRoleMax && !atMax && levelOk;
                 return (
                   <div key={wt.role} className={`bg-[#065f46] border-2 rounded-2xl p-4 transition-all ${alreadyHired ? 'border-[#10b981]' : levelOk ? 'border-[#fbbf24]/50' : 'border-[#fbbf24]/15 opacity-60'}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-[#fef3c7] font-black text-sm">{wt.emoji} {wt.name}</span>
-                          {alreadyHired && <span className="text-[9px] bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/40 rounded-full px-2 py-0.5 font-mono uppercase">Contratado</span>}
+                          {alreadyHired && <span className="text-[9px] bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/40 rounded-full px-2 py-0.5 font-mono uppercase">{hiredCount > 1 ? `${hiredCount}x Ativo` : 'Contratado'}</span>}
+                          {SCALABLE_ROLES.includes(wt.role) && <span className="text-[9px] bg-amber-500/15 text-amber-300 border border-amber-400/30 rounded-full px-1.5 py-0.5">Até {maxPerRole}x</span>}
                           {!levelOk && <span className="text-[9px] bg-red-900/40 text-red-300 border border-red-500/30 rounded-full px-2 py-0.5 font-mono uppercase">🔒 Nível {wt.minLevel}</span>}
                         </div>
                         <div className="text-[#fef3c7]/70 text-[11px] font-mono mt-1 leading-relaxed">{wt.desc}</div>
                         <div className="text-[#fbbf24] text-[10px] font-mono mt-1.5 flex items-center gap-2 flex-wrap">
-                          <span>-{wt.dailyCost}💰/dia</span>
+                          <span>-{wt.dailyCost}💰/dia{hiredCount > 1 ? ` × ${hiredCount} = -${wt.dailyCost * hiredCount}💰/dia` : ''}</span>
                           {(wt.role === 'tratador') && <span className="text-[9px] bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30 rounded-full px-1.5 py-0.5">Remove debuff geral</span>}
                           {(wt.role === 'ordenhador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Bovinos sem debuff</span>}
                           {(wt.role === 'tosquiador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Fibras/Caprinos sem debuff</span>}
                           {(wt.role === 'avicultor') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Aves sem debuff</span>}
                           {(wt.role === 'tratador_exotico') && <span className="text-[9px] bg-purple-500/15 text-purple-300 border border-purple-400/30 rounded-full px-1.5 py-0.5">Exóticos sem debuff</span>}
+                          {(wt.role === 'queijeiro') && alreadyHired && <span className="text-[9px] bg-amber-500/15 text-amber-300 border border-amber-400/30 rounded-full px-1.5 py-0.5">{hiredCount} queijo(s)/dia</span>}
+                          {(wt.role === 'artesao') && alreadyHired && <span className="text-[9px] bg-amber-500/15 text-amber-300 border border-amber-400/30 rounded-full px-1.5 py-0.5">{hiredCount} têxtil(is)/dia</span>}
+                          {(wt.role === 'cozinheiro') && alreadyHired && <span className="text-[9px] bg-amber-500/15 text-amber-300 border border-amber-400/30 rounded-full px-1.5 py-0.5">{hiredCount} prato(s)/dia</span>}
                         </div>
                       </div>
                       <button
                         disabled={!canHire}
                         onClick={() => { if (canHire) onHireWorker(wt); }}
                         className={`shrink-0 text-xs font-black uppercase px-3 py-2 rounded-xl border-2 cursor-pointer transition-all ${
-                          alreadyHired ? 'bg-[#10b981]/20 border-[#10b981] text-[#10b981] cursor-not-allowed' :
+                          atRoleMax ? 'bg-[#10b981]/20 border-[#10b981] text-[#10b981] cursor-not-allowed' :
                           !levelOk ? 'bg-[#022c22] border-[#fbbf24]/10 text-[#fef3c7]/20 cursor-not-allowed' :
                           atMax ? 'bg-[#022c22] border-[#fbbf24]/20 text-[#fef3c7]/30 cursor-not-allowed' :
                           'bg-[#fbbf24] border-[#fbbf24] text-[#78350f] hover:bg-[#f59e0b] hover:scale-105 active:translate-y-0.5'
                         }`}
                       >
-                        {alreadyHired ? '✅ Ativo' : !levelOk ? `🔒 Nível ${wt.minLevel}` : atMax ? `🚫 Máx ${maxSlots}` : 'Contratar'}
+                        {atRoleMax ? `✅ Máx (${maxPerRole})` : !levelOk ? `🔒 Nível ${wt.minLevel}` : atMax ? `🚫 Máx ${maxSlots}` : alreadyHired ? `+1 Contratar` : 'Contratar'}
                       </button>
                     </div>
                   </div>

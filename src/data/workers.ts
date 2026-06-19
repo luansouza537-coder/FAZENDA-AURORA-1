@@ -8,4 +8,6 @@ export const WORKER_TYPES = [
   { role: 'tratador_exotico'     as const, name: 'Tratador Exótico',   emoji: '🦎',  dailyCost: 65,  desc: 'Cuida de jacarés, rãs e caracóis: +5 felicidade/dia e -50% chance de epidemia nesses animais.',                                  minLevel: 8 },
   { role: 'veterinario'          as const, name: 'Veterinário',        emoji: '💉',  dailyCost: 80,  desc: 'Cura doenças, remove estresse e adiciona +5 felicidade para todos os animais por dia.',                                           minLevel: 10 },
   { role: 'comerciante_residente'as const, name: 'Comerciante',        emoji: '💰',  dailyCost: 120, desc: '+8% no preço de venda de leite, lã, ovos, seda, couro e carne bruta.',                                                           minLevel: 10 },
+  { role: 'artesao'              as const, name: 'Artesão',            emoji: '🧵',  dailyCost: 45,  desc: 'Produz 1 item têxtil por dia: prioriza Manta Premium, Fio de Seda, Tecido, Cachecol Angorá e Tapete. Até 3 artesãos simultâneos.', minLevel: 6  },
+  { role: 'cozinheiro'           as const, name: 'Cozinheiro',         emoji: '👨‍🍳',  dailyCost: 55,  desc: 'Produz 1 item gastronômico por dia: prioriza Hidromel, Mel Envasado, Risoto, Conservas e Sopa. Até 3 cozinheiros simultâneos.',   minLevel: 7  },
 ];

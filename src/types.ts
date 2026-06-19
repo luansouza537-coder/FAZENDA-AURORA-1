@@ -130,7 +130,7 @@ export interface LogMessage {
 
 export interface FarmWorker {
   id: string;
-  role: 'tratador' | 'composteiro' | 'tosquiador' | 'ordenhador' | 'avicultor' | 'queijeiro' | 'tratador_exotico' | 'veterinario' | 'comerciante_residente';
+  role: 'tratador' | 'composteiro' | 'tosquiador' | 'ordenhador' | 'avicultor' | 'queijeiro' | 'tratador_exotico' | 'veterinario' | 'comerciante_residente' | 'artesao' | 'cozinheiro';
   name: string;
   dailyCost: number;
   hiredDay: number;
