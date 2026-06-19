@@ -81,7 +81,7 @@ interface AnimalGridProps {
   retireAnimal: (id: number, e?: React.MouseEvent) => void;
   getAnimalDailyProfit: (animal: Animal) => number;
   getTraitInfo: (trait: string) => { label: string; color: string; description: string };
-  getLifePhase: (animal: Animal) => string;
+  getLifePhase: (animal: Animal) => { phase: string; label: string; emoji: string; prodMult: number; color: string };
   getBoiEmoji: (animal: Animal) => string;
   renderGrowthBadge: (animal: Animal) => React.ReactNode;
   setCruzarModal: (v: { animalId: number; type: AnimalType } | null) => void;

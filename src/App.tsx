@@ -2788,13 +2788,14 @@ function GameApp() {
   const processarMaturacaoQueijos = (
     currentMaturacao: MaturacaoItem[],
     nextDayVal: number,
-    logs: { msg: string; type: LogMessage['type'] }[]
+    logs: { msg: string; type: LogMessage['type'] }[],
+    decrementBy: number = 1
   ) => {
     const readyQueijos: string[] = [];
     const remaining: MaturacaoItem[] = [];
 
     currentMaturacao.forEach(item => {
-      const nextDias = item.diasRestantes - 1;
+      const nextDias = item.diasRestantes - decrementBy;
       if (nextDias <= 0) {
         readyQueijos.push(item.tipo);
       } else {
@@ -4483,10 +4484,9 @@ function GameApp() {
       });
 
       // --- SUBFUNÇÃO 5: Processamento da Maturação de Queijos ---
-      const maturacaoInput = hasLaboratorio
-        ? queijosEmMaturacao.map(q => ({ ...q, diasRestantes: Math.max(0, q.diasRestantes - 1) }))
-        : queijosEmMaturacao;
-      const { remaining: maturacaoRemaining, readyQueijos } = processarMaturacaoQueijos(maturacaoInput, nextDayValue, logsToAdd);
+      const { remaining: maturacaoRemaining, readyQueijos } = processarMaturacaoQueijos(
+        queijosEmMaturacao, nextDayValue, logsToAdd, hasLaboratorio ? 2 : 1
+      );
       setQueijosEmMaturacao(maturacaoRemaining);
 
       if (readyQueijos.length > 0) {
@@ -5083,30 +5083,36 @@ function GameApp() {
         }
 
         // --- Artesão: produz 1 item têxtil por artesão (prioridade: Manta > Fio > Tecido > Angorá > Tapete > Cachecol) ---
+        // --- Artesão: produz 1 têxtil premium por artesão (cachecol usa fila manual; artesão faz peças premium) ---
         const artesaosCount = workers.filter(w => w.role === 'artesao').length;
         let artesaoAction = `Dia ${nextDayValue}: sem materiais disponíveis`;
         if (artesaosCount > 0) {
+          type TextileRecipe = { consume: [string, number][]; produce: string; label: string; energy: number };
+          const textilePriority: TextileRecipe[] = [
+            { consume: [['fio_seda',1],['cachecol_angora',1],['tecido_alpaca',1]], produce: 'manta_premium',   label: 'Manta Premium',   energy: 3 },
+            { consume: [['seda_bruta',2]],                                          produce: 'fio_seda',        label: 'Fio de Seda',     energy: 1 },
+            { consume: [['alpaca_wool',3]],                                         produce: 'tecido_alpaca',   label: 'Tecido de Alpaca',energy: 2 },
+            { consume: [['angora_wool',2]],                                         produce: 'cachecol_angora', label: 'Cachecol Angorá', energy: 1 },
+            { consume: [['llama_wool',3]],                                          produce: 'tapete_lhama',    label: 'Tapete de Lhama', energy: 2 },
+          ];
           let artesaosLeft = artesaosCount;
-          let artesaoItens: string[] = [];
-          const inv = { ...inventory } as Record<string, number>;
-          const tryTextile = (key: string, consume: [string, number][], produce: string, label: string) => {
-            while (artesaosLeft > 0 && consume.every(([k, n]) => (inv[k] ?? 0) >= n)) {
-              consume.forEach(([k, n]) => { inv[k] = (inv[k] ?? 0) - n; });
-              inv[produce] = (inv[produce] ?? 0) + 1;
-              artesaoItens.push(label);
+          const artesaoItens: string[] = [];
+          // delta puro: acumula apenas +/- em relação ao inventário atual do closure
+          const artesaoDelta: Record<string, number> = {};
+          const getEffective = (k: string) => ((inventory as Record<string,number>)[k] ?? 0) + (artesaoDelta[k] ?? 0);
+          for (const recipe of textilePriority) {
+            while (artesaosLeft > 0 && recipe.consume.every(([k, n]) => getEffective(k) >= n)) {
+              recipe.consume.forEach(([k, n]) => { artesaoDelta[k] = (artesaoDelta[k] ?? 0) - n; });
+              artesaoDelta[recipe.produce] = (artesaoDelta[recipe.produce] ?? 0) + 1;
+              artesaoItens.push(recipe.label);
+              craftEnergyRef.current += recipe.energy;
               artesaosLeft--;
             }
-          };
-          tryTextile('manta_premium',   [['fio_seda',1],['cachecol_angora',1],['tecido_alpaca',1]], 'manta_premium',   'Manta Premium');
-          tryTextile('fio_seda',        [['seda_bruta',2]],                                          'fio_seda',        'Fio de Seda');
-          tryTextile('tecido_alpaca',   [['alpaca_wool',3]],                                         'tecido_alpaca',   'Tecido de Alpaca');
-          tryTextile('cachecol_angora', [['angora_wool',2]],                                         'cachecol_angora', 'Cachecol Angorá');
-          tryTextile('tapete_lhama',    [['llama_wool',3]],                                          'tapete_lhama',    'Tapete de Lhama');
-          tryTextile('scarf',           [['wool',2]],                                                'scarf',           'Cachecol');
+          }
           if (artesaoItens.length > 0) {
             setInventory(prev => {
               const next = { ...prev } as Record<string, number>;
-              Object.keys(inv).forEach(k => { next[k] = inv[k]; });
+              Object.entries(artesaoDelta).forEach(([k, d]) => { next[k] = Math.max(0, (next[k] ?? 0) + d); });
               return next as typeof inventory;
             });
             logsToAdd.push({ msg: `🧵 ${artesaosCount > 1 ? `${artesaosCount} Artesãos produziram` : 'Artesão produziu'}: ${artesaoItens.join(', ')}!`, type: 'success' });
@@ -5114,31 +5120,37 @@ function GameApp() {
           }
         }
 
-        // --- Cozinheiro: produz 1 item gastronômico por cozinheiro (prioridade: Hidromel > Mel > Risoto > Conserva Peixe > Sopa > Maionese) ---
+        // --- Cozinheiro: produz 1 item gastronômico por cozinheiro ---
         const cozinheirosCount = workers.filter(w => w.role === 'cozinheiro').length;
         let cozinheiroAction = `Dia ${nextDayValue}: sem ingredientes disponíveis`;
         if (cozinheirosCount > 0) {
+          type CookRecipe = { consume: [string, number][]; produce: string; label: string; energy: number; water: number };
+          const cookPriority: CookRecipe[] = [
+            { consume: [['mel',2],['milk',3]], produce: 'hidromel',        label: 'Hidromel',           energy: 1, water: 1 },
+            { consume: [['mel',3]],            produce: 'mel_envasado',    label: 'Mel Envasado',       energy: 1, water: 0 },
+            { consume: [['cogumelo',3]],        produce: 'risoto_cogumelo', label: 'Risoto de Cogumelo', energy: 1, water: 2 },
+            { consume: [['peixe',2]],           produce: 'conserva_peixe',  label: 'Conserva de Peixe',  energy: 1, water: 1 },
+            { consume: [['cogumelo',2]],        produce: 'sopa_cogumelo',   label: 'Sopa de Cogumelo',   energy: 1, water: 2 },
+            { consume: [['egg',2]],             produce: 'mayo',            label: 'Maionese',           energy: 1, water: 0 },
+          ];
           let cooksLeft = cozinheirosCount;
-          let cookItens: string[] = [];
-          const cinv = { ...inventory } as Record<string, number>;
-          const tryCook = (consume: [string, number][], produce: string, label: string) => {
-            while (cooksLeft > 0 && consume.every(([k, n]) => (cinv[k] ?? 0) >= n)) {
-              consume.forEach(([k, n]) => { cinv[k] = (cinv[k] ?? 0) - n; });
-              cinv[produce] = (cinv[produce] ?? 0) + 1;
-              cookItens.push(label);
+          const cookItens: string[] = [];
+          const cookDelta: Record<string, number> = {};
+          const getEffectiveCook = (k: string) => ((inventory as Record<string,number>)[k] ?? 0) + (cookDelta[k] ?? 0);
+          for (const recipe of cookPriority) {
+            while (cooksLeft > 0 && recipe.consume.every(([k, n]) => getEffectiveCook(k) >= n)) {
+              recipe.consume.forEach(([k, n]) => { cookDelta[k] = (cookDelta[k] ?? 0) - n; });
+              cookDelta[recipe.produce] = (cookDelta[recipe.produce] ?? 0) + 1;
+              cookItens.push(recipe.label);
+              craftEnergyRef.current += recipe.energy;
+              craftWaterRef.current += recipe.water;
               cooksLeft--;
             }
-          };
-          tryCook([['mel',2],['milk',3]],        'hidromel',       'Hidromel');
-          tryCook([['mel',3]],                    'mel_envasado',   'Mel Envasado');
-          tryCook([['cogumelo',3]],               'risoto_cogumelo','Risoto de Cogumelo');
-          tryCook([['peixe',2]],                  'conserva_peixe', 'Conserva de Peixe');
-          tryCook([['cogumelo',2]],               'sopa_cogumelo',  'Sopa de Cogumelo');
-          tryCook([['egg',2]],                    'mayo',           'Maionese');
+          }
           if (cookItens.length > 0) {
             setInventory(prev => {
               const next = { ...prev } as Record<string, number>;
-              Object.keys(cinv).forEach(k => { next[k] = cinv[k]; });
+              Object.entries(cookDelta).forEach(([k, d]) => { next[k] = Math.max(0, (next[k] ?? 0) + d); });
               return next as typeof inventory;
             });
             logsToAdd.push({ msg: `👨‍🍳 ${cozinheirosCount > 1 ? `${cozinheirosCount} Cozinheiros produziram` : 'Cozinheiro produziu'}: ${cookItens.join(', ')}!`, type: 'success' });
