@@ -27,11 +27,13 @@ interface ContractsModalProps {
 }
 
 const PRODUCT_LABELS: Record<string, string> = {
-  milk: '🥛 Leite Cru', wool: '🧶 Lã Crua', egg: '🥚 Ovos', cheese: '🧀 Queijo Simples',
+  milk: '🥛 Leite Cru', wool: '🧶 Lã Crua', egg: '🥚 Ovos Caipiras', cheese: '🧀 Queijo Simples',
   queijoCoalho: '🧀 Queijo Coalho', queijoMucarela: '🧀 Queijo Muçarela', queijoBrie: '🧀 Queijo Brie',
-  butter: '🧈 Manteiga', yogurt: '🥛 Iogurte', goat_milk: '🐐 Leite de Cabra',
-  buffalo_milk: '🐃 Leite de Búfala', duck_egg: '🦆 Ovo de Pato', quail_egg: '🐦 Ovo de Codorna',
-  feather: '🪶 Penas', angora_wool: '🐇 Lã Angorá', alpaca_wool: '🦙 Lã de Alpaca',
+  butter: '🧈 Manteiga Artesanal', yogurt: '🥛 Iogurte Natural', goat_milk: '🐐 Leite de Cabra',
+  buffalo_milk: '🐃 Leite de Búfala', buffalo_mozzarella: '🐃 Mozzarella de Búfala',
+  duck_egg: '🦆 Ovo de Pato', quail_egg: '🐦 Ovo de Codorna', goose_egg: '🪿 Ovo de Ganso',
+  feather: '🪶 Penas', peacock_feather: '🦚 Penas de Pavão',
+  angora_wool: '🐇 Lã Angorá', alpaca_wool: '🦙 Lã de Alpaca', llama_wool: '🦙 Lã de Lhama',
   muco: '🐌 Muco de Caracol', seda_bruta: '🐛 Seda Bruta', mel_envasado: '🍯 Mel Envasado',
   boi: '🐂 Boi (Carne)', porco: '🐷 Porco (Carne)', boi_porco: '🥩 Boi + Porco (Misto)',
 };

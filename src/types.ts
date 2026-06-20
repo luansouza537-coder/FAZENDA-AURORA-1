@@ -90,7 +90,7 @@ export interface Animal {
 // Funcionalidade 4: Contratos de fornecimento
 export interface Contract {
   id: string;
-  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'feather' | 'angora_wool' | 'alpaca_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'boi' | 'porco' | 'boi_porco';
+  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'buffalo_mozzarella' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'goose_egg' | 'feather' | 'peacock_feather' | 'angora_wool' | 'alpaca_wool' | 'llama_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'boi' | 'porco' | 'boi_porco';
   quantity: number;
   delivered: number;
   pricePerUnit: number;

@@ -1006,7 +1006,12 @@ export function useInventory({
     const contractProductMap: Record<string, Contract['product']> = {
       milk: 'milk', wool: 'wool', egg: 'egg',
       cheese: 'cheese', queijoCoalho: 'queijoCoalho', queijoMucarela: 'queijoMucarela', queijoBrie: 'queijoBrie',
-      butter: 'butter', alpaca_wool: 'alpaca_wool', muco: 'muco', mel_envasado: 'mel_envasado', seda_bruta: 'seda_bruta',
+      butter: 'butter', yogurt: 'yogurt',
+      goat_milk: 'goat_milk', buffalo_milk: 'buffalo_milk', buffalo_mozzarella: 'buffalo_mozzarella',
+      duck_egg: 'duck_egg', quail_egg: 'quail_egg', goose_egg: 'goose_egg',
+      feather: 'feather', peacock_feather: 'peacock_feather',
+      alpaca_wool: 'alpaca_wool', angora_wool: 'angora_wool', llama_wool: 'llama_wool',
+      muco: 'muco', mel_envasado: 'mel_envasado', seda_bruta: 'seda_bruta',
     };
     const contractProduct = contractProductMap[itemType as string];
     if (contractProduct) {
