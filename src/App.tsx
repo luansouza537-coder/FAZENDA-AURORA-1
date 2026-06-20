@@ -1005,7 +1005,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 localStorage.removeItem('aurora_import_autoload');
                 setCurrentScreen('game');
               } else {
-                setCurrentScreen('title');
+                setCurrentScreen('game');
               }
             }, 300);
             return 100;
