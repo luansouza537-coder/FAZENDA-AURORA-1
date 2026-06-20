@@ -36,6 +36,12 @@ const PRODUCT_LABELS: Record<string, string> = {
   angora_wool: '🐇 Lã Angorá', alpaca_wool: '🦙 Lã de Alpaca', llama_wool: '🦙 Lã de Lhama',
   muco: '🐌 Muco de Caracol', seda_bruta: '🐛 Seda Bruta', mel_envasado: '🍯 Mel Envasado',
   boi: '🐂 Boi (Carne)', porco: '🐷 Porco (Carne)', boi_porco: '🥩 Boi + Porco (Misto)',
+  mayo: '🥚 Maionese Artesanal', queijo_cabra: '🐐 Queijo de Cabra', iogurte_cabra: '🐐 Iogurte de Cabra',
+  tapete_lhama: '🦙 Tapete de Lhama', leite_condensado: '🥛 Leite Condensado',
+  tecido_alpaca: '🦙 Tecido de Alpaca', cachecol_angora: '🐇 Cachecol Angorá',
+  coxa_ra: '🐸 Coxa de Rã', pena_grande: '🦤 Pena de Avestruz',
+  carne_avestruz: '🦤 Carne de Avestruz', couro_avestruz: '🦤 Couro de Avestruz',
+  fio_seda: '🪡 Fio de Seda', carne_jacare: '🐊 Carne de Jacaré', couro_jacare: '🐊 Couro de Jacaré',
 };
 
 export const ContractsModal: React.FC<ContractsModalProps> = ({

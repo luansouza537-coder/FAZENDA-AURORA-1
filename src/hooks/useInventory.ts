@@ -1012,6 +1012,11 @@ export function useInventory({
       feather: 'feather', peacock_feather: 'peacock_feather',
       alpaca_wool: 'alpaca_wool', angora_wool: 'angora_wool', llama_wool: 'llama_wool',
       muco: 'muco', mel_envasado: 'mel_envasado', seda_bruta: 'seda_bruta',
+      mayo: 'mayo', queijo_cabra: 'queijo_cabra', iogurte_cabra: 'iogurte_cabra',
+      tapete_lhama: 'tapete_lhama', leite_condensado: 'leite_condensado', tecido_alpaca: 'tecido_alpaca',
+      cachecol_angora: 'cachecol_angora', coxa_ra: 'coxa_ra', pena_grande: 'pena_grande',
+      carne_avestruz: 'carne_avestruz', couro_avestruz: 'couro_avestruz',
+      fio_seda: 'fio_seda', carne_jacare: 'carne_jacare', couro_jacare: 'couro_jacare',
     };
     const contractProduct = contractProductMap[itemType as string];
     if (contractProduct) {
