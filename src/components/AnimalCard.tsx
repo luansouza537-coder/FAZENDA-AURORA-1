@@ -567,7 +567,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               : animal.type === 'ganso'
               ? "🦢 Bota ovos de ganso a cada 3 dias no Outono/Inverno. Fora dessa época, gera penas a cada 7 dias. Funciona como alarme de eventos negativos."
               : animal.type === 'bufalo'
-              ? "🐃 Produz leite de búfala em grandes quantidades (3u/dia). No Verão sofre estresse térmico (-1u). Seu leite pode virar Muçarela de Búfala (120💰)."
+              ? "🐃 Produz leite de búfala (3u/dia, 28💰/u). No Verão sofre estresse térmico (-1u). Seu leite pode virar Muçarela de Búfala (120💰)."
               : animal.type === 'pavao'
               ? "🦚 Animal de prestígio. Gera penas semanalmente na Primavera/Verão (80💰/u). Com felicidade ≥80%, bônus de +10% felicidade para todos e +3-5% nos preços de venda."
               : "🥚 Bota ricos ovos de quintal se manter felicidade > 30% e fome > 25%."}
@@ -951,8 +951,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           </button>
         )}
 
-        {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré e cabra (cabra tem botão próprio após coleta) */}
-        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'lhama' && (() => {
+        {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré, cabra, lhama e búfalo (têm botões próprios) */}
+        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'lhama' && animal.type !== 'bufalo' && (() => {
           const age = animal.age ?? 0;
           const maxAge = animal.maxAge ?? 90;
           const lifeFraction = Math.min(1, age / maxAge);
@@ -1134,6 +1134,35 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             🥛 Leite Búfala
           </button>
         )}
+
+        {/* Vender Búfalo — após botão de coleta de leite */}
+        {animal.type === 'bufalo' && animal.isAdult !== false && (() => {
+          const age = animal.age ?? 0;
+          const maxAge = animal.maxAge ?? 90;
+          const lifeFraction = Math.min(1, age / maxAge);
+          const sellPct = Math.max(0.10, 0.80 - lifeFraction * 0.70);
+          if (pendingSell) {
+            return (
+              <div className="flex items-center gap-1.5 bg-orange-50 border-2 border-orange-300 rounded-xl px-2 py-1.5 animate-pulse-once">
+                <span className="text-[9px] font-mono font-black text-orange-700 leading-tight">
+                  Vender {animal.name}?<br/>
+                  <span className="text-orange-500">~{Math.round(sellPct * 100)}% do valor</span>
+                </span>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); onSellAnimal(animal.id, e); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+              </div>
+            );
+          }
+          return (
+            <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(true); }}
+              className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-b-4 border-orange-400 bg-orange-50 text-orange-800 hover:bg-orange-100 hover:scale-[1.03] active:translate-y-0.5 cursor-pointer transition-all shadow-sm"
+              title={`Vender por ~${Math.round(sellPct * 100)}% do valor.`}>
+              💸 Vender ({Math.round(sellPct * 100)}%)
+            </button>
+          );
+        })()}
 
         {/* Alpaca: coletar lã */}
         {animal.type === 'alpaca' && (

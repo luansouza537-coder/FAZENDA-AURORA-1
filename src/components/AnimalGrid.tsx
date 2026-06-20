@@ -618,7 +618,7 @@ export default function AnimalGrid({
                     {farmLevel < 4 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv4+</span>}
                     <span className="text-4xl">🐃</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Búfalo Leiteiro</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite de búfala 55💰/u. Pode virar Muçarela 120💰!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite de búfala 28💰/u. Pode virar Muçarela 120💰!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('bufalo')}</span>
                     <div className="relative w-full">
                       {farmLevel >= 4 && (

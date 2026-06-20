@@ -1046,15 +1046,8 @@ export function useAnimals({
     if (type === 'jacare' && farmLevel < 18) { addLog('🔒 Jacaré requer Nível 18!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'porco' && farmLevel < 4) { addLog('🔒 Porco requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
 
-    // Verificar ração disponível
-    const { feedType, feedLabel } = getAnimalFeedType(type);
+    const { feedType } = getAnimalFeedType(type);
     const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
-    if (!noFeedAnimals.includes(type) && (inventory[feedType] ?? 0) < 1) {
-      addLog(`🌾 Você precisa de 1 saco de ${feedLabel} para trazer o animal. Compre na loja!`, 'error');
-      triggerAudioResult(() => sfx.playSound('error'));
-      spawnFeedback('❌', `Falta ${feedLabel}!`, event);
-      return;
-    }
 
     const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : getRandomName(type);
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
@@ -1127,7 +1120,7 @@ export function useAnimals({
     else if (type === 'avestruz') typeLabel = '🦤 Avestruz';
     else if (type === 'jacare') typeLabel = '🐊 Jacaré';
 
-    const feedMsg = noFeedAnimals.includes(type) ? 'chegou à fazenda!' : 'chegou à fazenda e foi alimentado com 1 saco de ração!';
+    const feedMsg = 'chegou à fazenda!';
     addLog(`🐄 ${newAnimal.name} ${feedMsg}`, 'success');
     addLog(`✨ Parabéns! Você comprou ${newAnimal.name} (${typeLabel}) por ${price} moedas!`, 'success');
     setFarmXp(prev => prev + 5);
@@ -1179,14 +1172,8 @@ export function useAnimals({
       return;
     }
 
-    const { feedType, feedLabel } = getAnimalFeedType(type);
+    const { feedType } = getAnimalFeedType(type);
     const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
-    if (!noFeedAnimals.includes(type) && (inventory[feedType] ?? 0) < 1) {
-      addLog(`🌾 Você precisa de 1 saco de ${feedLabel} para trazer o filhote. Compre na loja!`, 'error');
-      triggerAudioResult(() => sfx.playSound('error'));
-      spawnFeedback('❌', `Falta ${feedLabel}!`, event);
-      return;
-    }
 
     const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : getRandomName(type);
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;

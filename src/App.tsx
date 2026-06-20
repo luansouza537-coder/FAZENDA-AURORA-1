@@ -1645,7 +1645,7 @@ function GameApp() {
     if (itemType === 'llama_wool') return 28;
     if (itemType === 'duck_egg') return farmLevel >= 5 ? 22 : 18;
     if (itemType === 'goose_egg') return 50;
-    if (itemType === 'buffalo_milk') return farmLevel >= 6 ? 62 : 55;
+    if (itemType === 'buffalo_milk') return farmLevel >= 6 ? 35 : 28;
     if (itemType === 'buffalo_mozzarella') return 120;
     if (itemType === 'feather') return 15;
     if (itemType === 'peacock_feather') return 80;
