@@ -4272,7 +4272,7 @@ function GameApp() {
       {
         const producingCodornas = finalAnimals.filter(a => a.type === 'codorna' && a.hasProducedToday);
         if (producingCodornas.length > 0) {
-          const eggs = producingCodornas.length * 3;
+          const eggs = producingCodornas.length * 2;
           setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) + eggs }));
           logsToAdd.push({ msg: `🐦 ${producingCodornas.length} codorna(s) botaram ${eggs} ovos de codorna!`, type: 'success' });
         }
@@ -5444,7 +5444,7 @@ function GameApp() {
     else if (type === 'ganso') revenue = getItemBaseSellPrice('goose_egg') / 3;
     else if (type === 'bufalo') revenue = getItemBaseSellPrice('buffalo_milk') * 3;
     else if (type === 'pavao') revenue = getItemBaseSellPrice('peacock_feather') / 7;
-    else if (type === 'codorna') revenue = getItemBaseSellPrice('quail_egg') * 6;
+    else if (type === 'codorna') revenue = getItemBaseSellPrice('quail_egg') * 2;
     else if (type === 'alpaca') revenue = getItemBaseSellPrice('alpaca_wool') / 4;
     else if (type === 'minhoca') revenue = getItemBaseSellPrice('humus') / 3;
     else if (type === 'caracol') revenue = getItemBaseSellPrice('muco') / 3;

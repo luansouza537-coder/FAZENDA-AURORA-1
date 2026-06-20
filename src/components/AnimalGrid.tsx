@@ -680,7 +680,7 @@ export default function AnimalGrid({
                     {farmLevel < 3 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv3+</span>}
                     <span className="text-4xl">🐦</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Codorna</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">6 ovos de codorna/dia 22💰/u. Ração de galinha.</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">2 ovos de codorna/dia 22💰/u. Ração de Aves.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('codorna')}</span>
                     <button type="button" onClick={(e) => buyAnimal('codorna', e)} disabled={gold < getAnimalPurchasePrice('codorna') || farmLevel < 3}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -729,7 +729,7 @@ export default function AnimalGrid({
                     {farmLevel < 7 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv7+</span>}
                     <span className="text-4xl">🐌</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Caracol</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Muco 120💰/u a cada 3 dias. 2x na chuva. Sem ração!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Muco 35💰/u a cada 3 dias. Sem ração!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('caracol')}</span>
                     <button type="button" onClick={(e) => buyAnimal('caracol', e)} disabled={gold < getAnimalPurchasePrice('caracol') || farmLevel < 7}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -768,7 +768,7 @@ export default function AnimalGrid({
                     {farmLevel < 12 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv12+</span>}
                     <span className="text-4xl">🐸</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Rã</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Coxa de rã 70💰/u a cada 7 dias. +50% na chuva!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Coxa de rã 110💰/u a cada 7 dias. +50% na chuva!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('ra')}</span>
                     <button type="button" onClick={(e) => buyAnimal('ra', e)} disabled={gold < getAnimalPurchasePrice('ra') || farmLevel < 12}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -802,7 +802,7 @@ export default function AnimalGrid({
                       <ellipse cx="13" cy="27" rx="5" ry="4" fill="#b45309" transform="rotate(-20 13 27)"/>
                     </svg>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Avestruz</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Penas 60💰/u (7d), carne 180💰, couro 300💰 (na morte)!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Penas 90💰/u (7d), carne 220💰, couro 260💰 (na morte)!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('avestruz')}</span>
                     <button type="button" onClick={(e) => buyAnimal('avestruz', e)} disabled={gold < getAnimalPurchasePrice('avestruz') || farmLevel < 15}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -816,7 +816,7 @@ export default function AnimalGrid({
                     {farmLevel >= 18 && <span className="absolute -top-2.5 -right-2 bg-red-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">⚠️ Exótico</span>}
                     <span className="text-4xl">🐊</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Jacaré</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Carne 250💰, couro 400💰 (na morte). Requer Licença Exótica!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Carne 300💰, couro 500💰 (na morte). Requer Licença Exótica!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('jacare')}</span>
                     <button type="button" onClick={(e) => buyAnimal('jacare', e)} disabled={gold < getAnimalPurchasePrice('jacare') || farmLevel < 18}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
