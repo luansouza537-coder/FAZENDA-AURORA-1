@@ -67,6 +67,7 @@ import { ReproducoesModal, RankingModal, FairResultModal, AllTimeStatsModal, Cru
 import GameSidebar from './components/GameSidebar';
 import AnimalGrid from './components/AnimalGrid';
 import { ToastNotification, Toast } from './components/ToastNotification';
+import { DaySummaryModal, DaySummary } from './components/DaySummaryModal';
 
 
 interface FloatingText {
@@ -179,6 +180,17 @@ function GameApp() {
   const removeToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
+
+  // Day Summary Modal
+  const [showDaySummary, setShowDaySummary] = useState<boolean>(false);
+  const [pendingDaySummary, setPendingDaySummary] = useState<DaySummary | null>(null);
+  const [dayGoldEarned, setDayGoldEarned] = useState<number>(0);
+  const [dayGoldSpent, setDayGoldSpent] = useState<number>(0);
+  const [dayAnimalsFedfed, setDayAnimalsFedfed] = useState<number>(0);
+  const [dayItemsCollected, setDayItemsCollected] = useState<number>(0);
+  const [dayContractDeliveries, setDayContractDeliveries] = useState<number>(0);
+
+  const pendingAdvanceDayRef = useRef<React.MouseEvent | null>(null);
 
   // priceHistory moved to useEconomy
 
@@ -2002,6 +2014,37 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     addFinancialEntry,
     canAddToInventory,
   });
+
+  // --- Day Summary wrapper ---
+  const handleAdvanceDayWithSummary = useCallback((e: React.MouseEvent) => {
+    const summary: DaySummary = {
+      day: currentDay,
+      goldEarned: dayGoldEarned,
+      goldSpent: dayGoldSpent,
+      animalsFedfed: dayAnimalsFedfed,
+      itemsCollected: dayItemsCollected,
+      contractDeliveries: dayContractDeliveries,
+    };
+    pendingAdvanceDayRef.current = e;
+    setPendingDaySummary(summary);
+    setShowDaySummary(true);
+  }, [currentDay, dayGoldEarned, dayGoldSpent, dayAnimalsFedfed, dayItemsCollected, dayContractDeliveries]);
+
+  const handleDaySummaryClose = useCallback(() => {
+    setShowDaySummary(false);
+    setPendingDaySummary(null);
+    // Reset day counters
+    setDayGoldEarned(0);
+    setDayGoldSpent(0);
+    setDayAnimalsFedfed(0);
+    setDayItemsCollected(0);
+    setDayContractDeliveries(0);
+    if (pendingAdvanceDayRef.current !== null) {
+      const evt = pendingAdvanceDayRef.current;
+      pendingAdvanceDayRef.current = null;
+      advanceDayRef.current(evt);
+    }
+  }, [advanceDayRef]);
 
   // --- Toast-wired wrappers for key actions ---
   const feedAnimalWithToast = useCallback((id: number, event: React.MouseEvent) => {
@@ -6304,7 +6347,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             debugMode={debugMode}
             setDebugMode={setDebugMode}
             isGameOver={isGameOver}
-            advanceDay={advanceDay}
+            advanceDay={handleAdvanceDayWithSummary}
             isSleeping={isSleeping}
             setIsSleeping={setIsSleeping}
             isSleepingRef={isSleepingRef}
@@ -6322,10 +6365,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             stats={stats}
             currentDay={currentDay}
             inventory={inventory}
-            feedAnimal={feedAnimal}
-            collectMilk={collectMilk}
+            feedAnimal={feedAnimalWithToast}
+            collectMilk={collectMilkWithToast}
             collectWool={collectWool}
-            collectEgg={collectEgg}
+            collectEgg={collectEggWithToast}
             sellOx={sellOx}
             calculateBoiValue={calculateBoiValue}
             calculatePorcoValue={calculatePorcoValue}
@@ -6925,6 +6968,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       {/* Toast Notifications */}
       <ToastNotification toasts={toasts} onRemove={removeToast} />
+
+      {/* Day Summary Modal */}
+      {showDaySummary && pendingDaySummary && (
+        <DaySummaryModal summary={pendingDaySummary} onClose={handleDaySummaryClose} />
+      )}
 
     </div>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Contract } from '../types';
 
@@ -48,6 +48,23 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
   contracts, currentDay, farmLevel, gold, longContractCatalog, onSignLongContract, onClose
 }) => {
   const longContracts = contracts.filter(c => c.active && c.contractType === 'long');
+  const [levelFilter, setLevelFilter] = useState<'all' | '1-5' | '6-10' | '11-15' | '16+'>('all');
+
+  const filteredCatalog = longContractCatalog.filter(cat => {
+    if (levelFilter === '1-5') return cat.minLevel >= 1 && cat.minLevel <= 5;
+    if (levelFilter === '6-10') return cat.minLevel >= 6 && cat.minLevel <= 10;
+    if (levelFilter === '11-15') return cat.minLevel >= 11 && cat.minLevel <= 15;
+    if (levelFilter === '16+') return cat.minLevel >= 16;
+    return true;
+  });
+
+  const getStars = (cat: LongContractCatalogEntry): string => {
+    if (!cat.baseMarket || cat.baseMarket === 0) return '⭐';
+    const premiumPct = ((cat.pricePerUnit - cat.baseMarket) / cat.baseMarket) * 100;
+    if (premiumPct >= 60) return '⭐⭐⭐';
+    if (premiumPct >= 30) return '⭐⭐';
+    return '⭐';
+  };
 
   return (
     <motion.div
@@ -115,9 +132,21 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
 
               {/* Catalog */}
               <div>
-                <h4 className="font-display font-black text-xs uppercase text-stone-500 mb-3">📋 Catálogo de Fornecedores</h4>
+                <h4 className="font-display font-black text-xs uppercase text-stone-500 mb-2">📋 Catálogo de Fornecedores</h4>
+                {/* Level filter chips */}
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {(['all', '1-5', '6-10', '11-15', '16+'] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setLevelFilter(f)}
+                      className={`text-[10px] font-mono font-black px-2.5 py-1 rounded-full border cursor-pointer transition-all ${levelFilter === f ? 'bg-violet-600 text-white border-violet-800' : 'bg-white text-violet-700 border-violet-300 hover:bg-violet-50'}`}
+                    >
+                      {f === 'all' ? 'Todos' : `Nível ${f}`}
+                    </button>
+                  ))}
+                </div>
                 <div className="space-y-3">
-                  {longContractCatalog.map(cat => {
+                  {filteredCatalog.map(cat => {
                     const isActive = contracts.some(c => c.contractType === 'long' && c.active && c.catalogId === cat.catalogId);
                     const locked = farmLevel < cat.minLevel;
                     const weeks = Math.round(cat.durationDays / 7);
@@ -133,6 +162,7 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                           <div className="text-right">
                             <div className="text-xs font-black text-green-700">{cat.pricePerUnit}💰/un</div>
                             <div className="text-[10px] font-mono text-green-600">+{premiumPct}% acima do mercado</div>
+                            <div className="text-[11px] mt-0.5" title="Rentabilidade">{getStars(cat)}</div>
                           </div>
                         </div>
                         <p className="text-[11px] text-stone-600 font-mono mb-2.5 leading-relaxed">{cat.description}</p>
