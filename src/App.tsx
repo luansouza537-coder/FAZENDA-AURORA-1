@@ -48,7 +48,7 @@ import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract, FarmS
 import { getRandomName, getUniqueOxName } from './names';
 import { sfx, music } from './utils/audio';
 import SeasonalParticles from './components/SeasonalParticles';
-import { ContractsModal, PendingContractModal } from './components/ContractsModal';
+import { ContractsModal } from './components/ContractsModal';
 import { AnimalCard, AnimalListRow } from './components/AnimalCard';
 import { MissionsModal } from './components/MissionsModal';
 import WorkersModal from './components/WorkersModal';
@@ -301,8 +301,7 @@ function GameApp() {
   });
   const [showBuyMenu, setShowBuyMenu] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
-  const [pendingContractOffer, setPendingContractOffer] = useState<import('./types').Contract | null>(null);
-  const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>('splash');
+const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>('splash');
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
 
   // Finanças tab
@@ -2932,77 +2931,6 @@ function GameApp() {
     triggerAudioResult(() => sfx.playSound('sell'));
   };
 
-  // F4: gerar contrato pelo comerciante
-  const generateMerchantContract = (nextDayVal: number) => {
-    if (contracts.filter(c => c.active).length >= 3) return; // Máx 3 contratos
-
-    // Tiered contract system based on farm level
-    const tier = farmLevel >= 15 ? 'premium' : farmLevel >= 10 ? 'avancado' : farmLevel >= 6 ? 'medio' : 'basico';
-
-    const allProducts = [
-      { product: 'milk', basePrice: 5, minLevel: 1 },
-      { product: 'wool', basePrice: 12, minLevel: 1 },
-      { product: 'egg', basePrice: 4, minLevel: 1 },
-      { product: 'cheese', basePrice: 20, minLevel: 2 },
-      { product: 'goat_milk', basePrice: 14, minLevel: 4 },
-      { product: 'buffalo_milk', basePrice: 55, minLevel: 6 },
-      { product: 'queijoCoalho', basePrice: 35, minLevel: 3 },
-      { product: 'queijoMucarela', basePrice: 55, minLevel: 4 },
-      { product: 'queijoBrie', basePrice: 90, minLevel: 5 },
-      { product: 'butter', basePrice: 45, minLevel: 3 },
-      { product: 'yogurt', basePrice: 35, minLevel: 3 },
-      { product: 'duck_egg', basePrice: 18, minLevel: 4 },
-      { product: 'quail_egg', basePrice: 22, minLevel: 4 },
-      { product: 'feather', basePrice: 15, minLevel: 4 },
-      { product: 'angora_wool', basePrice: 90, minLevel: 9 },
-      { product: 'alpaca_wool', basePrice: 65, minLevel: 6 },
-      { product: 'muco', basePrice: 120, minLevel: 8 },
-      { product: 'seda_bruta', basePrice: 100, minLevel: 11 },
-    ] as const;
-
-    // Filter by farm level
-    const available = allProducts.filter(p => farmLevel >= p.minLevel);
-    const chosen = available[Math.floor(Math.random() * available.length)];
-
-    // Tier multipliers for price premium and quantity
-    const tierConfig = {
-      basico:   { priceMulti: 1.15, qtyMin: 5,  qtyMax: 15, deadlineMin: 5,  deadlineMax: 10, penaltyRate: 0.5 },
-      medio:    { priceMulti: 1.20, qtyMin: 10, qtyMax: 25, deadlineMin: 7,  deadlineMax: 14, penaltyRate: 0.4 },
-      avancado: { priceMulti: 1.25, qtyMin: 15, qtyMax: 40, deadlineMin: 10, deadlineMax: 20, penaltyRate: 0.35 },
-      premium:  { priceMulti: 1.35, qtyMin: 20, qtyMax: 60, deadlineMin: 14, deadlineMax: 30, penaltyRate: 0.3 },
-    };
-    const cfg = tierConfig[tier];
-
-    const pricePerUnit = Math.round(chosen.basePrice * cfg.priceMulti);
-    const quantity = cfg.qtyMin + Math.floor(Math.random() * (cfg.qtyMax - cfg.qtyMin + 1));
-    const deadline = nextDayVal + cfg.deadlineMin + Math.floor(Math.random() * (cfg.deadlineMax - cfg.deadlineMin + 1));
-    const penalty = Math.round(pricePerUnit * quantity * cfg.penaltyRate);
-
-    const clientNames: Record<string, string[]> = {
-      basico: ['Mercadinho do Bairro', 'Feira Local', 'Restaurante Familiar', 'Padaria Aurora'],
-      medio: ['Supermercado Bom Preço', 'Buffet São José', 'Hotel Regional', 'Cooperativa Rural'],
-      avancado: ['Rede Atacado Nordeste', 'Restaurante 5 Estrelas', 'Distribuidora Premium', 'Laticínios Nacionais'],
-      premium: ['Exportadora Internacional', 'Rede de Hotéis Luxo', 'Gourmet Market São Paulo', 'Embaixada Gastronômica'],
-    };
-    const clients = clientNames[tier];
-    const client = clients[Math.floor(Math.random() * clients.length)];
-
-    const newContract: Contract = {
-      id: Math.random().toString(36).substring(2, 9),
-      product: chosen.product as Contract['product'],
-      quantity,
-      delivered: 0,
-      pricePerUnit,
-      deadline,
-      penalty,
-      active: true,
-      client,
-      tier,
-    };
-    setPendingContractOffer(newContract);
-    setTimeout(() => addNotification(`📋 ${client} quer oferecer um contrato [${tier.toUpperCase()}]! Verifique a proposta para aceitar ou recusar.`, 'event', nextDayVal), 0);
-  };
-
   /**
    * 7. processarComercianteViajante: Lida com chance de comerciante aparecer e suas rotatividades.
    */
@@ -3034,10 +2962,6 @@ function GameApp() {
       });
       // BUG FIX: passa nextDayVal para que a notificação mostre o dia correto
       setTimeout(() => addNotification('🧙‍♂️ Comerciante Viajante chegou! Venda tudo por 1.5x hoje!', 'event', nextDayVal), 0);
-      // F4: comerciante pode oferecer contrato
-      if (Math.random() < 0.6) {
-        setTimeout(() => generateMerchantContract(nextDayVal), 50);
-      }
       // 30% chance to gift folha_amoreira (only after silk is unlocked at level 10)
       if (farmLevel >= 10 && Math.random() < 0.3) {
         setTimeout(() => {
@@ -6906,24 +6830,6 @@ function GameApp() {
           addLog={addLog}
         />
       )}
-
-      {/* 📋 MODAL OFERTA DE CONTRATO */}
-      <AnimatePresence>
-        {pendingContractOffer && (
-          <PendingContractModal
-            offer={pendingContractOffer}
-            onAccept={() => {
-              setContracts(prev => [...prev, pendingContractOffer!]);
-              addLog(`✅ Contrato aceito! Entregue ${pendingContractOffer.quantity} un de ${pendingContractOffer.product} até o dia ${pendingContractOffer.deadline}.`, 'success');
-              setPendingContractOffer(null);
-            }}
-            onReject={() => {
-              addLog(`❌ Proposta de contrato recusada.`, 'info');
-              setPendingContractOffer(null);
-            }}
-          />
-        )}
-      </AnimatePresence>
 
       {/* 🎪 MODAL RESULTADO DA FEIRA */}
       {showFairResultModal && (

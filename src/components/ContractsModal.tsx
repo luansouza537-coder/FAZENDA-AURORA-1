@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { Contract } from '../types';
 
@@ -39,11 +39,7 @@ const PRODUCT_LABELS: Record<string, string> = {
 export const ContractsModal: React.FC<ContractsModalProps> = ({
   contracts, currentDay, farmLevel, gold, longContractCatalog, onSignLongContract, onClose
 }) => {
-  const [tab, setTab] = useState<'short' | 'long'>('long');
-
-  const shortContracts = contracts.filter(c => c.active && c.contractType !== 'long');
   const longContracts = contracts.filter(c => c.active && c.contractType === 'long');
-  const expiredContracts = contracts.filter(c => !c.active);
 
   return (
     <motion.div
@@ -62,30 +58,15 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
           <button onClick={onClose} className="absolute top-4 right-4 text-[#fcd57e] bg-violet-950 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b-4 border-violet-200 shrink-0 bg-violet-50">
-          <button
-            onClick={() => setTab('long')}
-            className={`flex-1 py-2.5 text-xs font-display font-black uppercase tracking-wider transition-colors cursor-pointer ${tab === 'long' ? 'bg-violet-700 text-white' : 'text-violet-700 hover:bg-violet-100'}`}
-          >
-            📜 Fornecedores Fixos {longContracts.length > 0 && <span className="ml-1 bg-white text-violet-700 rounded-full px-1.5">{longContracts.length}</span>}
-          </button>
-          <button
-            onClick={() => setTab('short')}
-            className={`flex-1 py-2.5 text-xs font-display font-black uppercase tracking-wider transition-colors cursor-pointer ${tab === 'short' ? 'bg-violet-700 text-white' : 'text-violet-700 hover:bg-violet-100'}`}
-          >
-            🤝 Contratos do Comerciante {shortContracts.length > 0 && <span className="ml-1 bg-white text-violet-700 rounded-full px-1.5">{shortContracts.length}</span>}
-          </button>
+        <div className="bg-violet-700 px-5 py-2 border-b-4 border-violet-200 shrink-0">
+          <p className="text-white text-xs font-display font-black uppercase tracking-wider">📜 Fornecedores Fixos {longContracts.length > 0 && <span className="ml-1 bg-white text-violet-700 rounded-full px-1.5">{longContracts.length}</span>}</p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-
-          {/* ---- LONG CONTRACTS TAB ---- */}
-          {tab === 'long' && (
-            <>
-              {/* Active long contracts */}
-              {longContracts.length > 0 && (
-                <div className="space-y-3">
+          <>
+            {/* Active long contracts */}
+            {longContracts.length > 0 && (
+              <div className="space-y-3">
                   <h4 className="font-display font-black text-xs uppercase text-violet-700">✅ Contratos Ativos</h4>
                   {longContracts.map(c => {
                     const weeks = Math.round((c.deadline - currentDay) / 7);
@@ -169,52 +150,7 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                 </div>
               </div>
             </>
-          )}
-
-          {/* ---- SHORT CONTRACTS TAB ---- */}
-          {tab === 'short' && (
-            <>
-              {shortContracts.length === 0 ? (
-                <div className="text-center text-stone-500 py-8 font-mono text-sm">
-                  📋 Nenhum contrato ativo. O comerciante viajante oferece contratos quando visita a fazenda!
-                </div>
-              ) : (
-                shortContracts.map(c => {
-                  const pct = Math.round((c.delivered / c.quantity) * 100);
-                  const daysLeft = c.deadline - currentDay;
-                  return (
-                    <div key={c.id} className={`border-4 rounded-3xl p-5 ${daysLeft <= 2 ? 'border-red-400 bg-red-50' : 'border-violet-300 bg-white'}`}>
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="font-display font-black text-sm uppercase text-[#78350f]">{PRODUCT_LABELS[c.product] ?? c.product}</h4>
-                          <p className="text-xs text-stone-500 font-mono mt-0.5">{c.client} • {c.pricePerUnit}💰/un</p>
-                        </div>
-                        <span className={`text-xs font-mono font-bold px-2 py-1 rounded-full ${daysLeft <= 2 ? 'bg-red-500 text-white' : 'bg-violet-100 text-violet-800'}`}>
-                          {daysLeft > 0 ? `${daysLeft}d restante(s)` : 'VENCIDO!'}
-                        </span>
-                      </div>
-                      <div className="text-xs font-mono text-stone-600 mb-2">Entregue: {c.delivered}/{c.quantity} un • Multa: {c.penalty}💰</div>
-                      <div className="w-full bg-stone-100 h-3 rounded-full overflow-hidden border border-stone-200">
-                        <div className="bg-gradient-to-r from-violet-400 to-purple-500 h-full transition-all" style={{ width: `${pct}%` }} />
-                      </div>
-                      <div className="text-[10px] font-mono text-center mt-1 text-stone-500">{pct}% entregue</div>
-                    </div>
-                  );
-                })
-              )}
-              {expiredContracts.filter(c => c.contractType !== 'long').length > 0 && (
-                <div>
-                  <h4 className="font-display font-black text-xs uppercase text-stone-400 mb-2">Histórico</h4>
-                  {expiredContracts.filter(c => c.contractType !== 'long').slice(-3).map(c => (
-                    <div key={c.id} className="text-xs text-stone-400 font-mono border border-stone-200 rounded-xl p-2 mb-1">
-                      {PRODUCT_LABELS[c.product] ?? c.product} • {c.delivered}/{c.quantity} entregues
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
+          </div>
 
         <div className="bg-violet-50 p-4 border-t border-violet-100 flex justify-end shrink-0">
           <button onClick={onClose} className="bg-violet-600 hover:bg-violet-500 text-white border-b-4 border-violet-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider cursor-pointer">
@@ -226,43 +162,3 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
   );
 };
 
-interface PendingContractModalProps {
-  offer: Contract;
-  onAccept: () => void;
-  onReject: () => void;
-}
-
-export const PendingContractModal: React.FC<PendingContractModalProps> = ({ offer, onAccept, onReject }) => {
-  const PRODUCT_LABELS: Record<string, string> = {
-    milk: '🥛 Leite Cru', wool: '🧶 Lã Crua', egg: '🥚 Ovos', cheese: '🧀 Queijo Simples',
-    queijoCoalho: '🧀 Queijo Coalho', queijoMucarela: '🧀 Queijo Muçarela', queijoBrie: '🧀 Queijo Brie',
-    butter: '🧈 Manteiga', alpaca_wool: '🦙 Lã de Alpaca', muco: '🐌 Muco de Caracol',
-    mel_envasado: '🍯 Mel Envasado', seda_bruta: '🐛 Seda Bruta',
-  };
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
-    >
-      <motion.div
-        initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}
-        className="bg-[#fef3c7] border-4 border-violet-500 rounded-3xl p-6 max-w-sm w-full shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="font-display font-black text-xl text-[#78350f] uppercase mb-2 flex items-center gap-2">📋 Proposta de Contrato</h2>
-        <p className="text-[11px] text-stone-600 font-mono mb-4">O Comerciante Viajante quer fazer um negócio com você! Quer aceitar?</p>
-        <div className="bg-violet-50 border-2 border-violet-300 rounded-2xl p-4 mb-4 space-y-1">
-          <div className="text-sm font-black text-violet-900">{PRODUCT_LABELS[offer.product] ?? offer.product}</div>
-          <div className="text-xs font-mono text-stone-700">Quantidade: <strong>{offer.quantity} unidades</strong></div>
-          <div className="text-xs font-mono text-stone-700">Preço garantido: <strong>{offer.pricePerUnit}💰/un</strong></div>
-          <div className="text-xs font-mono text-stone-700">Prazo: <strong>Dia {offer.deadline}</strong></div>
-          <div className="text-xs font-mono text-red-600">Multa por atraso: <strong>{offer.penalty}💰</strong></div>
-        </div>
-        <div className="flex gap-2">
-          <button type="button" onClick={onAccept} className="flex-1 bg-violet-600 hover:bg-violet-500 text-white font-black text-sm uppercase px-4 py-2 rounded-xl border-b-2 border-violet-800 transition-all cursor-pointer">✅ Aceitar</button>
-          <button type="button" onClick={onReject} className="flex-1 bg-stone-300 hover:bg-stone-400 text-stone-800 font-black text-sm uppercase px-4 py-2 rounded-xl border-b-2 border-stone-500 transition-all cursor-pointer">❌ Recusar</button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-};
