@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface SplashScreenProps {
   onStart: () => void;
@@ -15,6 +15,7 @@ const ANIMALS = ['🐄', '🐑', '🐔', '🦙', '🦆', '🐐', '🦚', '🐊']
 
 export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
   const [floatIndex, setFloatIndex] = useState(0);
+  const [confirmNew, setConfirmNew] = useState(false);
   const [importError, setImportError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -24,9 +25,16 @@ export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
   }, []);
 
   function handleNewGame() {
-    if (!confirm('Apagar progresso e começar do zero?')) return;
+    if (hasSave) {
+      setConfirmNew(true);
+    } else {
+      onStart();
+    }
+  }
+
+  function confirmNewGame() {
     localStorage.removeItem('aurora_farm_save');
-    window.location.reload();
+    onStart();
   }
 
   function handleLoadFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -48,7 +56,6 @@ export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
       }
     };
     reader.readAsText(file);
-    // reset so same file can be re-selected if needed
     e.target.value = '';
   }
 
@@ -104,7 +111,6 @@ export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
         transition={{ delay: 0.5, duration: 0.5 }}
         className="flex flex-col gap-3 items-stretch w-64 z-10"
       >
-        {/* Continuar */}
         {hasSave ? (
           <button
             onClick={onStart}
@@ -113,15 +119,11 @@ export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
             ▶ Continuar
           </button>
         ) : (
-          <button
-            disabled
-            className="py-4 bg-[#3a5a3a] text-[#6a8a6a] font-extrabold text-xl rounded-2xl cursor-not-allowed opacity-50"
-          >
+          <div className="py-4 bg-[#3a5a3a] text-[#6a8a6a] font-extrabold text-xl rounded-2xl text-center opacity-40 cursor-not-allowed">
             ▶ Continuar
-          </button>
+          </div>
         )}
 
-        {/* Novo Jogo */}
         <button
           onClick={handleNewGame}
           className="py-3 bg-[#2d5a27] hover:bg-[#3d7a35] border border-[#4a8a3a] text-[#f5e6a3] font-bold text-lg rounded-2xl shadow transition-all active:scale-95 hover:scale-105"
@@ -129,7 +131,6 @@ export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
           + Novo Jogo
         </button>
 
-        {/* Carregar Save */}
         <button
           onClick={() => fileRef.current?.click()}
           className="py-3 bg-[#1a3a1a] hover:bg-[#253a25] border border-[#4a8a3a] text-[#a3c48a] font-bold text-lg rounded-2xl shadow transition-all active:scale-95 hover:scale-105"
@@ -149,6 +150,47 @@ export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
           <p className="text-[#f87171] text-xs text-center mt-1">{importError}</p>
         )}
       </motion.div>
+
+      {/* Confirm new game modal */}
+      <AnimatePresence>
+        {confirmNew && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-8"
+            onClick={() => setConfirmNew(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-[#1a3a1a] border border-[#4a8a3a] rounded-2xl p-6 w-full max-w-xs text-center shadow-xl"
+            >
+              <div className="text-4xl mb-3">⚠️</div>
+              <h2 className="text-[#f5e6a3] font-extrabold text-lg mb-2">Apagar progresso?</h2>
+              <p className="text-[#a3c48a] text-sm mb-6">
+                Todo o seu progresso atual será perdido. Essa ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmNew(false)}
+                  className="flex-1 py-2 rounded-xl border border-[#4a8a3a] text-[#a3c48a] font-bold hover:bg-[#2d5a27] transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmNewGame}
+                  className="flex-1 py-2 rounded-xl bg-[#f87171] hover:bg-[#ef4444] text-white font-bold transition-colors"
+                >
+                  Apagar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="absolute bottom-4 text-[10px] text-[#4a6a4a] z-10">v1.0.0</div>
     </div>
