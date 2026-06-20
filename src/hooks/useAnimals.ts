@@ -114,6 +114,7 @@ export interface UseAnimalsProps {
   onFilhoteAdded?: () => void;
   getFreightMultiplier?: (cat: string) => number;
   addFinancialEntry?: (entry: { day: number; type: 'income' | 'expense'; amount: number; category: string; description: string }) => void;
+  canAddToInventory?: (itemKey: string, qty?: number) => boolean;
 }
 
 export function useAnimals({
@@ -149,6 +150,7 @@ export function useAnimals({
   onFilhoteAdded,
   getFreightMultiplier,
   addFinancialEntry,
+  canAddToInventory,
 }: UseAnimalsProps) {
   const [animals, setAnimals] = useState<Animal[]>(() => {
     try {
@@ -394,6 +396,11 @@ export function useAnimals({
     // Apply champion bonus
     if (animal.isCampiao) totalOvos = Math.round(totalOvos * 1.1);
 
+    if (canAddToInventory && !canAddToInventory('egg', totalOvos)) {
+      addLog('❌ Câmara Fria cheia! Venda ovos ou expanda nas Melhorias.', 'error');
+      spawnFeedback('❄️', 'Câmara Cheia!', event);
+      return;
+    }
     setInventory(prev => ({
       ...prev,
       egg: (prev.egg ?? 0) + totalOvos
@@ -457,6 +464,11 @@ export function useAnimals({
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
     qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
 
+    if (canAddToInventory && !canAddToInventory('goat_milk', qty)) {
+      addLog('❌ Câmara Fria cheia! Venda leite de cabra ou expanda nas Melhorias.', 'error');
+      spawnFeedback('❄️', 'Câmara Cheia!', event);
+      return;
+    }
     setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) + qty }));
     // BUG FIX: reseta frescor ao coletar leite de cabra fresco
     setProductFreshness((prev: any) => ({ ...prev, goat_milk: 3 }));
@@ -641,6 +653,11 @@ export function useAnimals({
       spawnFeedback('⏳', 'Vazia', event);
       return;
     }
+    if (canAddToInventory && !canAddToInventory('milk', 3)) {
+      addLog('❌ Câmara Fria cheia! Venda leite ou expanda nas Melhorias.', 'error');
+      spawnFeedback('❄️', 'Câmara Cheia!', event);
+      return;
+    }
     // F12: som de animal
     if (soundEnabled) sfx.playAnimalSound('vaca');
 
@@ -732,6 +749,11 @@ export function useAnimals({
     // Apply champion bonus
     if (animal.isCampiao) woolBonus = Math.round(woolBonus * 1.1);
 
+    if (canAddToInventory && !canAddToInventory('wool', woolBonus)) {
+      addLog('❌ Celeiro cheio! Venda lã ou expanda nas Melhorias.', 'error');
+      spawnFeedback('📦', 'Celeiro Cheio!', event);
+      return;
+    }
     setInventory(prev => ({
       ...prev,
       wool: prev.wool + woolBonus

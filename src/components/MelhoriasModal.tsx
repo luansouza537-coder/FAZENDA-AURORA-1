@@ -68,6 +68,10 @@ interface MelhoriasModalProps {
   setAbatedouroUnlocked: (v: boolean) => void;
   lastUpgradeDay: number;
   setLastUpgradeDay: (v: number) => void;
+  celeiroLevel: number;
+  setCeleiroLevel: (v: number) => void;
+  camaraFriaLevel: number;
+  setCamaraFriaLevel: (v: number) => void;
 }
 
 const VEHICLE_CATEGORIES = [

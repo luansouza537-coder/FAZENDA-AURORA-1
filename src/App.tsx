@@ -225,6 +225,8 @@ function GameApp() {
   const [licencaCriadouro, setLicencaCriadouro] = useState<boolean>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).licencaCriadouro ?? false; } catch(e) {} return false;
   });
+  const [celeiroLevel, setCeleiroLevel] = useState<number>(() => { try { const s = JSON.parse(localStorage.getItem('aurora_farm_save') || '{}'); return s.celeiroLevel ?? 0; } catch { return 0; } });
+  const [camaraFriaLevel, setCamaraFriaLevel] = useState<number>(() => { try { const s = JSON.parse(localStorage.getItem('aurora_farm_save') || '{}'); return s.camaraFriaLevel ?? 0; } catch { return 0; } });
   const [reproducaoAtiva, setReproducaoAtiva] = useState<{
     animalId1: number; animalId2: number; type: AnimalType; gestacaoEnd: number;
   }[]>(() => {
@@ -956,6 +958,7 @@ function GameApp() {
     setLoanDaysUntilInterest(7);
     setShownMilestones([]);
     setVehicleTiers({});
+    setCeleiroLevel(0); setCamaraFriaLevel(0);
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -1608,6 +1611,20 @@ function GameApp() {
     return 1.0;
   };
 
+  // Storage limits for Celeiro and Câmara Fria
+  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','feather','peacock_feather','pena_grande','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','almofada_penas','colete_couro','bolsa_exotica','enfeite_pavao','hidromel','mel_envasado','conserva_peixe','sabonete_natural']);
+  const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','muco','creme_cosmetico']);
+
+  const getCeleiroLimit = () => ([30, 60, 120, 250, 999][celeiroLevel] ?? 30);
+  const getCamaraFriaLimit = () => ([15, 40, 80, 180][camaraFriaLevel] ?? 15);
+
+  const canAddToInventory = (itemKey: string, qty: number = 1): boolean => {
+    const current = (inventory as Record<string, number>)[itemKey] ?? 0;
+    if (CELEIRO_ITEMS.has(itemKey)) return current + qty <= getCeleiroLimit();
+    if (CAMARA_FRIA_ITEMS.has(itemKey)) return current + qty <= getCamaraFriaLimit();
+    return true;
+  };
+
   // Base raw item prices (increases with levels)
   const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao'): number => {
     // --- PREÇOS BASE BALANCEADOS ---
@@ -1973,6 +1990,7 @@ function GameApp() {
     },
     getFreightMultiplier,
     addFinancialEntry,
+    canAddToInventory,
   });
 
   // --- useWorkers hook ---
@@ -2128,6 +2146,7 @@ function GameApp() {
         wellLevel,
         solarLevel,
         irrigationLevel,
+        celeiroLevel, camaraFriaLevel,
         queijariaNivel,
         nextDayEvent,
         activeMarketEvent,
@@ -5879,6 +5898,25 @@ function GameApp() {
                 🏜️ {droughtDaysRemaining}d
               </div>
             )}
+            {/* Celeiro / Câmara Fria usage */}
+            {(() => {
+              const celeiroUsed = Object.entries(inventory as Record<string, number>).filter(([k]) => CELEIRO_ITEMS.has(k)).reduce((s,[,v]) => s + v, 0);
+              const camaraUsed = Object.entries(inventory as Record<string, number>).filter(([k]) => CAMARA_FRIA_ITEMS.has(k)).reduce((s,[,v]) => s + v, 0);
+              const celeiroMax = getCeleiroLimit() * CELEIRO_ITEMS.size;
+              const camaraMax = getCamaraFriaLimit() * CAMARA_FRIA_ITEMS.size;
+              const celeiroFull = celeiroUsed / celeiroMax > 0.8;
+              const camaraFull = camaraUsed / camaraMax > 0.8;
+              return (
+                <>
+                  <div className={`font-mono font-black text-xs px-3 py-2 rounded-full border-3 flex items-center gap-1 ${celeiroFull ? 'bg-yellow-700 border-yellow-400 text-white animate-pulse' : 'bg-stone-700 border-stone-500 text-stone-200'}`} title={`Celeiro: ${celeiroUsed} itens`}>
+                    📦 {celeiroFull ? 'Cheio!' : 'OK'}
+                  </div>
+                  <div className={`font-mono font-black text-xs px-3 py-2 rounded-full border-3 flex items-center gap-1 ${camaraFull ? 'bg-blue-700 border-blue-400 text-white animate-pulse' : 'bg-stone-700 border-stone-500 text-stone-200'}`} title={`Câmara Fria: ${camaraUsed} itens`}>
+                    ❄️ {camaraFull ? 'Cheia!' : 'OK'}
+                  </div>
+                </>
+              );
+            })()}
             {worldEvent && (
               <div className="relative group">
                 <div className={`border-3 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1 cursor-help ${worldEvent.priceMult >= 1 ? 'bg-green-600 border-green-400' : 'bg-red-600 border-red-400'}`}>
@@ -6611,6 +6649,8 @@ function GameApp() {
           setAbatedouroUnlocked={setAbatedouroUnlocked}
           lastUpgradeDay={lastUpgradeDay}
           setLastUpgradeDay={setLastUpgradeDay}
+          celeiroLevel={celeiroLevel} setCeleiroLevel={setCeleiroLevel}
+          camaraFriaLevel={camaraFriaLevel} setCamaraFriaLevel={setCamaraFriaLevel}
           ownedOneTimeEffects={[
             ...(hasBebedouro ? ['bebedouro'] : []),
             ...(hasCertSanitario ? ['cert_sanitario'] : []),
