@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RotateCcw } from 'lucide-react';
 import { Animal, AnimalType, FarmStats, FarmWorker } from '../types';
@@ -185,6 +185,7 @@ export default function AnimalGrid({
   abatedouroUnlocked,
   hasCertSanitario,
 }: AnimalGridProps) {
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
   return (
           <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b-4 border-[#78350f]/60 pb-3 gap-3">
@@ -917,66 +918,99 @@ export default function AnimalGrid({
                   </div>
                 )}
                 {/* Feature 1: Animal Filter Bar */}
-                <div className="col-span-full flex flex-wrap gap-2 mb-3">
-                  {/* Categoria rápida */}
-                  {[
-                    { label: '🐾 Todos', value: 'all' },
-                    { label: '🐄 Bovinos', value: '__bovinos__' },
-                    { label: '🐔 Aves', value: '__aves__' },
-                    { label: '🧶 Fibras', value: '__fibras__' },
-                    { label: '🦎 Exóticos', value: '__exoticos__' },
-                    { label: '⚡ Prontos', value: 'ready' },
-                  ].map(f => (
-                    <button key={f.value}
-                      onClick={() => setAnimalFilter(f.value)}
-                      className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 transition-all ${animalFilter === f.value ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-white/5 hover:bg-[#fbbf24]/20 border-[#fbbf24]/40 text-[#fef3c7]/80 hover:text-[#fef3c7] hover:border-[#fbbf24]/70 transition-all'}`}>
-                      {f.label}
-                    </button>
-                  ))}
-                  <select value={animalFilter} onChange={e => setAnimalFilter(e.target.value)}
-                    className="bg-[#064e3b] border-2 border-[#fbbf24] text-[#fef3c7] text-xs font-mono rounded-xl px-3 py-1.5">
-                    <option value="all">🔍 Por tipo</option>
-                    {[...new Set(animals.map(a => a.type))].map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
-                  {(['happiness','production','age','name','ready'] as const).map(s => (
-                    <button key={s} onClick={() => { if (animalSort === s) setAnimalSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setAnimalSort(s); setAnimalSortDir(() => 'desc'); }}}
-                      className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalSort === s ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-white/5 hover:bg-[#fbbf24]/20 border-[#fbbf24]/40 text-[#fef3c7]/80 hover:text-[#fef3c7] hover:border-[#fbbf24]/70 transition-all'}`}>
-                      {s === 'happiness' ? '😊 Feliz' : s === 'production' ? '📦 Prod' : s === 'age' ? '📅 Idade' : s === 'ready' ? '✅ Prontos' : '🔤 Nome'}
-                      {animalSort === s ? (animalSortDir === 'asc' ? ' ↑' : ' ↓') : ''}
-                    </button>
-                  ))}
-                  <button onClick={() => { setAnimalFilter('all'); setAnimalSort('production'); setAnimalSortDir(() => 'desc'); }}
-                    className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-[#10b981]/60 text-[#10b981] bg-transparent">
-                    🏆 Top Prod
-                  </button>
-                  <button onClick={() => { setAnimalFilter('all'); setAnimalSort('happiness'); setAnimalSortDir(() => 'asc'); }}
-                    className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-red-400/60 text-red-400 bg-transparent">
-                    ⚠️ Tristes
-                  </button>
-                  <button onClick={() => setAnimalFilter(animalFilter === 'ready' ? 'all' : 'ready')}
-                    className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalFilter === 'ready' ? 'bg-yellow-400 border-yellow-400 text-yellow-900' : 'border-yellow-400/60 text-yellow-300 bg-transparent'}`}>
-                    ⚡ Prontos
-                  </button>
-                  <span className="text-[10px] text-[#fef3c7]/60 font-mono self-center ml-1">
-                    Mostrando {animals.filter(a => {
-                      if (animalFilter === 'all') return true;
-                      if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.feathersReady) || (a.type === 'bufalo' && !a.hasProducedToday);
-                      if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo','porco'].includes(a.type);
-                      if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz'].includes(a.type);
-                      if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra','bicho_seda'].includes(a.type);
-                      if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
-                      return a.type === animalFilter;
-                    }).length} de {animals.length} animais
-                  </span>
-                  <button
-                    onClick={() => setAnimalViewMode(m => m === 'card' ? 'list' : 'card')}
-                    className="ml-auto text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-[#fbbf24]/60 text-[#fef3c7] bg-transparent hover:bg-[#fbbf24]/10 transition-all"
-                    title="Alternar entre modo card e lista compacta"
-                  >
-                    {animalViewMode === 'card' ? '☰ Lista' : '⊞ Cards'}
-                  </button>
+                <div className="col-span-full mb-3">
+                  {/* Barra de toggle sempre visível */}
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="text-[10px] text-[#fef3c7]/60 font-mono">
+                      Mostrando {animals.filter(a => {
+                        if (animalFilter === 'all') return true;
+                        if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.feathersReady) || (a.type === 'bufalo' && !a.hasProducedToday);
+                        if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo','porco'].includes(a.type);
+                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz'].includes(a.type);
+                        if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra','bicho_seda'].includes(a.type);
+                        if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
+                        return a.type === animalFilter;
+                      }).length} de {animals.length} animais
+                    </span>
+                    {animalFilter !== 'all' && (
+                      <span className="text-[9px] font-black bg-[#fbbf24] text-[#78350f] px-2 py-0.5 rounded-full uppercase">
+                        Filtro ativo
+                      </span>
+                    )}
+                    <div className="ml-auto flex items-center gap-2">
+                      <button
+                        onClick={() => setAnimalViewMode(m => m === 'card' ? 'list' : 'card')}
+                        className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-[#fbbf24]/60 text-[#fef3c7] bg-transparent hover:bg-[#fbbf24]/10 transition-all"
+                        title="Alternar entre modo card e lista compacta"
+                      >
+                        {animalViewMode === 'card' ? '☰ Lista' : '⊞ Cards'}
+                      </button>
+                      <button
+                        onClick={() => setFiltersExpanded(v => !v)}
+                        className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-[#fbbf24]/60 text-[#fef3c7] bg-white/5 hover:bg-[#fbbf24]/20 transition-all flex items-center gap-1.5"
+                        title={filtersExpanded ? 'Recolher filtros' : 'Expandir filtros'}
+                      >
+                        🔽 Filtros {filtersExpanded ? '▲' : '▼'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Filtros colapsáveis */}
+                  <AnimatePresence>
+                    {filtersExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {/* Categoria rápida */}
+                          {[
+                            { label: '🐾 Todos', value: 'all' },
+                            { label: '🐄 Bovinos', value: '__bovinos__' },
+                            { label: '🐔 Aves', value: '__aves__' },
+                            { label: '🧶 Fibras', value: '__fibras__' },
+                            { label: '🦎 Exóticos', value: '__exoticos__' },
+                            { label: '⚡ Prontos', value: 'ready' },
+                          ].map(f => (
+                            <button key={f.value}
+                              onClick={() => setAnimalFilter(f.value)}
+                              className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 transition-all ${animalFilter === f.value ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-white/5 hover:bg-[#fbbf24]/20 border-[#fbbf24]/40 text-[#fef3c7]/80 hover:text-[#fef3c7] hover:border-[#fbbf24]/70 transition-all'}`}>
+                              {f.label}
+                            </button>
+                          ))}
+                          <select value={animalFilter} onChange={e => setAnimalFilter(e.target.value)}
+                            className="bg-[#064e3b] border-2 border-[#fbbf24] text-[#fef3c7] text-xs font-mono rounded-xl px-3 py-1.5">
+                            <option value="all">🔍 Por tipo</option>
+                            {[...new Set(animals.map(a => a.type))].map(type => (
+                              <option key={type} value={type}>{type}</option>
+                            ))}
+                          </select>
+                          {(['happiness','production','age','name','ready'] as const).map(s => (
+                            <button key={s} onClick={() => { if (animalSort === s) setAnimalSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setAnimalSort(s); setAnimalSortDir(() => 'desc'); }}}
+                              className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalSort === s ? 'bg-[#fbbf24] border-[#fbbf24] text-[#78350f]' : 'bg-white/5 hover:bg-[#fbbf24]/20 border-[#fbbf24]/40 text-[#fef3c7]/80 hover:text-[#fef3c7] hover:border-[#fbbf24]/70 transition-all'}`}>
+                              {s === 'happiness' ? '😊 Feliz' : s === 'production' ? '📦 Prod' : s === 'age' ? '📅 Idade' : s === 'ready' ? '✅ Prontos' : '🔤 Nome'}
+                              {animalSort === s ? (animalSortDir === 'asc' ? ' ↑' : ' ↓') : ''}
+                            </button>
+                          ))}
+                          <button onClick={() => { setAnimalFilter('all'); setAnimalSort('production'); setAnimalSortDir(() => 'desc'); }}
+                            className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-[#10b981]/60 text-[#10b981] bg-transparent">
+                            🏆 Top Prod
+                          </button>
+                          <button onClick={() => { setAnimalFilter('all'); setAnimalSort('happiness'); setAnimalSortDir(() => 'asc'); }}
+                            className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-red-400/60 text-red-400 bg-transparent">
+                            ⚠️ Tristes
+                          </button>
+                          <button onClick={() => setAnimalFilter(animalFilter === 'ready' ? 'all' : 'ready')}
+                            className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalFilter === 'ready' ? 'bg-yellow-400 border-yellow-400 text-yellow-900' : 'border-yellow-400/60 text-yellow-300 bg-transparent'}`}>
+                            ⚡ Prontos
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
                 <AnimatePresence>
                   {(() => {
