@@ -863,7 +863,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       totalScarf: 0,
       totalEggs: 0,
       totalMayo: 0,
-      totalMerchantTrades: 0
+      totalMerchantTrades: 0,
+      totalSilk: 0,
+      totalFeathers: 0,
+      happyDays: 0,
+      contractsCompleted: 0,
+      cheeseTypesMade: []
     });
     
     // BUG 5 FIX: animais iniciais agora recebem `trait` aleatório, igual aos comprados via buyAnimal.
@@ -2100,6 +2105,155 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       triggerAchievementCheck(stats, gold, farmLevel, animals);
     }
   }, [stats, gold, farmLevel, animals, currentScreen, totalQueijosFabricados, queijosFabricadosTipos, currentDay, loanActive, milkerLevel, shearerLevel, feederLevel, insurance, insuranceTheft, insuranceClimate]);
+
+  // Comprehensive 110-achievement useEffect
+  useEffect(() => {
+    if (currentScreen !== 'game') return;
+    const s = stats;
+    const milk = s.totalMilk || 0;
+    const wool = s.totalWool || 0;
+    const eggs = s.totalEggs || 0;
+    const silk = s.totalSilk || 0;
+    const feathers = s.totalFeathers || 0;
+    const earned = s.totalEarned || 0;
+    const fed = s.totalFed || 0;
+    const happy = s.happyDays || 0;
+    const cheese = s.totalCheese || 0;
+    const scarves = s.totalScarf || 0;
+    const contracts = s.contractsCompleted || 0;
+
+    // Produção
+    if (milk >= 10) checkAndUnlockAchievement('prod_1');
+    if (milk >= 50) checkAndUnlockAchievement('prod_2');
+    if (wool >= 30) checkAndUnlockAchievement('prod_3');
+    if (milk >= 150) checkAndUnlockAchievement('prod_4');
+    if (eggs >= 80) checkAndUnlockAchievement('prod_5');
+    if (milk >= 350) checkAndUnlockAchievement('prod_6');
+    if (wool >= 150) checkAndUnlockAchievement('prod_7');
+    if (eggs >= 200) checkAndUnlockAchievement('prod_8');
+    if (milk >= 600) checkAndUnlockAchievement('prod_9');
+    if (silk >= 15) checkAndUnlockAchievement('prod_10');
+    if (eggs >= 400) checkAndUnlockAchievement('prod_11');
+    if (wool >= 350) checkAndUnlockAchievement('prod_12');
+    if (silk >= 50) checkAndUnlockAchievement('prod_13');
+    if (milk >= 1000) checkAndUnlockAchievement('prod_14');
+    if (feathers >= 15) checkAndUnlockAchievement('prod_15');
+    if (silk >= 100) checkAndUnlockAchievement('prod_16');
+    if (feathers >= 40) checkAndUnlockAchievement('prod_17');
+    if (milk >= 1500) checkAndUnlockAchievement('prod_18');
+    if (milk >= 2000) checkAndUnlockAchievement('prod_19');
+    if (wool >= 500) checkAndUnlockAchievement('prod_20');
+
+    // Economia
+    if (earned >= 100) checkAndUnlockAchievement('eco_1');
+    if (earned >= 400) checkAndUnlockAchievement('eco_2');
+    if (earned >= 1000) checkAndUnlockAchievement('eco_3');
+    if (earned >= 2500) checkAndUnlockAchievement('eco_4');
+    if (earned >= 5000) checkAndUnlockAchievement('eco_5');
+    if (earned >= 9000) checkAndUnlockAchievement('eco_6');
+    if (earned >= 15000) checkAndUnlockAchievement('eco_7');
+    if (earned >= 25000) checkAndUnlockAchievement('eco_8');
+    if (earned >= 40000) checkAndUnlockAchievement('eco_9');
+    if (earned >= 60000) checkAndUnlockAchievement('eco_10');
+    if (earned >= 85000) checkAndUnlockAchievement('eco_11');
+    if (earned >= 110000) checkAndUnlockAchievement('eco_12');
+    if (earned >= 140000) checkAndUnlockAchievement('eco_13');
+    if (earned >= 170000) checkAndUnlockAchievement('eco_14');
+    if (earned >= 200000) checkAndUnlockAchievement('eco_15');
+    if (earned >= 230000) checkAndUnlockAchievement('eco_16');
+    if (earned >= 260000) checkAndUnlockAchievement('eco_17');
+    if (earned >= 290000) checkAndUnlockAchievement('eco_18');
+    if (earned >= 320000) checkAndUnlockAchievement('eco_19');
+    if (earned >= 350000) checkAndUnlockAchievement('eco_20');
+
+    // Cuidado
+    if (fed >= 1) checkAndUnlockAchievement('care_1');
+    if (happy >= 7) checkAndUnlockAchievement('care_2');
+    if (fed >= 80) checkAndUnlockAchievement('care_3');
+    if (happy >= 20) checkAndUnlockAchievement('care_4');
+    if (fed >= 200) checkAndUnlockAchievement('care_5');
+    if (happy >= 40) checkAndUnlockAchievement('care_6');
+    if (fed >= 400) checkAndUnlockAchievement('care_7');
+    if (happy >= 70) checkAndUnlockAchievement('care_8');
+    if (fed >= 700) checkAndUnlockAchievement('care_9');
+    if (happy >= 110) checkAndUnlockAchievement('care_10');
+    if (fed >= 1000) checkAndUnlockAchievement('care_11');
+    if (happy >= 160) checkAndUnlockAchievement('care_12');
+    if (fed >= 1400) checkAndUnlockAchievement('care_13');
+    if (happy >= 220) checkAndUnlockAchievement('care_14');
+    if (fed >= 1800) checkAndUnlockAchievement('care_15');
+    if (happy >= 290) checkAndUnlockAchievement('care_16');
+    if (fed >= 2200) checkAndUnlockAchievement('care_17');
+    if (happy >= 370) checkAndUnlockAchievement('care_18');
+    if (fed >= 2800) checkAndUnlockAchievement('care_19');
+    if (happy >= 450) checkAndUnlockAchievement('care_20');
+
+    // Processamento & Contratos
+    if (cheese >= 1) checkAndUnlockAchievement('craft_1');
+    if (cheese >= 8) checkAndUnlockAchievement('craft_2');
+    if (scarves >= 5) checkAndUnlockAchievement('craft_3');
+    if (cheese >= 20) checkAndUnlockAchievement('craft_4');
+    if (scarves >= 15) checkAndUnlockAchievement('craft_5');
+    if (contracts >= 1) checkAndUnlockAchievement('craft_6');
+    if (contracts >= 5) checkAndUnlockAchievement('craft_7');
+    if (contracts >= 12) checkAndUnlockAchievement('craft_8');
+    if (cheese >= 80) checkAndUnlockAchievement('craft_9');
+    if (scarves >= 60) checkAndUnlockAchievement('craft_10');
+    if (contracts >= 25) checkAndUnlockAchievement('craft_11');
+    if (cheese >= 150) checkAndUnlockAchievement('craft_12');
+    if (scarves >= 120) checkAndUnlockAchievement('craft_13');
+    if (contracts >= 50) checkAndUnlockAchievement('craft_14');
+    if (cheese >= 250) checkAndUnlockAchievement('craft_15');
+    if (contracts >= 80) checkAndUnlockAchievement('craft_16');
+    if (cheese >= 400) checkAndUnlockAchievement('craft_17');
+    if (contracts >= 120) checkAndUnlockAchievement('craft_18');
+    if (cheese >= 600) checkAndUnlockAchievement('craft_19');
+    if (cheese >= 1000) checkAndUnlockAchievement('craft_20');
+
+    // Marcos - dias
+    if (currentDay >= 7) checkAndUnlockAchievement('milestone_1');
+    if (currentDay >= 20) checkAndUnlockAchievement('milestone_2');
+    if (currentDay >= 40) checkAndUnlockAchievement('milestone_3');
+    if (currentDay >= 30) checkAndUnlockAchievement('milestone_4');
+    if (currentDay >= 90) checkAndUnlockAchievement('milestone_5');
+    if (currentDay >= 240) checkAndUnlockAchievement('milestone_6');
+    if (currentDay >= 120) checkAndUnlockAchievement('milestone_7');
+    if (currentDay >= 200) checkAndUnlockAchievement('milestone_10');
+    if (currentDay >= 360) checkAndUnlockAchievement('milestone_11');
+    if (currentDay >= 300) checkAndUnlockAchievement('milestone_13');
+    if (currentDay >= 400) checkAndUnlockAchievement('milestone_15');
+    if (currentDay >= 500) checkAndUnlockAchievement('milestone_17');
+    if (currentDay >= 600) checkAndUnlockAchievement('milestone_19');
+    if (currentDay >= 750) checkAndUnlockAchievement('milestone_20');
+
+    // animal count milestones
+    if (animals.length >= 15) checkAndUnlockAchievement('milestone_14');
+    if (animals.length >= 20) checkAndUnlockAchievement('milestone_16');
+
+    const avestruzes = animals.filter(a => a.type === 'avestruz').length;
+    if (avestruzes >= 3) checkAndUnlockAchievement('milestone_18');
+
+    const hasJacare = animals.some(a => a.type === 'jacare');
+    if (hasJacare) checkAndUnlockAchievement('milestone_12');
+
+    // secret
+    const hasBestFriend = animals.some((a: Animal) => a.isBestFriend);
+    if (hasBestFriend) checkAndUnlockAchievement('secret_1');
+
+    const hasCaracol = animals.some(a => a.type === 'caracol');
+    const hasBichoSeda = animals.some(a => a.type === 'bicho_seda');
+    if (hasCaracol && hasBichoSeda) checkAndUnlockAchievement('secret_6');
+
+    if (animals.length >= 10 && animals.every(a => a.happiness >= 80)) checkAndUnlockAchievement('secret_8');
+
+    if (farmLevel >= 20) checkAndUnlockAchievement('secret_10');
+
+    // secret_3: all 3 cheese types made
+    if (queijosFabricadosTipos.includes('coalho') && queijosFabricadosTipos.includes('mucarela') && queijosFabricadosTipos.includes('brie')) {
+      checkAndUnlockAchievement('secret_3');
+    }
+
+  }, [stats, animals, currentDay, farmLevel, currentScreen, queijosFabricadosTipos]);
 
   // --- FUNCIONALIDADE 1: Auto-avanço useEffect ---
   // isGameOver derivado antecipado para uso no useEffect de auto-avanço (galinha = 60 moedas base)
@@ -3708,6 +3862,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       const happyCount = updatedAnimalsList.filter(a => a.happiness > 70).length;
       if (updatedAnimalsList.length > 0 && happyCount === updatedAnimalsList.length) {
         updateMissionProgress('happy_animals', 1);
+        setStats(prev => ({ ...prev, happyDays: (prev.happyDays || 0) + 1 }));
       }
 
       // --- SUBFUNÇÃO 8: Verificação de Mortes Secundárias ---
@@ -4108,6 +4263,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 if (newTotal >= 10) checkAndUnlockAchievement('silk_producer');
                 return { ...prev, seda_bruta: newTotal };
               });
+              setStats(prev => ({ ...prev, totalSilk: (prev.totalSilk || 0) + 3 }));
             }, 0);
             logsToAdd.push({ msg: `🐛 ${a.name} (bicho-da-seda) produziu 3 seda bruta!`, type: 'success' });
             updateMissionProgress('collect_silk', 3, nextDayValue);
@@ -4506,6 +4662,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (completionRate >= 0.8) {
               const bonus = c.completionBonus ?? 0;
               const xp = c.completionXP ?? 0;
+              setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted || 0) + 1 }));
               if (bonus > 0) {
                 setGold(prev => prev + bonus);
                 setFarmXp(prev => prev + xp);

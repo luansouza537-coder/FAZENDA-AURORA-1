@@ -1,12 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface Achievement {
-  id: string;
-  emoji: string;
-  title: string;
-  description: string;
-}
+import { Achievement } from '../data/achievements';
 
 interface AchievementsModalProps {
   unlockedAchievements: string[];
@@ -38,10 +32,10 @@ const AchievementsModal: React.FC<AchievementsModalProps> = ({
         >
           <div className="bg-[#78350f] p-5 border-b-4 border-[#92400e] text-center shrink-0">
             <h3 className="text-white text-xl sm:text-2xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2 animate-pulse" style={{ textShadow: '1.5px 1.5px 0px #451a03', animationDuration: '4s' }}>
-              🏆 Galeria de Medalhas & Conquistas
+              Recompensas
             </h3>
             <p className="text-[#fcd57e] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-              Seus marcos heroicos na Fazenda Aurora
+              Suas conquistas na Fazenda Aurora
             </p>
             <button onClick={handleClose} className="absolute top-4 right-4 text-[#fcd57e] hover:text-white bg-[#92400e] hover:bg-[#b45309] border-2 border-[#78350f] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all active:scale-95 text-lg font-bold" title="Fechar">✕</button>
           </div>
@@ -68,10 +62,10 @@ const AchievementsModal: React.FC<AchievementsModalProps> = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <h4 className={`font-display font-black text-xs sm:text-sm uppercase tracking-wider ${isUnlocked ? 'text-[#78350f]' : 'text-stone-500'}`}>{ach.title}</h4>
+                      <h4 className={`font-display font-black text-xs sm:text-sm uppercase tracking-wider ${isUnlocked ? 'text-[#78350f]' : 'text-stone-500'}`}>{(!isUnlocked && ach.secret) ? '???' : ach.title}</h4>
                       {isUnlocked && <span className="text-[10px] text-amber-600">🏆</span>}
                     </div>
-                    <p className={`text-xs mt-1 leading-normal ${isUnlocked ? 'text-stone-600' : 'text-stone-400'}`}>{ach.description}</p>
+                    <p className={`text-xs mt-1 leading-normal ${isUnlocked ? 'text-stone-600' : 'text-stone-400'}`}>{(!isUnlocked && ach.secret) ? 'Conquista Secreta — descubra jogando!' : ach.description}</p>
                   </div>
                 </div>
               );

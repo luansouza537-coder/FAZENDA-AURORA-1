@@ -170,6 +170,11 @@ export interface FarmStats {
   totalButter?: number;
   totalYogurt?: number;
   totalMerchantShopPurchases?: number;
+  totalSilk?: number;
+  totalFeathers?: number;
+  happyDays?: number;
+  contractsCompleted?: number;
+  cheeseTypesMade?: string[];
 }
 
 export interface InsuranceState {

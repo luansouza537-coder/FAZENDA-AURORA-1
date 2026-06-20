@@ -850,6 +850,7 @@ export function useAnimals({
       if (newTotal >= 5) checkAndUnlockAchievement('rare_feathers');
       return { ...prev, pena_grande: newTotal };
     });
+    setStats(prev => ({ ...prev, totalFeathers: (prev.totalFeathers || 0) + qty }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolReady: false, daysSinceLastWool: 0 } : a));
     addLog(`🦤 ${animal.name} (avestruz) soltou penas! +${qty} pena grande.`, 'success');
     setFarmXp(prev => prev + qty);
