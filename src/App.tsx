@@ -3689,9 +3689,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // --- LONG CONTRACTS: Liquidação semanal de prêmios ---
       let longContractBonusForGold = 0;
       if (isWeeklyBillDay) {
-        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, cheese: 20, queijoCoalho: 28, queijoMucarela: 55, queijoBrie: 90, butter: 45, yogurt: 35, goat_milk: 14, buffalo_milk: 28, buffalo_mozzarella: 120, duck_egg: 18, quail_egg: 22, goose_egg: 50, feather: 15, peacock_feather: 80, alpaca_wool: 65, angora_wool: 90, llama_wool: 45, muco: 35, mel_envasado: 80, seda_bruta: 100, boi: 300, porco: 180, mayo: 16, queijo_cabra: 90, iogurte_cabra: 55, tapete_lhama: 110, leite_condensado: 100, tecido_alpaca: 180, cachecol_angora: 160, coxa_ra: 110, pena_grande: 90, carne_avestruz: 220, couro_avestruz: 300, fio_seda: 200, carne_jacare: 300, couro_jacare: 500 };
+        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, cheese: 20, queijoCoalho: 28, queijoMucarela: 55, queijoBrie: 90, butter: 45, yogurt: 35, goat_milk: 14, buffalo_milk: 28, buffalo_mozzarella: 120, duck_egg: 18, quail_egg: 22, goose_egg: 50, feather: 15, peacock_feather: 80, alpaca_wool: 65, angora_wool: 90, llama_wool: 45, muco: 35, mel_envasado: 80, seda_bruta: 100, boi: 300, porco: 180, boi_porco: 300, mayo: 16, queijo_cabra: 90, iogurte_cabra: 55, tapete_lhama: 110, leite_condensado: 100, tecido_alpaca: 180, cachecol_angora: 160, coxa_ra: 110, pena_grande: 90, carne_avestruz: 220, couro_avestruz: 300, fio_seda: 200, carne_jacare: 300, couro_jacare: 500 };
         contracts.forEach(c => {
-          if (c.contractType !== 'long' || !c.active) return;
+          if (c.contractType !== 'long' || !c.active || c.cycleType === 'monthly') return;
           const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
           const goal = c.weeklyGoal ?? 0;
           const basePrice = LONG_BASE_PRICES[c.product] ?? 0;
@@ -3709,7 +3709,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
         });
         setContracts(prev => prev.map(c => {
-          if (c.contractType !== 'long' || !c.active) return c;
+          if (c.contractType !== 'long' || !c.active || c.cycleType === 'monthly') return c;
           const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
           const goal = c.weeklyGoal ?? 0;
           const missed = deliveredThisWeek < goal * 0.5;
