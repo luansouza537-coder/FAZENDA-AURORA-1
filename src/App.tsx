@@ -451,6 +451,9 @@ function GameApp() {
   const [insuranceClimate, setInsuranceClimate] = useState<{ active: boolean; daysLeft: number }>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).insuranceClimate ?? { active: false, daysLeft: 0 }; } catch(e) {} return { active: false, daysLeft: 0 };
   });
+  const [lastUpgradeDay, setLastUpgradeDay] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).lastUpgradeDay ?? -1; } catch(e) {} return -1;
+  });
 
   // --- OFICINA DE AUTOMAÇÃO ---
   const [milkerLevel, setMilkerLevel] = useState<number>(() => {
@@ -923,6 +926,7 @@ function GameApp() {
     setFarmWisdomBonus({ vaca: 0, ovelha: 0, boi: 0, galinha: 0 });
     setContracts([]);
     setInsurance({ active: false, premium: 50, daysLeft: 0 });
+    setLastUpgradeDay(-1);
     setLandLots(1);
     setWellLevel(0);
     setSolarLevel(0);
@@ -1638,7 +1642,7 @@ function GameApp() {
       return 14;  // era 16 — proporcional ao ovo
     }
     if (itemType === 'goat_milk') return farmLevel >= 4 ? 16 : 14;
-    if (itemType === 'llama_wool') return 45;
+    if (itemType === 'llama_wool') return 28;
     if (itemType === 'duck_egg') return farmLevel >= 5 ? 22 : 18;
     if (itemType === 'goose_egg') return 50;
     if (itemType === 'buffalo_milk') return farmLevel >= 6 ? 62 : 55;
@@ -1663,7 +1667,7 @@ function GameApp() {
     if (itemType === 'queijo_cabra') return 90;
     if (itemType === 'iogurte_cabra') return 70;    // era 55 — Grupo C
     if (itemType === 'leite_condensado') return 100;
-    if (itemType === 'tapete_lhama') return 110;
+    if (itemType === 'tapete_lhama') return 65;
     if (itemType === 'cachecol_angora') return 120; // era 160 — Grupo B
     if (itemType === 'tecido_alpaca') return 180;
     if (itemType === 'fio_seda') return 180;        // era 200 — Grupo C
@@ -2172,6 +2176,7 @@ function GameApp() {
 
         shownMilestones,
         vehicleTiers,
+        lastUpgradeDay,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
       setShowSavedToast(true);
@@ -3564,7 +3569,7 @@ function GameApp() {
           });
           if (penaltyCategories.length > 0) {
             logsToAdd.push({
-              msg: `⚠️ Fazenda diversificada sem especialistas! Animais em stress: ${penaltyCategories.join(', ')} (-4 felicidade/dia). Contrate peões especializados!`,
+              msg: `⚠️ Fazenda diversificada sem especialistas! Animais em stress: ${penaltyCategories.join(', ')} (-4 felicidade/dia). Contrate funcionários especializados!`,
               type: 'error'
             });
           }
@@ -3773,15 +3778,15 @@ function GameApp() {
       }));
 
       // Água: base mínima + escala com número de animais. Poço reduz até 75%.
-      const baseWaterCost = isWeeklyBillDay ? Math.round(8 + animals.length * 2 + irrigationLevel * 4) : 0;
+      const baseWaterCost = isWeeklyBillDay ? Math.round(15 + animals.length * 3 + irrigationLevel * 5) : 0;
       const waterDiscount = Math.min(wellLevel * 0.15 + (hasCisterna ? 0.3 : 0), 0.90);
       const waterCost = isWeeklyBillDay ? Math.round(baseWaterCost * (1 - waterDiscount)) : 0;
 
       // Energia: só cobra se houver infraestrutura instalada (máquinas, fridge, silo, estábulo, bebedouro, queijaria).
-      const milkerEnergy = machines.milkerPurchased && machines.milkerActive ? 18 : 0;
-      const shearerEnergy = machines.shearerPurchased && machines.shearerActive ? 14 : 0;
-      const feederEnergy = machines.feederPurchased && machines.feederActive ? 10 : 0;
-      const infraEnergy = (hasFridge ? 12 : 0) + (hasSilo ? 6 : 0) + (hasStable ? 8 : 0) + (hasBebedouro ? 5 : 0) + (queijariaNivel > 0 ? queijariaNivel * 6 : 0) + (abatedouroUnlocked ? 25 : 0);
+      const milkerEnergy = machines.milkerPurchased && machines.milkerActive ? 27 : 0;
+      const shearerEnergy = machines.shearerPurchased && machines.shearerActive ? 21 : 0;
+      const feederEnergy = machines.feederPurchased && machines.feederActive ? 15 : 0;
+      const infraEnergy = (hasFridge ? 18 : 0) + (hasSilo ? 9 : 0) + (hasStable ? 12 : 0) + (hasBebedouro ? 8 : 0) + (queijariaNivel > 0 ? queijariaNivel * 9 : 0) + (abatedouroUnlocked ? 38 : 0);
       const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy + infraEnergy;
       const energyDiscount = solarLevel === 1 ? 0.4 : solarLevel === 2 ? 0.7 : solarLevel >= 3 ? 1.0 : 0;
       const energyCost = isWeeklyBillDay && machineEnergyCost > 0 ? Math.round(machineEnergyCost * (1 - energyDiscount)) : 0;
@@ -4462,26 +4467,7 @@ function GameApp() {
         return c;
       }));
 
-      // --- F5: Decrementar seguro agrícola ---
-      // BUG FIX: side-effects (log/notificação) extraídos para fora do updater,
-      // calculados com `insurance` da closure para evitar dupla execução em StrictMode.
-      if (insurance.active) {
-        const newDaysLeft = insurance.daysLeft - 1;
-        if (newDaysLeft <= 0) {
-          logsToAdd.push({ msg: `🛡️ Seu seguro agrícola expirou! Renove nas Melhorias para continuar protegido.`, type: 'event' });
-          setTimeout(() => addNotification(`🛡️ Seguro agrícola expirou!`, 'warning', nextDayValue), 0);
-        } else if (newDaysLeft === 2) {
-          setTimeout(() => addNotification(`⚠️ Seguro agrícola expira em 2 dias! Renove nas Melhorias.`, 'warning', nextDayValue), 0);
-        }
-      }
-      setInsurance(prev => {
-        if (!prev.active) return prev;
-        const newDaysLeft = prev.daysLeft - 1;
-        if (newDaysLeft <= 0) {
-          return { ...prev, active: false, daysLeft: 0 };
-        }
-        return { ...prev, daysLeft: newDaysLeft };
-      });
+      // Seguros são permanentes — sem decremento de dias
 
       // --- SUBFUNÇÃO 5: Processamento da Maturação de Queijos ---
       const { remaining: maturacaoRemaining, readyQueijos } = processarMaturacaoQueijos(
@@ -4881,8 +4867,8 @@ function GameApp() {
           if (prev < workerCost) { setDebt(d => d + (workerCost - prev)); return 0; }
           return prev - workerCost;
         });
-        logsToAdd.push({ msg: `👷 Peões trabalharam hoje! Custo diário: -${workerCost}💰`, type: 'info' });
-        addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'trabalhador', description: `Salário de ${workers.length} peão(ões)`, amount: workerCost });
+        logsToAdd.push({ msg: `👷 Funcionários trabalharam hoje! Custo diário: -${workerCost}💰`, type: 'info' });
+        addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'trabalhador', description: `Salário de ${workers.length} funcionário(s)`, amount: workerCost });
 
         // --- Tratador: alimenta todos os animais consumindo ração correta do inventário ---
         if (workers.some(w => w.role === 'tratador')) {
@@ -4984,19 +4970,21 @@ function GameApp() {
           }
         }
 
-        // --- Tosquiador: coleta lã de ovelha e coelho angorá com chance de premium ---
+        // --- Tosquiador: coleta lã de ovelha, lhama e coelho angorá com chance de premium ---
         if (workers.some(w => w.role === 'tosquiador')) {
           const woolCollected = finalAnimals.filter(a => a.type === 'ovelha' && a.isAdult !== false && a.woolReady && !(machines.shearerPurchased && machines.shearerActive)).length;
           const angoraCollected = finalAnimals.filter(a => a.type === 'coelho_angora' && a.isAdult !== false && a.woolReady).length;
+          const llamaCollected = finalAnimals.filter(a => a.type === 'lhama' && a.isAdult !== false && a.woolReady).length;
           const tosquiadorIds = new Set(finalAnimals.filter(a => {
             if (a.type === 'ovelha' && a.isAdult !== false && a.woolReady && !(machines.shearerPurchased && machines.shearerActive)) return true;
             if (a.type === 'coelho_angora' && a.isAdult !== false && a.woolReady) return true;
+            if (a.type === 'lhama' && a.isAdult !== false && a.woolReady) return true;
             return false;
           }).map(a => a.id));
           if (tosquiadorIds.size > 0) {
             setAnimals(prev => prev.map(a => {
               if (!tosquiadorIds.has(a.id)) return a;
-              const daysUntilWool = a.type === 'coelho_angora' ? 5 : 7;
+              const daysUntilWool = a.type === 'coelho_angora' ? 5 : a.type === 'lhama' ? 10 : 7;
               return { ...a, woolReady: false, daysUntilWool, daysSinceLastWool: 0 };
             }));
           }
@@ -5008,6 +4996,10 @@ function GameApp() {
           if (angoraCollected > 0) {
             setInventory(prev => ({ ...prev, angora_wool: (prev.angora_wool ?? 0) + angoraCollected }));
             logsToAdd.push({ msg: `🐇 Tosquiador coletou +${angoraCollected} lã angorá automaticamente!`, type: 'success' });
+          }
+          if (llamaCollected > 0) {
+            setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) + llamaCollected }));
+            logsToAdd.push({ msg: `🦙 Tosquiador tosquiou +${llamaCollected} lã(s) de lhama automaticamente!`, type: 'success' });
           }
         }
 
@@ -5268,25 +5260,6 @@ function GameApp() {
         }
       }
 
-      // --- SEGUROS EXTRAS: decrementar dias ---
-      if (insuranceTheft.active) {
-        const left = insuranceTheft.daysLeft - 1;
-        if (left <= 0) {
-          setInsuranceTheft({ active: false, daysLeft: 0 });
-          logsToAdd.push({ msg: `🛡️ Seguro contra Roubo expirou! Renove nas Melhorias.`, type: 'event' });
-        } else {
-          setInsuranceTheft(prev => ({ ...prev, daysLeft: left }));
-        }
-      }
-      if (insuranceClimate.active) {
-        const left = insuranceClimate.daysLeft - 1;
-        if (left <= 0) {
-          setInsuranceClimate({ active: false, daysLeft: 0 });
-          logsToAdd.push({ msg: `🌦️ Seguro Climático expirou! Renove nas Melhorias.`, type: 'event' });
-        } else {
-          setInsuranceClimate(prev => ({ ...prev, daysLeft: left }));
-        }
-      }
 
       // --- EFEITOS DO MERCADOR: decrementar dias ---
       if (productionBoostDays > 0) setProductionBoostDays(prev => prev - 1);
@@ -5872,33 +5845,33 @@ function GameApp() {
               <span>Loja</span>
             </button>
 
-            {/* 👷 Peões Button */}
+            {/* 👷 Funcionários Button */}
             <button
               onClick={() => {
                 setShowWorkersModal(true);
                 triggerAudioResult(() => sfx.playSound('click'));
               }}
               className="bg-[#064e3b] border-3 border-[#fbbf24] hover:bg-[#065f46] text-[#fef3c7] font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#022c22] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
-              title="Contratar Peões: trabalhadores que automatizam tarefas diárias"
+              title="Contratar Funcionários: trabalhadores que automatizam tarefas diárias"
             >
               <span>👷</span>
-              <span>Peões {workers.length > 0 ? `(${workers.length})` : ''}</span>
+              <span>Funcionários {workers.length > 0 ? `(${workers.length})` : ''}</span>
             </button>
 
             {/* 🛡️ Seguro Status */}
             {insurance.active && (
-              <div className="bg-green-700 border-3 border-green-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seguro agrícola: ${insurance.daysLeft} dias restantes`}>
-                🛡️ {insurance.daysLeft}d
-              </div>
-            )}
-            {insuranceTheft.active && (
-              <div className="bg-orange-700 border-3 border-orange-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seguro contra Roubo: ${insuranceTheft.daysLeft} dias`}>
-                🔒 {insuranceTheft.daysLeft}d
+              <div className="bg-green-700 border-3 border-green-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title="Seguro Básico ativo (permanente)">
+                🛡️ ∞
               </div>
             )}
             {insuranceClimate.active && (
-              <div className="bg-sky-700 border-3 border-sky-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seguro Climático: ${insuranceClimate.daysLeft} dias`}>
-                🌦️ {insuranceClimate.daysLeft}d
+              <div className="bg-sky-700 border-3 border-sky-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title="Seguro Intermediário ativo (permanente)">
+                🌦️ ∞
+              </div>
+            )}
+            {insuranceTheft.active && (
+              <div className="bg-orange-700 border-3 border-orange-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title="Seguro Premium ativo (permanente)">
+                🔒 ∞
               </div>
             )}
             {droughtDaysRemaining > 0 && (
@@ -6636,6 +6609,8 @@ function GameApp() {
           getFreightMultiplier={getFreightMultiplier}
           abatedouroUnlocked={abatedouroUnlocked}
           setAbatedouroUnlocked={setAbatedouroUnlocked}
+          lastUpgradeDay={lastUpgradeDay}
+          setLastUpgradeDay={setLastUpgradeDay}
           ownedOneTimeEffects={[
             ...(hasBebedouro ? ['bebedouro'] : []),
             ...(hasCertSanitario ? ['cert_sanitario'] : []),

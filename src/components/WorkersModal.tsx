@@ -34,7 +34,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
         >
           <div className="bg-[#065f46] p-5 border-b-4 border-[#fbbf24] text-center shrink-0">
             <h3 className="text-[#fef3c7] text-xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
-              👷 Peões da Fazenda
+              👷 Funcionários da Fazenda
             </h3>
             <p className="text-[#fbbf24] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
               Vagas: {workers.length}/{Math.max(1, Math.floor(farmLevel / 3))} • 1 vaga a cada 3 níveis
@@ -44,7 +44,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {workers.length > 0 && (
               <div className="bg-[#065f46] border-2 border-[#fbbf24]/40 rounded-2xl p-4">
-                <h4 className="text-[#fbbf24] font-black text-xs uppercase mb-3">Peões Contratados</h4>
+                <h4 className="text-[#fbbf24] font-black text-xs uppercase mb-3">Funcionários Contratados</h4>
                 <div className="space-y-2">
                   {workers.map(w => {
                     const wt = WORKER_TYPES.find(t => t.role === w.role);
@@ -109,7 +109,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                       </span>
                     ))}
                   </div>
-                  <div className="text-[#fbbf24] text-[10px] font-mono">Contrate os peões abaixo para remover o debuff.</div>
+                  <div className="text-[#fbbf24] text-[10px] font-mono">Contrate os funcionários abaixo para remover o debuff.</div>
                 </div>
               );
             })()}

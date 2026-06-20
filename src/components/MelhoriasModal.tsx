@@ -66,6 +66,8 @@ interface MelhoriasModalProps {
   onBuyConsumivel: (item: typeof MERCHANT_SPECIAL_ITEMS[number]) => void;
   abatedouroUnlocked: boolean;
   setAbatedouroUnlocked: (v: boolean) => void;
+  lastUpgradeDay: number;
+  setLastUpgradeDay: (v: number) => void;
 }
 
 const VEHICLE_CATEGORIES = [
@@ -234,13 +236,14 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             {/* Poço d'Água */}
             <div className="bg-white border-4 border-blue-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-blue-800 mb-1">💧 Poço d'Água</h4>
-              <p className="text-xs text-stone-500 font-mono mb-2">Reduz conta de água por nível (máx 75%). Atual: Nível {p.wellLevel}/5 (-{Math.round(Math.min(p.wellLevel * 15, 75))}% água) • Compra sequencial</p>
+              <p className="text-xs text-stone-500 font-mono mb-2">Reduz conta de água por nível (máx 75%). Atual: Nível {p.wellLevel}/5 (-{Math.round(Math.min(p.wellLevel * 15, 75))}% água) • 1 upgrade por dia</p>
+              {p.lastUpgradeDay === p.currentDay && <p className="text-[10px] text-amber-600 font-mono mb-1">⏳ Já foi feito 1 upgrade hoje. Volte amanhã!</p>}
               <div className="grid grid-cols-5 gap-1">
                 {[{ lvl: 1, price: 700 }, { lvl: 2, price: 2000 }, { lvl: 3, price: 5500 }, { lvl: 4, price: 25000 }, { lvl: 5, price: 70000 }].map(({ lvl, price }) => {
-                  const canBuy = p.gold >= price && p.wellLevel === lvl - 1;
+                  const canBuy = p.gold >= price && p.wellLevel === lvl - 1 && p.lastUpgradeDay !== p.currentDay;
                   return (
                     <button key={lvl} disabled={p.wellLevel >= lvl || !canBuy}
-                      onClick={() => { if (canBuy) { p.setGold(prev => prev - price); p.setWellLevel(lvl); p.addLog(`💧 Poço d'água nível ${lvl} instalado! Água -${Math.round(Math.min(lvl * 15, 75))}%.`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }}
+                      onClick={() => { if (canBuy) { p.setGold(prev => prev - price); p.setWellLevel(lvl); p.setLastUpgradeDay(p.currentDay); p.addLog(`💧 Poço d'água nível ${lvl} instalado! Água -${Math.round(Math.min(lvl * 15, 75))}%.`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }}
                       className={`text-xs font-mono font-black py-2 px-1 rounded-xl border-b-2 transition-all cursor-pointer ${p.wellLevel >= lvl ? 'bg-blue-100 border-blue-300 text-blue-700' : canBuy ? 'bg-blue-500 hover:bg-blue-400 text-white border-blue-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                     >
                       {p.wellLevel >= lvl ? `✅ Nv${lvl}` : p.wellLevel < lvl - 1 ? `🔒 Nv${lvl}` : `Nv${lvl} (${price.toLocaleString()}💰)`}
@@ -254,17 +257,17 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             <div className="bg-white border-4 border-yellow-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-yellow-800 mb-1">☀️ Gerador Solar</h4>
               <p className="text-xs text-stone-500 font-mono mb-2">
-                Reduz manutenção e conta de energia das máquinas. Atual: Nível {p.solarLevel}/4<br/>
+                Reduz manutenção e conta de energia das máquinas. Atual: Nível {p.solarLevel}/4 • 1 upgrade por dia<br/>
                 Nv1: -15% manutenção, -40% energia | Nv2: -30% manutenção, -70% energia<br/>
                 Nv3: -45% manutenção, energia GRATUITA 🆓 | Nv4: energia GRATUITA + 10% felicidade animais
               </p>
               <div className="grid grid-cols-4 gap-1">
                 {[{ lvl: 1, price: 1200, minFarm: 1 }, { lvl: 2, price: 3500, minFarm: 1 }, { lvl: 3, price: 9000, minFarm: 5 }, { lvl: 4, price: 40000, minFarm: 14 }].map(({ lvl, price, minFarm }) => {
                   const requiresFarmLevel = lvl >= 3 && p.farmLevel < minFarm;
-                  const canAfford = p.gold >= price && p.solarLevel === lvl - 1 && !requiresFarmLevel;
+                  const canAfford = p.gold >= price && p.solarLevel === lvl - 1 && !requiresFarmLevel && p.lastUpgradeDay !== p.currentDay;
                   return (
                     <button key={lvl} disabled={p.solarLevel >= lvl || !canAfford}
-                      onClick={() => { if (canAfford) { p.setGold(prev => prev - price); p.setSolarLevel(lvl); p.addLog(`☀️ Gerador solar nível ${lvl} instalado! Manutenção ${lvl * 15}% mais barata.`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } else if (requiresFarmLevel) { p.addLog(`☀️ Gerador solar nível ${lvl} requer Fazenda Nível ${minFarm}!`, 'error'); } }}
+                      onClick={() => { if (canAfford) { p.setGold(prev => prev - price); p.setSolarLevel(lvl); p.setLastUpgradeDay(p.currentDay); p.addLog(`☀️ Gerador solar nível ${lvl} instalado! Manutenção ${lvl * 15}% mais barata.`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } else if (requiresFarmLevel) { p.addLog(`☀️ Gerador solar nível ${lvl} requer Fazenda Nível ${minFarm}!`, 'error'); } }}
                       className={`text-xs font-mono font-black py-2 px-1 rounded-xl border-b-2 transition-all cursor-pointer ${p.solarLevel >= lvl ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : canAfford ? 'bg-yellow-500 hover:bg-yellow-400 text-white border-yellow-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                     >
                       {p.solarLevel >= lvl ? `✅ Nv${lvl}` : requiresFarmLevel ? `🔒 Nv${lvl}` : `Nv${lvl} (${price.toLocaleString()}💰)`}
@@ -277,14 +280,14 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             {/* Irrigação */}
             <div className="bg-white border-4 border-cyan-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-cyan-800 mb-1">🌊 Sistema de Irrigação</h4>
-              <p className="text-xs text-stone-500 font-mono mb-2">Nv1: secas -40% impacto | Nv2: imunidade total a secas | Nv3: +1 felicidade/dia animais. Atual: Nível {p.irrigationLevel}/3 • Compra sequencial</p>
+              <p className="text-xs text-stone-500 font-mono mb-2">Nv1: secas -40% impacto | Nv2: imunidade total a secas | Nv3: +1 felicidade/dia animais. Atual: Nível {p.irrigationLevel}/3 • 1 upgrade por dia</p>
               <div className="grid grid-cols-3 gap-2">
                 {[{ lvl: 1, price: 1500 }, { lvl: 2, price: 4500 }, { lvl: 3, price: 20000 }].map(({ lvl, price }) => {
                   const requiresFarmLevel12 = lvl === 3 && p.farmLevel < 12;
-                  const canBuy = p.gold >= price && p.irrigationLevel === lvl - 1 && !requiresFarmLevel12;
+                  const canBuy = p.gold >= price && p.irrigationLevel === lvl - 1 && !requiresFarmLevel12 && p.lastUpgradeDay !== p.currentDay;
                   return (
                     <button key={lvl} disabled={p.irrigationLevel >= lvl || !canBuy}
-                      onClick={() => { if (canBuy) { p.setGold(prev => prev - price); p.setIrrigationLevel(lvl); p.addLog(`🌊 Irrigação nível ${lvl} instalada!`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }}
+                      onClick={() => { if (canBuy) { p.setGold(prev => prev - price); p.setIrrigationLevel(lvl); p.setLastUpgradeDay(p.currentDay); p.addLog(`🌊 Irrigação nível ${lvl} instalada!`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }}
                       className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${p.irrigationLevel >= lvl ? 'bg-cyan-100 border-cyan-300 text-cyan-700' : canBuy ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                     >
                       {p.irrigationLevel >= lvl ? `✅ Nv${lvl}` : p.irrigationLevel < lvl - 1 || requiresFarmLevel12 ? `🔒 Nv${lvl}` : `Nv${lvl} (${price.toLocaleString()}💰)`}
@@ -294,23 +297,38 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               </div>
             </div>
 
-            {/* Seguros */}
-            {[
-              { key: 'insurance', label: '🛡️ Seguro Agrícola', color: 'emerald', price: 400, days: 7, desc: `Reduz impacto de eventos negativos em 70% por 7 dias. ${p.insurance.active ? `Ativo: ${p.insurance.daysLeft} dias restantes` : 'Inativo'}`, state: p.insurance, setState: (v: InsuranceState) => p.setInsurance(v), logMsg: '🛡️ Seguro agrícola contratado por 7 dias por 400 moedas!' },
-              { key: 'theft', label: '🔒 Seguro contra Roubo', color: 'orange', price: 300, days: 10, desc: `Bloqueia completamente roubo noturno por 10 dias. ${p.insuranceTheft.active ? `Ativo: ${p.insuranceTheft.daysLeft} dias restantes` : 'Inativo'}`, state: p.insuranceTheft, setState: (v: InsuranceState) => p.setInsuranceTheft(v), logMsg: '🔒 Seguro contra Roubo contratado por 10 dias!' },
-              { key: 'climate', label: '🌦️ Seguro Climático', color: 'sky', price: 350, days: 10, desc: `Protege contra secas e tempestades: sem custo extra de água por 10 dias. ${p.insuranceClimate.active ? `Ativo: ${p.insuranceClimate.daysLeft} dias restantes` : 'Inativo'}`, state: p.insuranceClimate, setState: (v: InsuranceState) => p.setInsuranceClimate(v), logMsg: '🌦️ Seguro Climático contratado por 10 dias!' },
-            ].map(({ key, label, color, price, days, desc, state, setState, logMsg }) => (
-              <div key={key} className={`bg-white border-4 border-${color}-300 rounded-3xl p-4`}>
-                <h4 className={`font-display font-black text-sm uppercase text-${color}-800 mb-1`}>{label}</h4>
-                <p className="text-xs text-stone-500 font-mono mb-2">{desc}</p>
-                <button disabled={state.active || p.gold < price}
-                  onClick={() => { if (!state.active && p.gold >= price) { p.setGold(prev => prev - price); setState({ active: true, daysLeft: days }); p.addLog(logMsg, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }}
-                  className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${state.active ? `bg-${color}-100 border-${color}-300 text-${color}-700` : p.gold >= price ? `bg-${color}-500 hover:bg-${color}-400 text-white border-${color}-700` : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
-                >
-                  {state.active ? `✅ Ativo (${state.daysLeft}d)` : `Contratar (${price}💰 / ${days} dias)`}
-                </button>
-              </div>
-            ))}
+            {/* Seguros — 3 tiers progressivos e permanentes */}
+            <div className="bg-white border-4 border-emerald-300 rounded-3xl p-4 space-y-3">
+              <h4 className="font-display font-black text-sm uppercase text-emerald-800 mb-1">🛡️ Sistema de Seguros</h4>
+              <p className="text-xs text-stone-500 font-mono mb-2">Proteção permanente e progressiva. Cada tier inclui o anterior.</p>
+              {([
+                { tier: 1 as const, label: '🌱 Seguro Básico', price: 800, minLevel: 2, desc: 'Reduz impacto de pragas e epidemias em 70%. Permanente.', prevActive: true, active: p.insurance.active, onBuy: () => p.setInsurance({ active: true, daysLeft: 9999 }) },
+                { tier: 2 as const, label: '🌦️ Seguro Intermediário', price: 2500, minLevel: 6, desc: 'Protege contra secas, tempestades e geadas. Inclui Básico.', prevActive: p.insurance.active, active: p.insuranceClimate.active, onBuy: () => p.setInsuranceClimate({ active: true, daysLeft: 9999 }) },
+                { tier: 3 as const, label: '🔒 Seguro Premium', price: 8000, minLevel: 12, desc: 'Bloqueia roubos e garante proteção total. Inclui todos os anteriores.', prevActive: p.insuranceClimate.active, active: p.insuranceTheft.active, onBuy: () => p.setInsuranceTheft({ active: true, daysLeft: 9999 }) },
+              ] as const).map(({ tier, label, price, minLevel, desc, prevActive, active, onBuy }) => {
+                const levelOk = p.farmLevel >= minLevel;
+                const canBuy = !active && prevActive && levelOk && p.gold >= price;
+                return (
+                  <div key={tier} className={`border-2 rounded-2xl p-3 ${active ? 'bg-emerald-50 border-emerald-400' : 'bg-stone-50 border-stone-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="text-xs font-black text-stone-800">{label} {active && '✅'}</div>
+                        <div className="text-[10px] text-stone-500 font-mono">{desc}</div>
+                        {!levelOk && <div className="text-[10px] text-red-500 font-mono">🔒 Requer Nível {minLevel}</div>}
+                        {!prevActive && levelOk && <div className="text-[10px] text-amber-600 font-mono">⚠️ Requer tier anterior</div>}
+                      </div>
+                      <button
+                        disabled={!canBuy}
+                        onClick={() => { if (!canBuy) return; p.setGold(prev => prev - price); onBuy(); p.addLog(`🛡️ ${label} contratado! Proteção permanente ativada.`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); }}
+                        className={`shrink-0 text-[10px] font-black uppercase px-2 py-1.5 rounded-xl border-b-2 cursor-pointer transition-all ${active ? 'bg-emerald-100 border-emerald-300 text-emerald-700 cursor-not-allowed' : canBuy ? 'bg-emerald-500 hover:bg-emerald-400 text-white border-emerald-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                      >
+                        {active ? 'Ativo ✅' : `${price.toLocaleString()}💰`}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
             {/* Oficina de Automação */}
             {(p.machines.milkerPurchased || p.machines.shearerPurchased || p.machines.feederPurchased) && (
