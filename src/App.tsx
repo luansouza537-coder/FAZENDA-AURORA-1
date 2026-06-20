@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SplashScreen from './components/SplashScreen';
 import { useAnimals } from './hooks/useAnimals';
 import { useInventory } from './hooks/useInventory';
@@ -66,6 +66,7 @@ import SellAllModal from './components/SellAllModal';
 import { ReproducoesModal, RankingModal, FairResultModal, AllTimeStatsModal, CruzamentoModal } from './components/SmallModals';
 import GameSidebar from './components/GameSidebar';
 import AnimalGrid from './components/AnimalGrid';
+import { ToastNotification, Toast } from './components/ToastNotification';
 
 
 interface FloatingText {
@@ -168,6 +169,16 @@ function GameApp() {
 
   // Ateliê: mostrar itens vazios toggle
   const [showEmptyItems, setShowEmptyItems] = useState<boolean>(false);
+
+  // Toast notifications
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const addToast = useCallback((message: string, type: Toast['type'] = 'info', icon?: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts(prev => [...prev.slice(-4), { id, message, type, icon }]);
+  }, []);
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
   // priceHistory moved to useEconomy
 
@@ -1992,6 +2003,23 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     canAddToInventory,
   });
 
+  // --- Toast-wired wrappers for key actions ---
+  const feedAnimalWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    const animal = animals.find(a => a.id === id);
+    feedAnimal(id, event);
+    if (animal) addToast(`${animal.name} alimentado!`, 'info', '🍽️');
+  }, [animals, feedAnimal, addToast]);
+
+  const collectMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectMilk(id, event);
+    addToast('+Leite coletado!', 'success', '🥛');
+  }, [collectMilk, addToast]);
+
+  const collectEggWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectEgg(id, event);
+    addToast('+Ovo coletado!', 'success', '🥚');
+  }, [collectEgg, addToast]);
+
   // --- useWorkers hook ---
   const {
     workers,
@@ -2942,6 +2970,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setContracts(prev => [...prev, newContract]);
     const cycleLabel = (cat as any).cycleType === 'monthly' ? `${cat.weeklyGoal} animais/mês` : `${cat.weeklyGoal} un/${cat.product}/semana`;
     addLog(`📜 Contrato assinado com ${cat.client}! Meta: ${cycleLabel} por ${cat.durationDays} dias.`, 'success');
+    addToast(`Contrato assinado com ${cat.client}!`, 'success', '📜');
     triggerAudioResult(() => sfx.playSound('levelup'));
   };
 
@@ -6893,6 +6922,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           onClose={() => setShowAllTimeStats(false)}
         />
       )}
+
+      {/* Toast Notifications */}
+      <ToastNotification toasts={toasts} onRemove={removeToast} />
 
     </div>
   );

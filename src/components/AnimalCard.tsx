@@ -399,6 +399,24 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               </span>
             );
           })()}
+          {/* Status badges row */}
+          <div className="flex flex-wrap gap-1 mt-1">
+            {!animal.isAdult && (
+              <span className="text-[9px] bg-pink-100 border border-pink-300 text-pink-700 font-black px-1.5 py-0.5 rounded-full">😴 Filhote</span>
+            )}
+            {animal.isSick && (
+              <span className="text-[9px] bg-red-100 border border-red-300 text-red-700 font-black px-1.5 py-0.5 rounded-full animate-pulse">🤒 Doente</span>
+            )}
+            {(animal.stressedDays ?? 0) > 0 && (
+              <span className="text-[9px] bg-orange-100 border border-orange-300 text-orange-700 font-black px-1.5 py-0.5 rounded-full">⚠️ Estressado</span>
+            )}
+            {isCritical && !['minhoca','caracol'].includes(animal.type) && (
+              <span className="text-[9px] bg-red-200 border border-red-400 text-red-800 font-black px-1.5 py-0.5 rounded-full animate-pulse">💀 Crítico</span>
+            )}
+            {isReady && (
+              <span className="text-[9px] bg-emerald-100 border border-emerald-300 text-emerald-700 font-black px-1.5 py-0.5 rounded-full">✅ Pronto</span>
+            )}
+          </div>
           {/* MECHANIC 3: Cabra — badge de lactação */}
           {animal.type === 'cabra' && (
             animal.isLactating ? (
