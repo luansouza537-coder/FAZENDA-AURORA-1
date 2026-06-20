@@ -301,6 +301,71 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               </div>
             </div>
 
+            {/* Celeiro */}
+            <div className="bg-white border-4 border-amber-300 rounded-3xl p-4 space-y-3">
+              <h4 className="font-display font-black text-sm uppercase text-amber-800 mb-1">📦 Celeiro</h4>
+              <p className="text-xs text-stone-500 font-mono mb-2">Expanda o espaço para armazenar itens secos: lã, penas, têxteis, mel e mais.</p>
+              {([
+                { level: 1, label: 'Celeiro Básico', capacity: 60, price: 500, minLevel: 2 },
+                { level: 2, label: 'Celeiro Ampliado', capacity: 120, price: 1500, minLevel: 5 },
+                { level: 3, label: 'Celeiro Grande', capacity: 250, price: 4000, minLevel: 9 },
+                { level: 4, label: 'Celeiro Industrial', capacity: 999, price: 10000, minLevel: 14 },
+              ] as const).map(({ level, label, capacity, price, minLevel }) => {
+                const purchased = p.celeiroLevel >= level;
+                const available = p.celeiroLevel === level - 1;
+                const levelOk = p.farmLevel >= minLevel;
+                const canBuy = available && levelOk && p.gold >= price;
+                return (
+                  <div key={level} className={`border-2 rounded-2xl p-3 ${purchased ? 'bg-amber-50 border-amber-400' : 'bg-stone-50 border-stone-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="text-xs font-black text-stone-800">{label} {purchased && '✅'}</div>
+                        <div className="text-[10px] text-stone-500 font-mono">{capacity === 999 ? 'Ilimitado' : `${capacity}/item`} — itens secos</div>
+                        {!levelOk && <div className="text-[10px] text-red-500 font-mono">🔒 Requer Nível {minLevel}</div>}
+                      </div>
+                      <button disabled={!canBuy} onClick={() => { if (!canBuy) return; p.setGold(prev => prev - price); p.setCeleiroLevel(level); p.addLog(`📦 ${label} construído! Capacidade de estoque ampliada.`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); }}
+                        className={`shrink-0 text-[10px] font-black uppercase px-2 py-1.5 rounded-xl border-b-2 cursor-pointer transition-all ${purchased ? 'bg-amber-100 border-amber-300 text-amber-700 cursor-not-allowed' : canBuy ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}>
+                        {purchased ? '✅' : `${price.toLocaleString()}💰`}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="text-[10px] text-amber-700 font-mono">Capacidade atual: {[30,60,120,250,999][p.celeiroLevel] ?? 30}/item</div>
+            </div>
+
+            {/* Câmara Fria */}
+            <div className="bg-white border-4 border-sky-300 rounded-3xl p-4 space-y-3">
+              <h4 className="font-display font-black text-sm uppercase text-sky-800 mb-1">❄️ Câmara Fria</h4>
+              <p className="text-xs text-stone-500 font-mono mb-2">Armazene leite, ovos, carnes e laticínios com segurança. Integra com a Geladeira existente.</p>
+              {([
+                { level: 1, label: 'Geladeira Industrial', capacity: 40, price: 800, minLevel: 3 },
+                { level: 2, label: 'Câmara Fria Pequena', capacity: 80, price: 2500, minLevel: 6 },
+                { level: 3, label: 'Câmara Fria Grande', capacity: 180, price: 6000, minLevel: 11 },
+              ] as const).map(({ level, label, capacity, price, minLevel }) => {
+                const purchased = p.camaraFriaLevel >= level;
+                const available = p.camaraFriaLevel === level - 1;
+                const levelOk = p.farmLevel >= minLevel;
+                const canBuy = available && levelOk && p.gold >= price;
+                return (
+                  <div key={level} className={`border-2 rounded-2xl p-3 ${purchased ? 'bg-sky-50 border-sky-400' : 'bg-stone-50 border-stone-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="text-xs font-black text-stone-800">{label} {purchased && '✅'}</div>
+                        <div className="text-[10px] text-stone-500 font-mono">{capacity}/item — leite, ovos, carnes</div>
+                        {!levelOk && <div className="text-[10px] text-red-500 font-mono">🔒 Requer Nível {minLevel}</div>}
+                      </div>
+                      <button disabled={!canBuy} onClick={() => { if (!canBuy) return; p.setGold(prev => prev - price); p.setCamaraFriaLevel(level); p.addLog(`❄️ ${label} instalada! Capacidade de refrigeração ampliada.`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); }}
+                        className={`shrink-0 text-[10px] font-black uppercase px-2 py-1.5 rounded-xl border-b-2 cursor-pointer transition-all ${purchased ? 'bg-sky-100 border-sky-300 text-sky-700 cursor-not-allowed' : canBuy ? 'bg-sky-500 hover:bg-sky-400 text-white border-sky-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}>
+                        {purchased ? '✅' : `${price.toLocaleString()}💰`}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="text-[10px] text-sky-700 font-mono">Capacidade atual: {[15,40,80,180][p.camaraFriaLevel] ?? 15}/item</div>
+            </div>
+
             {/* Seguros — 3 tiers progressivos e permanentes */}
             <div className="bg-white border-4 border-emerald-300 rounded-3xl p-4 space-y-3">
               <h4 className="font-display font-black text-sm uppercase text-emerald-800 mb-1">🛡️ Sistema de Seguros</h4>

@@ -241,6 +241,19 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const noHungerAnimal = ['minhoca', 'caracol'].includes(animal.type);
   const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
 
+  const isReady = (
+    (animal.type === 'vaca' && animal.hasProducedToday) ||
+    (animal.type === 'bufalo' && animal.hasProducedToday) ||
+    (animal.type === 'galinha' && animal.hasProducedToday) ||
+    (animal.type === 'codorna' && animal.hasProducedToday) ||
+    (animal.type === 'pato' && animal.hasProducedToday) ||
+    (animal.type === 'cabra' && animal.isLactating && animal.hasProducedToday) ||
+    (animal.type === 'ovelha' && animal.woolReady) ||
+    (animal.type === 'lhama' && (animal.woolAccumulated ?? 0) > 0) ||
+    (animal.type === 'alpaca' && animal.woolReady) ||
+    (animal.type === 'coelho_angora' && animal.woolReady)
+  );
+
   return (
     <motion.div
       key={animal.id}
@@ -255,8 +268,13 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           : animal.happiness === 100
           ? 'bg-yellow-50 border-yellow-400 shadow-[0_12px_0_#ca8a04] hover:border-yellow-300'
           : 'bg-[#fffbeb] border-[#fbbf24] shadow-[0_12px_0_#d97706] hover:border-[#f59e0b]'
-      }`}
+      } ${isReady ? 'ring-2 ring-[#10b981] ring-offset-1' : ''}`}
     >
+      {/* Ready to collect pulsing dot */}
+      {isReady && (
+        <span className="absolute top-2 right-2 w-3 h-3 bg-[#10b981] rounded-full animate-pulse border-2 border-white shadow z-10" title="Pronto para coletar!" />
+      )}
+
       {/* Critical Danger warning badge */}
       {isCritical && (
         <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-red-600 to-red-800 text-white font-black text-[9px] sm:text-[10px] px-3 py-1 rounded-full uppercase shadow-md flex items-center gap-1.5 animate-pulse border-2 border-white select-none">
@@ -276,6 +294,13 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         <div className="absolute -top-3.5 -left-2.5 bg-gradient-to-r from-red-500 to-pink-500 text-white font-black text-[10px] px-2.5 py-1 rounded-full uppercase shadow-md flex items-center gap-1.5 animate-bounce" style={{ animationDuration: '3s' }}>
           <span className="animate-heart-pulse">💖</span> Melhor Amigo!
         </div>
+      )}
+
+      {/* Veteran badge */}
+      {animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75 && (
+        <span className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-amber-100 border border-amber-400 text-amber-800 cursor-help" title="Este animal está na fase final da vida. Considere aposentá-lo.">
+          👴 Veterano
+        </span>
       )}
 
       {/* Badge de galinha super feliz (pode gerar ovo fértil) */}
