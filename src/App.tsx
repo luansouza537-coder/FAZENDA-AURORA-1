@@ -1663,7 +1663,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       return farmLevel >= 3 ? 15 : 12;
     }
     if (itemType === 'cheese') {
-      return 22;  // pequeno aumento
+      return 30;
     }
     // Grupo C: mais valor para processados mid-game
     if (itemType === 'queijoCoalho') {
@@ -1676,7 +1676,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       return 90;
     }
     if (itemType === 'scarf') {
-      return 30;
+      return 50;
     }
     // Grupo A: ovo mais barato para diminuir ROI absurdo da galinha
     if (itemType === 'egg') {
@@ -1687,16 +1687,16 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     }
     if (itemType === 'goat_milk') return farmLevel >= 4 ? 16 : 14;
     if (itemType === 'llama_wool') return 28;
-    if (itemType === 'duck_egg') return farmLevel >= 5 ? 22 : 18;
+    if (itemType === 'duck_egg') return 28;
     if (itemType === 'goose_egg') return 50;
     if (itemType === 'buffalo_milk') return farmLevel >= 6 ? 35 : 28;
-    if (itemType === 'buffalo_mozzarella') return 120;
+    if (itemType === 'buffalo_mozzarella') return 165;
     if (itemType === 'feather') return 15;
     if (itemType === 'peacock_feather') return 80;
     if (itemType === 'butter') return 55;   // era 45 — Grupo C
     if (itemType === 'yogurt') return 40;   // era 35 — Grupo C
     if (itemType === 'fertile_egg') return 36;
-    if (itemType === 'quail_egg') return farmLevel >= 5 ? 26 : 22;
+    if (itemType === 'quail_egg') return farmLevel >= 5 ? 18 : 16;
     if (itemType === 'alpaca_wool') return farmLevel >= 6 ? 75 : 65;
     if (itemType === 'humus') return 15;    // era 20 — Grupo B (sem custo ração)
     if (itemType === 'muco') return 35;     // era 120 — Grupo B (OP sem ração)
@@ -1710,32 +1710,32 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'couro_jacare') return 500;
     if (itemType === 'queijo_cabra') return 90;
     if (itemType === 'iogurte_cabra') return 70;    // era 55 — Grupo C
-    if (itemType === 'leite_condensado') return 100;
-    if (itemType === 'tapete_lhama') return 65;
-    if (itemType === 'cachecol_angora') return 120; // era 160 — Grupo B
-    if (itemType === 'tecido_alpaca') return 180;
-    if (itemType === 'fio_seda') return 180;        // era 200 — Grupo C
-    if (itemType === 'manta_premium') return 420;
-    if (itemType === 'pate_pato') return 95;
+    if (itemType === 'leite_condensado') return 145;
+    if (itemType === 'tapete_lhama') return 120;
+    if (itemType === 'cachecol_angora') return 260;
+    if (itemType === 'tecido_alpaca') return 320;
+    if (itemType === 'fio_seda') return 280;
+    if (itemType === 'manta_premium') return 1100;
+    if (itemType === 'pate_pato') return 150;
     if (itemType === 'ovo_defumado') return 120;
-    if (itemType === 'conserva_codorna') return 80;
+    if (itemType === 'conserva_codorna') return 160;
     if (itemType === 'creme_cosmetico') return 220;
     if (itemType === 'sabonete_natural') return 140;
-    if (itemType === 'almofada_penas') return 170;
+    if (itemType === 'almofada_penas') return 320;
     if (itemType === 'colete_couro') return 550;
-    if (itemType === 'bolsa_exotica') return 600;   // era 800 — Grupo B
-    if (itemType === 'enfeite_pavao') return 200;
+    if (itemType === 'bolsa_exotica') return 820;
+    if (itemType === 'enfeite_pavao') return 380;
     if ((itemType as string) === 'peixe') return 45;
     if ((itemType as string) === 'mel') return 80;
     if ((itemType as string) === 'cogumelo') return 35;
-    if ((itemType as string) === 'hidromel') return 180;
+    if ((itemType as string) === 'hidromel') return 260;
     if ((itemType as string) === 'risoto_cogumelo') return 120;
-    if ((itemType as string) === 'conserva_peixe') return 95;
-    if ((itemType as string) === 'mel_envasado') return 200;
+    if ((itemType as string) === 'conserva_peixe') return 140;
+    if ((itemType as string) === 'mel_envasado') return 350;
     if ((itemType as string) === 'sopa_cogumelo') return 80;
     if ((itemType as string) === 'queijo_parmesao') return 200;
     if ((itemType as string) === 'queijo_serra') return 280;
-    if ((itemType as string) === 'kit_gourmet') return 900;
+    if ((itemType as string) === 'kit_gourmet') return 2000;
     return 0;
   };
 
