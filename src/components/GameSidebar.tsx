@@ -245,246 +245,136 @@ export default function GameSidebar({
                 <h4 className="text-[11px] font-sans font-black uppercase text-[#92400e] tracking-wider pt-2 mb-2">Vendas Diretas p/ a Feira:</h4>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={(e) => sellProduct('milk', 1, e)}
-                    disabled={inventory.milk < 1}
-                    className="bg-stone-100 hover:bg-stone-200 border border-stone-300 disabled:opacity-40 disabled:cursor-not-allowed text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-stone-300"
-                    title="Vender leite cru. Preço de venda: 5 moedas base."
-                  >
-                    Vender Leite ({getActualSellPrice('milk')}💰)
-                  </button>
-
-                  <button
-                    onClick={(e) => sellProduct('wool', 1, e)}
-                    disabled={inventory.wool < 1}
-                    className="bg-stone-100 hover:bg-stone-200 border border-stone-300 disabled:opacity-40 disabled:cursor-not-allowed text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-stone-300"
-                    title="Vender lã crua. Preço de venda: 12 moedas base."
-                  >
-                    Vender Lã ({getActualSellPrice('wool')}💰)
-                  </button>
-
-                  <button
-                    onClick={(e) => sellProduct('egg', 1, e)}
-                    disabled={(inventory.egg ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
-                    title="Vender Ovo de Quintal. Preço de venda: 4 moedas base."
-                  >
-                    Vender Ovo ({getActualSellPrice('egg')}💰)
-                  </button>
-
-                  <button
-                    onClick={(e) => sellProduct('mayo', 1, e)}
-                    disabled={(inventory.mayo ?? 0) < 1}
-                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300"
-                    title="Vender Maionese Cremosa. Preço de venda: 10 moedas base."
-                  >
-                    Vender Maionese ({getActualSellPrice('mayo')}💰)
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('cheese', 1, e)}
-                    disabled={inventory.cheese < 1}
-                    className="bg-amber-50 hover:bg-amber-200 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2"
-                    title="Vende 1 Queijo Básico (feito com 3 leites). Para queijos premium use a Queijaria."
-                  >
-                    Vender Queijo Básico ({getActualSellPrice('cheese')}💰)
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('queijoCoalho', 1, e)}
-                    disabled={(inventory.queijoCoalho ?? 0) < 1}
-                    className="bg-amber-100/60 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-stone-300"
-                    title="Vende 1 Queijo Coalho."
-                  >
-                    Vender Q. Coalho ({getActualSellPrice('queijoCoalho')}💰)
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('queijoMucarela', 1, e)}
-                    disabled={(inventory.queijoMucarela ?? 0) < 1}
-                    className="bg-yellow-50 hover:bg-yellow-200 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300"
-                    title="Vende 1 Queijo Muçarela."
-                  >
-                    Vender Muçarela ({getActualSellPrice('queijoMucarela')}💰)
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('queijoBrie', 1, e)}
-                    disabled={(inventory.queijoBrie ?? 0) < 1}
-                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2"
-                    title="Vende 1 Queijo Brie."
-                  >
-                    Vender Q. Brie ({getActualSellPrice('queijoBrie')}💰)
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('scarf', 1, e)}
-                    disabled={inventory.scarf < 1}
-                    className="bg-indigo-100 hover:bg-indigo-100 border border-indigo-300 disabled:opacity-40 text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2"
-                    title="Vende 1 Cachecol elegante."
-                  >
-                    Vender Cachecol ({getActualSellPrice('scarf')}💰)
-                  </button>
-
-                  {/* BUG 5 FIX: itens especiais só aparecem se o jogador tem o animal produtor OU quantidade > 0 */}
-                  {(animals.some(a => a.type === 'cabra') || (inventory.goat_milk ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('goat_milk', 1, e)}
-                    disabled={(inventory.goat_milk ?? 0) < 1}
-                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300"
-                    title="Vende 1 Leite de Cabra. Preço base: 38 moedas."
-                  >
-                    L. Cabra ({getActualSellPrice('goat_milk')}💰)
+                  {inventory.milk > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('milk', 1, e)}
+                    className="bg-stone-100 hover:bg-stone-200 border border-stone-300 text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-stone-300">
+                    🥛 Leite · {inventory.milk}u ({getActualSellPrice('milk')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'lhama') || (inventory.llama_wool ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('llama_wool', 1, e)}
-                    disabled={(inventory.llama_wool ?? 0) < 1}
-                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300"
-                    title="Vende 1 Lã de Lhama. Preço base: 45 moedas."
-                  >
-                    L. Lhama ({getActualSellPrice('llama_wool')}💰)
+                  {inventory.wool > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('wool', 1, e)}
+                    className="bg-stone-100 hover:bg-stone-200 border border-stone-300 text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-stone-300">
+                    🧶 Lã · {inventory.wool}u ({getActualSellPrice('wool')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'pato') || (inventory.duck_egg ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('duck_egg', 1, e)}
-                    disabled={(inventory.duck_egg ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
-                    title="Vende 1 Ovo de Pato. Preço base: 18 moedas."
-                  >
-                    Ov. Pato ({getActualSellPrice('duck_egg')}💰)
+                  {(inventory.egg ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('egg', 1, e)}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🥚 Ovo · {inventory.egg ?? 0}u ({getActualSellPrice('egg')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'ganso') || (inventory.goose_egg ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('goose_egg', 1, e)}
-                    disabled={(inventory.goose_egg ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
-                    title="Vende 1 Ovo de Ganso. Preço base: 50 moedas."
-                  >
-                    Ov. Ganso ({getActualSellPrice('goose_egg')}💰)
+                  {(inventory.mayo ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('mayo', 1, e)}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
+                    🥣 Maionese · {inventory.mayo ?? 0}u ({getActualSellPrice('mayo')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'bufalo') || (inventory.buffalo_milk ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('buffalo_milk', 1, e)}
-                    disabled={(inventory.buffalo_milk ?? 0) < 1}
-                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300"
-                    title="Vende 1 Leite de Búfala. Preço base: 55 moedas."
-                  >
-                    L. Búfala ({getActualSellPrice('buffalo_milk')}💰)
+                  {inventory.cheese > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('cheese', 1, e)}
+                    className="bg-amber-50 hover:bg-amber-200 border border-amber-300 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
+                    🧀 Queijo Básico · {inventory.cheese}u ({getActualSellPrice('cheese')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'bufalo') || (inventory.buffalo_mozzarella ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('buffalo_mozzarella', 1, e)}
-                    disabled={(inventory.buffalo_mozzarella ?? 0) < 1}
-                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2"
-                    title="Vende 1 Muçarela de Búfala. Preço base: 120 moedas."
-                  >
-                    Muç. Búfala ({getActualSellPrice('buffalo_mozzarella')}💰)
+                  {(inventory.queijoCoalho ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('queijoCoalho', 1, e)}
+                    className="bg-amber-100/60 hover:bg-amber-100 border border-amber-300 text-[#78350f] py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-stone-300">
+                    🧀 Q.Coalho · {inventory.queijoCoalho ?? 0}u ({getActualSellPrice('queijoCoalho')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'pato' || a.type === 'ganso') || (inventory.feather ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('feather', 1, e)}
-                    disabled={(inventory.feather ?? 0) < 1}
-                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 disabled:cursor-not-allowed text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300"
-                    title="Vende 1 Pena de Pato/Ganso. Preço base: 15 moedas."
-                  >
-                    Penas ({getActualSellPrice('feather')}💰)
+                  {(inventory.queijoMucarela ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('queijoMucarela', 1, e)}
+                    className="bg-yellow-50 hover:bg-yellow-200 border border-yellow-300 text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
+                    🧀 Muçarela · {inventory.queijoMucarela ?? 0}u ({getActualSellPrice('queijoMucarela')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'pavao') || (inventory.peacock_feather ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('peacock_feather', 1, e)}
-                    disabled={(inventory.peacock_feather ?? 0) < 1}
-                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300"
-                    title="Vende 1 Pena de Pavão. Preço base: 80 moedas."
-                  >
-                    P. Pavão ({getActualSellPrice('peacock_feather')}💰)
+                  {(inventory.queijoBrie ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('queijoBrie', 1, e)}
+                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 text-orange-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
+                    🧀 Q.Brie · {inventory.queijoBrie ?? 0}u ({getActualSellPrice('queijoBrie')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'vaca') || (inventory.butter ?? 0) > 0 || inventory.milk > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('butter', 1, e)}
-                    disabled={(inventory.butter ?? 0) < 1}
-                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300"
-                    title="Vende 1 Manteiga. Preço base: 45 moedas."
-                  >
-                    Manteiga ({getActualSellPrice('butter')}💰)
+                  {inventory.scarf > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('scarf', 1, e)}
+                    className="bg-indigo-100 hover:bg-indigo-200 border border-indigo-300 text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
+                    🧣 Cachecol · {inventory.scarf}u ({getActualSellPrice('scarf')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'vaca') || (inventory.yogurt ?? 0) > 0 || inventory.milk > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('yogurt', 1, e)}
-                    disabled={(inventory.yogurt ?? 0) < 1}
-                    className="bg-pink-50 hover:bg-pink-100 border border-pink-300 disabled:opacity-40 disabled:cursor-not-allowed text-pink-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-pink-300"
-                    title="Vende 1 Iogurte. Preço base: 35 moedas."
-                  >
-                    Iogurte ({getActualSellPrice('yogurt')}💰)
+                  {(inventory.goat_milk ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('goat_milk', 1, e)}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
+                    🐐 L.Cabra · {inventory.goat_milk ?? 0}u ({getActualSellPrice('goat_milk')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'galinha') || (inventory.fertile_egg ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('fertile_egg', 1, e)}
-                    disabled={(inventory.fertile_egg ?? 0) < 1}
-                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
-                    title="Vende 1 Ovo Fértil. Preço base: 36 moedas."
-                  >
-                    ✨ Ov. Fértil ({getActualSellPrice('fertile_egg')}💰)
+                  {(inventory.llama_wool ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('llama_wool', 1, e)}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
+                    🦙 L.Lhama · {inventory.llama_wool ?? 0}u ({getActualSellPrice('llama_wool')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'avestruz') || (inventory.couro_avestruz ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('couro_avestruz', 1, e)}
-                    disabled={(inventory.couro_avestruz ?? 0) < 1}
-                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm"
-                    title="Vende 1 Couro de Avestruz. Preço base: 300 moedas."
-                  >
-                    🦤 Couro Avestruz ({getActualSellPrice('couro_avestruz')}💰)
+                  {(inventory.duck_egg ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('duck_egg', 1, e)}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🦆 Ov.Pato · {inventory.duck_egg ?? 0}u ({getActualSellPrice('duck_egg')}💰)
                   </button>
                   )}
-
-                  {(animals.some(a => a.type === 'jacare') || (inventory.couro_jacare ?? 0) > 0) && (
-                  <button
-                    type="button"
-                    onClick={(e) => sellProduct('couro_jacare', 1, e)}
-                    disabled={(inventory.couro_jacare ?? 0) < 1}
-                    className="bg-green-50 hover:bg-green-100 border border-green-300 disabled:opacity-40 text-green-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm"
-                    title="Vende 1 Couro de Jacaré. Preço base: 400 moedas."
-                  >
-                    🐊 Couro Jacaré ({getActualSellPrice('couro_jacare')}💰)
+                  {(inventory.goose_egg ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('goose_egg', 1, e)}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🪿 Ov.Ganso · {inventory.goose_egg ?? 0}u ({getActualSellPrice('goose_egg')}💰)
+                  </button>
+                  )}
+                  {(inventory.buffalo_milk ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('buffalo_milk', 1, e)}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
+                    🐃 L.Búfala · {inventory.buffalo_milk ?? 0}u ({getActualSellPrice('buffalo_milk')}💰)
+                  </button>
+                  )}
+                  {(inventory.buffalo_mozzarella ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('buffalo_mozzarella', 1, e)}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
+                    🧀 Muç.Búfala · {inventory.buffalo_mozzarella ?? 0}u ({getActualSellPrice('buffalo_mozzarella')}💰)
+                  </button>
+                  )}
+                  {(inventory.feather ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('feather', 1, e)}
+                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300">
+                    🪶 Penas · {inventory.feather ?? 0}u ({getActualSellPrice('feather')}💰)
+                  </button>
+                  )}
+                  {(inventory.peacock_feather ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('peacock_feather', 1, e)}
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300">
+                    🦚 P.Pavão · {inventory.peacock_feather ?? 0}u ({getActualSellPrice('peacock_feather')}💰)
+                  </button>
+                  )}
+                  {(inventory.butter ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('butter', 1, e)}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
+                    🧈 Manteiga · {inventory.butter ?? 0}u ({getActualSellPrice('butter')}💰)
+                  </button>
+                  )}
+                  {(inventory.yogurt ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('yogurt', 1, e)}
+                    className="bg-pink-50 hover:bg-pink-100 border border-pink-300 text-pink-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-pink-300">
+                    🥛 Iogurte · {inventory.yogurt ?? 0}u ({getActualSellPrice('yogurt')}💰)
+                  </button>
+                  )}
+                  {(inventory.fertile_egg ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('fertile_egg', 1, e)}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    ✨ Ov.Fértil · {inventory.fertile_egg ?? 0}u ({getActualSellPrice('fertile_egg')}💰)
+                  </button>
+                  )}
+                  {(inventory.couro_avestruz ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('couro_avestruz', 1, e)}
+                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
+                    🦤 Couro Avestruz · {inventory.couro_avestruz ?? 0}u ({getActualSellPrice('couro_avestruz')}💰)
+                  </button>
+                  )}
+                  {(inventory.couro_jacare ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('couro_jacare', 1, e)}
+                    className="bg-green-50 hover:bg-green-100 border border-green-300 text-green-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
+                    🐊 Couro Jacaré · {inventory.couro_jacare ?? 0}u ({getActualSellPrice('couro_jacare')}💰)
                   </button>
                   )}
 

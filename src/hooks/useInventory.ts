@@ -957,7 +957,7 @@ export function useInventory({
   // --- SELL FUNCTIONS ---
 
   const sellProduct = (itemType: keyof InventoryState, qty: number, event: React.MouseEvent) => {
-    if (event) event.preventDefault();
+    if (event) { event.preventDefault(); event.stopPropagation(); }
     if ((inventory[itemType] ?? 0) < qty) {
       addLog(`📦 Estoque insuficiente deste produto no Armazém!`, 'error');
       triggerAudioResult(() => sfx.playSound('error'));
