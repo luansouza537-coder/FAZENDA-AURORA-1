@@ -115,6 +115,9 @@ export interface UseAnimalsProps {
   getFreightMultiplier?: (cat: string) => number;
   addFinancialEntry?: (entry: { day: number; type: 'income' | 'expense'; amount: number; category: string; description: string }) => void;
   canAddToInventory?: (itemKey: string, qty?: number) => boolean;
+  onAnimalFed?: () => void;
+  onItemCollected?: (qty: number) => void;
+  onGoldSpent?: (amount: number) => void;
 }
 
 export function useAnimals({
@@ -151,6 +154,9 @@ export function useAnimals({
   getFreightMultiplier,
   addFinancialEntry,
   canAddToInventory,
+  onAnimalFed,
+  onItemCollected,
+  onGoldSpent,
 }: UseAnimalsProps) {
   const [animals, setAnimals] = useState<Animal[]>(() => {
     try {
@@ -337,6 +343,7 @@ export function useAnimals({
     }));
 
     setStats(prev => ({ ...prev, totalFed: prev.totalFed + 1 }));
+    onAnimalFed?.();
     addLog(`🌽 Você alimentou ${animal.name} com ${feedLabel}! +Fome +Felicidade.`, 'success');
     triggerAudioResult(() => sfx.playSound('feed'));
     if (soundEnabled) sfx.playAnimalSound(animal.type);
@@ -435,6 +442,7 @@ export function useAnimals({
     spawnFeedback('🥚', `+${totalOvos} Ovo`, event);
     // Missão: coletar itens
     updateMissionProgress('collect_items', totalOvos);
+    onItemCollected?.(totalOvos);
   };
 
   // Collect Goat Milk (Cabra)
@@ -479,6 +487,7 @@ export function useAnimals({
     if (soundEnabled) sfx.playAnimalSound('cabra');
     spawnFeedback('🥛', `+${qty} Leite Cabra`, event);
     updateMissionProgress('collect_items', qty);
+    onItemCollected?.(qty);
   };
 
   // Collect Llama Wool (Lhama) — only in spring (season 0)
@@ -509,6 +518,7 @@ export function useAnimals({
     if (soundEnabled) sfx.playAnimalSound('lhama');
     spawnFeedback('🧶', `+${qty} Lã Lhama`, event);
     updateMissionProgress('collect_items', qty);
+    onItemCollected?.(qty);
   };
 
   // Collect Duck Egg (Pato)
@@ -562,7 +572,7 @@ export function useAnimals({
     triggerAudioResult(() => sfx.playSound('collect'));
     if (soundEnabled) sfx.playAnimalSound('pato');
     spawnFeedback('🥚', `+${qty} Ovo Pato`, event);
-    if (qty > 0) updateMissionProgress('collect_items', qty);
+    if (qty > 0) { updateMissionProgress('collect_items', qty); onItemCollected?.(qty); }
   };
 
   // Collect Goose Egg / Feather (Ganso)
@@ -592,6 +602,7 @@ export function useAnimals({
       if (soundEnabled) sfx.playAnimalSound('ganso');
       spawnFeedback('🥚', '+1 Ovo Ganso', event);
       updateMissionProgress('collect_items', 1);
+      onItemCollected?.(1);
     } else {
       // Feather every 7 days
       const daysSinceFeather = animal.daysSinceLastGooseFeather ?? 0;
@@ -640,6 +651,7 @@ export function useAnimals({
     if (soundEnabled) sfx.playAnimalSound('bufalo');
     spawnFeedback('🥛', `+${qty} Leite Búfala`, event);
     updateMissionProgress('collect_items', qty);
+    onItemCollected?.(qty);
   };
 
   // 3. Collect Milk (Vaca)
@@ -712,6 +724,7 @@ export function useAnimals({
     spawnFeedback('🥛', `+${totalLeite} Leite`, event);
     // Missão: coletar itens
     updateMissionProgress('collect_items', totalLeite);
+    onItemCollected?.(totalLeite);
   };
 
   // 4. Collect Wool (Ovelha)
@@ -791,6 +804,7 @@ export function useAnimals({
     spawnFeedback('🧶', `+${woolBonus} Lã`, event);
     // Missão: coletar itens
     updateMissionProgress('collect_items', woolBonus);
+    onItemCollected?.(woolBonus);
   };
 
   // Collect Alpaca Wool
@@ -806,6 +820,7 @@ export function useAnimals({
     setFarmXp(prev => prev + qty);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧶', `+${qty} Lã Alpaca`, event);
+    onItemCollected?.(qty);
   };
 
   // Collect Coelho Angorá Wool
@@ -821,6 +836,7 @@ export function useAnimals({
     setFarmXp(prev => prev + qty);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧶', `+${qty} Lã Angorá`, event);
+    onItemCollected?.(qty);
   };
 
   // Collect Rã coxa
@@ -836,6 +852,7 @@ export function useAnimals({
     setFarmXp(prev => prev + qty);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍖', `+${qty} Coxa Rã`, event);
+    onItemCollected?.(qty);
   };
 
   // Collect Avestruz pena_grande
@@ -856,6 +873,7 @@ export function useAnimals({
     setFarmXp(prev => prev + qty);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🪶', `+${qty} Pena Grande`, event);
+    onItemCollected?.(qty);
   };
 
   // Sell Avestruz (carne)
@@ -1120,6 +1138,7 @@ export function useAnimals({
     }
 
     setGold(prev => prev - price);
+    onGoldSpent?.(price);
     setAnimals(prev => [...prev, newAnimal]);
     setWeeklyStats((prev: any) => ({ ...prev, spending: prev.spending + price }));
 
@@ -1235,6 +1254,7 @@ export function useAnimals({
     }
 
     setGold(prev => prev - config.price);
+    onGoldSpent?.(config.price);
     setAnimals(prev => [...prev, newFilhote]);
     setWeeklyStats((prev: any) => ({ ...prev, spending: prev.spending + config.price }));
 

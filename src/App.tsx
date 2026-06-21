@@ -184,11 +184,10 @@ function GameApp() {
   // Day Summary Modal
   const [showDaySummary, setShowDaySummary] = useState<boolean>(false);
   const [pendingDaySummary, setPendingDaySummary] = useState<DaySummary | null>(null);
-  const [dayGoldEarned, setDayGoldEarned] = useState<number>(0);
-  const [dayGoldSpent, setDayGoldSpent] = useState<number>(0);
   const [dayAnimalsFedfed, setDayAnimalsFedfed] = useState<number>(0);
   const [dayItemsCollected, setDayItemsCollected] = useState<number>(0);
   const [dayContractDeliveries, setDayContractDeliveries] = useState<number>(0);
+  const dayStartGoldRef = useRef<number>(gold);
 
   const pendingAdvanceDayRef = useRef<React.MouseEvent | null>(null);
 
@@ -1941,6 +1940,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       craftEnergyRef.current += energy;
       craftWaterRef.current += water;
     },
+    onContractDelivered: () => setDayContractDeliveries(prev => prev + 1),
   });
 
   // --- useAnimals hook ---
@@ -2018,14 +2018,23 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     getFreightMultiplier,
     addFinancialEntry,
     canAddToInventory,
+    onAnimalFed: () => setDayAnimalsFedfed(prev => prev + 1),
+    onItemCollected: (qty: number) => setDayItemsCollected(prev => prev + qty),
   });
 
   // --- Day Summary wrapper ---
+  // Capture gold at the start of each new day so we can compute goldSpent in the summary
+  useEffect(() => {
+    dayStartGoldRef.current = gold;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDay]);
+
   const handleAdvanceDayWithSummary = useCallback((e: React.MouseEvent) => {
+    const goldSpentToday = Math.max(0, dayStartGoldRef.current + dailyEarning - gold);
     const summary: DaySummary = {
       day: currentDay,
-      goldEarned: dayGoldEarned,
-      goldSpent: dayGoldSpent,
+      goldEarned: dailyEarning,
+      goldSpent: goldSpentToday,
       animalsFedfed: dayAnimalsFedfed,
       itemsCollected: dayItemsCollected,
       contractDeliveries: dayContractDeliveries,
@@ -2033,14 +2042,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     pendingAdvanceDayRef.current = e;
     setPendingDaySummary(summary);
     setShowDaySummary(true);
-  }, [currentDay, dayGoldEarned, dayGoldSpent, dayAnimalsFedfed, dayItemsCollected, dayContractDeliveries]);
+  }, [currentDay, dailyEarning, gold, dayAnimalsFedfed, dayItemsCollected, dayContractDeliveries]);
 
   const handleDaySummaryClose = useCallback(() => {
     setShowDaySummary(false);
     setPendingDaySummary(null);
     // Reset day counters
-    setDayGoldEarned(0);
-    setDayGoldSpent(0);
     setDayAnimalsFedfed(0);
     setDayItemsCollected(0);
     setDayContractDeliveries(0);

@@ -35,6 +35,8 @@ export interface UseInventoryProps {
   addFinancialEntry?: (entry: { day: number; type: 'income' | 'expense'; amount: number; category: string; description: string }) => void;
   currentDay?: number;
   addCraftCost?: (energy: number, water: number) => void;
+  onGoldSpent?: (amount: number) => void;
+  onContractDelivered?: () => void;
 }
 
 // Custo de energia (💡) e água (💧) por produto craftado
@@ -102,6 +104,8 @@ export function useInventory({
   addFinancialEntry,
   currentDay,
   addCraftCost,
+  onGoldSpent,
+  onContractDelivered,
 }: UseInventoryProps) {
 
   const applyCraftCost = (product: string) => {
@@ -1028,6 +1032,7 @@ export function useInventory({
         const newDelivered = c.delivered + toDeliver;
         if (newDelivered >= c.quantity) {
           setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
+          setTimeout(() => onContractDelivered?.(), 0);
           addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
           setFarmXp(prev => prev + 20);
           return { ...c, delivered: newDelivered, active: false };
@@ -1506,6 +1511,7 @@ export function useInventory({
       return;
     }
     setGold(prev => prev - totalCost);
+    onGoldSpent?.(totalCost);
     setInventory(prev => ({ ...prev, folha_amoreira: (prev.folha_amoreira ?? 0) + qty }));
     setWeeklyStats(prev => ({ ...prev, spending: prev.spending + totalCost }));
     addLog(`🌿 Compra realizada: +${qty} Folha de Amoreira por ${totalCost} moedas!`, 'success');
