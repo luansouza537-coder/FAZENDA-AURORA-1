@@ -6451,20 +6451,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         </div>
 
         {/* --- FARM REGULATORY FOOTER --- */}
-        <footer className="bg-[#78350f] border-t-8 border-[#451a03] text-center p-4 text-[10px] sm:text-xs font-mono text-[#fcd57e] select-none flex flex-col sm:flex-row items-center justify-between px-6 gap-3 uppercase font-black">
-          <span>🐮 Leite (🥛 Queijo) • 🐑 Tosquia (🧣 Cachecol) • 🐂 Peso (+5 moedas bônus no nível 5)</span>
-          <div className="flex items-center gap-3">
-            <span className="text-[#fef3c7]/60 text-[9px]">Fazenda Aurora © 2026 - Cuide com carinho!</span>
-            <a
-              href="https://ko-fi.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 px-3 py-1 bg-[#FF5E5B] hover:bg-[#ff4845] text-white text-xs rounded-full transition-colors"
-              title="Apoiar o desenvolvimento"
-            >
-              ☕ Apoiar
-            </a>
-          </div>
+        <footer className="bg-[#78350f] border-t-8 border-[#451a03] text-center p-3 text-[9px] font-mono text-[#fcd57e]/60 select-none uppercase font-black">
+          Fazenda Aurora © 2026 - Cuide com carinho!
         </footer>
 
       </div>
