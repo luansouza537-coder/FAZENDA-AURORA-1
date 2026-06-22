@@ -5931,55 +5931,47 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </div>
             </div>
 
-            {/* 💹 Economia + 📋 Contratos — par */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => { setShowFinancasModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                className="bg-emerald-700 border-3 border-emerald-400 hover:bg-emerald-600 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#064e3b] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
-                title="Economia: Mercado de preços e histórico financeiro"
-              >
-                <span>💹</span>
-                <span>Economia</span>
-                {merchantActive && (
-                  <span className="bg-yellow-400 text-[#451a03] text-[10px] h-5 w-5 rounded-full flex items-center justify-center font-bold">🛒</span>
-                )}
-              </button>
+            {/* Fileira única de ícones: ações + utilitários */}
+            <div className="flex items-center gap-1.5 flex-wrap justify-center">
+              {/* 💹 Economia */}
               <div className="relative">
-                <button
-                  onClick={() => { setShowContractsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                  className="relative bg-violet-600 border-3 border-violet-400 hover:bg-violet-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#4c1d95] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
-                  title="Contratos de fornecimento"
-                >
-                  <span>📋</span>
-                  <span>Contratos</span>
-                  {contracts.filter(c => c.active).length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                      {contracts.filter(c => c.active).length}
-                    </span>
-                  )}
+                <button onClick={() => { setShowFinancasModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                  title="Economia: Mercado de preços e histórico financeiro">
+                  💹
                 </button>
+                {merchantActive && <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center pointer-events-none">🛒</span>}
               </div>
-            </div>
-
-            {/* 🏪 Loja + 👷 Funcionários — par */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => { setShowUpgradesModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                className="bg-orange-600 border-3 border-orange-400 hover:bg-orange-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#7c2d12] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
-                title="Loja da Fazenda: infraestrutura, consumíveis e upgrades"
-              >
-                <span>🏪</span>
-                <span>Loja</span>
+              {/* 📋 Contratos */}
+              <div className="relative">
+                <button onClick={() => { setShowContractsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                  title="Contratos de fornecimento">
+                  📋
+                </button>
+                {contracts.filter(c => c.active).length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center pointer-events-none">{contracts.filter(c => c.active).length}</span>}
+              </div>
+              {/* 🏪 Loja */}
+              <button onClick={() => { setShowUpgradesModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                title="Loja da Fazenda: infraestrutura, consumíveis e upgrades">
+                🏪
               </button>
-              <button
-                onClick={() => { setShowWorkersModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                className="bg-[#064e3b] border-3 border-[#fbbf24] hover:bg-[#065f46] text-[#fef3c7] font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#022c22] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
-                title="Contratar Funcionários: trabalhadores que automatizam tarefas diárias"
-              >
-                <span>👷</span>
-                <span>Func. {workers.length > 0 ? `(${workers.length})` : ''}</span>
+              {/* 👷 Funcionários */}
+              <div className="relative">
+                <button onClick={() => { setShowWorkersModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                  title="Contratar Funcionários: trabalhadores que automatizam tarefas diárias">
+                  👷
+                </button>
+                {workers.length > 0 && <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center pointer-events-none">{workers.length}</span>}
+              </div>
+              {/* 🛒 Comprar Animal */}
+              <button onClick={() => { setShowBuyMenu(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
+                className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${showBuyMenu ? 'bg-[#fbbf24]' : 'bg-[#ffcd7e] hover:bg-[#fbc550]'}`}
+                title="Comprar Animais: abre o catálogo para expandir seu rebanho">
+                🐄
               </button>
-            </div>
 
             {droughtDaysRemaining > 0 && (
               <div className="bg-yellow-700 border-3 border-yellow-500 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seca ativa: custo de água triplicado por mais ${droughtDaysRemaining} dia${droughtDaysRemaining > 1 ? 's' : ''}`}>
@@ -6030,102 +6022,65 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </div>
             )}
 
-            {/* 🧀 Queijaria Button */}
-            <button 
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                setShowQueijariaModal(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
-              title="Acesse a Queijaria para maturação de queijos artesanais e ampliação"
-            >
-              <span>🏭</span>
-              <span>Produção</span>
-              {queijosEmMaturacao.length > 0 && (
-                <span className="bg-red-500 text-white text-[10px] h-5 w-5 rounded-full flex items-center justify-center font-bold font-mono">
-                  {queijosEmMaturacao.length}
-                </span>
-              )}
-            </button>
+              {/* 🏭 Produção */}
+              <div className="relative">
+                <button type="button"
+                  onClick={(e) => { e.preventDefault(); setShowQueijariaModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                  title="Acesse a Queijaria para maturação de queijos artesanais e ampliação">
+                  🏭
+                </button>
+                {queijosEmMaturacao.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center pointer-events-none">{queijosEmMaturacao.length}</span>}
+              </div>
+              {/* 🔔 Notificações */}
+              <div className="relative">
+                <button onClick={() => { setShowNotifications(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                  title="Notificações persistentes">
+                  <Bell className="w-5 h-5" />
+                </button>
+                {notifications.filter(n => !n.read).length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center pointer-events-none">{notifications.filter(n => !n.read).length}</span>}
+              </div>
+              {/* 📖 Tutorial */}
+              <button onClick={() => { setShowTutorialModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                title="Ajuda & Tutorial">
+                📖
+              </button>
+              {/* 💾 Salvar */}
+              <button onClick={exportSave}
+                className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                title="Exportar Save — baixa seu progresso como arquivo .json">
+                💾
+              </button>
+              {/* 📂 Carregar */}
+              <button onClick={importSave}
+                className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                title="Importar Save — carrega um arquivo .json de backup">
+                📂
+              </button>
+              {/* 🏆 Conquistas */}
+              <button onClick={() => { setShowAchievementsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                title="Sala de Troféus & Conquistas">
+                🏆
+              </button>
 
-            {/* 🔔 Notificações Button */}
-            <button
-              onClick={() => {
-                setShowNotifications(prev => !prev);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="relative bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Notificações persistentes"
-            >
-              <Bell className="w-5 h-5" />
-              {notifications.filter(n => !n.read).length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                  {notifications.filter(n => !n.read).length}
-                </span>
-              )}
-            </button>
+              {/* 🔊 Som & Música */}
+              <button
+                onClick={() => {
+                  const anyOn = soundEnabled || musicEnabled;
+                  if (anyOn) { setSoundEnabled(false); setMusicEnabled(false); sfx.isMuted = true; }
+                  else { setSoundEnabled(true); setMusicEnabled(true); sfx.isMuted = false; sfx.playSound('click'); }
+                }}
+                className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${(soundEnabled || musicEnabled) ? 'bg-[#ffcd7e] hover:bg-[#fbc550]' : 'bg-[#e5c88e] opacity-60 hover:opacity-80'}`}
+                title={(soundEnabled || musicEnabled) ? 'Silenciar tudo' : 'Ativar som e música'}
+              >
+                {(soundEnabled || musicEnabled) ? '🔊' : '🔇'}
+              </button>
 
-            {/* 📖 Tutorial */}
-            <button
-              onClick={() => { setShowTutorialModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Ajuda & Tutorial"
-            >
-              📖
-            </button>
-
-            {/* 💾 Salvar */}
-            <button
-              onClick={exportSave}
-              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Exportar Save — baixa seu progresso como arquivo .json"
-            >
-              💾
-            </button>
-
-            {/* 📂 Carregar */}
-            <button
-              onClick={importSave}
-              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Importar Save — carrega um arquivo .json de backup"
-            >
-              📂
-            </button>
-
-            {/* 🏆 Conquistas */}
-            <button
-              onClick={() => { setShowAchievementsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Sala de Troféus & Conquistas"
-            >
-              🏆
-            </button>
-
-            {/* 🔊 Som & Música */}
-            <button
-              onClick={() => {
-                const anyOn = soundEnabled || musicEnabled;
-                if (anyOn) {
-                  setSoundEnabled(false);
-                  setMusicEnabled(false);
-                  sfx.isMuted = true;
-                } else {
-                  setSoundEnabled(true);
-                  setMusicEnabled(true);
-                  sfx.isMuted = false;
-                  sfx.playSound('click');
-                }
-              }}
-              className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${(soundEnabled || musicEnabled) ? 'bg-[#ffcd7e] hover:bg-[#fbc550]' : 'bg-[#e5c88e] opacity-60 hover:opacity-80'}`}
-              title={(soundEnabled || musicEnabled) ? 'Silenciar tudo' : 'Ativar som e música'}
-            >
-              {(soundEnabled || musicEnabled) ? '🔊' : '🔇'}
-            </button>
-
-            {/* ⚙️ Mais — Stats, Recordes, Reproduções, Reset */}
-            <div className="relative">
+              {/* ⚙️ Mais — Stats, Recordes, Reproduções, Reset */}
+              <div className="relative">
               <button
                 onClick={() => setShowMorePanel(prev => !prev)}
                 className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${showMorePanel ? 'bg-[#fbbf24]' : 'bg-[#ffcd7e] hover:bg-[#fbc550]'}`}
@@ -6154,6 +6109,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                   </button>
                 </div>
               )}
+              </div>
             </div>
 
           </div>
