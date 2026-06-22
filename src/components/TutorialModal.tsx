@@ -36,7 +36,7 @@ const SECTIONS = [
         <li><strong className="text-[#b45309]">🐄 Vaca / 🐐 Cabra / 🦬 Búfalo:</strong> Produzem leite diariamente. Felicidade e alimentação afetam a quantidade produzida.</li>
         <li><strong className="text-[#b45309]">🐑 Ovelha / 🦙 Lhama / 🦙 Alpaca / 🐇 Coelho Angorá:</strong> Produzem fibras (lã/pelo/seda). Intervalo de coleta varia por animal.</li>
         <li><strong className="text-[#b45309]">🐔 Galinha / 🦆 Pato / 🪿 Ganso / 🐦 Codorna / 🦚 Pavão:</strong> Produzem ovos diariamente. Ovos de raças especiais valem muito mais.</li>
-        <li><strong className="text-[#b45309]">🐂 Boi / 🐷 Porco:</strong> Animais de corte — ganham peso com o tempo. Venda no <strong>Abatedouro</strong> por alto retorno.</li>
+        <li><strong className="text-[#b45309]">🐂 Boi:</strong> Animal de corte — ganha peso com o tempo. Venda no <strong>Abatedouro</strong> por alto retorno.</li>
         <li><strong className="text-[#b45309]">🐛 Bicho-da-Seda:</strong> Produz seda bruta — rara e valiosa para crafting de tecidos premium.</li>
         <li><strong className="text-[#b45309]">🐊 Jacaré / 🦤 Avestruz:</strong> Animais exóticos de nível alto. Geram couro e carne de altíssimo valor.</li>
         <li><strong className="text-[#b45309]">🐟 Peixe / 🍄 Cogumelo / 🐝 Abelha:</strong> Cultivados em áreas especiais. Colha periodicamente para estoque.</li>
@@ -70,7 +70,7 @@ const SECTIONS = [
         <li><strong className="text-[#b45309]">🧙‍♂️ Mercador Viajante:</strong> Aparece aleatoriamente (a cada 3-7 dias) e paga <strong>+8% a mais</strong> em qualquer produto.</li>
         <li><strong className="text-[#b45309]">Exposição de Raças:</strong> Evento de feira especial — inscreva seus melhores animais para ganhar prêmios de ouro e prestígio.</li>
         <li><strong className="text-[#b45309]">Contratos:</strong> Aceite contratos para entregar uma quantidade específica de produto em prazo determinado. Recompensas em ouro e XP. Não adie muito — contratos vencem!</li>
-        <li><strong className="text-[#b45309]">Abatedouro:</strong> Venda animais de corte (boi, porco) com base no peso acumulado. Quanto mais pesado, mais ouro.</li>
+        <li><strong className="text-[#b45309]">Abatedouro:</strong> Venda animais de corte (boi) com base no peso acumulado. Quanto mais pesado, mais ouro.</li>
       </ul>
     ),
   },

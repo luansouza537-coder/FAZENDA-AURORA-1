@@ -59,6 +59,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   calculatePorcoValue,
   onSellPorco,
 }) => {
+  if (animal.type === 'porco') return null;
   const noHungerAnimal = ['minhoca','caracol'].includes(animal.type);
   const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;

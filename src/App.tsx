@@ -3528,7 +3528,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         // --- FEATURE 6: fanfarra de desbloqueio de animal/funcionalidade ---
         const UNLOCK_FANFARE: Record<number, string> = {
           3:  '🦆 Pato de Quintal & 🐦 Codorna desbloqueados!',
-          4:  '🐷 Porco de Engorda desbloqueado!',
+          4:  '🎉 Nível 4! Desconto de 10% em todos os animais desbloqueado!',
           5:  '🦙 Alpaca desbloqueada!',
           6:  '🪱 Minhoca desbloqueada!',
           7:  '🐌 Caracol desbloqueado!',

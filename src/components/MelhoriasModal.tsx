@@ -77,7 +77,7 @@ interface MelhoriasModalProps {
 }
 
 const VEHICLE_CATEGORIES = [
-  { key: 'animais',    label: '🐄 Animais Vivos',           desc: 'Boi, porco e outros animais engordados',           penalty: [12, 6, 0], winterExtra: [8, 4, 0], vehicles: ['Carrocinha', 'Caminhão Boiadeiro', 'Carreta Dupla'],          prices: [0, 800, 3000] },
+  { key: 'animais',    label: '🐄 Animais Vivos',           desc: 'Boi e outros animais de corte engordados',           penalty: [12, 6, 0], winterExtra: [8, 4, 0], vehicles: ['Carrocinha', 'Caminhão Boiadeiro', 'Carreta Dupla'],          prices: [0, 800, 3000] },
   { key: 'laticinios', label: '🧀 Laticínios (Refrigerado)', desc: 'Leite, queijos, manteiga e derivados',            penalty: [10, 5, 0], winterExtra: [8, 4, 0], vehicles: ['Caixote de Gelo', 'Baú Refrigerado', 'Câmara Frigorífica'],   prices: [0, 600, 2500] },
   { key: 'ovos',      label: '🥚 Ovos e Derivados',         desc: 'Ovos, maionese, patê e conservas de ovo',          penalty: [8,  4, 0], winterExtra: [6, 3, 0], vehicles: ['Cesto de Palha', 'Caixote Acolchoado', 'Van de Ovos'],        prices: [0, 300, 1200] },
   { key: 'texteis',   label: '🧶 Têxteis e Fios',           desc: 'Lãs, cachecóis, tapetes e tecidos',               penalty: [7,  3, 0], winterExtra: [4, 2, 0], vehicles: ['Mochila de Fazenda', 'Furgão Coberto', 'Trailer Têxtil'],     prices: [0, 300, 1200] },
@@ -517,7 +517,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             {p.farmLevel >= 10 && (
               <div className="bg-white border-4 border-red-300 rounded-3xl p-4">
                 <h4 className="font-display font-black text-sm uppercase text-red-800 mb-1">🏭 Abatedouro Parceiro</h4>
-                <p className="text-xs text-stone-500 font-mono mb-3">Frigorífico externo que processa bois e porcos engordados. Desbloqueia os contratos de abate — os mais lucrativos do jogo. Requer Certificado Sanitário. Custo fixo: +25💰/dia de energia.</p>
+                <p className="text-xs text-stone-500 font-mono mb-3">Frigorífico externo que processa bois engordados. Desbloqueia os contratos de abate — os mais lucrativos do jogo. Requer Certificado Sanitário. Custo fixo: +25💰/dia de energia.</p>
                 {!p.ownedOneTimeEffects.includes('cert_sanitario') ? (
                   <div className="text-xs text-amber-700 font-mono bg-amber-50 border border-amber-200 rounded-xl p-3">⚠️ Requer Certificado Sanitário (disponível em Consumíveis)</div>
                 ) : p.abatedouroUnlocked ? (

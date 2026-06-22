@@ -35,7 +35,7 @@ const PRODUCT_LABELS: Record<string, string> = {
   feather: '🪶 Penas', peacock_feather: '🦚 Penas de Pavão',
   angora_wool: '🐇 Lã Angorá', alpaca_wool: '🦙 Lã de Alpaca', llama_wool: '🦙 Lã de Lhama',
   muco: '🐌 Muco de Caracol', seda_bruta: '🐛 Seda Bruta', mel_envasado: '🍯 Mel Envasado',
-  boi: '🐂 Boi (Carne)', porco: '🐷 Porco (Carne)', boi_porco: '🥩 Boi + Porco (Misto)',
+  boi: '🐂 Boi (Carne)', porco: '🐷 Porco (Carne — em breve)', boi_porco: '🥩 Boi + Porco (Misto — em breve)',
   mayo: '🥚 Maionese Artesanal', queijo_cabra: '🐐 Queijo de Cabra', iogurte_cabra: '🐐 Iogurte de Cabra',
   tapete_lhama: '🦙 Tapete de Lhama', leite_condensado: '🥛 Leite Condensado',
   tecido_alpaca: '🦙 Tecido de Alpaca', cachecol_angora: '🐇 Cachecol Angorá',
