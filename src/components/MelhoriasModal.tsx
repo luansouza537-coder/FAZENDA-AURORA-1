@@ -72,6 +72,8 @@ interface MelhoriasModalProps {
   setCeleiroLevel: (v: number) => void;
   camaraFriaLevel: number;
   setCamaraFriaLevel: (v: number) => void;
+  buyMachine: (key: 'milker' | 'shearer' | 'feeder') => void;
+  toggleMachine: (key: 'milker' | 'shearer' | 'feeder') => void;
 }
 
 const VEHICLE_CATEGORIES = [
@@ -85,7 +87,7 @@ const VEHICLE_CATEGORIES = [
 ];
 
 const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
-  const [activeTab, setActiveTab] = useState<'infraestrutura' | 'consumiveis'>('infraestrutura');
+  const [activeTab, setActiveTab] = useState<'infraestrutura' | 'consumiveis' | 'automacao'>('infraestrutura');
 
   return (
     <AnimatePresence>
@@ -118,6 +120,12 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               className={`flex-1 py-3 text-xs font-display font-black uppercase tracking-wider transition-colors cursor-pointer ${activeTab === 'consumiveis' ? 'bg-orange-700 text-white' : 'text-orange-700 hover:bg-orange-100'}`}
             >
               🛒 Consumíveis
+            </button>
+            <button
+              onClick={() => setActiveTab('automacao')}
+              className={`flex-1 py-3 text-xs font-display font-black uppercase tracking-wider transition-colors cursor-pointer ${activeTab === 'automacao' ? 'bg-orange-700 text-white' : 'text-orange-700 hover:bg-orange-100'}`}
+            >
+              ⚙️ Automação
             </button>
           </div>
 
@@ -605,6 +613,55 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
 
           </div>
           )} {/* end infraestrutura tab */}
+
+          {activeTab === 'automacao' && (
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <p className="text-xs text-stone-500 font-mono mb-2">💡 Após compradas, as máquinas operam no final de cada dia com o interruptor <strong>LIGADO</strong>. Consomem energia (⚡) por dia.</p>
+              {([
+                { key: 'milker' as const, emoji: '🥛', name: 'Ordenhadeira Automática', desc: 'Coleta automaticamente o leite de TODAS as vacas produtoras ao final de cada dia.', cost: 2500, minLevel: 6, energy: 8, purchased: p.machines.milkerPurchased, active: p.machines.milkerActive },
+                { key: 'shearer' as const, emoji: '✂️', name: 'Tosquiadeira Elétrica', desc: 'Coleta automaticamente a lã de TODAS as ovelhas com lã madura no fim do dia.', cost: 2000, minLevel: 5, energy: 6, purchased: p.machines.shearerPurchased, active: p.machines.shearerActive },
+                { key: 'feeder' as const, emoji: '🌾', name: 'Alimentador Automático', desc: 'Alimenta TODOS os animais no final do dia. Consome ração do Armazém (1 unidade por animal).', cost: 1500, minLevel: 4, energy: 5, purchased: p.machines.feederPurchased, active: p.machines.feederActive },
+              ]).map(({ key, emoji, name, desc, cost, minLevel, energy, purchased, active }) => {
+                const levelOk = p.farmLevel >= minLevel;
+                const canBuy = !purchased && levelOk && p.gold >= cost;
+                return (
+                  <div key={key} className={`border-4 rounded-3xl p-4 flex flex-col sm:flex-row items-center sm:items-start gap-4 transition-all ${purchased ? 'bg-emerald-50 border-emerald-400' : 'bg-white border-stone-200'}`}>
+                    <div className="rounded-2xl w-12 h-12 bg-blue-50 flex items-center justify-center text-2xl shrink-0 border-2 border-blue-100">{emoji}</div>
+                    <div className="flex-1 min-w-0 text-center sm:text-left">
+                      <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                        <span className="font-display font-black text-sm uppercase text-[#78350f]">{emoji} {name}</span>
+                        {!purchased && <span className="bg-[#fef3c7] text-[#92400e] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border border-[#fbbf24]">Nível {minLevel}+</span>}
+                        {purchased && <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase font-mono">Adquirido</span>}
+                      </div>
+                      <p className="text-xs text-stone-600 mt-1">{desc}</p>
+                      <p className="text-[10px] text-stone-400 font-mono mt-1 uppercase">⚡ {cost.toLocaleString()}💰 • Nível mín: {minLevel} • <span className="text-orange-500 font-black">{energy}⚡/dia</span></p>
+                    </div>
+                    <div className="shrink-0">
+                      {!purchased ? (
+                        <button
+                          type="button"
+                          onClick={() => p.buyMachine(key)}
+                          disabled={!canBuy}
+                          className={`font-mono font-black text-xs uppercase px-4 py-2 rounded-2xl border-b-4 transition-all ${canBuy ? 'bg-amber-500 hover:bg-amber-400 text-[#451a03] border-amber-700 hover:scale-105 cursor-pointer' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                        >
+                          {!levelOk ? `🔒 Nível ${minLevel}` : `Comprar (${cost.toLocaleString()}💰)`}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => p.toggleMachine(key)}
+                          className={`font-mono font-black text-xs px-4 py-2 rounded-xl border-b-2 cursor-pointer transition-all uppercase ${active ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-800' : 'bg-stone-400 hover:bg-stone-300 text-white border-stone-600'}`}
+                        >
+                          {active ? '🟢 LIGADO' : '🔴 DESLIGADO'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <div className="bg-orange-50 p-4 border-t border-orange-100 flex justify-end shrink-0">
             <button onClick={p.onClose} className="bg-orange-600 hover:bg-orange-500 text-white border-b-4 border-orange-900 shadow-md px-6 py-2.5 rounded-2xl font-display font-black uppercase text-xs tracking-wider cursor-pointer">
               Fechar Loja

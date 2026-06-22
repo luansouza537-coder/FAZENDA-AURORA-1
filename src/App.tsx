@@ -55,7 +55,6 @@ import WorkersModal from './components/WorkersModal';
 import TutorialModal from './components/TutorialModal';
 import MelhoriasModal from './components/MelhoriasModal';
 import QueijariaModal from './components/QueijariaModal';
-import AutomationModal from './components/AutomationModal';
 import MarketModal from './components/MarketModal';
 import AchievementsModal from './components/AchievementsModal';
 import LevelUpModal from './components/LevelUpModal';
@@ -353,7 +352,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   // machines — managed by useFarm hook
 
-  const [showAutomationModal, setShowAutomationModal] = useState<boolean>(false);
   const [showMarketModal, setShowMarketModal] = useState<boolean>(false);
   const [showSellAllConfirmModal, setShowSellAllConfirmModal] = useState<boolean>(false);
 
@@ -2273,7 +2271,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   useEffect(() => {
     if (!autoAdvance || isPaused || isGameOverForAutoAdvance || isSleeping) return;
-    const anyModalOpen = showBuyMenu || showLevelUpModal !== null || showWeeklyReport || showTutorialModal || showAchievementsModal || showAutomationModal || showMarketModal || showSellAllConfirmModal || showQueijariaModal || showMissionsModal || showNotifications || showStatsModal;
+    const anyModalOpen = showBuyMenu || showLevelUpModal !== null || showWeeklyReport || showTutorialModal || showAchievementsModal || showMarketModal || showSellAllConfirmModal || showQueijariaModal || showMissionsModal || showNotifications || showStatsModal;
     if (anyModalOpen) return;
 
     const interval = setInterval(() => {
@@ -2289,7 +2287,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     }, autoSpeed * 1000);
 
     return () => clearInterval(interval);
-  }, [autoAdvance, isPaused, autoSpeed, isGameOverForAutoAdvance, isSleeping, showBuyMenu, showLevelUpModal, showWeeklyReport, showTutorialModal, showAchievementsModal, showAutomationModal, showMarketModal, showSellAllConfirmModal, showQueijariaModal, showMissionsModal, showNotifications, showStatsModal]);
+  }, [autoAdvance, isPaused, autoSpeed, isGameOverForAutoAdvance, isSleeping, showBuyMenu, showLevelUpModal, showWeeklyReport, showTutorialModal, showAchievementsModal, showMarketModal, showSellAllConfirmModal, showQueijariaModal, showMissionsModal, showNotifications, showStatsModal]);
 
   // Keyboard Shortcuts (D, S, M, H, 1, 2, 3, Escape)
   useEffect(() => {
@@ -2307,7 +2305,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (e.key === 'Escape') {
         setShowTutorialModal(false);
         setShowMarketModal(false);
-        setShowAutomationModal(false);
         setShowAchievementsModal(false);
         setShowWeeklyReport(false);
         setShowSellAllConfirmModal(false);
@@ -3685,7 +3682,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       {
         let fertilEggsProduced = 0;
         updatedAnimalsList = updatedAnimalsList.map(a => {
-          if (a.type === 'galinha' && a.hasProducedToday && a.happiness >= 95 && Math.random() < 0.20) {
+          if (a.type === 'galinha' && a.hasProducedToday && a.happiness >= 95 && Math.random() < 0.05) {
             fertilEggsProduced++;
             logsToAdd.push({ msg: `✨ ${a.name} está super feliz e botou um ovo fértil especial!`, type: 'success' });
             // BUG FIX: marca hasProducedToday=false para evitar coleta dupla (ovo fértil + ovo normal no mesmo dia)
@@ -5942,19 +5939,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               <span>Dia {currentDay}</span>
             </div>
 
-            {/* 🏭 Automação Button */}
-            <button 
-              onClick={() => {
-                setShowAutomationModal(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="bg-emerald-600 border-3 border-emerald-400 hover:bg-emerald-500 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#064e3b] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
-              title="Gerenciar Máquinas Automáticas de Coleta e Alimentação"
-            >
-              <span>🏭</span>
-              <span>Automação</span>
-            </button>
-
             {/* 📊 Mercado Button */}
             <button
               onClick={() => {
@@ -6690,15 +6674,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         )}
       </AnimatePresence>
 
-      {/* 🏭 AUTOMATION / MACHINES MODAL */}
-      {showAutomationModal && (
-        <AutomationModal
-          gold={gold} farmLevel={farmLevel} machines={machines}
-          onClose={() => setShowAutomationModal(false)}
-          buyMachine={buyMachine} toggleMachine={toggleMachine}
-          triggerAudioResult={triggerAudioResult} sfx={sfx}
-        />
-      )}
 
       {/* 🧀 QUEIJARIA ARTESANAL MODAL */}
       {showQueijariaModal && (
@@ -6820,6 +6795,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           setLastUpgradeDay={setLastUpgradeDay}
           celeiroLevel={celeiroLevel} setCeleiroLevel={setCeleiroLevel}
           camaraFriaLevel={camaraFriaLevel} setCamaraFriaLevel={setCamaraFriaLevel}
+          buyMachine={buyMachine} toggleMachine={toggleMachine}
           ownedOneTimeEffects={[
             ...(hasBebedouro ? ['bebedouro'] : []),
             ...(hasCertSanitario ? ['cert_sanitario'] : []),
