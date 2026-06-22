@@ -799,20 +799,12 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                   const season = Math.floor(((currentDay - 1) % 120) / 30);
                   const isEggSeason = season === 2 || season === 3;
                   const daysSince = animal.daysSinceLastGooseEgg ?? 0;
-                  const daysSinceFeather = animal.daysSinceLastGooseFeather ?? 0;
-                  if (isEggSeason) {
-                    return daysSince >= 3 ? (
-                      <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">🥚 Ovo de ganso disponível!</span>
-                    ) : (
-                      <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">⏳ Próximo ovo em {3 - daysSince} dia(s)</span>
-                    );
-                  } else {
-                    return daysSinceFeather >= 7 ? (
-                      <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">🪶 Pena disponível! (Fora época)</span>
-                    ) : (
-                      <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">⏳ Pena em {7 - daysSinceFeather}d (Postura: Outono/Inverno)</span>
-                    );
-                  }
+                  const interval = isEggSeason ? 3 : 5;
+                  return daysSince >= interval ? (
+                    <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">🥚 Ovo de ganso disponível!</span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">⏳ Próximo ovo em {interval - daysSince} dia(s){!isEggSeason ? ' (fora da época)' : ''}</span>
+                  );
                 })()}
               </>
             )}
@@ -1152,16 +1144,16 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {animal.type === 'ganso' && (() => {
           const season = Math.floor(((currentDay - 1) % 120) / 30);
           const isEggSeason = season === 2 || season === 3;
-          const canCollect = isEggSeason ? (animal.daysSinceLastGooseEgg ?? 0) >= 3 : (animal.daysSinceLastGooseFeather ?? 0) >= 7;
+          const canCollect = (animal.daysSinceLastGooseEgg ?? 0) >= (isEggSeason ? 3 : 5);
           return (
             <button
               type="button"
               onClick={(e) => { e.preventDefault(); onCollectGooseProduct(animal.id, e); }}
               disabled={!canCollect}
               className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${canCollect ? 'bg-teal-500 hover:bg-teal-400 border-b-4 border-teal-700 shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
-              title={isEggSeason ? "Coletar ovo de ganso (1 a cada 3 dias)" : "Coletar pena de ganso (1 a cada 7 dias fora da época)"}
+              title={isEggSeason ? "Coletar ovo de ganso (1 a cada 3 dias)" : "Coletar ovo de ganso (1 a cada 5 dias fora da época)"}
             >
-              {isEggSeason ? '🥚 Ovo Ganso' : '🪶 Pena'}
+              🥚 Ovo Ganso
             </button>
           );
         })()}
