@@ -1001,7 +1001,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         )}
 
         {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré, cabra, lhama e búfalo (têm botões próprios) */}
-        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'lhama' && animal.type !== 'bufalo' && (() => {
+        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'lhama' && animal.type !== 'bufalo' && animal.type !== 'ganso' && (() => {
           const age = animal.age ?? 0;
           const maxAge = animal.maxAge ?? 90;
           const lifeFraction = Math.min(1, age / maxAge);
@@ -1153,7 +1153,36 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${canCollect ? 'bg-teal-500 hover:bg-teal-400 border-b-4 border-teal-700 shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
               title={isEggSeason ? "Coletar ovo de ganso (1 a cada 3 dias)" : "Coletar ovo de ganso (1 a cada 5 dias fora da época)"}
             >
-              🥚 Ovo Ganso
+              🥚 Coletar
+            </button>
+          );
+        })()}
+
+        {/* Vender Ganso — após botão de coleta */}
+        {animal.type === 'ganso' && animal.isAdult !== false && (() => {
+          const age = animal.age ?? 0;
+          const maxAge = animal.maxAge ?? 90;
+          const lifeFraction = Math.min(1, age / maxAge);
+          const sellPct = Math.max(0.10, 0.80 - lifeFraction * 0.70);
+          if (pendingSell) {
+            return (
+              <div className="flex items-center gap-1.5 bg-orange-50 border-2 border-orange-300 rounded-xl px-2 py-1.5">
+                <span className="text-[9px] font-mono font-black text-orange-700 leading-tight">
+                  Vender {animal.name}?<br/>
+                  <span className="text-orange-500">~{Math.round(sellPct * 100)}% do valor</span>
+                </span>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); onSellAnimal(animal.id, e); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+              </div>
+            );
+          }
+          return (
+            <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(true); }}
+              className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-b-4 border-orange-400 bg-orange-50 text-orange-800 hover:bg-orange-100 hover:scale-[1.03] active:translate-y-0.5 cursor-pointer transition-all shadow-sm"
+              title={`Vender por ~${Math.round(sellPct * 100)}% do valor.`}>
+              💸 Vender ({Math.round(sellPct * 100)}%)
             </button>
           );
         })()}
