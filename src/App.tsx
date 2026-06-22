@@ -6064,6 +6064,20 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </button>
             </div>
 
+              {/* 🎯 Missões */}
+              <div className="relative">
+                <button onClick={() => { setShowMissionsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                  title="Missões">
+                  🎯
+                </button>
+                {missions.filter(m => m.completed && !m.claimed).length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center pointer-events-none">
+                    {missions.filter(m => m.completed && !m.claimed).length}
+                  </span>
+                )}
+              </div>
+
             {/* 🔔 Notificações Button */}
             <button
               onClick={() => {
