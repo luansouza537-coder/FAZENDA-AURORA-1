@@ -152,8 +152,6 @@ export function useEconomy(_props: UseEconomyProps = {}) {
       goose_egg: [50, 50, 50, 50, 50, 50, 50],
       buffalo_milk: [55, 55, 55, 55, 55, 55, 55],
       buffalo_mozzarella: [120, 120, 120, 120, 120, 120, 120],
-      feather: [15, 15, 15, 15, 15, 15, 15],
-      peacock_feather: [80, 80, 80, 80, 80, 80, 80],
       butter: [45, 45, 45, 45, 45, 45, 45],
       yogurt: [35, 35, 35, 35, 35, 35, 35],
       fertile_egg: [36, 36, 36, 36, 36, 36, 36],
@@ -165,7 +163,6 @@ export function useEconomy(_props: UseEconomyProps = {}) {
       seda_bruta: [80, 80, 80, 80, 80, 80, 80],
       coxa_ra: [70, 70, 70, 70, 70, 70, 70],
       carne_avestruz: [200, 200, 200, 200, 200, 200, 200],
-      pena_grande: [60, 60, 60, 60, 60, 60, 60],
       couro_avestruz: [300, 300, 300, 300, 300, 300, 300],
       carne_jacare: [250, 250, 250, 250, 250, 250, 250],
       couro_jacare: [400, 400, 400, 400, 400, 400, 400],
@@ -182,10 +179,8 @@ export function useEconomy(_props: UseEconomyProps = {}) {
       conserva_codorna: [80, 80, 80, 80, 80, 80, 80],
       creme_cosmetico: [220, 220, 220, 220, 220, 220, 220],
       sabonete_natural: [140, 140, 140, 140, 140, 140, 140],
-      almofada_penas: [170, 170, 170, 170, 170, 170, 170],
       colete_couro: [550, 550, 550, 550, 550, 550, 550],
       bolsa_exotica: [800, 800, 800, 800, 800, 800, 800],
-      enfeite_pavao: [200, 200, 200, 200, 200, 200, 200],
     };
   });
 

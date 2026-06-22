@@ -98,7 +98,7 @@ export default function GameSidebar({
                   key: string;
                   label: string;
                   qty: number;
-                  priceKey?: 'milk'|'wool'|'cheese'|'scarf'|'egg'|'mayo'|'queijoCoalho'|'queijoMucarela'|'queijoBrie'|'goat_milk'|'llama_wool'|'duck_egg'|'goose_egg'|'buffalo_milk'|'buffalo_mozzarella'|'feather'|'peacock_feather'|'butter'|'yogurt'|'fertile_egg';
+                  priceKey?: 'milk'|'wool'|'cheese'|'scarf'|'egg'|'mayo'|'queijoCoalho'|'queijoMucarela'|'queijoBrie'|'goat_milk'|'llama_wool'|'duck_egg'|'goose_egg'|'buffalo_milk'|'buffalo_mozzarella'|'butter'|'yogurt'|'fertile_egg';
                   freshKey?: 'milk'|'egg'|'goat_milk'|'duck_egg'|'goose_egg'|'buffalo_milk'|'fertile_egg';
                   colSpan?: boolean;
                 };

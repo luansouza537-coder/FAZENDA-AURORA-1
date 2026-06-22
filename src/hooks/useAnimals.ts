@@ -850,21 +850,16 @@ export function useAnimals({
     onItemCollected?.(qty);
   };
 
-  // Collect Avestruz pena_grande
+  // Collect Avestruz carne
   const collectAvestruzPena = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'avestruz') return;
-    if (!animal.woolReady) { addLog(`🦤 ${animal.name} ainda não tem penas prontas!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
+    if (!animal.woolReady) { addLog(`🦤 ${animal.name} ainda não está pronta para abate!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
     const qty = specialization === 'exotica' ? 2 : 1;
-    setInventory(prev => {
-      const newTotal = (prev.pena_grande ?? 0) + qty;
-      if (newTotal >= 5) checkAndUnlockAchievement('rare_feathers');
-      return { ...prev, pena_grande: newTotal };
-    });
-    setStats(prev => ({ ...prev, totalFeathers: (prev.totalFeathers || 0) + qty }));
+    setInventory(prev => ({ ...prev, carne_avestruz: (prev.carne_avestruz ?? 0) + qty }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolReady: false, daysSinceLastWool: 0 } : a));
-    addLog(`🦤 ${animal.name} (avestruz) soltou penas! +${qty} pena grande.`, 'success');
+    addLog(`🦤 ${animal.name} (avestruz) abatida! +${qty} carne de avestruz.`, 'success');
     setFarmXp(prev => prev + qty);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🪶', `+${qty} Pena Grande`, event);
@@ -1124,7 +1119,7 @@ export function useAnimals({
       ...(type === 'codorna' && { hasProducedToday: false }),
       ...(type === 'alpaca' && { daysUntilWool: 4, daysSinceLastWool: 0, woolReady: false, heatStress: false }),
       ...(type === 'coelho_angora' && { daysUntilWool: 5, daysSinceLastWool: 0, woolReady: false }),
-      ...(type === 'avestruz' && { daysUntilWool: 7, daysSinceLastWool: 0, woolReady: false }), // woolReady = pena_grande ready
+      ...(type === 'avestruz' && { daysUntilWool: 7, daysSinceLastWool: 0, woolReady: false }),
     };
 
     // Deduzir ração do inventário (minhoca, caracol, bicho_seda não consomem)

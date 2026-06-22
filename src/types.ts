@@ -58,7 +58,6 @@ export interface Animal {
   inLayingSeason?: boolean;  // se está na época de postura
   nextAlarmDay?: number;     // dia do próximo evento que o ganso vai alertar
   daysSinceLastGooseEgg?: number; // dias desde o último ovo de ganso
-  daysSinceLastGooseFeather?: number; // dias desde a última pena de ganso
 
   // Búfalo
   heatStress?: boolean;      // se está sofrendo estresse térmico (verão)
@@ -171,7 +170,6 @@ export interface FarmStats {
   totalYogurt?: number;
   totalMerchantShopPurchases?: number;
   totalSilk?: number;
-  totalFeathers?: number;
   happyDays?: number;
   contractsCompleted?: number;
   cheeseTypesMade?: string[];

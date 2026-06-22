@@ -977,12 +977,11 @@ export function useInventory({
       butter: 'butter', yogurt: 'yogurt',
       goat_milk: 'goat_milk', buffalo_milk: 'buffalo_milk', buffalo_mozzarella: 'buffalo_mozzarella',
       duck_egg: 'duck_egg', quail_egg: 'quail_egg', goose_egg: 'goose_egg',
-      feather: 'feather', peacock_feather: 'peacock_feather',
       alpaca_wool: 'alpaca_wool', angora_wool: 'angora_wool', llama_wool: 'llama_wool',
       muco: 'muco', mel_envasado: 'mel_envasado', seda_bruta: 'seda_bruta',
       mayo: 'mayo', queijo_cabra: 'queijo_cabra', iogurte_cabra: 'iogurte_cabra',
       tapete_lhama: 'tapete_lhama', leite_condensado: 'leite_condensado', tecido_alpaca: 'tecido_alpaca',
-      cachecol_angora: 'cachecol_angora', coxa_ra: 'coxa_ra', pena_grande: 'pena_grande',
+      cachecol_angora: 'cachecol_angora', coxa_ra: 'coxa_ra',
       carne_avestruz: 'carne_avestruz', couro_avestruz: 'couro_avestruz',
       fio_seda: 'fio_seda', carne_jacare: 'carne_jacare', couro_jacare: 'couro_jacare',
     };
@@ -1021,8 +1020,6 @@ export function useInventory({
     else if (itemType === 'goose_egg') label = 'Ovo de Ganso';
     else if (itemType === 'buffalo_milk') label = 'Leite de Búfala';
     else if (itemType === 'buffalo_mozzarella') label = 'Muçarela de Búfala';
-    else if (itemType === 'feather') label = 'Penas';
-    else if (itemType === 'peacock_feather') label = 'Pena de Pavão';
     else if (itemType === 'butter') label = 'Manteiga';
     else if (itemType === 'yogurt') label = 'Iogurte';
     else if (itemType === 'fertile_egg') label = 'Ovo Fértil';
@@ -1034,7 +1031,6 @@ export function useInventory({
     else if (itemType === 'seda_bruta') label = 'Seda Bruta';
     else if (itemType === 'coxa_ra') label = 'Coxa de Rã';
     else if (itemType === 'carne_avestruz') label = 'Carne de Avestruz';
-    else if (itemType === 'pena_grande') label = 'Pena de Avestruz';
     else if (itemType === 'couro_avestruz') label = 'Couro de Avestruz';
     else if (itemType === 'carne_jacare') label = 'Carne de Jacaré';
     else if (itemType === 'couro_jacare') label = 'Couro de Jacaré';
@@ -1051,10 +1047,8 @@ export function useInventory({
     else if (itemType === 'conserva_codorna') label = 'Conserva de Codorna';
     else if (itemType === 'creme_cosmetico') label = 'Creme Cosmético';
     else if (itemType === 'sabonete_natural') label = 'Sabonete Natural';
-    else if (itemType === 'almofada_penas') label = 'Almofada de Penas';
     else if (itemType === 'colete_couro') label = 'Colete de Couro';
     else if (itemType === 'bolsa_exotica') label = 'Bolsa Exótica';
-    else if (itemType === 'enfeite_pavao') label = 'Enfeite de Pavão';
 
     addLog(`💰 Venda realizada: ${qty} unidades de ${label} por +${profit} moedas!`, 'success');
 

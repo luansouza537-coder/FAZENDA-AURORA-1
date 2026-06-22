@@ -30,11 +30,8 @@ interface Inventory {
   peixe?: number;
   humus?: number;
   muco?: number;
-  feather?: number;
-  pena_grande?: number;
   couro_avestruz?: number;
   couro_jacare?: number;
-  peacock_feather?: number;
   queijoBrie?: number;
   queijoCoalho?: number;
   [key: string]: number | undefined;
