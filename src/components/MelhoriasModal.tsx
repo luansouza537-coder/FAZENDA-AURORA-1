@@ -129,7 +129,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             </button>
           </div>
 
-          {activeTab === 'consumiveis' ? (
+          {activeTab === 'consumiveis' && (
             <div className="flex-1 overflow-y-auto p-6">
               <p className="text-xs text-stone-500 font-mono mb-4">Itens disponíveis a qualquer momento. Itens únicos só podem ser comprados uma vez.</p>
               <div className="grid grid-cols-2 gap-3">
@@ -156,7 +156,8 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 })}
               </div>
             </div>
-          ) : (
+          )}
+          {activeTab === 'infraestrutura' && (
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
 
             {/* Expansão de Terreno */}
@@ -613,6 +614,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
 
           </div>
           )} {/* end infraestrutura tab */}
+
 
           {activeTab === 'automacao' && (
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
