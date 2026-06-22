@@ -599,15 +599,15 @@ export function useInventory({
   // Cozinha
   const craftPatePato = (event?: React.MouseEvent) => {
     if (event) event.preventDefault();
-    if (farmLevel < 5) { addLog('🍖 Patê de Pato requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (farmLevel < 5) { addLog('🥞 Panquecinhas Douradas requerem Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.duck_egg ?? 0) < 2) { addLog('🦆 Falta Ovo de Pato! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ovo Pato!', event); return; }
     if ((inventory.butter ?? 0) < 1) { addLog('🧈 Falta Manteiga! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Manteiga!', event); return; }
     setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) - 2, butter: (prev.butter ?? 0) - 1, pate_pato: (prev.pate_pato ?? 0) + 1 }));
     applyCraftCost('pate_pato');
-    addLog('🍖 Você preparou 1 Patê de Pato gourmet!', 'success');
+    addLog('🥞 Você preparou Panquecinhas Douradas de Ovos de Pato!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🍖', '+1 Patê Pato', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+    spawnFeedback('🥞', '+1 Panquecinha', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   const craftOvoDefumado = (event?: React.MouseEvent) => {
@@ -1042,7 +1042,7 @@ export function useInventory({
     else if (itemType === 'tecido_alpaca') label = 'Tecido de Alpaca';
     else if (itemType === 'fio_seda') label = 'Fio de Seda';
     else if (itemType === 'manta_premium') label = 'Manta Premium';
-    else if (itemType === 'pate_pato') label = 'Patê de Pato';
+    else if (itemType === 'pate_pato') label = 'Panquecinhas Douradas de Ovos de Pato';
     else if (itemType === 'ovo_defumado') label = 'Ovo Defumado';
     else if (itemType === 'conserva_codorna') label = 'Conserva de Codorna';
     else if (itemType === 'creme_cosmetico') label = 'Creme Cosmético';

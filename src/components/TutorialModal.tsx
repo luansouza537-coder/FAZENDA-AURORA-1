@@ -51,7 +51,7 @@ const SECTIONS = [
       <ul className="text-stone-700 space-y-2 text-xs sm:text-sm list-disc pl-4">
         <li><strong className="text-[#b45309]">Laticínios:</strong> Leite → Queijo, Manteiga, Iogurte, Leite Condensado, Queijo Coalho, Muçarela, Brie, Parmesão, Serra.</li>
         <li><strong className="text-[#b45309]">Têxteis:</strong> Lã → Cachecol · Pelo de Lhama → Tapete · Angorá → Cachecol Angorá · Alpaca → Tecido · Seda → Fio de Seda → Manta Premium.</li>
-        <li><strong className="text-[#b45309]">Aves & Exóticos:</strong> Ovo de Pato → Patê de Pato · Ovo de Ganso → Ovo Defumado · Ovos de Codorna → Conserva · Penas → Almofada · Penas de Pavão → Enfeite.</li>
+        <li><strong className="text-[#b45309]">Aves & Exóticos:</strong> Ovo de Pato → Panquecinhas Douradas · Ovo de Ganso → Ovo Defumado · Ovos de Codorna → Conserva.</li>
         <li><strong className="text-[#b45309]">Couro:</strong> Couro de Avestruz → Colete · Couro de Jacaré → Bolsa Exótica.</li>
         <li><strong className="text-[#b45309]">Especiais:</strong> Mel → Mel Envasado / Hidromel · Cogumelo → Risoto / Sopa · Peixe → Conserva.</li>
         <li><strong className="text-rose-700">Kit Gourmet</strong> (item máximo): 2 Queijo Brie + 1 Manta Premium + 2 Mel = vende por <strong>2.000+ moedas</strong>!</li>

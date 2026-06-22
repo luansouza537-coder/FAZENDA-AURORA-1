@@ -185,7 +185,7 @@ export default function AnimalGrid({
   abatedouroUnlocked,
   hasCertSanitario,
 }: AnimalGridProps) {
-  const [filtersExpanded, setFiltersExpanded] = useState(true);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   return (
           <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b-4 border-[#78350f]/60 pb-3 gap-3">
@@ -211,26 +211,6 @@ export default function AnimalGrid({
                   title="Comprar Animais: abre o catálogo para expandir seu rebanho"
                 >
                   🛒 COMPRAR ANIMAL
-                </button>
-
-                {/* Improvement 2: Profit Panel Toggle */}
-                <button
-                  type="button"
-                  onClick={(e) => { e.preventDefault(); setShowProfitPanel(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
-                  className={`${showProfitPanel ? 'bg-emerald-600 border-emerald-800' : 'bg-teal-700 border-teal-900'} text-white border-b-4 px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5`}
-                  title="Painel de Lucro: mostra receita, custo e lucro estimado por animal"
-                >
-                  💹 LUCRO
-                </button>
-
-                {/* Improvement 4: Ranking Modal */}
-                <button
-                  type="button"
-                  onClick={(e) => { e.preventDefault(); setShowRankingModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                  className="bg-amber-600 border-b-4 border-amber-800 text-white px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
-                  title="Ranking de Animais por produção semanal"
-                >
-                  🏆 RANKING
                 </button>
 
                 {/* HELP / TUTORIAL BUTTON */}
@@ -291,29 +271,6 @@ export default function AnimalGrid({
                   title="Avançar Dia: passa para o próximo dia, animais perdem fome e podem produzir"
                 >
                   🌞 AVANÇAR DIA
-                </button>
-
-                {/* DORMIR BUTTON */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    // BUG 20 FIX: usa ref para evitar duplo-clique
-                    e.preventDefault();
-                    if (isSleepingRef.current) return;
-                    isSleepingRef.current = true;
-                    setIsSleeping(true);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                    setTimeout(() => {
-                      advanceDay(null as any);
-                      setIsSleeping(false);
-                      isSleepingRef.current = false;
-                    }, 1250);
-                  }}
-                  disabled={isGameOver || isSleeping}
-                  className="bg-indigo-600 hover:bg-indigo-750 disabled:bg-stone-500 text-white border-b-4 border-indigo-900 px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
-                  title="Dormir: vai para a cama e inicia o próximo dia com uma bela transição de descanso"
-                >
-                  😴 DORMIR
                 </button>
 
                 {/* AUTO-AVANÇO BUTTON */}
@@ -974,6 +931,21 @@ export default function AnimalGrid({
                           <button onClick={() => setAnimalFilter(animalFilter === 'ready' ? 'all' : 'ready')}
                             className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 ${animalFilter === 'ready' ? 'bg-yellow-400 border-yellow-400 text-yellow-900' : 'border-yellow-400/60 text-yellow-300 bg-transparent'}`}>
                             ⚡ Prontos
+                          </button>
+                          <div className="w-full h-px bg-[#fbbf24]/20 my-0.5" />
+                          <button
+                            onClick={(e) => { e.preventDefault(); setShowProfitPanel(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
+                            className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 transition-all ${showProfitPanel ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-emerald-400/60 text-emerald-300 bg-transparent hover:bg-emerald-400/10'}`}
+                            title="Painel de Lucro: mostra receita, custo e lucro estimado por animal"
+                          >
+                            💹 Lucro
+                          </button>
+                          <button
+                            onClick={(e) => { e.preventDefault(); setShowRankingModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                            className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl border-2 border-amber-400/60 text-amber-300 bg-transparent hover:bg-amber-400/10 transition-all"
+                            title="Ranking de Animais por produção semanal"
+                          >
+                            🏆 Ranking
                           </button>
                         </div>
                       </motion.div>

@@ -145,7 +145,7 @@ export default function GameSidebar({
                       { key: 'tecido_alpaca', label: '🧶 Tecido Alpaca', qty: (inventory as any).tecido_alpaca ?? 0, priceKey: 'tecido_alpaca' as any },
                       { key: 'fio_seda', label: '🪡 Fio de Seda', qty: (inventory as any).fio_seda ?? 0, priceKey: 'fio_seda' as any },
                       { key: 'manta_premium', label: '✨ Manta Premium', qty: (inventory as any).manta_premium ?? 0, priceKey: 'manta_premium' as any },
-                      { key: 'pate_pato', label: '🍖 Patê de Pato', qty: (inventory as any).pate_pato ?? 0, priceKey: 'pate_pato' as any },
+                      { key: 'pate_pato', label: '🥞 Panquecinhas Douradas', qty: (inventory as any).pate_pato ?? 0, priceKey: 'pate_pato' as any },
                       { key: 'ovo_defumado', label: '🥚 Ovo Defumado', qty: (inventory as any).ovo_defumado ?? 0, priceKey: 'ovo_defumado' as any },
                       { key: 'conserva_codorna', label: '🥚 Conserva Codorna', qty: (inventory as any).conserva_codorna ?? 0, priceKey: 'conserva_codorna' as any },
                     ]
@@ -414,7 +414,7 @@ export default function GameSidebar({
                   {(inventory.pate_pato ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('pate_pato', 1, e)} disabled={(inventory.pate_pato ?? 0) < 1}
                     className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
-                    🍖 Patê Pato ({getActualSellPrice('pate_pato')}💰)
+                    🥞 Panquecinhas ({getActualSellPrice('pate_pato')}💰)
                   </button>
                   )}
                   {(inventory.ovo_defumado ?? 0) > 0 && (
