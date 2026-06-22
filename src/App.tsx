@@ -760,6 +760,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setRacaoOrganicaDays(0);
     setFertilizanteDays(0);
     setLicencaExotica(false);
+    setInsuranceTheft({ active: false, daysLeft: 0 });
+    setInsuranceClimate({ active: false, daysLeft: 0 });
     setHasBebedouro(false);
     setHasCertSanitario(false);
     setLicencaCriadouro(false);
@@ -5492,6 +5494,25 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (antiPestDays > 0) setAntiPestDays(prev => prev - 1);
       if (suplementoMineralDays > 0) setSuplementoMineralDays(prev => prev - 1);
       if (silagemDays > 0) setSilagemDays(prev => prev - 1);
+      // Decrementar seguros temporários (daysLeft < 9999 = bônus de level-up, não permanente)
+      if (insuranceClimate.active && insuranceClimate.daysLeft < 9999) {
+        const next = insuranceClimate.daysLeft - 1;
+        if (next <= 0) {
+          setInsuranceClimate({ active: false, daysLeft: 0 });
+          setTimeout(() => addNotification('🌦️ Seguro Climático temporário expirou.', 'info', nextDayValue), 0);
+        } else {
+          setInsuranceClimate(prev => ({ ...prev, daysLeft: next }));
+        }
+      }
+      if (insuranceTheft.active && insuranceTheft.daysLeft < 9999) {
+        const next = insuranceTheft.daysLeft - 1;
+        if (next <= 0) {
+          setInsuranceTheft({ active: false, daysLeft: 0 });
+          setTimeout(() => addNotification('🔒 Seguro contra Roubo temporário expirou.', 'info', nextDayValue), 0);
+        } else {
+          setInsuranceTheft(prev => ({ ...prev, daysLeft: next }));
+        }
+      }
 
       // --- EVENTOS DO MUNDO ---
       if (worldEvent) {
