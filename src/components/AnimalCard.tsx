@@ -995,6 +995,19 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           </button>
         )}
 
+        {/* Coletar Ovo de Pato */}
+        {animal.type === 'pato' && (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); onCollectDuckEgg(animal.id, e); }}
+            disabled={!animal.hasProducedToday}
+            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.hasProducedToday ? 'bg-amber-500 hover:bg-amber-400 border-b-4 border-amber-700 text-white shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+            title="Coletar ovo de pato"
+          >
+            🥚 Coletar
+          </button>
+        )}
+
         {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré, cabra, lhama e búfalo (têm botões próprios) */}
         {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'lhama' && animal.type !== 'bufalo' && (() => {
           const age = animal.age ?? 0;
@@ -1134,19 +1147,6 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             </button>
           );
         })()}
-
-        {/* Coletar Ovo de Pato */}
-        {animal.type === 'pato' && (
-          <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); onCollectDuckEgg(animal.id, e); }}
-            disabled={!animal.hasProducedToday}
-            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.hasProducedToday ? 'bg-amber-500 hover:bg-amber-400 border-b-4 border-amber-700 text-white shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
-            title="Coletar ovo de pato"
-          >
-            🥚 Ovo Pato
-          </button>
-        )}
 
         {/* Coletar Ganso (ovo ou pena) */}
         {animal.type === 'ganso' && (() => {
