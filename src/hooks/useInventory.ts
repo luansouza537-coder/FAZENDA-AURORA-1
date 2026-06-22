@@ -980,6 +980,9 @@ export function useInventory({
 
     setGold(prev => prev + profit);
     setDailyEarning(prev => prev + profit);
+    addLog(`💰 Vendido: ${qty}x ${String(itemType)} por ${profit} moedas!`, 'success');
+    triggerAudioResult(() => sfx.playSound('coin'));
+    spawnFeedback('💰', `+${profit}`, event);
     const freightCost = Math.floor(pricePerUnit * qty) - profit;
     addFinancialEntry?.({ day: currentDay ?? 0, type: 'income', amount: profit, category: 'venda', description: `Venda: ${qty}x ${String(itemType)}` });
     if (freightCost > 0) addFinancialEntry?.({ day: currentDay ?? 0, type: 'expense', amount: freightCost, category: 'outro', description: `Frete: ${String(itemType)}` });
