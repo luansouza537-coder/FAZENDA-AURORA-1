@@ -1880,10 +1880,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     craftSaboneteNatural,
     craftRacaoOrganica,
     craftFertilizante,
-    craftAlmofadaPenas,
     craftColeteCouro,
     craftBolsaExotica,
-    craftEnfeitePavao,
     craftCheese,
     craftQueijo,
     craftQueijoParmesao,
@@ -6661,7 +6659,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             craftIncubarOvos, craftHidromel, craftRisotoCogumelo, craftConservaPeixe,
             craftMelEnvasado, craftSopaCogumelo,
             craftCremeCosmetico, craftSaboneteNatural, craftRacaoOrganica, craftFertilizante,
-            craftAlmofadaPenas, craftColeteCouro, craftBolsaExotica, craftEnfeitePavao, craftKitGourmet,
+            craftColeteCouro, craftBolsaExotica, craftKitGourmet,
           }}
           onClose={() => setShowQueijariaModal(false)}
           onOpenMelhorias={() => setShowUpgradesModal(true)}

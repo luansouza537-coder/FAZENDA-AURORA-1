@@ -68,10 +68,8 @@ export interface CraftActions {
   craftSaboneteNatural: (e?: React.MouseEvent) => void;
   craftRacaoOrganica: (e?: React.MouseEvent) => void;
   craftFertilizante: (e?: React.MouseEvent) => void;
-  craftAlmofadaPenas: (e?: React.MouseEvent) => void;
   craftColeteCouro: (e?: React.MouseEvent) => void;
   craftBolsaExotica: (e?: React.MouseEvent) => void;
-  craftEnfeitePavao: (e?: React.MouseEvent) => void;
   craftKitGourmet: (e?: React.MouseEvent) => void;
 }
 
