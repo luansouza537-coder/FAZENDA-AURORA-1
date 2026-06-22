@@ -6030,25 +6030,33 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </div>
             )}
 
-            {/* 🧀 Queijaria Button */}
-            <button 
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                setShowQueijariaModal(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
-              title="Acesse a Queijaria para maturação de queijos artesanais e ampliação"
-            >
-              <span>🏭</span>
-              <span>Produção</span>
-              {queijosEmMaturacao.length > 0 && (
-                <span className="bg-red-500 text-white text-[10px] h-5 w-5 rounded-full flex items-center justify-center font-bold font-mono">
-                  {queijosEmMaturacao.length}
-                </span>
-              )}
-            </button>
+            {/* 🏭 Produção + 🛒 Comprar Animal — par */}
+            <div className="flex items-center gap-1.5">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setShowQueijariaModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
+                  title="Acesse a Queijaria para maturação de queijos artesanais e ampliação"
+                >
+                  <span>🏭</span>
+                  <span>Produção</span>
+                  {queijosEmMaturacao.length > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] h-5 w-5 rounded-full flex items-center justify-center font-bold font-mono">
+                      {queijosEmMaturacao.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+              <button
+                onClick={() => { setShowBuyMenu(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
+                className={`border-3 border-[#1d4ed8] text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#1e3a8a] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none ${showBuyMenu ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                title="Comprar Animais: abre o catálogo para expandir seu rebanho"
+              >
+                <span>🛒</span>
+                <span>Comprar Animal</span>
+              </button>
+            </div>
 
             {/* 🔔 Notificações Button */}
             <button
