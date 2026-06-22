@@ -60,10 +60,8 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   sabonete_natural: { energy: 1, water: 1 },
   racao_organica:   { energy: 1, water: 1 },
   fertilizante:     { energy: 1, water: 1 },
-  almofada_penas:   { energy: 1, water: 0 },
   colete_couro:     { energy: 2, water: 0 },
   bolsa_exotica:    { energy: 2, water: 0 },
-  enfeite_pavao:    { energy: 1, water: 0 },
   cheese:           { energy: 1, water: 0 },
   queijoCoalho:     { energy: 2, water: 0 },
   queijoMucarela:   { energy: 2, water: 0 },
@@ -127,9 +125,9 @@ export function useInventory({
     coxa_ra: 'carnes', carne_avestruz: 'carnes', carne_jacare: 'carnes', peixe: 'carnes',
     humus: 'organicos', muco: 'organicos', mel: 'organicos', mel_envasado: 'organicos',
     cogumelo: 'organicos', seda_bruta: 'organicos',
-    feather: 'luxo', peacock_feather: 'luxo', pena_grande: 'luxo', couro_avestruz: 'luxo',
+    couro_avestruz: 'luxo',
     couro_jacare: 'luxo', creme_cosmetico: 'luxo', sabonete_natural: 'luxo',
-    almofada_penas: 'luxo', colete_couro: 'luxo', bolsa_exotica: 'luxo', enfeite_pavao: 'luxo',
+    colete_couro: 'luxo', bolsa_exotica: 'luxo',
     hidromel: 'luxo', risoto_cogumelo: 'luxo', conserva_peixe: 'luxo',
     sopa_cogumelo: 'luxo', kit_gourmet: 'luxo',
   };
@@ -163,8 +161,6 @@ export function useInventory({
           goose_egg: inv.goose_egg ?? 0,
           buffalo_milk: inv.buffalo_milk ?? 0,
           buffalo_mozzarella: inv.buffalo_mozzarella ?? 0,
-          feather: inv.feather ?? 0,
-          peacock_feather: inv.peacock_feather ?? 0,
           butter: inv.butter ?? 0,
           yogurt: inv.yogurt ?? 0,
           fertile_egg: inv.fertile_egg ?? 0,
@@ -176,7 +172,6 @@ export function useInventory({
           seda_bruta: inv.seda_bruta ?? 0,
           coxa_ra: inv.coxa_ra ?? 0,
           carne_avestruz: inv.carne_avestruz ?? 0,
-          pena_grande: inv.pena_grande ?? 0,
           couro_avestruz: inv.couro_avestruz ?? 0,
           carne_jacare: inv.carne_jacare ?? 0,
           couro_jacare: inv.couro_jacare ?? 0,
@@ -195,10 +190,8 @@ export function useInventory({
           conserva_codorna: inv.conserva_codorna ?? 0,
           creme_cosmetico: inv.creme_cosmetico ?? 0,
           sabonete_natural: inv.sabonete_natural ?? 0,
-          almofada_penas: inv.almofada_penas ?? 0,
           colete_couro: inv.colete_couro ?? 0,
           bolsa_exotica: inv.bolsa_exotica ?? 0,
-          enfeite_pavao: inv.enfeite_pavao ?? 0,
           peixe: inv.peixe ?? 0,
           mel: inv.mel ?? 0,
           cogumelo: inv.cogumelo ?? 0,
@@ -236,8 +229,6 @@ export function useInventory({
       goose_egg: 0,
       buffalo_milk: 0,
       buffalo_mozzarella: 0,
-      feather: 0,
-      peacock_feather: 0,
       butter: 0,
       yogurt: 0,
       fertile_egg: 0,
@@ -249,7 +240,6 @@ export function useInventory({
       seda_bruta: 0,
       coxa_ra: 0,
       carne_avestruz: 0,
-      pena_grande: 0,
       couro_avestruz: 0,
       carne_jacare: 0,
       couro_jacare: 0,
@@ -268,10 +258,8 @@ export function useInventory({
       conserva_codorna: 0,
       creme_cosmetico: 0,
       sabonete_natural: 0,
-      almofada_penas: 0,
       colete_couro: 0,
       bolsa_exotica: 0,
-      enfeite_pavao: 0,
       peixe: 0,
       mel: 0,
       cogumelo: 0,
@@ -700,20 +688,6 @@ export function useInventory({
     spawnFeedback('🌱', 'Fertilizante +5d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
-  // Luxo
-  const craftAlmofadaPenas = (event?: React.MouseEvent) => {
-    if (event) event.preventDefault();
-    if (farmLevel < 8) { addLog('🪶 Almofada de Penas requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if ((inventory.feather ?? 0) < 3) { addLog('🪶 Falta Penas! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Penas!', event); return; }
-    if ((inventory.pena_grande ?? 0) < 2) { addLog('🦤 Falta Pena Grande! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta P.Grande!', event); return; }
-    setInventory(prev => ({ ...prev, feather: (prev.feather ?? 0) - 3, pena_grande: (prev.pena_grande ?? 0) - 2, almofada_penas: (prev.almofada_penas ?? 0) + 1 }));
-    applyCraftCost('almofada_penas');
-    addLog('🛋️ Você confeccionou 1 Almofada de Penas luxuosa!', 'success');
-    setFarmXp(prev => prev + 3);
-    triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🛋️', '+1 Almofada Penas', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
-  };
-
   const craftColeteCouro = (event?: React.MouseEvent) => {
     if (event) event.preventDefault();
     if (farmLevel < 15) { addLog('🦺 Colete de Couro requer Nível 15!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
@@ -736,19 +710,6 @@ export function useInventory({
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('👜', '+1 Bolsa Exótica', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
-  };
-
-  const craftEnfeitePavao = (event?: React.MouseEvent) => {
-    if (event) event.preventDefault();
-    if (farmLevel < 10) { addLog('🦚 Enfeite de Pavão requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if ((inventory.peacock_feather ?? 0) < 2) { addLog('🦚 Falta Pena de Pavão! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta P.Pavão!', event); return; }
-    if ((inventory.pena_grande ?? 0) < 1) { addLog('🦤 Falta Pena Grande! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta P.Grande!', event); return; }
-    setInventory(prev => ({ ...prev, peacock_feather: (prev.peacock_feather ?? 0) - 2, pena_grande: (prev.pena_grande ?? 0) - 1, enfeite_pavao: (prev.enfeite_pavao ?? 0) + 1 }));
-    applyCraftCost('enfeite_pavao');
-    addLog('🦚 Você criou 1 Enfeite de Pavão deslumbrante!', 'success');
-    setFarmXp(prev => prev + 3);
-    triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🦚', '+1 Enfeite Pavão', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   // Main crafting functions
@@ -1125,8 +1086,6 @@ export function useInventory({
     const gooseEggQty = inventory.goose_egg || 0;
     const buffaloMilkQty = inventory.buffalo_milk || 0;
     const buffaloMozzQty = inventory.buffalo_mozzarella || 0;
-    const featherQty = inventory.feather || 0;
-    const peacockFeatherQty = inventory.peacock_feather || 0;
     const butterQty = inventory.butter || 0;
     const yogurtQty = inventory.yogurt || 0;
     const fertileEggQty = inventory.fertile_egg || 0;
@@ -1148,7 +1107,6 @@ export function useInventory({
     const sedaBrutaQty = inventory.seda_bruta || 0;
     const coxaRaQty = inventory.coxa_ra || 0;
     const carneAvestruzQty = inventory.carne_avestruz || 0;
-    const penaGrandeQty = inventory.pena_grande || 0;
     const couroAvestruzQty = inventory.couro_avestruz || 0;
     const carneJacareQty = inventory.carne_jacare || 0;
     const couroJacareQty = inventory.couro_jacare || 0;
@@ -1165,17 +1123,15 @@ export function useInventory({
     const conservaCodornaQty = inventory.conserva_codorna || 0;
     const cremeCosmeticoQty = inventory.creme_cosmetico || 0;
     const saboneteNaturalQty = inventory.sabonete_natural || 0;
-    const almofadaPenasQty = inventory.almofada_penas || 0;
     const coleteCouroQty = inventory.colete_couro || 0;
     const bolsaExoticaQty = inventory.bolsa_exotica || 0;
-    const enfeitePavaoQty = inventory.enfeite_pavao || 0;
     const queijoParmesaoQty = inventory.queijo_parmesao || 0;
     const queijoSerraQty = inventory.queijo_serra || 0;
     const kitGourmetQty = inventory.kit_gourmet || 0;
 
-    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + penaGrandeQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + almofadaPenasQty + coleteCouroQty + bolsaExoticaQty + enfeitePavaoQty;
+    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + coleteCouroQty + bolsaExoticaQty;
 
-    if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && featherQty === 0 && peacockFeatherQty === 0 && butterQty === 0 && yogurtQty === 0 && fertileEggQty === 0 && allExtras === 0) {
+    if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && butterQty === 0 && yogurtQty === 0 && fertileEggQty === 0 && allExtras === 0) {
       if (!quietValue) {
         addLog(`📦 Seu Armazém está completamente vazio de mercadorias para vender!`, 'error');
         triggerAudioResult(() => sfx.playSound('error'));
@@ -1198,8 +1154,6 @@ export function useInventory({
     const gooseEggPrice = getDynamicTransactionPrice('goose_egg');
     const buffaloMilkPrice = getDynamicTransactionPrice('buffalo_milk');
     const buffaloMozzPrice = getDynamicTransactionPrice('buffalo_mozzarella');
-    const featherPrice = getDynamicTransactionPrice('feather');
-    const peacockFeatherPrice = getDynamicTransactionPrice('peacock_feather');
     const butterPrice = getDynamicTransactionPrice('butter');
     const yogurtPrice = getDynamicTransactionPrice('yogurt');
     const fertileEggPrice = getDynamicTransactionPrice('fertile_egg');
@@ -1220,7 +1174,6 @@ export function useInventory({
     const sedaBrutaPrice = getDynamicTransactionPrice('seda_bruta');
     const coxaRaPrice = getDynamicTransactionPrice('coxa_ra');
     const carneAvestruzPrice = getDynamicTransactionPrice('carne_avestruz');
-    const penaGrandePrice = getDynamicTransactionPrice('pena_grande');
     const couroAvestruzPrice = getDynamicTransactionPrice('couro_avestruz');
     const carneJacarePrice = getDynamicTransactionPrice('carne_jacare');
     const couroJacarePrice = getDynamicTransactionPrice('couro_jacare');
@@ -1237,10 +1190,8 @@ export function useInventory({
     const conservaCodornaPrice = getDynamicTransactionPrice('conserva_codorna');
     const cremeCosmeticoPrice = getDynamicTransactionPrice('creme_cosmetico');
     const saboneteNaturalPrice = getDynamicTransactionPrice('sabonete_natural');
-    const almofadaPenasPrice = getDynamicTransactionPrice('almofada_penas');
     const coleteCouroPrice = getDynamicTransactionPrice('colete_couro');
     const bolsaExoticaPrice = getDynamicTransactionPrice('bolsa_exotica');
-    const enfeitePavaoPrice = getDynamicTransactionPrice('enfeite_pavao');
 
     const _lm = getFreightMultiplier ? getFreightMultiplier('laticinios') : 1;
     const _em = getFreightMultiplier ? getFreightMultiplier('ovos') : 1;
@@ -1269,12 +1220,11 @@ export function useInventory({
        carneJacareQty * carneJacarePrice + peixeQty * peixePrice) * _cm +
       (humusQty * humusPrice + mucoQty * mucoPrice + melQty * melPrice +
        melEnvasadoQty * melEnvasadoPrice + cogumeloQty * cogumeloPrice + sedaBrutaQty * sedaBrutaPrice) * _om +
-      (featherQty * featherPrice + peacockFeatherQty * peacockFeatherPrice +
-       penaGrandeQty * penaGrandePrice + couroAvestruzQty * couroAvestruzPrice +
+      (couroAvestruzQty * couroAvestruzPrice +
        couroJacareQty * couroJacarePrice + cremeCosmeticoQty * cremeCosmeticoPrice +
-       saboneteNaturalQty * saboneteNaturalPrice + almofadaPenasQty * almofadaPenasPrice +
+       saboneteNaturalQty * saboneteNaturalPrice +
        coleteCouroQty * coleteCouroPrice + bolsaExoticaQty * bolsaExoticaPrice +
-       enfeitePavaoQty * enfeitePavaoPrice + hidromelQty * hidromelPrice +
+       hidromelQty * hidromelPrice +
        risotoQty * risotoPrice + conservaPeixeQty * conservaPeixePrice +
        sopaCogumeloQty * sopaCogumeloPrice +
        kitGourmetQty * getDynamicTransactionPrice('kit_gourmet' as any)) * _xm
@@ -1302,18 +1252,16 @@ export function useInventory({
       goose_egg: 0,
       buffalo_milk: 0,
       buffalo_mozzarella: 0,
-      feather: 0,
-      peacock_feather: 0,
       butter: 0,
       yogurt: 0,
       fertile_egg: 0,
       quail_egg: 0, alpaca_wool: 0, humus: 0, muco: 0, angora_wool: 0, seda_bruta: 0,
-      coxa_ra: 0, carne_avestruz: 0, pena_grande: 0, couro_avestruz: 0,
+      coxa_ra: 0, carne_avestruz: 0, couro_avestruz: 0,
       carne_jacare: 0, couro_jacare: 0, queijo_cabra: 0, iogurte_cabra: 0,
       leite_condensado: 0, tapete_lhama: 0, cachecol_angora: 0, tecido_alpaca: 0,
       fio_seda: 0, manta_premium: 0, pate_pato: 0, ovo_defumado: 0, conserva_codorna: 0,
-      creme_cosmetico: 0, sabonete_natural: 0, almofada_penas: 0, colete_couro: 0,
-      bolsa_exotica: 0, enfeite_pavao: 0,
+      creme_cosmetico: 0, sabonete_natural: 0, colete_couro: 0,
+      bolsa_exotica: 0,
       peixe: 0, mel: 0, cogumelo: 0, hidromel: 0, risoto_cogumelo: 0,
       conserva_peixe: 0, mel_envasado: 0, sopa_cogumelo: 0,
     }));
@@ -1337,8 +1285,6 @@ export function useInventory({
       if (gooseEggQty > 0) updated.goose_egg = (prev.goose_egg || 0) + gooseEggQty;
       if (buffaloMilkQty > 0) updated.buffalo_milk = (prev.buffalo_milk || 0) + buffaloMilkQty;
       if (buffaloMozzQty > 0) updated.buffalo_mozzarella = (prev.buffalo_mozzarella || 0) + buffaloMozzQty;
-      if (featherQty > 0) updated.feather = (prev.feather || 0) + featherQty;
-      if (peacockFeatherQty > 0) updated.peacock_feather = (prev.peacock_feather || 0) + peacockFeatherQty;
       if (butterQty > 0) updated.butter = (prev.butter || 0) + butterQty;
       if (yogurtQty > 0) updated.yogurt = (prev.yogurt || 0) + yogurtQty;
       if (fertileEggQty > 0) updated.fertile_egg = (prev.fertile_egg || 0) + fertileEggQty;
@@ -1350,7 +1296,6 @@ export function useInventory({
       if (sedaBrutaQty > 0) updated.seda_bruta = (prev.seda_bruta || 0) + sedaBrutaQty;
       if (coxaRaQty > 0) updated.coxa_ra = (prev.coxa_ra || 0) + coxaRaQty;
       if (carneAvestruzQty > 0) updated.carne_avestruz = (prev.carne_avestruz || 0) + carneAvestruzQty;
-      if (penaGrandeQty > 0) updated.pena_grande = (prev.pena_grande || 0) + penaGrandeQty;
       if (couroAvestruzQty > 0) updated.couro_avestruz = (prev.couro_avestruz || 0) + couroAvestruzQty;
       if (carneJacareQty > 0) updated.carne_jacare = (prev.carne_jacare || 0) + carneJacareQty;
       if (couroJacareQty > 0) updated.couro_jacare = (prev.couro_jacare || 0) + couroJacareQty;
@@ -1368,7 +1313,7 @@ export function useInventory({
       return updated;
     });
 
-    const totalAllQty = milkQty + woolQty + cheeseQty + scarfQty + eggQty + mayoQty + coalhoQty + mucarelaQty + brieQty + goatMilkQty + llamaWoolQty + duckEggQty + gooseEggQty + buffaloMilkQty + buffaloMozzQty + featherQty + peacockFeatherQty + butterQty + yogurtQty + fertileEggQty + allExtras;
+    const totalAllQty = milkQty + woolQty + cheeseQty + scarfQty + eggQty + mayoQty + coalhoQty + mucarelaQty + brieQty + goatMilkQty + llamaWoolQty + duckEggQty + gooseEggQty + buffaloMilkQty + buffaloMozzQty + butterQty + yogurtQty + fertileEggQty + allExtras;
     setStats(prev => ({
       ...prev,
       totalEarned: prev.totalEarned + totalEarningCalculated,
@@ -1406,8 +1351,6 @@ export function useInventory({
     if (gooseEggQty > 0) messageParts.push(`${gooseEggQty} ovos de ganso`);
     if (buffaloMilkQty > 0) messageParts.push(`${buffaloMilkQty} leite de búfala`);
     if (buffaloMozzQty > 0) messageParts.push(`${buffaloMozzQty} muç. de búfala`);
-    if (featherQty > 0) messageParts.push(`${featherQty} penas`);
-    if (peacockFeatherQty > 0) messageParts.push(`${peacockFeatherQty} penas de pavão`);
     if (butterQty > 0) messageParts.push(`${butterQty} manteigas`);
     if (yogurtQty > 0) messageParts.push(`${yogurtQty} iogurtes`);
     if (fertileEggQty > 0) messageParts.push(`${fertileEggQty} ovos férteis`);

@@ -32,8 +32,6 @@ export type InventoryState = {
   goose_egg: number;
   buffalo_milk: number;
   buffalo_mozzarella: number;
-  feather: number;
-  peacock_feather: number;
   butter: number;
   yogurt: number;
   fertile_egg: number;
@@ -45,7 +43,6 @@ export type InventoryState = {
   seda_bruta: number;
   coxa_ra: number;
   carne_avestruz: number;
-  pena_grande: number;
   couro_avestruz: number;
   carne_jacare: number;
   couro_jacare: number;
@@ -64,10 +61,8 @@ export type InventoryState = {
   conserva_codorna: number;
   creme_cosmetico: number;
   sabonete_natural: number;
-  almofada_penas: number;
   colete_couro: number;
   bolsa_exotica: number;
-  enfeite_pavao: number;
   peixe: number;
   mel: number;
   cogumelo: number;
@@ -557,22 +552,12 @@ export function useAnimals({
     if (animal.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
     if (animal.trait === 'preguicosa') qty = Math.max(0, qty - 1);
 
-    // Feather chance
-    const featherChance = currentSeason === 0 ? 0.5 : 0.3;
-    const gotFeather = Math.random() < featherChance;
-
-    setInventory(prev => ({
-      ...prev,
-      duck_egg: (prev.duck_egg ?? 0) + qty,
-      feather: (prev.feather ?? 0) + (gotFeather ? 1 : 0)
-    }));
-    // BUG FIX: reseta frescor ao coletar ovos de pato frescos
+    setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) + qty }));
     if (qty > 0) setProductFreshness((prev: any) => ({ ...prev, duck_egg: 3 }));
-    setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + qty + (gotFeather ? 1 : 0) }));
-    setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false, feathersReady: false } : a));
+    setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + qty }));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false } : a));
 
-    const featherTxt = gotFeather ? ' + 🪶 1 pena!' : '';
-    addLog(`🦆 ${animal.name} botou ${qty} ovo(s) de pato!${featherTxt}`, 'success');
+    addLog(`🦆 ${animal.name} botou ${qty} ovo(s) de pato!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (soundEnabled) sfx.playAnimalSound('pato');
     spawnFeedback('🥚', `+${qty} Ovo Pato`, event);
@@ -608,19 +593,23 @@ export function useAnimals({
       updateMissionProgress('collect_items', 1);
       onItemCollected?.(1);
     } else {
-      // Feather every 7 days
-      const daysSinceFeather = animal.daysSinceLastGooseFeather ?? 0;
-      if (daysSinceFeather < 7) {
-        addLog(`🦢 ${animal.name}: pena disponível em ${7 - daysSinceFeather} dia(s). (Fora da época de postura)`, 'error');
-        spawnFeedback('⏳', `${7 - daysSinceFeather}d`, event);
+      // Ovo a cada 5 dias fora da época de postura
+      const daysSince = animal.daysSinceLastGooseEgg ?? 0;
+      if (daysSince < 5) {
+        addLog(`🦢 ${animal.name}: próximo ovo em ${5 - daysSince} dia(s).`, 'error');
+        spawnFeedback('⏳', `${5 - daysSince}d`, event);
         return;
       }
-      setInventory(prev => ({ ...prev, feather: (prev.feather ?? 0) + 1 }));
+      setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) + 1 }));
+      setProductFreshness((prev: any) => ({ ...prev, goose_egg: 3 }));
       setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + 1 }));
-      setAnimals(prev => prev.map(a => a.id === id ? { ...a, daysSinceLastGooseFeather: 0 } : a));
-      addLog(`🦢 ${animal.name} soltou 1 pena fora da época de postura.`, 'success');
+      setAnimals(prev => prev.map(a => a.id === id ? { ...a, daysSinceLastGooseEgg: 0 } : a));
+      addLog(`🦢 ${animal.name} botou 1 ovo de ganso!`, 'success');
       triggerAudioResult(() => sfx.playSound('collect'));
-      spawnFeedback('🪶', '+1 Pena', event);
+      if (soundEnabled) sfx.playAnimalSound('ganso');
+      spawnFeedback('🥚', '+1 Ovo Ganso', event);
+      updateMissionProgress('collect_items', 1);
+      onItemCollected?.(1);
     }
   };
 
@@ -1128,8 +1117,8 @@ export function useAnimals({
       ...(type === 'porco' && { weightGain: 0.10 }),
       ...(type === 'cabra' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'lhama' && { woolAccumulated: 0 }),
-      ...(type === 'pato' && { hasProducedToday: false, feathersReady: false }),
-      ...(type === 'ganso' && { inLayingSeason: false, daysSinceLastGooseEgg: 0, daysSinceLastGooseFeather: 0, hasProducedToday: false }),
+      ...(type === 'pato' && { hasProducedToday: false }),
+      ...(type === 'ganso' && { inLayingSeason: false, daysSinceLastGooseEgg: 0, hasProducedToday: false }),
       ...(type === 'bufalo' && { hasProducedToday: false, heatStress: false }),
       ...(type === 'pavao' && { hasProducedToday: false }),
       ...(type === 'codorna' && { hasProducedToday: false }),

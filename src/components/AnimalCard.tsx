@@ -607,13 +607,13 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               : animal.type === 'lhama'
               ? "🦙 Acumula lã ao longo das estações. Colheita somente na Primavera (mín. 3u). Não perde felicidade no Inverno e reduz custo de manutenção das máquinas."
               : animal.type === 'pato'
-              ? "🦆 Bota ovos de pato diariamente (mais na Primavera, menos no Inverno). Também gera penas ocasionalmente. Reduz chance de pragas em 40%."
+              ? "🦆 Bota ovos de pato diariamente (mais na Primavera, menos no Inverno). Reduz chance de pragas em 40%."
               : animal.type === 'ganso'
-              ? "🦢 Bota ovos de ganso a cada 3 dias no Outono/Inverno. Fora dessa época, gera penas a cada 7 dias. Funciona como alarme de eventos negativos."
+              ? "🦢 Bota ovos de ganso a cada 3 dias no Outono/Inverno e a cada 5 dias nas demais estações. Funciona como alarme de eventos negativos."
               : animal.type === 'bufalo'
               ? "🐃 Produz leite de búfala (3u/dia, 28💰/u). No Verão sofre estresse térmico (-1u). Seu leite pode virar Muçarela de Búfala (120💰)."
               : animal.type === 'pavao'
-              ? "🦚 Animal de prestígio. Gera penas semanalmente na Primavera/Verão (80💰/u). Com felicidade ≥80%, bônus de +10% felicidade para todos e +3-5% nos preços de venda."
+              ? "🦚 Animal de prestígio. Com felicidade ≥80%, concede +10% felicidade para todos os animais e +3-5% nos preços de venda."
               : "🥚 Bota ricos ovos de quintal se manter felicidade > 30% e fome > 25%."}
           </div>
         </div>

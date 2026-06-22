@@ -358,10 +358,8 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
               <div className="space-y-2">
                 <h4 className="font-display font-black text-xs uppercase tracking-wider text-purple-900 mb-2">🏺 Produtos de Luxo</h4>
                 {[
-                  { label: 'Almofada de Penas', emoji: '🛋️', req: `🪶 3 Penas (${inventory.feather ?? 0}/3) + 🦤 2 P.Grande (${inventory.pena_grande ?? 0}/2) • Nv8`, canCraft: farmLevel >= 8 && (inventory.feather ?? 0) >= 3 && (inventory.pena_grande ?? 0) >= 2, reqLevel: 8, onClick: (e: React.MouseEvent) => c.craftAlmofadaPenas(e) },
                   { label: 'Colete de Couro', emoji: '🦺', req: `🦤 1 Couro Avestruz (${inventory.couro_avestruz ?? 0}/1) • Nv15`, canCraft: farmLevel >= 15 && (inventory.couro_avestruz ?? 0) >= 1, reqLevel: 15, onClick: (e: React.MouseEvent) => c.craftColeteCouro(e) },
                   { label: 'Bolsa Exótica', emoji: '👜', req: `🐊 1 Couro Jacaré (${inventory.couro_jacare ?? 0}/1) • Nv18`, canCraft: farmLevel >= 18 && (inventory.couro_jacare ?? 0) >= 1, reqLevel: 18, onClick: (e: React.MouseEvent) => c.craftBolsaExotica(e) },
-                  { label: 'Enfeite de Pavão', emoji: '🦚', req: `🦚 2 P.Pavão (${inventory.peacock_feather ?? 0}/2) + 🦤 1 P.Grande (${inventory.pena_grande ?? 0}/1) • Nv10`, canCraft: farmLevel >= 10 && (inventory.peacock_feather ?? 0) >= 2 && (inventory.pena_grande ?? 0) >= 1, reqLevel: 10, onClick: (e: React.MouseEvent) => c.craftEnfeitePavao(e) },
                   { label: 'Kit Gourmet Premiado', emoji: '🎁', req: `🧀 2 Q.Brie (${inventory.queijoBrie ?? 0}/2) + ✨ 1 Manta Premium (${inventory.manta_premium ?? 0}/1) + 🍯 2 Mel (${inventory.mel ?? 0}/2) • Nv16`, canCraft: farmLevel >= 16 && (inventory.queijoBrie ?? 0) >= 2 && (inventory.manta_premium ?? 0) >= 1 && (inventory.mel ?? 0) >= 2, reqLevel: 16, onClick: (e: React.MouseEvent) => c.craftKitGourmet(e) },
                 ].map((r, i) => (
                   <div key={i} className={`bg-white border-2 rounded-xl p-3 flex items-center justify-between gap-3 ${farmLevel >= r.reqLevel ? 'border-purple-200' : 'border-stone-200 opacity-70'}`}>

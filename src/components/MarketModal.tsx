@@ -245,7 +245,6 @@ const MarketModal: React.FC<MarketModalProps> = ({
                     { key: 'seda_bruta', label: '🪲 Seda Bruta', base: 80 },
                     { key: 'coxa_ra', label: '🐸 Coxa de Rã', base: 70 },
                     { key: 'carne_avestruz', label: '🦤 Carne de Avestruz', base: 200 },
-                    { key: 'pena_grande', label: '🦤 Pena de Avestruz', base: 60 },
                     { key: 'couro_avestruz', label: '🦤 Couro de Avestruz', base: 300 },
                     { key: 'carne_jacare', label: '🐊 Carne de Jacaré', base: 250 },
                     { key: 'couro_jacare', label: '🐊 Couro de Jacaré', base: 400 },

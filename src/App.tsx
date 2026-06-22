@@ -715,8 +715,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       goose_egg: 0,
       buffalo_milk: 0,
       buffalo_mozzarella: 0,
-      feather: 0,
-      peacock_feather: 0,
       butter: 0,
       yogurt: 0,
       fertile_egg: 0,
@@ -728,7 +726,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       seda_bruta: 0,
       coxa_ra: 0,
       carne_avestruz: 0,
-      pena_grande: 0,
       couro_avestruz: 0,
       carne_jacare: 0,
       couro_jacare: 0,
@@ -747,10 +744,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       conserva_codorna: 0,
       creme_cosmetico: 0,
       sabonete_natural: 0,
-      almofada_penas: 0,
       colete_couro: 0,
       bolsa_exotica: 0,
-      enfeite_pavao: 0,
       peixe: 0,
       mel: 0,
       cogumelo: 0,
@@ -794,8 +789,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       goose_egg: [50, 50, 50, 50, 50, 50, 50],
       buffalo_milk: [55, 55, 55, 55, 55, 55, 55],
       buffalo_mozzarella: [120, 120, 120, 120, 120, 120, 120],
-      feather: [15, 15, 15, 15, 15, 15, 15],
-      peacock_feather: [80, 80, 80, 80, 80, 80, 80],
       butter: [45, 45, 45, 45, 45, 45, 45],
       yogurt: [35, 35, 35, 35, 35, 35, 35],
       fertile_egg: [36, 36, 36, 36, 36, 36, 36],
@@ -807,7 +800,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       seda_bruta: [100, 100, 100, 100, 100, 100, 100],
       coxa_ra: [110, 110, 110, 110, 110, 110, 110],
       carne_avestruz: [220, 220, 220, 220, 220, 220, 220],
-      pena_grande: [90, 90, 90, 90, 90, 90, 90],
       couro_avestruz: [300, 300, 300, 300, 300, 300, 300],
       carne_jacare: [300, 300, 300, 300, 300, 300, 300],
       couro_jacare: [500, 500, 500, 500, 500, 500, 500],
@@ -824,10 +816,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       conserva_codorna: [80, 80, 80, 80, 80, 80, 80],
       creme_cosmetico: [220, 220, 220, 220, 220, 220, 220],
       sabonete_natural: [140, 140, 140, 140, 140, 140, 140],
-      almofada_penas: [170, 170, 170, 170, 170, 170, 170],
       colete_couro: [550, 550, 550, 550, 550, 550, 550],
       bolsa_exotica: [800, 800, 800, 800, 800, 800, 800],
-      enfeite_pavao: [200, 200, 200, 200, 200, 200, 200],
     });
     setQueijosEmMaturacao([]);
     setMaxPrateleiras(2);
@@ -1609,7 +1599,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       return 1.0;
     }
     // --- EXÓTICOS (carne, couro, muco, penas) ---
-    const exoticos = new Set(['coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare','muco','feather','peacock_feather','pena_grande','bolsa_exotica','colete_couro','creme_cosmetico','sabonete_natural']);
+    const exoticos = new Set(['coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare','muco','bolsa_exotica','colete_couro','creme_cosmetico','sabonete_natural']);
     if (exoticos.has(itemType)) {
       if (estacao === 'verao') return 1.1;
       if (estacao === 'inverno') return 0.9;
@@ -1640,7 +1630,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Storage limits for Celeiro and Câmara Fria
-  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','feather','peacock_feather','pena_grande','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','almofada_penas','colete_couro','bolsa_exotica','enfeite_pavao','hidromel','mel_envasado','conserva_peixe','sabonete_natural']);
+  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','sabonete_natural']);
   const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','muco','creme_cosmetico']);
 
   const getCeleiroLimit = () => ([30, 60, 120, 250, 999][celeiroLevel] ?? 30);
@@ -1692,8 +1682,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'goose_egg') return 50;
     if (itemType === 'buffalo_milk') return farmLevel >= 6 ? 35 : 28;
     if (itemType === 'buffalo_mozzarella') return 165;
-    if (itemType === 'feather') return 15;
-    if (itemType === 'peacock_feather') return 80;
     if (itemType === 'butter') return 55;   // era 45 — Grupo C
     if (itemType === 'yogurt') return 40;   // era 35 — Grupo C
     if (itemType === 'fertile_egg') return 36;
@@ -1705,7 +1693,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'seda_bruta') return 100;
     if (itemType === 'coxa_ra') return 110;
     if (itemType === 'carne_avestruz') return 220;
-    if (itemType === 'pena_grande') return 90;
     if (itemType === 'couro_avestruz') return 260;  // era 300 — Grupo C
     if (itemType === 'carne_jacare') return 300;
     if (itemType === 'couro_jacare') return 500;
@@ -1722,10 +1709,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'conserva_codorna') return 160;
     if (itemType === 'creme_cosmetico') return 220;
     if (itemType === 'sabonete_natural') return 140;
-    if (itemType === 'almofada_penas') return 320;
     if (itemType === 'colete_couro') return 550;
     if (itemType === 'bolsa_exotica') return 820;
-    if (itemType === 'enfeite_pavao') return 380;
     if ((itemType as string) === 'peixe') return 45;
     if ((itemType as string) === 'mel') return 80;
     if ((itemType as string) === 'cogumelo') return 35;
@@ -1825,7 +1810,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Final processed sell prices including dynamic pricing equations
-  const COMERCIANTE_BONUS_ITEMS = new Set(['milk','wool','egg','goat_milk','llama_wool','duck_egg','goose_egg','buffalo_milk','quail_egg','alpaca_wool','humus','muco','angora_wool','seda_bruta','coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare','feather','peacock_feather']);
+  const COMERCIANTE_BONUS_ITEMS = new Set(['milk','wool','egg','goat_milk','llama_wool','duck_egg','goose_egg','buffalo_milk','quail_egg','alpaca_wool','humus','muco','angora_wool','seda_bruta','coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare']);
   const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'feather' | 'peacock_feather' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'pena_grande' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'almofada_penas' | 'colete_couro' | 'bolsa_exotica' | 'enfeite_pavao'): number => {
     const base = getDynamicTransactionPrice(itemType);
     const hasComercianteBonus = workers.some(w => w.role === 'comerciante_residente') && COMERCIANTE_BONUS_ITEMS.has(itemType);
@@ -3094,7 +3079,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     // --- Nível 5 ---
     { catalogId: 'lc_08', client: 'Confeitaria Açafrão', product: 'quail_egg' as const, description: 'Confeitaria premiada regionalmente, especializada em miniaturas gourmet e canapés para eventos corporativos. Os ovos de codorna são ingrediente-estrela de vários pratos do buffet. A demanda deles é semanal e constante — casamentos, aniversários e eventos não esperam.', baseMarket: 22, pricePerUnit: 32, weeklyGoal: 10, durationDays: 90, minLevel: 5, completionBonus: 620, completionXP: 70 },
     { catalogId: 'lc_09', client: 'Hotel Fazenda Verde', product: 'butter' as const, description: 'Resort rural que recebe hóspedes em busca de turismo gastronômico. O café colonial é o carro-chefe: pães artesanais, geleias e, no centro da mesa, a manteiga da casa — que precisa ser artesanal, sem rótulo de fábrica. Contrato renovável se o desempenho for bom.', baseMarket: 45, pricePerUnit: 65, weeklyGoal: 4, durationDays: 90, minLevel: 5, completionBonus: 505, completionXP: 80 },
-    { catalogId: 'lc_10', client: 'Ateliê Plumas & Arte', product: 'feather' as const, description: 'Ateliê de adereços carnavalescos e fantasias teatrais que abastece grupos folclóricos e escolas de samba da região. As penas são matéria-prima essencial para capacetes, leques e fantasias. Demanda previsível ao longo do ano, com pico nos meses anteriores ao carnaval.', baseMarket: 15, pricePerUnit: 22, weeklyGoal: 8, durationDays: 90, minLevel: 5, completionBonus: 340, completionXP: 60 },
     { catalogId: 'lc_29', client: 'Empório Orgânico Raiz Viva', product: 'iogurte_cabra' as const, description: 'Loja especializada em alimentos naturais e funcionais, frequentada por atletas, veganos e pessoas com intolerância ao leite de vaca. O iogurte de cabra é o produto mais procurado da prateleira refrigerada — leve, digestivo e com sabor que a clientela fiel reconhece. Eles já têm lista de espera toda vez que o estoque acaba. Precisam de fornecedor confiável com entrega semanal.', baseMarket: 55, pricePerUnit: 78, weeklyGoal: 4, durationDays: 90, minLevel: 5, completionBonus: 600, completionXP: 65 },
     { catalogId: 'lc_30', client: 'Ateliê Espaço & Forma', product: 'tapete_lhama' as const, description: 'Ateliê de decoração de interiores que cria ambientes rústico-modernos para clientes de alto padrão. Os tapetes de lhama são peça assinada da linha principal — textura única, coloração natural, impossível de imitar com material sintético. Cada peça que sai daqui vai para salas de estar de mansões, chalés e apartamentos de luxo. Eles pagam bem e não regateiam com quem entrega qualidade.', baseMarket: 110, pricePerUnit: 155, weeklyGoal: 2, durationDays: 90, minLevel: 5, completionBonus: 600, completionXP: 65 },
     // --- Nível 6 ---
@@ -4221,17 +4205,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           copy.happiness = Math.min(100, copy.happiness + 2);
         }
 
-        // Pavão: gerar pena de pavão semanalmente (primavera/verão)
-        if (a.type === 'pavao' && (currentSeasonIdx === 0 || currentSeasonIdx === 1)) {
-          if (nextDayValue % 7 === 0) {
-            setTimeout(() => {
-              setInventory(prev => ({ ...prev, peacock_feather: (prev.peacock_feather ?? 0) + 1 }));
-              addNotification(`🦚 ${a.name} perdeu penas lindas! +1 Pena de Pavão`, 'success', nextDayValue);
-            }, 0);
-            logsToAdd.push({ msg: `🦚 ${a.name} perdeu penas lindas! +1 Pena de Pavão no Armazém.`, type: 'success' });
-          }
-        }
-
         // Minhoca: produz 1 húmus a cada 3 dias
         if (a.type === 'minhoca' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
           const humusAmt = specialization === 'organica' ? 2 : 1;
@@ -5253,10 +5226,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) + duckEggs }));
             logsToAdd.push({ msg: `🥚 Avicultor coletou +${duckEggs} ovo(s) de pato!`, type: 'success' });
           }
-          if (ostrichFeathers > 0) {
-            setInventory(prev => ({ ...prev, pena_grande: (prev.pena_grande ?? 0) + ostrichFeathers }));
-            logsToAdd.push({ msg: `🦤 Avicultor coletou +${ostrichFeathers} pena(s) grande(s) de avestruz!`, type: 'success' });
-          }
         }
 
         // --- Composteiro: coleta húmus de minhocas (produzem a cada 3 dias via age%3) + bônus a cada 3 dias ---
@@ -5525,7 +5494,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           { id: 'guerra', title: '⚔️ Conflito Regional', desc: 'Crise aumenta demanda por alimentos! Preços sobem.', daysLeft: 5, priceMult: 1.4, items: ['milk','wool','egg','cheese','meat'] },
           { id: 'festival', title: '🎉 Festival Nacional', desc: 'Festival aumenta consumo de produtos locais!', daysLeft: 4, priceMult: 1.3, items: ['egg','mayo','cheese','honey','butter'] },
           { id: 'seca_global', title: '🏜️ Seca Global', desc: 'Escassez mundial valoriza alimentos básicos.', daysLeft: 6, priceMult: 1.5, items: ['milk','goat_milk','buffalo_milk','butter'] },
-          { id: 'exportacao', title: '🚢 Abertura de Exportações', desc: 'Novos mercados abertos! Produtos exóticos valorizados.', daysLeft: 5, priceMult: 1.6, items: ['carne_jacare','couro_jacare','pena_grande','peacock_feather'] },
+          { id: 'exportacao', title: '🚢 Abertura de Exportações', desc: 'Novos mercados abertos! Produtos exóticos valorizados.', daysLeft: 5, priceMult: 1.6, items: ['carne_jacare','couro_jacare','couro_avestruz'] },
           { id: 'feria_gourmet', title: '🍽️ Feira Gourmet Internacional', desc: 'Queijos e derivados premium em alta demanda!', daysLeft: 4, priceMult: 1.45, items: ['queijoBrie','queijoMucarela','queijoCoalho','queijo_cabra'] },
           { id: 'boom_textil', title: '🧶 Boom Têxtil', desc: 'Indústria de moda em expansão! Lã e fibras valorizadas.', daysLeft: 5, priceMult: 1.35, items: ['wool','alpaca_wool','angora_wool','seda_bruta','fio_seda'] },
           { id: 'crise_economica', title: '📉 Crise Econômica', desc: 'Recessão reduz preços em 20% por 5 dias.', daysLeft: 5, priceMult: 0.8, items: ['milk','wool','egg','cheese','butter','mayo'] },
@@ -5668,7 +5637,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     else if (type === 'pato') revenue = getItemBaseSellPrice('duck_egg') * 0.7; // seasonal avg
     else if (type === 'ganso') revenue = getItemBaseSellPrice('goose_egg') / 3;
     else if (type === 'bufalo') revenue = getItemBaseSellPrice('buffalo_milk') * 3;
-    else if (type === 'pavao') revenue = getItemBaseSellPrice('peacock_feather') / 7;
+    else if (type === 'pavao') revenue = 0;
     else if (type === 'codorna') revenue = getItemBaseSellPrice('quail_egg') * 2;
     else if (type === 'alpaca') revenue = getItemBaseSellPrice('alpaca_wool') / 4;
     else if (type === 'minhoca') revenue = getItemBaseSellPrice('humus') / 3;
@@ -5676,7 +5645,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     else if (type === 'coelho_angora') revenue = getItemBaseSellPrice('angora_wool') / 5;
     else if (type === 'bicho_seda') revenue = getItemBaseSellPrice('seda_bruta') * 3 / 14;
     else if (type === 'ra') revenue = getItemBaseSellPrice('coxa_ra') / 7;
-    else if (type === 'avestruz') revenue = getItemBaseSellPrice('pena_grande') / 7;
+    else if (type === 'avestruz') revenue = getItemBaseSellPrice('carne_avestruz') / 30;
     else if (type === 'jacare') revenue = getItemBaseSellPrice('carne_jacare') / 60; // very long term
     revenue = Math.round(revenue * 10) / 10;
     const profit = Math.round((revenue - cost) * 10) / 10;

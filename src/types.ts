@@ -52,7 +52,7 @@ export interface Animal {
   woolAccumulated?: number;  // lã acumulada (só pode colher na primavera)
 
   // Pato
-  feathersReady?: boolean;   // penas prontas para coletar
+  // feathersReady removed — feathers only exist post-slaughter
 
   // Ganso
   inLayingSeason?: boolean;  // se está na época de postura
@@ -90,7 +90,7 @@ export interface Animal {
 // Funcionalidade 4: Contratos de fornecimento
 export interface Contract {
   id: string;
-  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'buffalo_mozzarella' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'goose_egg' | 'feather' | 'peacock_feather' | 'angora_wool' | 'alpaca_wool' | 'llama_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'boi' | 'porco' | 'boi_porco' | 'mayo' | 'queijo_cabra' | 'iogurte_cabra' | 'tapete_lhama' | 'leite_condensado' | 'tecido_alpaca' | 'cachecol_angora' | 'coxa_ra' | 'pena_grande' | 'carne_avestruz' | 'couro_avestruz' | 'fio_seda' | 'carne_jacare' | 'couro_jacare';
+  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'buffalo_mozzarella' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'goose_egg' | 'angora_wool' | 'alpaca_wool' | 'llama_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'boi' | 'porco' | 'boi_porco' | 'mayo' | 'queijo_cabra' | 'iogurte_cabra' | 'tapete_lhama' | 'leite_condensado' | 'tecido_alpaca' | 'cachecol_angora' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'fio_seda' | 'carne_jacare' | 'couro_jacare';
   quantity: number;
   delivered: number;
   pricePerUnit: number;

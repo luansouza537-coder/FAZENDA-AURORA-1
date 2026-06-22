@@ -116,8 +116,6 @@ export default function GameSidebar({
                       { key: 'duck_egg', label: '🥚 Ov. Pato', qty: inventory.duck_egg ?? 0, priceKey: 'duck_egg', freshKey: 'duck_egg' },
                       { key: 'goose_egg', label: '🥚 Ov. Ganso', qty: inventory.goose_egg ?? 0, priceKey: 'goose_egg', freshKey: 'goose_egg' },
                       { key: 'fertile_egg', label: '✨ Ovo Fértil', qty: inventory.fertile_egg ?? 0, priceKey: 'fertile_egg', freshKey: 'fertile_egg', tooltip: '🐣 Use 3 Ovos Férteis na Incubadora para chocar filhotes! Produzido por galinhas felicidade ≥95.' },
-                      { key: 'feather', label: '🪶 Penas', qty: inventory.feather ?? 0, priceKey: 'feather' },
-                      { key: 'peacock_feather', label: '🪶 P. Pavão', qty: inventory.peacock_feather ?? 0, priceKey: 'peacock_feather' },
                     ]
                   },
                   {
@@ -163,7 +161,6 @@ export default function GameSidebar({
                       { key: 'muco', label: '🐌 Muco', qty: inventory.muco ?? 0, priceKey: 'muco' as any },
                       { key: 'seda_bruta', label: '🐛 Seda Bruta', qty: inventory.seda_bruta ?? 0, priceKey: 'seda_bruta' as any },
                       { key: 'coxa_ra', label: '🐸 Coxa Rã', qty: inventory.coxa_ra ?? 0, priceKey: 'coxa_ra' as any },
-                      { key: 'pena_grande', label: '🦤 Pena Grande', qty: inventory.pena_grande ?? 0, priceKey: 'pena_grande' as any },
                       { key: 'carne_avestruz', label: '🦤 Carne Avestruz', qty: inventory.carne_avestruz ?? 0, priceKey: 'carne_avestruz' as any },
                       { key: 'couro_avestruz', label: '🦤 Couro Avestruz', qty: inventory.couro_avestruz ?? 0, priceKey: 'couro_avestruz' as any },
                       { key: 'carne_jacare', label: '🐊 Carne Jacaré', qty: inventory.carne_jacare ?? 0, priceKey: 'carne_jacare' as any },
@@ -335,18 +332,6 @@ export default function GameSidebar({
                     🧀 Muç.Búfala · {inventory.buffalo_mozzarella ?? 0}u ({getActualSellPrice('buffalo_mozzarella')}💰)
                   </button>
                   )}
-                  {(inventory.feather ?? 0) > 0 && (
-                  <button type="button" onClick={(e) => sellProduct('feather', 1, e)}
-                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300">
-                    🪶 Penas · {inventory.feather ?? 0}u ({getActualSellPrice('feather')}💰)
-                  </button>
-                  )}
-                  {(inventory.peacock_feather ?? 0) > 0 && (
-                  <button type="button" onClick={(e) => sellProduct('peacock_feather', 1, e)}
-                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300">
-                    🦚 P.Pavão · {inventory.peacock_feather ?? 0}u ({getActualSellPrice('peacock_feather')}💰)
-                  </button>
-                  )}
                   {(inventory.butter ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('butter', 1, e)}
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
@@ -456,12 +441,6 @@ export default function GameSidebar({
                     🧼 Sabonete Nat. ({getActualSellPrice('sabonete_natural')}💰)
                   </button>
                   )}
-                  {(inventory.almofada_penas ?? 0) > 0 && (
-                  <button type="button" onClick={(e) => sellProduct('almofada_penas', 1, e)} disabled={(inventory.almofada_penas ?? 0) < 1}
-                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
-                    🛋️ Almofada Penas ({getActualSellPrice('almofada_penas')}💰)
-                  </button>
-                  )}
                   {(inventory.colete_couro ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('colete_couro', 1, e)} disabled={(inventory.colete_couro ?? 0) < 1}
                     className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
@@ -474,13 +453,6 @@ export default function GameSidebar({
                     👜 Bolsa Exótica ({getActualSellPrice('bolsa_exotica')}💰)
                   </button>
                   )}
-                  {(inventory.enfeite_pavao ?? 0) > 0 && (
-                  <button type="button" onClick={(e) => sellProduct('enfeite_pavao', 1, e)} disabled={(inventory.enfeite_pavao ?? 0) < 1}
-                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 disabled:cursor-not-allowed text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300">
-                    🦚 Enfeite Pavão ({getActualSellPrice('enfeite_pavao')}💰)
-                  </button>
-                  )}
-
                   {/* Biome exclusive products */}
                   {(inventory.peixe ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('peixe' as any, 1, e)} disabled={(inventory.peixe ?? 0) < 1}
