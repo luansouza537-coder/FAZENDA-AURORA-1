@@ -472,8 +472,10 @@ export function useAnimals({
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
     qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
 
-    if (canAddToInventory && !canAddToInventory('goat_milk', qty)) {
-      addLog('❌ Câmara Fria cheia! Venda leite de cabra ou expanda nas Melhorias.', 'error');
+    if (canAddToInventory && !canAddToInventory('goat_milk', 1)) {
+      addLog('🥛 Câmara Fria cheia! Libere leite de cabra antes de coletar.', 'error');
+      addNotification('❄️ Câmara Fria cheia! Venda o leite primeiro.', 'warning');
+      triggerAudioResult(() => sfx.playSound('error'));
       spawnFeedback('❄️', 'Câmara Cheia!', event);
       return;
     }
@@ -665,8 +667,10 @@ export function useAnimals({
       spawnFeedback('⏳', 'Vazia', event);
       return;
     }
-    if (canAddToInventory && !canAddToInventory('milk', 3)) {
-      addLog('❌ Câmara Fria cheia! Venda leite ou expanda nas Melhorias.', 'error');
+    if (canAddToInventory && !canAddToInventory('milk', 1)) {
+      addLog('🥛 Câmara Fria cheia! Libere leite antes de coletar.', 'error');
+      addNotification('❄️ Câmara Fria cheia! Venda o leite primeiro.', 'warning');
+      triggerAudioResult(() => sfx.playSound('error'));
       spawnFeedback('❄️', 'Câmara Cheia!', event);
       return;
     }

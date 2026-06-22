@@ -1644,7 +1644,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','muco','creme_cosmetico']);
 
   const getCeleiroLimit = () => ([30, 60, 120, 250, 999][celeiroLevel] ?? 30);
-  const getCamaraFriaLimit = () => ([15, 40, 80, 180][camaraFriaLevel] ?? 15);
+  const getCamaraFriaLimit = () => ([50, 120, 250, 500][camaraFriaLevel] ?? 50);
 
   const canAddToInventory = (itemKey: string, qty: number = 1): boolean => {
     const current = (inventory as Record<string, number>)[itemKey] ?? 0;
