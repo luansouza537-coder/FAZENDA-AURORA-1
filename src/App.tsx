@@ -6049,7 +6049,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 </button>
               </div>
               <button
-                onClick={() => { setShowBuyMenu(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
+                onClick={() => {
+                  setShowBuyMenu(prev => !prev);
+                  triggerAudioResult(() => sfx.playSound('click'));
+                  setTimeout(() => {
+                    document.querySelector('[data-buy-menu]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 80);
+                }}
                 className={`border-3 border-[#1d4ed8] text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#1e3a8a] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none ${showBuyMenu ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                 title="Comprar Animais: abre o catálogo para expandir seu rebanho"
               >
@@ -6155,6 +6161,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
                     🐣 Reproduções
                   </button>
+                  {(insurance.active || insuranceClimate.active || insuranceTheft.active) && (
+                    <>
+                      <div className="h-px bg-[#fbbf24]/30 my-0.5" />
+                      {insurance.active && <div className="flex items-center gap-2 text-[11px] text-green-300 font-mono py-0.5">🛡️ Seguro Básico ativo</div>}
+                      {insuranceClimate.active && <div className="flex items-center gap-2 text-[11px] text-sky-300 font-mono py-0.5">🌦️ Seguro Clima ativo</div>}
+                      {insuranceTheft.active && <div className="flex items-center gap-2 text-[11px] text-orange-300 font-mono py-0.5">🔒 Seguro Premium ativo</div>}
+                    </>
+                  )}
                   <div className="h-px bg-[#fbbf24]/30 my-0.5" />
                   <button onClick={() => { if (window.confirm('Tem certeza? Todo o progresso será perdido!')) { initGame(); setShowMorePanel(false); } }}
                     className="flex items-center gap-2 text-[12px] font-black text-red-400 hover:text-red-300 transition-colors text-left py-0.5">
@@ -6339,22 +6353,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setShowProfitPanel={setShowProfitPanel}
             showRankingModal={showRankingModal}
             setShowRankingModal={setShowRankingModal}
-            setShowTutorialModal={setShowTutorialModal}
-            exportSave={exportSave}
-            importSave={importSave}
             debugMode={debugMode}
             setDebugMode={setDebugMode}
             isGameOver={isGameOver}
             advanceDay={handleAdvanceDayWithSummary}
-            isSleeping={isSleeping}
-            setIsSleeping={setIsSleeping}
-            isSleepingRef={isSleepingRef}
-            autoAdvance={autoAdvance}
-            setAutoAdvance={setAutoAdvance}
-            isPaused={isPaused}
-            setIsPaused={setIsPaused}
-            autoSpeed={autoSpeed}
-            setAutoSpeed={setAutoSpeed}
             gold={gold}
             farmLevel={farmLevel}
             getAnimalPurchasePrice={getAnimalPurchasePrice}

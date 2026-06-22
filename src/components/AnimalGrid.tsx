@@ -18,22 +18,10 @@ interface AnimalGridProps {
   setShowProfitPanel: (fn: (prev: boolean) => boolean) => void;
   showRankingModal: boolean;
   setShowRankingModal: (v: boolean) => void;
-  setShowTutorialModal: (v: boolean) => void;
-  exportSave: () => void;
-  importSave: () => void;
   debugMode: boolean;
   setDebugMode: (fn: (prev: boolean) => boolean) => void;
   isGameOver: boolean;
   advanceDay: (e: React.MouseEvent | null) => void;
-  isSleeping: boolean;
-  setIsSleeping: (v: boolean) => void;
-  isSleepingRef: React.MutableRefObject<boolean>;
-  autoAdvance: boolean;
-  setAutoAdvance: (fn: (prev: boolean) => boolean) => void;
-  isPaused: boolean;
-  setIsPaused: (fn: (prev: boolean) => boolean) => void;
-  autoSpeed: number;
-  setAutoSpeed: (v: number) => void;
   gold: number;
   farmLevel: number;
   getAnimalPurchasePrice: (type: string) => number;
@@ -106,22 +94,10 @@ export default function AnimalGrid({
   showProfitPanel,
   setShowProfitPanel,
   setShowRankingModal,
-  setShowTutorialModal,
-  exportSave,
-  importSave,
   debugMode,
   setDebugMode,
   isGameOver,
   advanceDay,
-  isSleeping,
-  setIsSleeping,
-  isSleepingRef,
-  autoAdvance,
-  setAutoAdvance,
-  isPaused,
-  setIsPaused,
-  autoSpeed,
-  setAutoSpeed,
   gold,
   farmLevel,
   getAnimalPurchasePrice,
@@ -236,6 +212,7 @@ export default function AnimalGrid({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
+                  data-buy-menu="true"
                   className="bg-[#fde68a]/30 border-4 border-[#fbbf24] rounded-[28px] p-5 flex flex-col gap-4 mb-2 shadow-inner overflow-hidden"
                 >
                   {/* BUG 1 FIX: grade responsiva com scroll para que todos os animais sejam acessíveis em mobile e desktop */}
