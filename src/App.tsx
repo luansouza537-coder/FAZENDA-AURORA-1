@@ -82,12 +82,51 @@ interface FloatingText {
 
 
 
+function migrateSave() {
+  try {
+    const raw = localStorage.getItem('aurora_farm_save');
+    if (!raw) return;
+    const save = JSON.parse(raw);
+    let changed = false;
+
+    // Remove feather items from inventory (removed from game)
+    const featherKeys = ['feather', 'peacock_feather', 'pena_grande', 'almofada_penas', 'enfeite_pavao'];
+    if (save.inventory) {
+      featherKeys.forEach(k => {
+        if (k in save.inventory) { delete save.inventory[k]; changed = true; }
+      });
+    }
+
+    // Remove feather contracts from active contracts
+    if (Array.isArray(save.contracts)) {
+      const featherProducts = new Set(['feather', 'peacock_feather', 'pena_grande']);
+      const before = save.contracts.length;
+      save.contracts = save.contracts.filter((c: any) => !featherProducts.has(c.product));
+      if (save.contracts.length !== before) changed = true;
+    }
+
+    // Remove feather entries from priceHistory
+    if (save.priceHistory) {
+      featherKeys.forEach(k => {
+        if (k in save.priceHistory) { delete save.priceHistory[k]; changed = true; }
+      });
+    }
+
+    // Remove totalFeathers from stats
+    if (save.stats && 'totalFeathers' in save.stats) {
+      delete save.stats.totalFeathers; changed = true;
+    }
+
+    if (changed) localStorage.setItem('aurora_farm_save', JSON.stringify(save));
+  } catch (e) {}
+}
+
 export default function App() {
   const hasSave = !!localStorage.getItem('aurora_farm_save');
   const [gameStarted, setGameStarted] = useState<boolean>(false);
 
   if (!gameStarted) {
-    return <SplashScreen onStart={() => setGameStarted(true)} hasSave={hasSave} />;
+    return <SplashScreen onStart={() => { migrateSave(); setGameStarted(true); }} hasSave={hasSave} />;
   }
 
   return <GameApp />;
