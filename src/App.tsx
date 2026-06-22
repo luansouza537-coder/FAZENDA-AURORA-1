@@ -645,6 +645,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   // earningsHistory moved to useEconomy
   const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
   const [showAllTimeStats, setShowAllTimeStats] = useState(false);
+  const [showMorePanel, setShowMorePanel] = useState<boolean>(false);
   const [productionByAnimal, setProductionByAnimal] = useState<Record<number, { name: string; type: string; produced: number }>>({});
   const [allTimeStats, setAllTimeStats] = useState<{ totalSpentFeed: number; bestDay: number; worstDay: number }>(() => {
     try {
@@ -5965,17 +5966,20 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               <span>Dia {currentDay}</span>
             </div>
 
-            {/* 📊 Mercado Button */}
+            {/* 💹 Economia (Mercado + Finanças unificados) */}
             <button
               onClick={() => {
-                setShowMarketModal(true);
+                setShowFinancasModal(true);
                 triggerAudioResult(() => sfx.playSound('click'));
               }}
-              className="bg-sky-600 border-3 border-sky-400 hover:bg-sky-500 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#0c4a6e] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
-              title="Painel de Preços Flutuantes, Sazonalidade e Oferta"
+              className="bg-emerald-700 border-3 border-emerald-400 hover:bg-emerald-600 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#064e3b] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
+              title="Economia: Mercado de preços e histórico financeiro"
             >
-              <span>📊</span>
-              <span>Mercado</span>
+              <span>💹</span>
+              <span>Economia</span>
+              {merchantActive && (
+                <span className="bg-yellow-400 text-[#451a03] text-[10px] h-5 w-5 rounded-full flex items-center justify-center font-bold">🛒</span>
+              )}
             </button>
 
             {/* 📋 Contratos Button */}
@@ -6053,12 +6057,16 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               const camaraFull = camaraUsed / camaraMax > 0.8;
               return (
                 <>
-                  <div className={`font-mono font-black text-xs px-3 py-2 rounded-full border-3 flex items-center gap-1 ${celeiroFull ? 'bg-yellow-700 border-yellow-400 text-white animate-pulse' : 'bg-stone-700 border-stone-500 text-stone-200'}`} title={`Celeiro: ${celeiroUsed} itens`}>
-                    📦 {celeiroFull ? 'Cheio!' : 'OK'}
-                  </div>
-                  <div className={`font-mono font-black text-xs px-3 py-2 rounded-full border-3 flex items-center gap-1 ${camaraFull ? 'bg-blue-700 border-blue-400 text-white animate-pulse' : 'bg-stone-700 border-stone-500 text-stone-200'}`} title={`Câmara Fria: ${camaraUsed} itens`}>
-                    ❄️ {camaraFull ? 'Cheia!' : 'OK'}
-                  </div>
+                  {celeiroFull && (
+                    <div className="font-mono font-black text-xs px-3 py-2 rounded-full border-3 bg-yellow-700 border-yellow-400 text-white animate-pulse flex items-center gap-1" title={`Celeiro quase cheio: ${celeiroUsed} itens`}>
+                      📦 Cheio!
+                    </div>
+                  )}
+                  {camaraFull && (
+                    <div className="font-mono font-black text-xs px-3 py-2 rounded-full border-3 bg-blue-700 border-blue-400 text-white animate-pulse flex items-center gap-1" title={`Câmara Fria quase cheia: ${camaraUsed} itens`}>
+                      ❄️ Cheia!
+                    </div>
+                  )}
                 </>
               );
             })()}
@@ -6103,57 +6111,25 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               )}
             </button>
 
-            {/* 💰 Finanças Button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                setShowFinancasModal(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="bg-emerald-700 border-3 border-emerald-400 hover:bg-emerald-600 text-white font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#064e3b] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
-              title="Histórico de transações financeiras da fazenda"
-            >
-              <span>💰</span>
-              <span>Finanças</span>
-            </button>
-
-            {/* 💰 Vender Tudo Button */}
+            {/* 🔊 Som & Música — botão único */}
             <button
               onClick={() => {
-                setShowSellAllConfirmModal(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="bg-amber-500 border-3 border-amber-300 hover:bg-amber-400 text-[#451a03] font-mono font-black text-sm px-4 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#78350f] cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 focus:outline-none"
-              title="Liquidar todo o estoque do seu Armazém instantaneamente por moedas"
-            >
-              <span>💰</span>
-              <span>Vender Tudo</span>
-            </button>
-
-            {/* Music Toggle */}
-            <button
-              onClick={() => setMusicEnabled(prev => !prev)}
-              className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${musicEnabled ? 'bg-[#ffcd7e] hover:bg-[#fbc550]' : 'bg-[#e5c88e] opacity-60 hover:opacity-80'}`}
-              title={musicEnabled ? "Desativar música" : "Ativar música"}
-            >
-              {musicEnabled ? '🎵' : '🎶'}
-            </button>
-
-            {/* Sound Toggle */}
-            <button
-              onClick={() => {
-                const nw = !soundEnabled;
-                setSoundEnabled(nw);
-                sfx.isMuted = !nw;
-                if (nw) {
+                const anyOn = soundEnabled || musicEnabled;
+                if (anyOn) {
+                  setSoundEnabled(false);
+                  setMusicEnabled(false);
+                  sfx.isMuted = true;
+                } else {
+                  setSoundEnabled(true);
+                  setMusicEnabled(true);
+                  sfx.isMuted = false;
                   sfx.playSound('click');
                 }
               }}
-              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title={soundEnabled ? "Desativar efeitos sonoros" : "Ativar efeitos sonoros"}
+              className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${(soundEnabled || musicEnabled) ? 'bg-[#ffcd7e] hover:bg-[#fbc550]' : 'bg-[#e5c88e] opacity-60 hover:opacity-80'}`}
+              title={(soundEnabled || musicEnabled) ? 'Silenciar tudo' : 'Ativar som e música'}
             >
-              {soundEnabled ? '🔊' : '🔇'}
+              {(soundEnabled || musicEnabled) ? '🔊' : '🔇'}
             </button>
 
             {/* Achievements Trophy Room Button */}
@@ -6185,45 +6161,20 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               )}
             </button>
 
-            {/* 🎯 Missões Button */}
-            <button
-              onClick={() => {
-                setShowMissionsModal(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="relative bg-purple-600 border-3 border-purple-400 hover:bg-purple-500 text-white p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#581c87] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Missões e objetivos"
-            >
-              <Target className="w-5 h-5" />
-              {(() => {
-                const claimable = missions.filter(m => m.completed && !m.claimed).length;
-                const expiring = missions.filter(m => !m.completed && !m.claimed && m.type === 'daily' && m.expiresOnDay <= currentDay + 1).length;
-                const active = missions.filter(m => !m.completed && !m.claimed).length;
-                if (claimable > 0) return (
-                  <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                    {claimable}
-                  </span>
-                );
-                if (expiring > 0) return (
-                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
-                    {expiring}
-                  </span>
-                );
-                if (active > 0) return (
-                  <span className="absolute -top-1 -right-1 bg-purple-300 text-purple-900 text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                    {active}
-                  </span>
-                );
-                return null;
-              })()}
-            </button>
-
-            {/* 🎯 Mini-painel de missão mais próxima */}
+            {/* 🎯 Mini-painel de missão mais próxima (substitui ícone redundante) */}
             {(() => {
               const claimable = missions.filter(m => m.completed && !m.claimed);
               const active = missions.filter(m => !m.completed && !m.claimed).sort((a, b) => (b.current / b.goal) - (a.current / a.goal));
               const featured = claimable[0] ?? active[0];
-              if (!featured) return null;
+              if (!featured) return (
+                <button
+                  onClick={() => { setShowMissionsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="flex flex-col gap-1 px-3 py-2 rounded-2xl border-2 cursor-pointer transition-all hover:scale-[1.02] text-left min-w-[140px] bg-purple-900/40 border-purple-500/60"
+                >
+                  <span className="text-[9px] font-black uppercase tracking-wider text-purple-300">🎯 Missões</span>
+                  <span className="text-[10px] font-mono text-purple-400">Nenhuma ativa</span>
+                </button>
+              );
               const pct = Math.min(100, Math.round((featured.current / featured.goal) * 100));
               const isReady = featured.completed && !featured.claimed;
               return (
@@ -6252,57 +6203,41 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               );
             })()}
 
-            {/* 📊 Stats Button */}
-            <button
-              onClick={() => {
-                setShowStatsModal(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="bg-teal-600 border-3 border-teal-400 hover:bg-teal-500 text-white p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#0f766e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Estatísticas históricas"
-            >
-              <BarChart2 className="w-5 h-5" />
-            </button>
-
-            {/* 📊 Recordes Button */}
-            <button
-              onClick={() => {
-                setShowAllTimeStats(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="bg-[#92400e] border-3 border-[#fbbf24] hover:bg-[#78350f] text-[#fef3c7] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#78350f] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Recordes da Fazenda Aurora"
-            >
-              🏅
-            </button>
-
-            {/* 🐣 Reproduções Button */}
-            <button
-              onClick={() => {
-                setShowReproModal(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="bg-pink-600 border-3 border-pink-400 hover:bg-pink-500 text-white p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#9d174d] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Histórico de Reproduções"
-            >
-              🐣
-            </button>
-
-            {/* Reset Game button */}
-            <button
-              onClick={() => {
-                if (window.confirm('Tem certeza? Todo o progresso será perdido!')) {
-                  initGame();
-                  triggerAudioResult(() => sfx.playSound('click'));
-                } else {
-                  triggerAudioResult(() => sfx.playSound('click'));
-                }
-              }}
-              className="bg-[#dc2626] border-3 border-[#991b1b] hover:bg-[#b91c1c] active:translate-y-0.5 shadow-[0_4px_0_#7f1d1d] p-2.5 rounded-full text-[#fef3c7] cursor-pointer transition-all hover:scale-105 focus:outline-none"
-              title="Resetar Jogo (Apaga progresso permanente)"
-            >
-              <RotateCcw className="w-5 h-5" />
-            </button>
+            {/* ⚙️ Mais — Conquistas, Stats, Recordes, Reproduções, Reset */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMorePanel(prev => !prev)}
+                className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${showMorePanel ? 'bg-[#fbbf24]' : 'bg-[#ffcd7e] hover:bg-[#fbc550]'}`}
+                title="Mais opções"
+              >
+                ⚙️
+              </button>
+              {showMorePanel && (
+                <div className="absolute bottom-full right-0 mb-2 bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl p-3 flex flex-col gap-2 z-50 shadow-2xl min-w-[170px]">
+                  <button onClick={() => { setShowAchievementsModal(true); setShowMorePanel(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
+                    🏆 Conquistas
+                  </button>
+                  <button onClick={() => { setShowStatsModal(true); setShowMorePanel(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
+                    📊 Estatísticas
+                  </button>
+                  <button onClick={() => { setShowAllTimeStats(true); setShowMorePanel(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
+                    🏅 Recordes
+                  </button>
+                  <button onClick={() => { setShowReproModal(true); setShowMorePanel(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
+                    🐣 Reproduções
+                  </button>
+                  <div className="h-px bg-[#fbbf24]/30 my-0.5" />
+                  <button onClick={() => { if (window.confirm('Tem certeza? Todo o progresso será perdido!')) { initGame(); setShowMorePanel(false); } }}
+                    className="flex items-center gap-2 text-[12px] font-black text-red-400 hover:text-red-300 transition-colors text-left py-0.5">
+                    🔄 Resetar Jogo
+                  </button>
+                </div>
+              )}
+            </div>
 
           </div>
 
@@ -6755,6 +6690,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           triggerAudioResult={triggerAudioResult}
           sfx={sfx}
           checkAndUnlockAchievement={checkAndUnlockAchievement}
+          onOpenMarket={() => setShowMarketModal(true)}
+          onSellAll={() => setShowSellAllConfirmModal(true)}
+          merchantActive={merchantActive}
         />
       )}
 

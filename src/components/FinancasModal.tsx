@@ -24,6 +24,9 @@ interface FinancasModalProps {
   triggerAudioResult: (fn: () => void) => void;
   sfx: { playSound: (s: string) => void };
   checkAndUnlockAchievement: (id: string) => void;
+  onOpenMarket?: () => void;
+  onSellAll?: () => void;
+  merchantActive?: boolean;
 }
 
 const catEmoji: Record<string, string> = {
@@ -55,8 +58,26 @@ const FinancasModal: React.FC<FinancasModalProps> = (p) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div className="bg-stone-900 border-4 border-emerald-600 rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b-2 border-emerald-700">
-          <h2 className="text-emerald-300 font-mono font-black text-base uppercase tracking-wide">💰 Finanças da Fazenda</h2>
+          <h2 className="text-emerald-300 font-mono font-black text-base uppercase tracking-wide">💹 Economia</h2>
           <button type="button" onClick={onClose} className="text-stone-400 hover:text-white text-xl font-bold cursor-pointer">✕</button>
+        </div>
+        <div className="flex gap-2 px-5 py-3 border-b border-emerald-900/60 bg-stone-800/50">
+          {p.onOpenMarket && (
+            <button
+              onClick={() => { onClose(); setTimeout(() => p.onOpenMarket!(), 50); }}
+              className={`flex items-center gap-1.5 text-[11px] font-black px-3 py-1.5 rounded-xl border-2 transition-all cursor-pointer ${p.merchantActive ? 'bg-yellow-500 border-yellow-300 text-yellow-900 animate-pulse' : 'bg-sky-800 border-sky-600 text-sky-200 hover:bg-sky-700'}`}
+            >
+              📊 Mercado{p.merchantActive ? ' 🛒' : ''}
+            </button>
+          )}
+          {p.onSellAll && (
+            <button
+              onClick={() => { onClose(); setTimeout(() => p.onSellAll!(), 50); }}
+              className="flex items-center gap-1.5 text-[11px] font-black px-3 py-1.5 rounded-xl border-2 bg-amber-700 border-amber-500 text-amber-100 hover:bg-amber-600 transition-all cursor-pointer"
+            >
+              💰 Vender Tudo
+            </button>
+          )}
         </div>
 
         {/* Resumo do dia */}
