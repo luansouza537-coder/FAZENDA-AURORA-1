@@ -3,7 +3,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Component, ErrorInfo, ReactNode } from 'react';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error, info: ErrorInfo) { console.error('GameApp crash:', error, info); }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ padding: 32, fontFamily: 'monospace', background: '#1a1a1a', color: '#ff6b6b', minHeight: '100vh' }}>
+          <h2>❌ Erro ao carregar o jogo</h2>
+          <pre style={{ whiteSpace: 'pre-wrap', color: '#ffd93d', fontSize: 13 }}>{this.state.error.message}</pre>
+          <pre style={{ whiteSpace: 'pre-wrap', color: '#aaa', fontSize: 11 }}>{this.state.error.stack}</pre>
+          <button onClick={() => { localStorage.removeItem('aurora_farm_save'); window.location.reload(); }}
+            style={{ marginTop: 24, padding: '10px 20px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>
+            🗑️ Limpar save e reiniciar
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 import SplashScreen from './components/SplashScreen';
 import { useAnimals } from './hooks/useAnimals';
 import { useInventory } from './hooks/useInventory';
@@ -129,7 +154,7 @@ export default function App() {
     return <SplashScreen onStart={() => { migrateSave(); setGameStarted(true); }} hasSave={hasSave} />;
   }
 
-  return <GameApp />;
+  return <ErrorBoundary><GameApp /></ErrorBoundary>;
 }
 
 function GameApp() {
