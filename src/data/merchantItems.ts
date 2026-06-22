@@ -12,6 +12,7 @@ export const MERCHANT_SPECIAL_ITEMS = [
   { id: 'kit_climatico',        label: '🛡️ Kit de Proteção Climática',   desc: 'Próxima tempestade E próxima seca não afetam a fazenda',         price: 130, effect: 'block_storm_drought' },
   { id: 'silagem_premium',      label: '🌽 Silagem Premium',             desc: 'Animais não consomem ração do Armazém por 5 dias',               price: 110, effect: 'silagem_5days' },
   { id: 'contrato_transporte',  label: '🚚 Contrato de Transporte',      desc: 'Isenta de multa nas próximas 3 entregas vencidas',               price: 95,  effect: 'isencao_multa_2x' },
+  { id: 'antidoto_anti_pragas', label: '🧴 Antídoto Anti-Pragas',        desc: 'Protege o celeiro de pragas por 14 dias',                         price: 75,  effect: 'anti_pest_14days' },
 ] as const;
 
 export type MerchantItemId = typeof MERCHANT_SPECIAL_ITEMS[number]['id'];

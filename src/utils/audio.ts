@@ -343,9 +343,16 @@ class MusicManager {
   setMuted(muted: boolean) {
     this.muted = muted;
     if (muted) {
-      if (this.current) this.current.volume = 0;
+      if (this.current) {
+        this.fadeVolumeTo(this.current, 0, 600, () => {
+          this.current?.pause();
+        });
+      }
     } else {
-      if (this.current) this.fadeVolumeTo(this.current, this.volume, 800);
+      if (this.current) {
+        this.current.play().catch(() => {});
+        this.fadeVolumeTo(this.current, this.volume, 800);
+      }
     }
   }
 
