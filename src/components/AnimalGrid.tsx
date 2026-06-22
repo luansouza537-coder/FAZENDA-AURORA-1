@@ -200,6 +200,21 @@ export default function AnimalGrid({
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
+                {/* Collapsible purchase Menu button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowBuyMenu(!showBuyMenu);
+                  }}
+                  className={`${showBuyMenu ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'} text-white border-b-4 ${showBuyMenu ? 'border-indigo-800' : 'border-[#1d4ed8]'} px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5`}
+                  title="Comprar Animais: abre o catálogo para expandir seu rebanho"
+                >
+                  🛒 COMPRAR ANIMAL
+                </button>
+
+
+
                 {/* DEBUG MODE TOGGLE — apenas em ambiente de desenvolvimento */}
                 {import.meta.env.DEV && (
                   <button
