@@ -166,12 +166,14 @@ export function useAnimals({
         if (parsed.animals && parsed.animals.length > 0) {
           // BUG FIX: inicializa age/maxAge para animais de saves antigos que não tinham esses campos
           const baseMaxAge: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, porco: 120 };
-          return parsed.animals.map((a: Animal) => ({
-            ...a,
-            age: a.age ?? 0,
-            maxAge: a.maxAge ?? Math.round((baseMaxAge[a.type] ?? 90) * (1 + (Math.random() * 0.4 - 0.2))),
-            isAdult: a.isAdult ?? true,  // existing animals are adults by default
-          }));
+          return parsed.animals
+            .filter((a: Animal) => a.type !== 'porco')
+            .map((a: Animal) => ({
+              ...a,
+              age: a.age ?? 0,
+              maxAge: a.maxAge ?? Math.round((baseMaxAge[a.type] ?? 90) * (1 + (Math.random() * 0.4 - 0.2))),
+              isAdult: a.isAdult ?? true,
+            }));
         }
       }
     } catch (e) {}
