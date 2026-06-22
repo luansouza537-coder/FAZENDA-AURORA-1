@@ -6161,47 +6161,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               )}
             </button>
 
-            {/* 🎯 Mini-painel de missão mais próxima (substitui ícone redundante) */}
-            {(() => {
-              const claimable = missions.filter(m => m.completed && !m.claimed);
-              const active = missions.filter(m => !m.completed && !m.claimed).sort((a, b) => (b.current / b.goal) - (a.current / a.goal));
-              const featured = claimable[0] ?? active[0];
-              if (!featured) return (
-                <button
-                  onClick={() => { setShowMissionsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                  className="flex flex-col gap-1 px-3 py-2 rounded-2xl border-2 cursor-pointer transition-all hover:scale-[1.02] text-left min-w-[140px] bg-purple-900/40 border-purple-500/60"
-                >
-                  <span className="text-[9px] font-black uppercase tracking-wider text-purple-300">🎯 Missões</span>
-                  <span className="text-[10px] font-mono text-purple-400">Nenhuma ativa</span>
-                </button>
-              );
-              const pct = Math.min(100, Math.round((featured.current / featured.goal) * 100));
-              const isReady = featured.completed && !featured.claimed;
-              return (
-                <button
-                  onClick={() => { setShowMissionsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                  className={`flex flex-col gap-1 px-3 py-2 rounded-2xl border-2 cursor-pointer transition-all hover:scale-[1.02] text-left min-w-[140px] max-w-[180px] ${isReady ? 'bg-yellow-400/20 border-yellow-400 animate-pulse' : 'bg-purple-900/40 border-purple-500/60'}`}
-                  title="Abrir painel de missões"
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span className={`text-[9px] font-black uppercase tracking-wider ${isReady ? 'text-yellow-300' : 'text-purple-300'}`}>
-                      {isReady ? '✅ Pronta para resgatar!' : '🎯 Missão ativa'}
-                    </span>
-                    <span className={`text-[9px] font-mono font-black ${isReady ? 'text-yellow-200' : 'text-purple-200'}`}>{pct}%</span>
-                  </div>
-                  <span className="text-[10px] font-black text-white leading-tight truncate w-full">{featured.title}</span>
-                  <div className="w-full bg-purple-950/60 h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${isReady ? 'bg-yellow-400' : 'bg-purple-400'}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  {!isReady && (
-                    <span className="text-[9px] font-mono text-purple-300">{featured.current}/{featured.goal} • +{featured.reward}💰</span>
-                  )}
-                </button>
-              );
-            })()}
+            {/* 📖 Tutorial */}
+            <button
+              onClick={() => { setShowTutorialModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+              title="Ajuda & Tutorial"
+            >
+              📖
+            </button>
 
             {/* ⚙️ Mais — Conquistas, Stats, Recordes, Reproduções, Reset */}
             <div className="relative">

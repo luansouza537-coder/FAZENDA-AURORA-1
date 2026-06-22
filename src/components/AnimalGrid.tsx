@@ -213,19 +213,7 @@ export default function AnimalGrid({
                   🛒 COMPRAR ANIMAL
                 </button>
 
-                {/* HELP / TUTORIAL BUTTON */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowTutorialModal(true);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  className="bg-emerald-600 hover:bg-[#059669] text-white border-b-4 border-[#047857] px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
-                  title="Ajuda & Tutorial: veja como jogar e as regras de pontuação"
-                >
-                  📖 TUTORIAL
-                </button>
+
 
                 {/* EXPORT SAVE */}
                 <button
