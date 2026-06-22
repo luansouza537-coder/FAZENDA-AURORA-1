@@ -6170,6 +6170,24 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               📖
             </button>
 
+            {/* 💾 Salvar */}
+            <button
+              onClick={exportSave}
+              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+              title="Exportar Save — baixa seu progresso como arquivo .json"
+            >
+              💾
+            </button>
+
+            {/* 📂 Carregar */}
+            <button
+              onClick={importSave}
+              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+              title="Importar Save — carrega um arquivo .json de backup"
+            >
+              📂
+            </button>
+
             {/* ⚙️ Mais — Conquistas, Stats, Recordes, Reproduções, Reset */}
             <div className="relative">
               <button

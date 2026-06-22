@@ -215,26 +215,6 @@ export default function AnimalGrid({
 
 
 
-                {/* EXPORT SAVE */}
-                <button
-                  type="button"
-                  onClick={exportSave}
-                  className="bg-stone-600 hover:bg-stone-500 text-white border-b-4 border-stone-800 px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
-                  title="Exportar Save: baixa seu progresso como arquivo .json para backup"
-                >
-                  💾 SALVAR
-                </button>
-
-                {/* IMPORT SAVE */}
-                <button
-                  type="button"
-                  onClick={importSave}
-                  className="bg-stone-700 hover:bg-stone-600 text-white border-b-4 border-stone-900 px-4 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
-                  title="Importar Save: carrega um arquivo .json de backup"
-                >
-                  📂 CARREGAR
-                </button>
-
                 {/* DEBUG MODE TOGGLE — apenas em ambiente de desenvolvimento */}
                 {import.meta.env.DEV && (
                   <button
@@ -261,49 +241,6 @@ export default function AnimalGrid({
                   🌞 AVANÇAR DIA
                 </button>
 
-                {/* AUTO-AVANÇO BUTTON */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setAutoAdvance(prev => !prev);
-                    if (!autoAdvance) setIsPaused(() => false);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  disabled={isGameOver}
-                  className={`${autoAdvance ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-slate-600 border-slate-800 hover:bg-slate-500'} disabled:bg-stone-500 text-white border-b-4 px-3 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1`}
-                  title={autoAdvance ? 'Auto-avanço ativo — clique para desativar' : 'Ativar auto-avanço de dias'}
-                >
-                  {autoAdvance ? `▶ AUTO (${autoSpeed}s)` : '▶ AUTO'}
-                </button>
-
-                {/* PAUSE BUTTON */}
-                {autoAdvance && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setIsPaused(prev => !prev);
-                      triggerAudioResult(() => sfx.playSound('click'));
-                    }}
-                    className={`${isPaused ? 'bg-amber-500 border-amber-700 hover:bg-amber-400' : 'bg-slate-500 border-slate-700 hover:bg-slate-400'} text-white border-b-4 px-3 py-2.5 rounded-2xl font-display font-black text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1`}
-                    title={isPaused ? 'Auto pausado — clique para retomar' : 'Pausar auto-avanço'}
-                  >
-                    {isPaused ? '⏸ PAUSADO' : '⏸ PAUSA'}
-                  </button>
-                )}
-
-                {/* SELETOR DE VELOCIDADE */}
-                <select
-                  value={autoSpeed}
-                  onChange={(e) => setAutoSpeed(Number(e.target.value))}
-                  className="bg-slate-700 text-white border-2 border-slate-500 rounded-xl px-2 py-2 font-mono font-black text-xs cursor-pointer focus:outline-none"
-                  title="Velocidade do auto-avanço"
-                >
-                  <option value={10}>🐢 Lento (10s)</option>
-                  <option value={5}>🐇 Médio (5s)</option>
-                  <option value={3}>⚡ Rápido (3s)</option>
-                </select>
               </div>
             </div>
 
