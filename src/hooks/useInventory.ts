@@ -498,9 +498,9 @@ export function useInventory({
     if ((inventory.goat_milk ?? 0) < 3) { addLog('🐐 Falta Leite de Cabra! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Cabra!', event); return; }
     if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
     setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) - 3 }));
-    setQueijosEmMaturacao(prev => [...prev, { tipo: 'queijo_cabra', diasRestantes: 2 }]);
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'queijo_cabra', diasRestantes: 5 }]);
     applyCraftCost('queijo_cabra');
-    addLog('🧀 Queijo de Cabra em maturação! Pronto em 2 dias.', 'success');
+    addLog('🧀 Queijo de Cabra em maturação! Pronto em 5 dias.', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧀', 'Maturando... 2d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);

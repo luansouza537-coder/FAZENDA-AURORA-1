@@ -166,7 +166,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               <p className="text-xs text-stone-500 font-mono mb-3">Cada lote permite +5 animais. Atual: Lote {p.landLots}/10 ({p.landLots * 5} animais máx) • Compra sequencial obrigatória</p>
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {[
-                  { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3500, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 22000, minLevel: 8 },
+                  { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3000, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 22000, minLevel: 8 },
                   { lot: 6, price: 55000, minLevel: 10 }, { lot: 7, price: 140000, minLevel: 12 }, { lot: 8, price: 350000, minLevel: 14 }, { lot: 9, price: 800000, minLevel: 16 }, { lot: 10, price: 2000000, minLevel: 18 },
                 ].map(({ lot, price, minLevel }) => {
                   const canBuy = p.gold >= price && p.landLots === lot - 1 && p.farmLevel >= minLevel;
@@ -472,7 +472,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               <h4 className="font-display font-black text-sm uppercase text-amber-800 mb-1">🧀 Expansão da Queijaria</h4>
               <p className="text-xs text-stone-500 font-mono mb-2">Prateleiras atuais: {p.maxPrateleiras}. Mais prateleiras = mais queijos simultaneamente.</p>
               <div className="grid grid-cols-2 gap-2">
-                {[{ slots: 4, price: 150 }, { slots: 6, price: 300 }, { slots: 8, price: 500 }].map(({ slots, price }) => (
+                {[{ slots: 4, price: 300 }, { slots: 6, price: 800 }, { slots: 8, price: 2000 }, { slots: 10, price: 5000 }, { slots: 12, price: 12000 }].map(({ slots, price }) => (
                   <button key={slots} disabled={p.maxPrateleiras >= slots || p.gold < price}
                     onClick={() => { if (p.gold >= price && p.maxPrateleiras < slots) { p.setGold(prev => prev - price); p.setMaxPrateleiras(slots); p.addLog(`🧀 Queijaria ampliada para ${slots} prateleiras!`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }}
                     className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${p.maxPrateleiras >= slots ? 'bg-amber-100 border-amber-300 text-amber-700' : p.gold >= price ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
