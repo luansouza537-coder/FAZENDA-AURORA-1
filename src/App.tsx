@@ -5912,37 +5912,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
           <div className="flex flex-wrap items-center justify-center gap-3 w-full lg:w-auto">
             
-            {/* Real-time Inventory counters in Top Bar */}
-            <div 
-              className="bg-[#fef3c7] border-3 border-[#fbbf24] rounded-full px-4 py-2 flex items-center justify-center gap-3.5 shadow-[inset_0_4px_0_rgba(255,255,255,0.5),0_4px_0_#451a03] text-[#92400e] font-black text-sm font-mono shrink-0 select-none" 
-              title="Armazém de produtos coletados. Use-os para Crafting ou venda no Mercado!"
-            >
-              <div className="flex items-center gap-1" title="🥛 Leite Cru coletado do seu rebanho">
-                <span>🥛</span>
-                <span className="min-w-[1.5ch] text-center">{inventory.milk}</span>
-              </div>
-              <span className="w-px h-4 bg-[#fbbf24]/50 shrink-0" />
-              <div className="flex items-center gap-1" title="🧶 Lã Crua tosquiada das suas ovelhas">
-                <span>🧶</span>
-                <span className="min-w-[1.5ch] text-center">{inventory.wool}</span>
-              </div>
-              <span className="w-px h-4 bg-[#fbbf24]/50 shrink-0" />
-              <div className="flex items-center gap-1" title="🧀 Queijo artesanal curado">
-                <span>🧀</span>
-                <span className="min-w-[1.5ch] text-center">{inventory.cheese}</span>
-              </div>
-              <span className="w-px h-4 bg-[#fbbf24]/50 shrink-0" />
-              <div className="flex items-center gap-1" title={scarfQueue.length > 0 ? `🧣 Cachecol: ${inventory.scarf} pronto(s) • ${scarfQueue.length} em produção` : '🧣 Cachecol elegante trançado'}>
-                <span>🧣</span>
-                <span className="min-w-[1.5ch] text-center">{inventory.scarf}</span>
-                {scarfQueue.length > 0 && (
-                  <span className="text-[9px] bg-yellow-500 text-white rounded-full px-1 font-bold animate-pulse" title={`${scarfQueue.length} cachecol(is) em produção`}>
-                    ⏳{scarfQueue.length}
-                  </span>
-                )}
-              </div>
-            </div>
-
             {/* Coins display */}
             <div className="bg-[#fef3c7] border-3 border-[#fbbf24] rounded-full px-5 py-2 flex items-center gap-2 shadow-[inset_0_4px_0_rgba(255,255,255,0.5),0_4px_0_#451a03] text-[#92400e] font-black text-lg sm:text-xl font-mono" title="Seu montante em moedas de ouro para alimentação e compras">
               <span className="text-xl sm:text-2xl">💰</span>
@@ -6026,22 +5995,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               <span>Funcionários {workers.length > 0 ? `(${workers.length})` : ''}</span>
             </button>
 
-            {/* 🛡️ Seguro Status */}
-            {insurance.active && (
-              <div className="bg-green-700 border-3 border-green-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title="Seguro Básico ativo (permanente)">
-                🛡️ ∞
-              </div>
-            )}
-            {insuranceClimate.active && (
-              <div className="bg-sky-700 border-3 border-sky-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title="Seguro Intermediário ativo (permanente)">
-                🌦️ ∞
-              </div>
-            )}
-            {insuranceTheft.active && (
-              <div className="bg-orange-700 border-3 border-orange-400 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title="Seguro Premium ativo (permanente)">
-                🔒 ∞
-              </div>
-            )}
             {droughtDaysRemaining > 0 && (
               <div className="bg-yellow-700 border-3 border-yellow-500 text-white font-mono font-black text-xs px-3 py-2 rounded-full flex items-center gap-1" title={`Seca ativa: custo de água triplicado por mais ${droughtDaysRemaining} dia${droughtDaysRemaining > 1 ? 's' : ''}`}>
                 🏜️ {droughtDaysRemaining}d
@@ -6111,39 +6064,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               )}
             </button>
 
-            {/* 🔊 Som & Música — botão único */}
-            <button
-              onClick={() => {
-                const anyOn = soundEnabled || musicEnabled;
-                if (anyOn) {
-                  setSoundEnabled(false);
-                  setMusicEnabled(false);
-                  sfx.isMuted = true;
-                } else {
-                  setSoundEnabled(true);
-                  setMusicEnabled(true);
-                  sfx.isMuted = false;
-                  sfx.playSound('click');
-                }
-              }}
-              className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${(soundEnabled || musicEnabled) ? 'bg-[#ffcd7e] hover:bg-[#fbc550]' : 'bg-[#e5c88e] opacity-60 hover:opacity-80'}`}
-              title={(soundEnabled || musicEnabled) ? 'Silenciar tudo' : 'Ativar som e música'}
-            >
-              {(soundEnabled || musicEnabled) ? '🔊' : '🔇'}
-            </button>
-
-            {/* Achievements Trophy Room Button */}
-            <button 
-              onClick={() => {
-                setShowAchievementsModal(true);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="bg-amber-500 border-3 border-amber-300 hover:bg-amber-600 text-white p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Sala de Troféus & Conquistas"
-            >
-              🏆
-            </button>
-
             {/* 🔔 Notificações Button */}
             <button
               onClick={() => {
@@ -6188,7 +6108,37 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               📂
             </button>
 
-            {/* ⚙️ Mais — Conquistas, Stats, Recordes, Reproduções, Reset */}
+            {/* 🏆 Conquistas */}
+            <button
+              onClick={() => { setShowAchievementsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+              title="Sala de Troféus & Conquistas"
+            >
+              🏆
+            </button>
+
+            {/* 🔊 Som & Música */}
+            <button
+              onClick={() => {
+                const anyOn = soundEnabled || musicEnabled;
+                if (anyOn) {
+                  setSoundEnabled(false);
+                  setMusicEnabled(false);
+                  sfx.isMuted = true;
+                } else {
+                  setSoundEnabled(true);
+                  setMusicEnabled(true);
+                  sfx.isMuted = false;
+                  sfx.playSound('click');
+                }
+              }}
+              className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${(soundEnabled || musicEnabled) ? 'bg-[#ffcd7e] hover:bg-[#fbc550]' : 'bg-[#e5c88e] opacity-60 hover:opacity-80'}`}
+              title={(soundEnabled || musicEnabled) ? 'Silenciar tudo' : 'Ativar som e música'}
+            >
+              {(soundEnabled || musicEnabled) ? '🔊' : '🔇'}
+            </button>
+
+            {/* ⚙️ Mais — Stats, Recordes, Reproduções, Reset */}
             <div className="relative">
               <button
                 onClick={() => setShowMorePanel(prev => !prev)}
@@ -6199,10 +6149,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </button>
               {showMorePanel && (
                 <div className="absolute bottom-full right-0 mb-2 bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl p-3 flex flex-col gap-2 z-50 shadow-2xl min-w-[170px]">
-                  <button onClick={() => { setShowAchievementsModal(true); setShowMorePanel(false); triggerAudioResult(() => sfx.playSound('click')); }}
-                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
-                    🏆 Conquistas
-                  </button>
                   <button onClick={() => { setShowStatsModal(true); setShowMorePanel(false); triggerAudioResult(() => sfx.playSound('click')); }}
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
                     📊 Estatísticas
