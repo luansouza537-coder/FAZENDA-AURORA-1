@@ -187,7 +187,6 @@ function GameApp() {
   const [dayAnimalsFedfed, setDayAnimalsFedfed] = useState<number>(0);
   const [dayItemsCollected, setDayItemsCollected] = useState<number>(0);
   const [dayContractDeliveries, setDayContractDeliveries] = useState<number>(0);
-  const dayStartGoldRef = useRef<number>(gold);
 
   const pendingAdvanceDayRef = useRef<React.MouseEvent | null>(null);
 
@@ -1125,6 +1124,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     insurance,
     setInsurance,
   } = useEconomy();
+
+  // Tracks gold at the start of each day to compute goldSpent in the Day Summary
+  const dayStartGoldRef = useRef<number>(gold);
 
   // --- useFarm hook ---
   const {
