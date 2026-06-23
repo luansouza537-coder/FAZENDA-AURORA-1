@@ -425,6 +425,18 @@ export default function GameSidebar({
                     🧼 Sabonete Nat. ({getActualSellPrice('sabonete_natural')}💰)
                   </button>
                   )}
+                  {(inventory.serum_facial ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('serum_facial' as any, 1, e)} disabled={(inventory.serum_facial ?? 0) < 1}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
+                    💧 Sérum Facial ({getActualSellPrice('serum_facial' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.mascara_facial ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('mascara_facial' as any, 1, e)} disabled={(inventory.mascara_facial ?? 0) < 1}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
+                    😷 Máscara Facial ({getActualSellPrice('mascara_facial' as any)}💰)
+                  </button>
+                  )}
                   {(inventory.colete_couro ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('colete_couro', 1, e)} disabled={(inventory.colete_couro ?? 0) < 1}
                     className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">

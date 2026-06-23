@@ -66,6 +66,8 @@ export interface CraftActions {
   craftSopaCogumelo: (e?: React.MouseEvent) => void;
   craftCremeCosmetico: (e?: React.MouseEvent) => void;
   craftSaboneteNatural: (e?: React.MouseEvent) => void;
+  craftSerumFacial: (e?: React.MouseEvent) => void;
+  craftMascaraFacial: (e?: React.MouseEvent) => void;
   craftRacaoOrganica: (e?: React.MouseEvent) => void;
   craftFertilizante: (e?: React.MouseEvent) => void;
   craftColeteCouro: (e?: React.MouseEvent) => void;
@@ -347,8 +349,10 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
               <div className="space-y-2">
                 <h4 className="font-display font-black text-xs uppercase tracking-wider text-green-900 mb-2">🌿 Cosméticos & Orgânicos</h4>
                 {[
-                  { label: 'Creme Cosmético', emoji: '🧴', req: `🐌 2 Muco (${inventory.muco ?? 0}/2) + 🐐 1 L.Cabra (${inventory.goat_milk ?? 0}/1) • Nv7`, canCraft: farmLevel >= 7 && (inventory.muco ?? 0) >= 2 && (inventory.goat_milk ?? 0) >= 1, reqLevel: 7, onClick: (e: React.MouseEvent) => c.craftCremeCosmetico(e) },
-                  { label: 'Sabonete Natural', emoji: '🧼', req: `🐌 1 Muco (${inventory.muco ?? 0}/1) + 🧈 1 Manteiga (${inventory.butter ?? 0}/1) + 🥛 1 Leite (${inventory.milk}/1) • Nv9`, canCraft: farmLevel >= 9 && (inventory.muco ?? 0) >= 1 && (inventory.butter ?? 0) >= 1 && inventory.milk >= 1, reqLevel: 9, onClick: (e: React.MouseEvent) => c.craftSaboneteNatural(e) },
+                  { label: 'Creme Cosmético', emoji: '🧴', req: `🐌 2 Muco (${inventory.muco ?? 0}/2) + 🍯 1 Mel (${(inventory as any).mel ?? 0}/1) • Nv7`, canCraft: farmLevel >= 7 && (inventory.muco ?? 0) >= 2 && ((inventory as any).mel ?? 0) >= 1, reqLevel: 7, onClick: (e: React.MouseEvent) => c.craftCremeCosmetico(e) },
+                  { label: 'Sérum Facial', emoji: '💧', req: `🐌 2 Muco (${inventory.muco ?? 0}/2) + 🍯 1 Mel (${(inventory as any).mel ?? 0}/1) • Nv7`, canCraft: farmLevel >= 7 && (inventory.muco ?? 0) >= 2 && ((inventory as any).mel ?? 0) >= 1, reqLevel: 7, onClick: (e: React.MouseEvent) => c.craftSerumFacial(e) },
+                  { label: 'Máscara Facial', emoji: '😷', req: `🐌 3 Muco (${inventory.muco ?? 0}/3) • Nv8`, canCraft: farmLevel >= 8 && (inventory.muco ?? 0) >= 3, reqLevel: 8, onClick: (e: React.MouseEvent) => c.craftMascaraFacial(e) },
+                  { label: 'Sabonete Natural', emoji: '🧼', req: `🐌 1 Muco (${inventory.muco ?? 0}/1) + 🍯 1 Mel (${(inventory as any).mel ?? 0}/1) + 🐐 1 L.Cabra (${inventory.goat_milk ?? 0}/1) • Nv9`, canCraft: farmLevel >= 9 && (inventory.muco ?? 0) >= 1 && ((inventory as any).mel ?? 0) >= 1 && (inventory.goat_milk ?? 0) >= 1, reqLevel: 9, onClick: (e: React.MouseEvent) => c.craftSaboneteNatural(e) },
                   { label: 'Ração Orgânica (+3d buff)', emoji: '🌿', req: `🪱 2 Húmus (${inventory.humus ?? 0}/2) • Nv6`, canCraft: farmLevel >= 6 && (inventory.humus ?? 0) >= 2, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftRacaoOrganica(e) },
                   { label: 'Fertilizante (+5d buff)', emoji: '🌱', req: `🪱 3 Húmus (${inventory.humus ?? 0}/3) • Nv8`, canCraft: farmLevel >= 8 && (inventory.humus ?? 0) >= 3, reqLevel: 8, onClick: (e: React.MouseEvent) => c.craftFertilizante(e) },
                   { label: 'Biofertilizante Líquido', emoji: '🧴', req: `🪱 3 Húmus (${inventory.humus ?? 0}/3) • Nv6`, canCraft: farmLevel >= 6 && (inventory.humus ?? 0) >= 3, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftBiofertilizante(e) },

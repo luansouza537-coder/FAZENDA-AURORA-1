@@ -61,6 +61,8 @@ export type InventoryState = {
   conserva_codorna: number;
   creme_cosmetico: number;
   sabonete_natural: number;
+  serum_facial: number;
+  mascara_facial: number;
   colete_couro: number;
   bolsa_exotica: number;
   peixe: number;

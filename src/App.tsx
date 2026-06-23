@@ -875,7 +875,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       humus: [22, 22, 22, 22, 22, 22, 22],
       minhoca_viva: [18, 18, 18, 18, 18, 18, 18],
       biofertilizante: [55, 55, 55, 55, 55, 55, 55],
-      muco: [120, 120, 120, 120, 120, 120, 120],
+      muco: [48, 48, 48, 48, 48, 48, 48],
+      serum_facial: [95, 95, 95, 95, 95, 95, 95],
+      mascara_facial: [75, 75, 75, 75, 75, 75, 75],
       angora_wool: [90, 90, 90, 90, 90, 90, 90],
       seda_bruta: [100, 100, 100, 100, 100, 100, 100],
       coxa_ra: [110, 110, 110, 110, 110, 110, 110],
@@ -1678,7 +1680,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       return 1.0;
     }
     // --- EXÓTICOS (carne, couro, muco, penas) ---
-    const exoticos = new Set(['coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare','muco','bolsa_exotica','colete_couro','creme_cosmetico','sabonete_natural']);
+    const exoticos = new Set(['coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare','muco','bolsa_exotica','colete_couro','creme_cosmetico','sabonete_natural','serum_facial','mascara_facial']);
     if (exoticos.has(itemType)) {
       if (estacao === 'verao') return 1.1;
       if (estacao === 'inverno') return 0.9;
@@ -1710,7 +1712,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   // Storage limits for Celeiro and Câmara Fria
   const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','sabonete_natural','minhoca_viva','biofertilizante']);
-  const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','muco','creme_cosmetico']);
+  const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','muco','creme_cosmetico','sabonete_natural','serum_facial','mascara_facial']);
 
   const getCeleiroLimit = () => ([30, 60, 120, 250, 999][celeiroLevel] ?? 30);
   const getCamaraFriaLimit = () => ([50, 120, 250, 500][camaraFriaLevel] ?? 50);
@@ -1769,7 +1771,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'humus') return 22;    // rebalanceado — sem custo de ração
     if (itemType === 'minhoca_viva') return 18;
     if (itemType === 'biofertilizante') return 55;
-    if (itemType === 'muco') return 35;     // era 120 — Grupo B (OP sem ração)
+    if (itemType === 'muco') return 48;
+    if (itemType === 'serum_facial') return 95;
+    if (itemType === 'mascara_facial') return 75;
     if (itemType === 'angora_wool') return 90;
     if (itemType === 'seda_bruta') return 100;
     if (itemType === 'coxa_ra') return 110;
@@ -1872,7 +1876,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     else if (tecidos.has(itemType)) processedLinkMult = 0.5 + woolSeasonMult * 0.5;
     else if (ovosProc.has(itemType)) processedLinkMult = 0.5 + eggSeasonMult * 0.5;
     // Raridade premium: itens vendidos em baixo volume têm bônus de raridade
-    const RARE_ITEMS = new Set(['couro_jacare','carne_jacare','muco','seda_bruta','angora_wool','bolsa_exotica','colete_couro','manta_premium']);
+    const RARE_ITEMS = new Set(['couro_jacare','carne_jacare','muco','seda_bruta','angora_wool','bolsa_exotica','colete_couro','manta_premium','serum_facial','mascara_facial']);
     const rarityMult = RARE_ITEMS.has(itemType) && weekSales <= 2 ? 1.1 : 1.0;
     // Evento de mercado ativo
     const marketBonus = activeMarketEvent && activeMarketEvent.items.includes(itemType) ? activeMarketEvent.mult : 1.0;
@@ -1974,6 +1978,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     craftConservaCodorna,
     craftCremeCosmetico,
     craftSaboneteNatural,
+    craftSerumFacial,
+    craftMascaraFacial,
     craftRacaoOrganica,
     craftFertilizante,
     craftColeteCouro,
@@ -3212,7 +3218,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     { catalogId: 'lc_15', client: 'Laticínios Premium do Norte', product: 'buffalo_milk' as const, description: 'Empresa especializada em derivados de búfala para o mercado gourmet. O leite serve de base para mozzarella, ricota e iogurte premium comercializados em delicatessens de todo o país. Eles pagam acima do mercado porque sabem que poucos produtores têm búfalas em produção estável.', baseMarket: 28, pricePerUnit: 42, weeklyGoal: 5, durationDays: 120, minLevel: 8, completionBonus: 540, completionXP: 95 },
     { catalogId: 'lc_16', client: 'Exportadora Fibras Raras', product: 'alpaca_wool' as const, description: 'Empresa que processa e exporta fibras especiais para marcas de moda italiana e portuguesa. A lã de alpaca é classificada como fibra nobre — levíssima, hipoalergênica, com valor crescente no mercado europeu. Contrato exigente em qualidade, mas com remuneração muito acima da média nacional.', baseMarket: 65, pricePerUnit: 92, weeklyGoal: 4, durationDays: 120, minLevel: 8, completionBonus: 940, completionXP: 120 },
     // --- Nível 9 ---
-    { catalogId: 'lc_17', client: 'Laboratório Raízes Naturais', product: 'muco' as const, description: 'Laboratório de cosméticos naturais que formula cremes anti-idade e soros para pele sensível. O muco de caracol é o ingrediente-âncora de toda a linha premium deles — e é difícil de obter em quantidade e qualidade constantes. Eles já pesquisaram fornecedores em três estados antes de chegar até você.', baseMarket: 35, pricePerUnit: 52, weeklyGoal: 3, durationDays: 150, minLevel: 9, completionBonus: 500, completionXP: 105 },
+    { catalogId: 'lc_17', client: 'Laboratório Raízes Naturais', product: 'muco' as const, description: 'Laboratório de cosméticos naturais que formula cremes anti-idade e soros para pele sensível. O muco de caracol é o ingrediente-âncora de toda a linha premium deles — e é difícil de obter em quantidade e qualidade constantes. Eles já pesquisaram fornecedores em três estados antes de chegar até você.', baseMarket: 48, pricePerUnit: 65, weeklyGoal: 3, durationDays: 150, minLevel: 8, completionBonus: 500, completionXP: 105 },
     { catalogId: 'lc_18', client: 'Ateliê Luxo Inverno', product: 'angora_wool' as const, description: 'Marca de moda inverno que vende peças de tricô artesanal por encomenda para clientes de alto poder aquisitivo. A lã angorá é a matéria-prima mais valorizada do portfólio deles — suave, quente e com apelo visual único. Um contrato de longa duração com uma das maiores margens do mercado têxtil.', baseMarket: 90, pricePerUnit: 128, weeklyGoal: 3, durationDays: 150, minLevel: 9, completionBonus: 1230, completionXP: 150 },
     { catalogId: 'lc_33', client: 'Cachecol & Cia', product: 'cachecol_angora' as const, description: 'Marca de acessórios de inverno que vende peças por catálogo e e-commerce para todo o Brasil. O cachecol angorá é o item mais vendido da coleção — macio, quente e com apelo visual que fotografa bem nas redes sociais. A demanda explode entre abril e julho, mas eles precisam de estoque o ano todo. Buscam um fornecedor que entenda o ritmo da moda e não deixe a linha parar.', baseMarket: 160, pricePerUnit: 228, weeklyGoal: 3, durationDays: 150, minLevel: 9, completionBonus: 2200, completionXP: 185 },
     // --- Nível 10 ---
@@ -4239,7 +4245,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             { title: '📰 Festival de Ovos', desc: 'Todos os ovos +20% por 3 dias!', items: ['egg','duck_egg','goose_egg','quail_egg','fertile_egg'], mult: 1.20, daysLeft: 3 },
             { title: '📰 Crise do Laticínio', desc: 'Leites -20% esta semana.', items: ['milk','goat_milk','buffalo_milk'], mult: 0.80, daysLeft: 5 },
             { title: '📰 Boom Orgânico', desc: 'Húmus e mel +35% por 2 dias!', items: ['humus','mel','mel_envasado'], mult: 1.35, daysLeft: 2 },
-            { title: '📰 Procura de Luxo', desc: 'Produtos exóticos +20% por 3 dias!', items: ['couro_jacare','carne_jacare','muco','bolsa_exotica','colete_couro'], mult: 1.20, daysLeft: 3 },
+            { title: '📰 Procura de Luxo', desc: 'Produtos exóticos +20% por 3 dias!', items: ['couro_jacare','carne_jacare','muco','bolsa_exotica','colete_couro','creme_cosmetico','sabonete_natural','serum_facial','mascara_facial'], mult: 1.20, daysLeft: 3 },
             { title: '📰 Concorrência Importada', desc: 'Lã e cachecol -15% por 4 dias.', items: ['wool','scarf','llama_wool'], mult: 0.85, daysLeft: 4 },
           ];
           const evt = MARKET_EVENTS[Math.floor(Math.random() * MARKET_EVENTS.length)];
@@ -6726,7 +6732,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             craftMayonese, craftPatePato, craftOvoDefumado, craftConservaCodorna,
             craftIncubarOvos, craftHidromel, craftRisotoCogumelo, craftConservaPeixe,
             craftMelEnvasado, craftSopaCogumelo,
-            craftCremeCosmetico, craftSaboneteNatural, craftRacaoOrganica, craftFertilizante,
+            craftCremeCosmetico, craftSaboneteNatural, craftSerumFacial, craftMascaraFacial, craftRacaoOrganica, craftFertilizante,
             craftColeteCouro, craftBolsaExotica, craftKitGourmet,
             craftFioLhama, craftCachecolLhama, craftGorroLhama, craftLuvasLhama,
             craftPonchoLhama, craftMantaLhama,

@@ -58,6 +58,8 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   conserva_codorna: { energy: 1, water: 1 },
   creme_cosmetico:  { energy: 1, water: 1 },
   sabonete_natural: { energy: 1, water: 1 },
+  serum_facial:     { energy: 2, water: 1 },
+  mascara_facial:   { energy: 1, water: 1 },
   racao_organica:   { energy: 1, water: 1 },
   fertilizante:     { energy: 1, water: 1 },
   colete_couro:     { energy: 2, water: 0 },
@@ -141,7 +143,7 @@ export function useInventory({
     humus: 'organicos', muco: 'organicos', mel: 'organicos', mel_envasado: 'organicos',
     cogumelo: 'organicos', seda_bruta: 'organicos',
     couro_avestruz: 'luxo',
-    couro_jacare: 'luxo', creme_cosmetico: 'luxo', sabonete_natural: 'luxo',
+    couro_jacare: 'luxo', creme_cosmetico: 'luxo', sabonete_natural: 'luxo', serum_facial: 'luxo', mascara_facial: 'luxo',
     colete_couro: 'luxo', bolsa_exotica: 'luxo',
     hidromel: 'luxo', risoto_cogumelo: 'luxo', conserva_peixe: 'luxo',
     sopa_cogumelo: 'luxo', kit_gourmet: 'luxo',
@@ -212,6 +214,8 @@ export function useInventory({
           conserva_codorna: inv.conserva_codorna ?? 0,
           creme_cosmetico: inv.creme_cosmetico ?? 0,
           sabonete_natural: inv.sabonete_natural ?? 0,
+          serum_facial: inv.serum_facial ?? 0,
+          mascara_facial: inv.mascara_facial ?? 0,
           colete_couro: inv.colete_couro ?? 0,
           bolsa_exotica: inv.bolsa_exotica ?? 0,
           peixe: inv.peixe ?? 0,
@@ -297,6 +301,8 @@ export function useInventory({
       conserva_codorna: 0,
       creme_cosmetico: 0,
       sabonete_natural: 0,
+      serum_facial: 0,
+      mascara_facial: 0,
       colete_couro: 0,
       bolsa_exotica: 0,
       peixe: 0,
@@ -695,8 +701,8 @@ export function useInventory({
     if (event) event.preventDefault();
     if (farmLevel < 7) { addLog('🧴 Creme Cosmético requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.muco ?? 0) < 2) { addLog('🐌 Falta Muco de Caracol! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Muco!', event); return; }
-    if ((inventory.goat_milk ?? 0) < 1) { addLog('🐐 Falta Leite de Cabra! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Cabra!', event); return; }
-    setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 2, goat_milk: (prev.goat_milk ?? 0) - 1, creme_cosmetico: (prev.creme_cosmetico ?? 0) + 1 }));
+    if ((inventory.mel ?? 0) < 1) { addLog('🍯 Falta Mel! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Mel!', event); return; }
+    setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 2, mel: (prev.mel ?? 0) - 1, creme_cosmetico: (prev.creme_cosmetico ?? 0) + 1 }));
     applyCraftCost('creme_cosmetico');
     addLog('🧴 Você formulou 1 Creme Cosmético de luxo!', 'success');
     setFarmXp(prev => prev + 3);
@@ -708,14 +714,39 @@ export function useInventory({
     if (event) event.preventDefault();
     if (farmLevel < 9) { addLog('🧼 Sabonete Natural requer Nível 9!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.muco ?? 0) < 1) { addLog('🐌 Falta Muco de Caracol! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Muco!', event); return; }
-    if ((inventory.butter ?? 0) < 1) { addLog('🧈 Falta Manteiga! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Manteiga!', event); return; }
-    if ((inventory.milk ?? 0) < 1) { addLog('🥛 Falta Leite! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Leite!', event); return; }
-    setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 1, butter: (prev.butter ?? 0) - 1, milk: prev.milk - 1, sabonete_natural: (prev.sabonete_natural ?? 0) + 1 }));
+    if ((inventory.mel ?? 0) < 1) { addLog('🍯 Falta Mel! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Mel!', event); return; }
+    if ((inventory.goat_milk ?? 0) < 1) { addLog('🐐 Falta Leite de Cabra! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Cabra!', event); return; }
+    setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 1, mel: (prev.mel ?? 0) - 1, goat_milk: (prev.goat_milk ?? 0) - 1, sabonete_natural: (prev.sabonete_natural ?? 0) + 1 }));
     applyCraftCost('sabonete_natural');
     addLog('🧼 Você produziu 1 Sabonete Natural artesanal!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧼', '+1 Sabonete Natural', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftSerumFacial = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 7) { addLog('💧 Sérum Facial requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.muco ?? 0) < 2) { addLog('🐌 Falta Muco de Caracol! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Muco!', event); return; }
+    if ((inventory.mel ?? 0) < 1) { addLog('🍯 Falta Mel! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Mel!', event); return; }
+    setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 2, mel: (prev.mel ?? 0) - 1, serum_facial: (prev.serum_facial ?? 0) + 1 }));
+    applyCraftCost('serum_facial');
+    addLog('💧 Você formulou 1 Sérum Facial de mucina!', 'success');
+    setFarmXp(prev => prev + 4);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('💧', '+1 Sérum Facial', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftMascaraFacial = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 8) { addLog('😷 Máscara Facial requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.muco ?? 0) < 3) { addLog('🐌 Falta Muco de Caracol! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Muco!', event); return; }
+    setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 3, mascara_facial: (prev.mascara_facial ?? 0) + 1 }));
+    applyCraftCost('mascara_facial');
+    addLog('😷 Você formulou 1 Máscara Facial de mucina!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('😷', '+1 Máscara Facial', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   const craftRacaoOrganica = (event?: React.MouseEvent) => {
@@ -1208,8 +1239,10 @@ export function useInventory({
     const waffelMelQty = (inventory as any).waffle_mel || 0;
     const minhocaVivaQty = (inventory as any).minhoca_viva || 0;
     const biofertilizanteQty = (inventory as any).biofertilizante || 0;
+    const serumFacialQty = (inventory as any).serum_facial || 0;
+    const mascaraFacialQty = (inventory as any).mascara_facial || 0;
 
-    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + coleteCouroQty + bolsaExoticaQty + fioLhamaQty + cachecolLhamaQty + gorroLhamaQty + luvasLhamaQty + ponchoLhamaQty + mantaLhamaQty + iogurteBufalaQty + mantegaBufalaQty + doceLeiteQty + burrataQty + massaFrescaQty + crepeRusticoQty + paoRusticoQty + waffelMelQty + minhocaVivaQty + biofertilizanteQty;
+    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + coleteCouroQty + bolsaExoticaQty + fioLhamaQty + cachecolLhamaQty + gorroLhamaQty + luvasLhamaQty + ponchoLhamaQty + mantaLhamaQty + iogurteBufalaQty + mantegaBufalaQty + doceLeiteQty + burrataQty + massaFrescaQty + crepeRusticoQty + paoRusticoQty + waffelMelQty + minhocaVivaQty + biofertilizanteQty + serumFacialQty + mascaraFacialQty;
 
     if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && butterQty === 0 && yogurtQty === 0 && fertileEggQty === 0 && allExtras === 0) {
       if (!quietValue) {
@@ -1270,6 +1303,8 @@ export function useInventory({
     const conservaCodornaPrice = getDynamicTransactionPrice('conserva_codorna');
     const cremeCosmeticoPrice = getDynamicTransactionPrice('creme_cosmetico');
     const saboneteNaturalPrice = getDynamicTransactionPrice('sabonete_natural');
+    const serumFacialPrice = getDynamicTransactionPrice('serum_facial' as any);
+    const mascaraFacialPrice = getDynamicTransactionPrice('mascara_facial' as any);
     const coleteCouroPrice = getDynamicTransactionPrice('colete_couro');
     const bolsaExoticaPrice = getDynamicTransactionPrice('bolsa_exotica');
     const fioLhamaPrice = getDynamicTransactionPrice('fio_lhama' as any);
@@ -1322,6 +1357,7 @@ export function useInventory({
       (couroAvestruzQty * couroAvestruzPrice +
        couroJacareQty * couroJacarePrice + cremeCosmeticoQty * cremeCosmeticoPrice +
        saboneteNaturalQty * saboneteNaturalPrice +
+       serumFacialQty * serumFacialPrice + mascaraFacialQty * mascaraFacialPrice +
        coleteCouroQty * coleteCouroPrice + bolsaExoticaQty * bolsaExoticaPrice +
        hidromelQty * hidromelPrice +
        risotoQty * risotoPrice + conservaPeixeQty * conservaPeixePrice +
@@ -1365,7 +1401,7 @@ export function useInventory({
       carne_jacare: 0, couro_jacare: 0, queijo_cabra: 0, iogurte_cabra: 0,
       leite_condensado: 0, tapete_lhama: 0, cachecol_angora: 0, tecido_alpaca: 0,
       fio_seda: 0, manta_premium: 0, pate_pato: 0, ovo_defumado: 0, conserva_codorna: 0,
-      creme_cosmetico: 0, sabonete_natural: 0, colete_couro: 0,
+      creme_cosmetico: 0, sabonete_natural: 0, serum_facial: 0, mascara_facial: 0, colete_couro: 0,
       bolsa_exotica: 0,
       peixe: 0, mel: 0, cogumelo: 0, hidromel: 0, risoto_cogumelo: 0,
       conserva_peixe: 0, mel_envasado: 0, sopa_cogumelo: 0,
@@ -1437,6 +1473,8 @@ export function useInventory({
       if (waffelMelQty > 0) updated.waffle_mel = (prev.waffle_mel || 0) + waffelMelQty;
       if (minhocaVivaQty > 0) updated.minhoca_viva = (prev.minhoca_viva || 0) + minhocaVivaQty;
       if (biofertilizanteQty > 0) updated.biofertilizante = (prev.biofertilizante || 0) + biofertilizanteQty;
+      if (serumFacialQty > 0) updated.serum_facial = (prev.serum_facial || 0) + serumFacialQty;
+      if (mascaraFacialQty > 0) updated.mascara_facial = (prev.mascara_facial || 0) + mascaraFacialQty;
       return updated;
     });
 
@@ -1876,6 +1914,8 @@ export function useInventory({
     craftConservaCodorna,
     craftCremeCosmetico,
     craftSaboneteNatural,
+    craftSerumFacial,
+    craftMascaraFacial,
     craftRacaoOrganica,
     craftFertilizante,
     craftColeteCouro,

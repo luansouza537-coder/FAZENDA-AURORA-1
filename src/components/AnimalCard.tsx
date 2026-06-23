@@ -424,6 +424,13 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 ? <span className="text-[9px] bg-emerald-100 border border-emerald-300 text-emerald-700 font-black px-1.5 py-0.5 rounded-full">🪱 Húmus hoje!</span>
                 : <span className="text-[9px] bg-amber-50 border border-amber-300 text-amber-700 font-black px-1.5 py-0.5 rounded-full">🪱 Húmus em {daysLeft}d</span>;
             })()}
+            {animal.type === 'caracol' && animal.isAdult !== false && (() => {
+              const age = animal.age ?? 0;
+              const daysLeft = age > 0 ? (3 - (age % 3)) % 3 : 3;
+              return daysLeft === 0
+                ? <span className="text-[9px] bg-teal-100 border border-teal-300 text-teal-700 font-black px-1.5 py-0.5 rounded-full">🐌 Muco hoje!</span>
+                : <span className="text-[9px] bg-amber-50 border border-amber-200 text-amber-700 font-black px-1.5 py-0.5 rounded-full">🐌 Muco em {daysLeft}d</span>;
+            })()}
           </div>
           {/* MECHANIC 3: Cabra — badge de lactação */}
           {animal.type === 'cabra' && (
