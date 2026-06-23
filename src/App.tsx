@@ -2177,18 +2177,25 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     addToast('+Ovo coletado!', 'success', '🥚');
   }, [collectEgg, addToast]);
 
+  // --- useWorkers hook ---
+  const {
+    workers,
+    setWorkers,
+    hireWorker,
+    fireWorker,
+    workerTypes,
+  } = useWorkers({ currentDay, addLog });
+
   const collectMel = useCallback((id: number, event: React.MouseEvent) => {
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'colmeia_abelhas' || !animal.melReady) return;
     const seasIdx = Math.floor(((currentDay - 1) % 120) / 30);
     const hasApicultor = workers.some(w => w.role === 'apicultor');
     const hasFlorestaBonus = landBiomes.some(b => b.biome === 'floresta');
-    // Base 1 + sol bonus + floresta bonus + apicultor bonus + coleta no prazo bonus
     let melAmt = 1;
     if (weather === 'sol') melAmt += 1;
     if (hasFlorestaBonus) melAmt += 1;
     if (hasApicultor) melAmt += 1;
-    // Coleta no prazo: se coletou no mesmo dia que ficou pronto (+1)
     const cycleBySeason = seasIdx === 0 ? 2 : seasIdx === 1 ? 3 : seasIdx === 2 ? 5 : (hasApicultor ? 7 : 10);
     const lastMel = animal.lastMelDay ?? currentDay;
     if (currentDay - lastMel === cycleBySeason) melAmt += 1;
@@ -2204,15 +2211,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     collectMel(id, event);
     addToast('+Mel colhido!', 'success', '🍯');
   }, [collectMel, addToast]);
-
-  // --- useWorkers hook ---
-  const {
-    workers,
-    setWorkers,
-    hireWorker,
-    fireWorker,
-    workerTypes,
-  } = useWorkers({ currentDay, addLog });
 
   // --- useMissions hook ---
   const { generateDailyMissions, generateWeeklyMissions, generateEpicMissions } = useMissions({ animals, farmLevel, inventory });
