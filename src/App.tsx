@@ -1781,7 +1781,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'tecido_alpaca') return 320;
     if (itemType === 'fio_seda') return 280;
     if (itemType === 'manta_premium') return 1100;
-    if (itemType === 'pate_pato') return 150;
+    if (itemType === 'pate_pato') return 210;
     if (itemType === 'ovo_defumado') return 120;
     if (itemType === 'conserva_codorna') return 160;
     if (itemType === 'creme_cosmetico') return 220;
@@ -3798,6 +3798,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (maintPaid) {
         // A. Ordenhadeira Automática
         if (machines.milkerPurchased && machines.milkerActive) {
+          const milkerBonus = 1 + (milkerLevel - 1) * 0.2;
+          const productionMult = productionBoostDays > 0 ? 1.15 : 1;
+
+          // Vacas
           let milkCollected = 0;
           let milkedCows = 0;
           updatedAnimalsList = updatedAnimalsList.map(a => {
@@ -3810,10 +3814,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (nextWeather === 'chuva') totalLeite = Math.max(1, Math.round(totalLeite * 0.8));
             if (a.trait === 'trabalhadora') totalLeite = Math.max(1, Math.round(totalLeite * 1.15));
             else if (a.trait === 'preguicosa') totalLeite = Math.max(1, Math.round(totalLeite * 0.85));
-            // Nível da ordenhadeira: +20% por nível adicional (Nv2=+20%, Nv3=+40%)
-            const milkerBonus = 1 + (milkerLevel - 1) * 0.2;
-            // Manual de produção
-            const productionMult = productionBoostDays > 0 ? 1.15 : 1;
             totalLeite = Math.round(totalLeite * milkerBonus * productionMult);
             milkCollected += totalLeite;
             milkedCows++;
@@ -3823,7 +3823,45 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setInventory(prev => ({ ...prev, milk: prev.milk + milkCollected }));
             setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + milkCollected, totalMilk: (prev.totalMilk || 0) + milkCollected }));
             setWeeklyStats(prev => ({ ...prev, milk: prev.milk + milkCollected }));
-            logsToAdd.push({ msg: `🏭 Ordenhadeira Automática: Coletou +${milkCollected} Leite(s) de ${milkedCows} vacas!`, type: 'success' });
+            logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${milkCollected} Leite(s) de ${milkedCows} vaca(s)!`, type: 'success' });
+          }
+
+          // Cabras (checa isLactating)
+          let goatMilkCollected = 0;
+          let milkedGoats = 0;
+          updatedAnimalsList = updatedAnimalsList.map(a => {
+            if (a.type !== 'cabra' || a.isAdult === false || !a.hasProducedToday || !a.isLactating) return a;
+            let qty = 1;
+            if (a.trait === 'trabalhadora') qty = 2;
+            else if (a.trait === 'preguicosa') qty = 1;
+            qty = Math.round(qty * milkerBonus * productionMult);
+            goatMilkCollected += qty;
+            milkedGoats++;
+            return { ...a, hasProducedToday: false };
+          });
+          if (goatMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) + goatMilkCollected }));
+            setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + goatMilkCollected }));
+            logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${goatMilkCollected} Leite(s) de Cabra de ${milkedGoats} cabra(s)!`, type: 'success' });
+          }
+
+          // Búfalas (checa isLactating)
+          let buffaloMilkCollected = 0;
+          let milkedBuffalos = 0;
+          updatedAnimalsList = updatedAnimalsList.map(a => {
+            if (a.type !== 'bufalo' || a.isAdult === false || !a.hasProducedToday || a.isLactating === false) return a;
+            let qty = a.heatStress ? 2 : 3;
+            if (a.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
+            else if (a.trait === 'preguicosa') qty = Math.max(1, qty - 1);
+            qty = Math.round(qty * milkerBonus * productionMult);
+            buffaloMilkCollected += qty;
+            milkedBuffalos++;
+            return { ...a, hasProducedToday: false };
+          });
+          if (buffaloMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) + buffaloMilkCollected }));
+            setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + buffaloMilkCollected }));
+            logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${buffaloMilkCollected} Leite(s) de Búfala de ${milkedBuffalos} búfala(s)!`, type: 'success' });
           }
         }
 

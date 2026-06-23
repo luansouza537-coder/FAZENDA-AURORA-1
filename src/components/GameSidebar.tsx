@@ -153,7 +153,7 @@ export default function GameSidebar({
                     ]
                   },
                   {
-                    title: '🌿 Novos Animais',
+                    title: '🐾 Animais Especiais',
                     bg: 'bg-green-50/60 border-green-200',
                     items: [
                       { key: 'quail_egg', label: '🐦 Ov. Codorna', qty: inventory.quail_egg ?? 0, priceKey: 'quail_egg' as any },
