@@ -574,7 +574,25 @@ export default function GameSidebar({
                   {(inventory.massa_fresca ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('massa_fresca' as any, 1, e)} disabled={(inventory.massa_fresca ?? 0) < 1}
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
-                    🍝 Massa Fresca ({getActualSellPrice('massa_fresca' as any)}💰)
+                    🍝 M.Fresca Ganso ({getActualSellPrice('massa_fresca' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.crepe_rustico ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('crepe_rustico' as any, 1, e)} disabled={(inventory.crepe_rustico ?? 0) < 1}
+                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-orange-300">
+                    🥞 Crepe Rústico ({getActualSellPrice('crepe_rustico' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.pao_rustico ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('pao_rustico' as any, 1, e)} disabled={(inventory.pao_rustico ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🥐 Pão Rústico ({getActualSellPrice('pao_rustico' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.waffle_mel ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('waffle_mel' as any, 1, e)} disabled={(inventory.waffle_mel ?? 0) < 1}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
+                    🧇 Waffle de Mel ({getActualSellPrice('waffle_mel' as any)}💰)
                   </button>
                   )}
                 </div>

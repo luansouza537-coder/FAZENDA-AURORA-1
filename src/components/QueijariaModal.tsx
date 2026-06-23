@@ -82,6 +82,9 @@ export interface CraftActions {
   craftDoceLeitelBufala: (e?: React.MouseEvent) => void;
   craftBurrata: (e?: React.MouseEvent) => void;
   craftMassaFresca: (e?: React.MouseEvent) => void;
+  craftCrepeRustico: (e?: React.MouseEvent) => void;
+  craftPaoRustico: (e?: React.MouseEvent) => void;
+  craftWaffelMel: (e?: React.MouseEvent) => void;
 }
 
 interface QueijariaModalProps {
@@ -313,7 +316,10 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                   { label: 'Conserva de Peixe', emoji: '🐟', req: `🐟 2 Peixe (${inventory.peixe ?? 0}/2) • Nv4`, canCraft: farmLevel >= 4 && (inventory.peixe ?? 0) >= 2, reqLevel: 4, onClick: (e: React.MouseEvent) => c.craftConservaPeixe(e) },
                   { label: 'Mel Envasado', emoji: '🍯', req: `🍯 3 Mel (${inventory.mel ?? 0}/3) • Nv3`, canCraft: farmLevel >= 3 && (inventory.mel ?? 0) >= 3, reqLevel: 3, onClick: (e: React.MouseEvent) => c.craftMelEnvasado(e) },
                   { label: 'Sopa de Cogumelo', emoji: '🍲', req: `🍄 2 Cogumelos (${inventory.cogumelo ?? 0}/2) • Nv3`, canCraft: farmLevel >= 3 && (inventory.cogumelo ?? 0) >= 2, reqLevel: 3, onClick: (e: React.MouseEvent) => c.craftSopaCogumelo(e) },
-                  { label: 'Massa Fresca', emoji: '🍝', req: `🪿 1 Ov.Ganso (${inventory.goose_egg ?? 0}/1) + 🌾 1 Farinha (${(inventory as any).farinha ?? 0}/1) • Nv5`, canCraft: farmLevel >= 5 && (inventory.goose_egg ?? 0) >= 1 && ((inventory as any).farinha ?? 0) >= 1, reqLevel: 5, onClick: (e: React.MouseEvent) => c.craftMassaFresca(e) },
+                  { label: 'Massa Fresca de Ovo de Ganso', emoji: '🍝', req: `🪿 1 Ov.Ganso (${inventory.goose_egg ?? 0}/1) + 🌾 1 Farinha (${(inventory as any).farinha ?? 0}/1) • Nv5`, canCraft: farmLevel >= 5 && (inventory.goose_egg ?? 0) >= 1 && ((inventory as any).farinha ?? 0) >= 1, reqLevel: 5, onClick: (e: React.MouseEvent) => c.craftMassaFresca(e) },
+                  { label: 'Crepe Rústico', emoji: '🥞', req: `🥚 1 Ovo (${inventory.egg}/1) + 🌾 1 Farinha (${(inventory as any).farinha ?? 0}/1) • Nv3`, canCraft: farmLevel >= 3 && (inventory.egg ?? 0) >= 1 && ((inventory as any).farinha ?? 0) >= 1, reqLevel: 3, onClick: (e: React.MouseEvent) => c.craftCrepeRustico(e) },
+                  { label: 'Pão Rústico', emoji: '🥐', req: `🌾 2 Farinha (${(inventory as any).farinha ?? 0}/2) + 🥛 1 Leite (${inventory.milk}/1) • Nv3`, canCraft: farmLevel >= 3 && ((inventory as any).farinha ?? 0) >= 2 && (inventory.milk ?? 0) >= 1, reqLevel: 3, onClick: (e: React.MouseEvent) => c.craftPaoRustico(e) },
+                  { label: 'Waffle de Mel', emoji: '🧇', req: `🌾 1 Farinha (${(inventory as any).farinha ?? 0}/1) + 🥚 1 Ovo (${inventory.egg}/1) + 🍯 1 Mel (${(inventory as any).mel ?? 0}/1) • Nv6`, canCraft: farmLevel >= 6 && ((inventory as any).farinha ?? 0) >= 1 && (inventory.egg ?? 0) >= 1 && ((inventory as any).mel ?? 0) >= 1, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftWaffelMel(e) },
                 ].map((r, i) => (
                   <div key={i} className="bg-white border-2 border-orange-100 rounded-xl p-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">

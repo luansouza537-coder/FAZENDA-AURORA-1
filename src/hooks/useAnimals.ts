@@ -86,6 +86,9 @@ export type InventoryState = {
   doce_leite_bufala: number;
   burrata: number;
   massa_fresca: number;
+  crepe_rustico: number;
+  pao_rustico: number;
+  waffle_mel: number;
 };
 
 export interface UseAnimalsProps {

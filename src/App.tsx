@@ -826,6 +826,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       doce_leite_bufala: 0,
       burrata: 0,
       massa_fresca: 0,
+      crepe_rustico: 0, pao_rustico: 0, waffle_mel: 0,
     });
     setRacaoOrganicaDays(0);
     setFertilizanteDays(0);
@@ -1808,7 +1809,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if ((itemType as string) === 'manteiga_bufala') return 70;
     if ((itemType as string) === 'doce_leite_bufala') return 95;
     if ((itemType as string) === 'burrata') return 220;
-    if ((itemType as string) === 'massa_fresca') return 130;
+    if ((itemType as string) === 'massa_fresca') return 78;
+    if ((itemType as string) === 'crepe_rustico') return 35;
+    if ((itemType as string) === 'pao_rustico') return 30;
+    if ((itemType as string) === 'waffle_mel') return 90;
     return 0;
   };
 
@@ -1992,6 +1996,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     craftDoceLeitelBufala,
     craftBurrata,
     craftMassaFresca,
+    craftCrepeRustico,
+    craftPaoRustico,
+    craftWaffelMel,
     sellProduct,
     sellAllItemsNoConfirm,
     buyFarinha,
@@ -6646,6 +6653,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             craftPonchoLhama, craftMantaLhama,
             craftIogurteBufala, craftManteiganBufala, craftDoceLeitelBufala, craftBurrata,
             craftMassaFresca,
+            craftCrepeRustico,
+            craftPaoRustico,
+            craftWaffelMel,
           }}
           onClose={() => setShowQueijariaModal(false)}
           onOpenMelhorias={() => setShowUpgradesModal(true)}

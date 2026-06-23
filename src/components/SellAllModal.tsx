@@ -35,7 +35,10 @@ const SellAllModal: React.FC<SellAllModalProps> = ({
     { key: 'manteiga_bufala', label: 'Manteiga de Búfala', qty: inventory.manteiga_bufala || 0, icon: '🧈' },
     { key: 'doce_leite_bufala', label: 'Doce de Leite Búfala', qty: inventory.doce_leite_bufala || 0, icon: '🍮' },
     { key: 'burrata', label: 'Burrata', qty: inventory.burrata || 0, icon: '🧀' },
-    { key: 'massa_fresca', label: 'Massa Fresca', qty: inventory.massa_fresca || 0, icon: '🍝' },
+    { key: 'massa_fresca', label: 'Massa Fresca de Ov. Ganso', qty: inventory.massa_fresca || 0, icon: '🍝' },
+    { key: 'crepe_rustico', label: 'Crepe Rústico', qty: inventory.crepe_rustico || 0, icon: '🥞' },
+    { key: 'pao_rustico', label: 'Pão Rústico', qty: inventory.pao_rustico || 0, icon: '🥐' },
+    { key: 'waffle_mel', label: 'Waffle de Mel', qty: inventory.waffle_mel || 0, icon: '🧇' },
   ].filter(i => i.qty > 0);
 
   const hasItems = itemsToSell.length > 0;

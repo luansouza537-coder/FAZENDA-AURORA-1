@@ -86,6 +86,9 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   doce_leite_bufala:{ energy: 2, water: 0 },
   burrata:          { energy: 1, water: 0 },
   massa_fresca:     { energy: 1, water: 1 },
+  crepe_rustico:    { energy: 1, water: 0 },
+  pao_rustico:      { energy: 1, water: 1 },
+  waffle_mel:       { energy: 1, water: 1 },
 };
 
 export function useInventory({
@@ -146,6 +149,7 @@ export function useInventory({
     iogurte_bufala: 'laticinios', manteiga_bufala: 'laticinios',
     doce_leite_bufala: 'laticinios', burrata: 'laticinios',
     massa_fresca: 'ovos',
+    crepe_rustico: 'ovos', pao_rustico: 'ovos', waffle_mel: 'organicos',
   };
 
   // --- INVENTORY STATE ---
@@ -232,6 +236,9 @@ export function useInventory({
           doce_leite_bufala: inv.doce_leite_bufala ?? 0,
           burrata: inv.burrata ?? 0,
           massa_fresca: inv.massa_fresca ?? 0,
+          crepe_rustico: inv.crepe_rustico ?? 0,
+          pao_rustico: inv.pao_rustico ?? 0,
+          waffle_mel: inv.waffle_mel ?? 0,
         };
       }
     } catch (e) {}
@@ -312,6 +319,9 @@ export function useInventory({
       doce_leite_bufala: 0,
       burrata: 0,
       massa_fresca: 0,
+      crepe_rustico: 0,
+      pao_rustico: 0,
+      waffle_mel: 0,
     };
   });
 
@@ -1099,7 +1109,10 @@ export function useInventory({
     else if (itemType === 'manteiga_bufala') label = 'Manteiga de Búfala';
     else if (itemType === 'doce_leite_bufala') label = 'Doce de Leite de Búfala';
     else if (itemType === 'burrata') label = 'Burrata';
-    else if (itemType === 'massa_fresca') label = 'Massa Fresca';
+    else if (itemType === 'massa_fresca') label = 'Massa Fresca de Ovo de Ganso';
+    else if (itemType === 'crepe_rustico') label = 'Crepe Rústico';
+    else if (itemType === 'pao_rustico') label = 'Pão Rústico';
+    else if (itemType === 'waffle_mel') label = 'Waffle de Mel';
 
     addLog(`💰 Venda realizada: ${qty} unidades de ${label} por +${profit} moedas!`, 'success');
 
@@ -1184,8 +1197,11 @@ export function useInventory({
     const doceLeiteQty = (inventory as any).doce_leite_bufala || 0;
     const burrataQty = (inventory as any).burrata || 0;
     const massaFrescaQty = (inventory as any).massa_fresca || 0;
+    const crepeRusticoQty = (inventory as any).crepe_rustico || 0;
+    const paoRusticoQty = (inventory as any).pao_rustico || 0;
+    const waffelMelQty = (inventory as any).waffle_mel || 0;
 
-    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + coleteCouroQty + bolsaExoticaQty + fioLhamaQty + cachecolLhamaQty + gorroLhamaQty + luvasLhamaQty + ponchoLhamaQty + mantaLhamaQty + iogurteBufalaQty + mantegaBufalaQty + doceLeiteQty + burrataQty + massaFrescaQty;
+    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + coleteCouroQty + bolsaExoticaQty + fioLhamaQty + cachecolLhamaQty + gorroLhamaQty + luvasLhamaQty + ponchoLhamaQty + mantaLhamaQty + iogurteBufalaQty + mantegaBufalaQty + doceLeiteQty + burrataQty + massaFrescaQty + crepeRusticoQty + paoRusticoQty + waffelMelQty;
 
     if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && butterQty === 0 && yogurtQty === 0 && fertileEggQty === 0 && allExtras === 0) {
       if (!quietValue) {
@@ -1259,6 +1275,9 @@ export function useInventory({
     const doceLeitePrice = getDynamicTransactionPrice('doce_leite_bufala' as any);
     const burrataPrice = getDynamicTransactionPrice('burrata' as any);
     const massaFrescaPrice = getDynamicTransactionPrice('massa_fresca' as any);
+    const crepeRusticoPrice = getDynamicTransactionPrice('crepe_rustico' as any);
+    const paoRusticoPrice = getDynamicTransactionPrice('pao_rustico' as any);
+    const waffelMelPrice = getDynamicTransactionPrice('waffle_mel' as any);
 
     const _lm = getFreightMultiplier ? getFreightMultiplier('laticinios') : 1;
     const _em = getFreightMultiplier ? getFreightMultiplier('ovos') : 1;
@@ -1300,7 +1319,9 @@ export function useInventory({
        kitGourmetQty * getDynamicTransactionPrice('kit_gourmet' as any)) * _xm +
       (iogurteBufalaQty * iogurteBufalaPrice + mantegaBufalaQty * mantegaBufalaPrice +
        doceLeiteQty * doceLeitePrice + burrataQty * burrataPrice) * _lm +
-      massaFrescaQty * massaFrescaPrice * _em
+      massaFrescaQty * massaFrescaPrice * _em +
+      (crepeRusticoQty * crepeRusticoPrice + paoRusticoQty * paoRusticoPrice) * _em +
+      waffelMelQty * waffelMelPrice * _om
     );
 
     if (totalEarningCalculated <= 0) return;
@@ -1341,6 +1362,7 @@ export function useInventory({
       poncho_lhama: 0, manta_lhama: 0,
       iogurte_bufala: 0, manteiga_bufala: 0, doce_leite_bufala: 0, burrata: 0,
       massa_fresca: 0,
+      crepe_rustico: 0, pao_rustico: 0, waffle_mel: 0,
     }));
 
     // Update weekly sales statistics — include ALL sold item types so supply/demand pricing works
@@ -1398,6 +1420,9 @@ export function useInventory({
       if (doceLeiteQty > 0) updated.doce_leite_bufala = (prev.doce_leite_bufala || 0) + doceLeiteQty;
       if (burrataQty > 0) updated.burrata = (prev.burrata || 0) + burrataQty;
       if (massaFrescaQty > 0) updated.massa_fresca = (prev.massa_fresca || 0) + massaFrescaQty;
+      if (crepeRusticoQty > 0) updated.crepe_rustico = (prev.crepe_rustico || 0) + crepeRusticoQty;
+      if (paoRusticoQty > 0) updated.pao_rustico = (prev.pao_rustico || 0) + paoRusticoQty;
+      if (waffelMelQty > 0) updated.waffle_mel = (prev.waffle_mel || 0) + waffelMelQty;
       return updated;
     });
 
@@ -1475,7 +1500,10 @@ export function useInventory({
     if (mantegaBufalaQty > 0) messageParts.push(`${mantegaBufalaQty} manteiga de búfala`);
     if (doceLeiteQty > 0) messageParts.push(`${doceLeiteQty} doce de leite búfala`);
     if (burrataQty > 0) messageParts.push(`${burrataQty} burratas`);
-    if (massaFrescaQty > 0) messageParts.push(`${massaFrescaQty} massas frescas`);
+    if (massaFrescaQty > 0) messageParts.push(`${massaFrescaQty} massas frescas de ovo de ganso`);
+    if (crepeRusticoQty > 0) messageParts.push(`${crepeRusticoQty} crepes rústicos`);
+    if (paoRusticoQty > 0) messageParts.push(`${paoRusticoQty} pães rústicos`);
+    if (waffelMelQty > 0) messageParts.push(`${waffelMelQty} waffles de mel`);
 
     addLog(`💰 Você vendeu tudo: ${messageParts.join(', ')} por ${totalEarningCalculated} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));
@@ -1688,10 +1716,53 @@ export function useInventory({
     if ((inventory.farinha ?? 0) < 1) { addLog('🌾 Falta Farinha! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Farinha!', event); return; }
     setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) - 1, farinha: (prev.farinha ?? 0) - 1, massa_fresca: (prev.massa_fresca ?? 0) + 1 }));
     applyCraftCost('massa_fresca');
-    addLog('🍝 Você preparou 1 Massa Fresca com ovo de ganso!', 'success');
+    addLog('🍝 Você preparou 1 Massa Fresca de Ovo de Ganso!', 'success');
     setFarmXp(prev => prev + 4);
     triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🍝', '+1 Massa Fresca', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+    spawnFeedback('🍝', '+1 M.Fresca Ganso', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  // --- CREPE RÚSTICO ---
+  const craftCrepeRustico = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 3) { addLog('🥞 Crepe Rústico requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.egg ?? 0) < 1) { addLog('🥚 Falta Ovo! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ovo!', event); return; }
+    if ((inventory.farinha ?? 0) < 1) { addLog('🌾 Falta Farinha! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Farinha!', event); return; }
+    setInventory(prev => ({ ...prev, egg: (prev.egg ?? 0) - 1, farinha: (prev.farinha ?? 0) - 1, crepe_rustico: (prev.crepe_rustico ?? 0) + 1 }));
+    applyCraftCost('crepe_rustico');
+    addLog('🥞 Você preparou 1 Crepe Rústico!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥞', '+1 Crepe Rústico', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  // --- PÃO RÚSTICO ---
+  const craftPaoRustico = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 3) { addLog('🥐 Pão Rústico requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.farinha ?? 0) < 2) { addLog('🌾 Falta Farinha! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Farinha!', event); return; }
+    if ((inventory.milk ?? 0) < 1) { addLog('🥛 Falta Leite! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Leite!', event); return; }
+    setInventory(prev => ({ ...prev, farinha: (prev.farinha ?? 0) - 2, milk: (prev.milk ?? 0) - 1, pao_rustico: (prev.pao_rustico ?? 0) + 1 }));
+    applyCraftCost('pao_rustico');
+    addLog('🥐 Você preparou 1 Pão Rústico!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥐', '+1 Pão Rústico', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  // --- WAFFLE DE MEL ---
+  const craftWaffelMel = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 6) { addLog('🧇 Waffle de Mel requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.farinha ?? 0) < 1) { addLog('🌾 Falta Farinha! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Farinha!', event); return; }
+    if ((inventory.egg ?? 0) < 1) { addLog('🥚 Falta Ovo! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ovo!', event); return; }
+    if ((inventory as any).mel < 1) { addLog('🍯 Falta Mel! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Mel!', event); return; }
+    setInventory(prev => ({ ...prev, farinha: (prev.farinha ?? 0) - 1, egg: (prev.egg ?? 0) - 1, mel: (prev as any).mel - 1, waffle_mel: (prev as any).waffle_mel + 1 }));
+    applyCraftCost('waffle_mel');
+    addLog('🧇 Você preparou 1 Waffle de Mel!', 'success');
+    setFarmXp(prev => prev + 5);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧇', '+1 Waffle de Mel', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   // --- BUY FUNCTIONS ---
@@ -1802,6 +1873,9 @@ export function useInventory({
     craftDoceLeitelBufala,
     craftBurrata,
     craftMassaFresca,
+    craftCrepeRustico,
+    craftPaoRustico,
+    craftWaffelMel,
     // Sell functions
     sellProduct,
     sellAllItemsNoConfirm,
