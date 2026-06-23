@@ -160,6 +160,8 @@ export default function GameSidebar({
                       { key: 'alpaca_wool', label: '🦙 Lã Alpaca', qty: inventory.alpaca_wool ?? 0, priceKey: 'alpaca_wool' as any },
                       { key: 'angora_wool', label: '🐰 Lã Angorá', qty: inventory.angora_wool ?? 0, priceKey: 'angora_wool' as any },
                       { key: 'humus', label: '🪱 Húmus', qty: inventory.humus ?? 0, priceKey: 'humus' as any },
+                      { key: 'minhoca_viva', label: '🪱 Minhoca Viva', qty: (inventory as any).minhoca_viva ?? 0, priceKey: 'minhoca_viva' as any },
+                      { key: 'biofertilizante', label: '🧴 Biofertilizante', qty: (inventory as any).biofertilizante ?? 0, priceKey: 'biofertilizante' as any },
                       { key: 'muco', label: '🐌 Muco', qty: inventory.muco ?? 0, priceKey: 'muco' as any },
                       { key: 'seda_bruta', label: '🐛 Seda Bruta', qty: inventory.seda_bruta ?? 0, priceKey: 'seda_bruta' as any },
                       { key: 'coxa_ra', label: '🐸 Coxa Rã', qty: inventory.coxa_ra ?? 0, priceKey: 'coxa_ra' as any },

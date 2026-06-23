@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface Inventory { milk: number; wool: number; cheese: number; scarf: number; egg?: number; mayo?: number; queijoCoalho?: number; queijoMucarela?: number; queijoBrie?: number; [key: string]: number | undefined; }
+interface Inventory { milk: number; wool: number; cheese: number; scarf: number; egg?: number; mayo?: number; queijoCoalho?: number; queijoMucarela?: number; queijoBrie?: number; minhoca_viva?: number; biofertilizante?: number; [key: string]: number | undefined; }
 
 interface SellAllModalProps {
   inventory: Inventory;
@@ -39,6 +39,8 @@ const SellAllModal: React.FC<SellAllModalProps> = ({
     { key: 'crepe_rustico', label: 'Crepe Rústico', qty: inventory.crepe_rustico || 0, icon: '🥞' },
     { key: 'pao_rustico', label: 'Pão Rústico', qty: inventory.pao_rustico || 0, icon: '🥐' },
     { key: 'waffle_mel', label: 'Waffle de Mel', qty: inventory.waffle_mel || 0, icon: '🧇' },
+    { key: 'minhoca_viva', label: 'Minhoca Viva', qty: inventory.minhoca_viva || 0, icon: '🪱' },
+    { key: 'biofertilizante', label: 'Biofertilizante Líquido', qty: inventory.biofertilizante || 0, icon: '🧴' },
   ].filter(i => i.qty > 0);
 
   const hasItems = itemsToSell.length > 0;

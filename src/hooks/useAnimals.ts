@@ -89,6 +89,8 @@ export type InventoryState = {
   crepe_rustico: number;
   pao_rustico: number;
   waffle_mel: number;
+  minhoca_viva: number;
+  biofertilizante: number;
 };
 
 export interface UseAnimalsProps {
@@ -1100,8 +1102,8 @@ export function useAnimals({
     const { feedType } = getAnimalFeedType(type);
     const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
 
-    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : getRandomName(type);
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
+    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? `Minhoca #${newId}` : getRandomName(type);
 
     // Custom initial stats
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80

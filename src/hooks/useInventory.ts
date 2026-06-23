@@ -89,6 +89,7 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   crepe_rustico:    { energy: 1, water: 0 },
   pao_rustico:      { energy: 1, water: 1 },
   waffle_mel:       { energy: 1, water: 1 },
+  biofertilizante:  { energy: 1, water: 1 },
 };
 
 export function useInventory({
@@ -150,6 +151,7 @@ export function useInventory({
     doce_leite_bufala: 'laticinios', burrata: 'laticinios',
     massa_fresca: 'ovos',
     crepe_rustico: 'ovos', pao_rustico: 'ovos', waffle_mel: 'organicos',
+    minhoca_viva: 'organicos', biofertilizante: 'organicos',
   };
 
   // --- INVENTORY STATE ---
@@ -239,6 +241,8 @@ export function useInventory({
           crepe_rustico: inv.crepe_rustico ?? 0,
           pao_rustico: inv.pao_rustico ?? 0,
           waffle_mel: inv.waffle_mel ?? 0,
+          minhoca_viva: inv.minhoca_viva ?? 0,
+          biofertilizante: inv.biofertilizante ?? 0,
         };
       }
     } catch (e) {}
@@ -322,6 +326,8 @@ export function useInventory({
       crepe_rustico: 0,
       pao_rustico: 0,
       waffle_mel: 0,
+      minhoca_viva: 0,
+      biofertilizante: 0,
     };
   });
 
@@ -1200,8 +1206,10 @@ export function useInventory({
     const crepeRusticoQty = (inventory as any).crepe_rustico || 0;
     const paoRusticoQty = (inventory as any).pao_rustico || 0;
     const waffelMelQty = (inventory as any).waffle_mel || 0;
+    const minhocaVivaQty = (inventory as any).minhoca_viva || 0;
+    const biofertilizanteQty = (inventory as any).biofertilizante || 0;
 
-    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + coleteCouroQty + bolsaExoticaQty + fioLhamaQty + cachecolLhamaQty + gorroLhamaQty + luvasLhamaQty + ponchoLhamaQty + mantaLhamaQty + iogurteBufalaQty + mantegaBufalaQty + doceLeiteQty + burrataQty + massaFrescaQty + crepeRusticoQty + paoRusticoQty + waffelMelQty;
+    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + coleteCouroQty + bolsaExoticaQty + fioLhamaQty + cachecolLhamaQty + gorroLhamaQty + luvasLhamaQty + ponchoLhamaQty + mantaLhamaQty + iogurteBufalaQty + mantegaBufalaQty + doceLeiteQty + burrataQty + massaFrescaQty + crepeRusticoQty + paoRusticoQty + waffelMelQty + minhocaVivaQty + biofertilizanteQty;
 
     if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && butterQty === 0 && yogurtQty === 0 && fertileEggQty === 0 && allExtras === 0) {
       if (!quietValue) {
@@ -1278,6 +1286,8 @@ export function useInventory({
     const crepeRusticoPrice = getDynamicTransactionPrice('crepe_rustico' as any);
     const paoRusticoPrice = getDynamicTransactionPrice('pao_rustico' as any);
     const waffelMelPrice = getDynamicTransactionPrice('waffle_mel' as any);
+    const minhocaVivaPrice = getDynamicTransactionPrice('minhoca_viva' as any);
+    const biofertilizantePrice = getDynamicTransactionPrice('biofertilizante' as any);
 
     const _lm = getFreightMultiplier ? getFreightMultiplier('laticinios') : 1;
     const _em = getFreightMultiplier ? getFreightMultiplier('ovos') : 1;
@@ -1321,7 +1331,8 @@ export function useInventory({
        doceLeiteQty * doceLeitePrice + burrataQty * burrataPrice) * _lm +
       massaFrescaQty * massaFrescaPrice * _em +
       (crepeRusticoQty * crepeRusticoPrice + paoRusticoQty * paoRusticoPrice) * _em +
-      waffelMelQty * waffelMelPrice * _om
+      waffelMelQty * waffelMelPrice * _om +
+      (minhocaVivaQty * minhocaVivaPrice + biofertilizanteQty * biofertilizantePrice) * _om
     );
 
     if (totalEarningCalculated <= 0) return;
@@ -1363,6 +1374,7 @@ export function useInventory({
       iogurte_bufala: 0, manteiga_bufala: 0, doce_leite_bufala: 0, burrata: 0,
       massa_fresca: 0,
       crepe_rustico: 0, pao_rustico: 0, waffle_mel: 0,
+      minhoca_viva: 0, biofertilizante: 0,
     }));
 
     // Update weekly sales statistics — include ALL sold item types so supply/demand pricing works
@@ -1423,6 +1435,8 @@ export function useInventory({
       if (crepeRusticoQty > 0) updated.crepe_rustico = (prev.crepe_rustico || 0) + crepeRusticoQty;
       if (paoRusticoQty > 0) updated.pao_rustico = (prev.pao_rustico || 0) + paoRusticoQty;
       if (waffelMelQty > 0) updated.waffle_mel = (prev.waffle_mel || 0) + waffelMelQty;
+      if (minhocaVivaQty > 0) updated.minhoca_viva = (prev.minhoca_viva || 0) + minhocaVivaQty;
+      if (biofertilizanteQty > 0) updated.biofertilizante = (prev.biofertilizante || 0) + biofertilizanteQty;
       return updated;
     });
 
@@ -1504,6 +1518,8 @@ export function useInventory({
     if (crepeRusticoQty > 0) messageParts.push(`${crepeRusticoQty} crepes rústicos`);
     if (paoRusticoQty > 0) messageParts.push(`${paoRusticoQty} pães rústicos`);
     if (waffelMelQty > 0) messageParts.push(`${waffelMelQty} waffles de mel`);
+    if (minhocaVivaQty > 0) messageParts.push(`${minhocaVivaQty} minhocas vivas`);
+    if (biofertilizanteQty > 0) messageParts.push(`${biofertilizanteQty} biofertilizantes`);
 
     addLog(`💰 Você vendeu tudo: ${messageParts.join(', ')} por ${totalEarningCalculated} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));
@@ -1765,6 +1781,19 @@ export function useInventory({
     spawnFeedback('🧇', '+1 Waffle de Mel', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
+  // --- BIOFERTILIZANTE LÍQUIDO ---
+  const craftBiofertilizante = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 6) { addLog('🧴 Biofertilizante requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.humus ?? 0) < 3) { addLog('🪱 Falta Húmus! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Húmus!', event); return; }
+    setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) - 3, biofertilizante: (prev as any).biofertilizante + 1 }));
+    applyCraftCost('biofertilizante');
+    addLog('🧴 Você produziu 1 Biofertilizante Líquido!', 'success');
+    setFarmXp(prev => prev + 4);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧴', '+1 Biofertilizante', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
   // --- BUY FUNCTIONS ---
 
   const buyFarinha = (qty: number, event: React.MouseEvent) => {
@@ -1876,6 +1905,7 @@ export function useInventory({
     craftCrepeRustico,
     craftPaoRustico,
     craftWaffelMel,
+    craftBiofertilizante,
     // Sell functions
     sellProduct,
     sellAllItemsNoConfirm,

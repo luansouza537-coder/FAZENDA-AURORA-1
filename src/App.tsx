@@ -873,6 +873,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       quail_egg: [22, 22, 22, 22, 22, 22, 22],
       alpaca_wool: [65, 65, 65, 65, 65, 65, 65],
       humus: [22, 22, 22, 22, 22, 22, 22],
+      minhoca_viva: [18, 18, 18, 18, 18, 18, 18],
+      biofertilizante: [55, 55, 55, 55, 55, 55, 55],
       muco: [120, 120, 120, 120, 120, 120, 120],
       angora_wool: [90, 90, 90, 90, 90, 90, 90],
       seda_bruta: [100, 100, 100, 100, 100, 100, 100],
@@ -1707,7 +1709,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Storage limits for Celeiro and Câmara Fria
-  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','sabonete_natural']);
+  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','sabonete_natural','minhoca_viva','biofertilizante']);
   const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','muco','creme_cosmetico']);
 
   const getCeleiroLimit = () => ([30, 60, 120, 250, 999][celeiroLevel] ?? 30);
@@ -1765,6 +1767,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'quail_egg') return farmLevel >= 5 ? 18 : 16;
     if (itemType === 'alpaca_wool') return farmLevel >= 6 ? 75 : 65;
     if (itemType === 'humus') return 22;    // rebalanceado — sem custo de ração
+    if (itemType === 'minhoca_viva') return 18;
+    if (itemType === 'biofertilizante') return 55;
     if (itemType === 'muco') return 35;     // era 120 — Grupo B (OP sem ração)
     if (itemType === 'angora_wool') return 90;
     if (itemType === 'seda_bruta') return 100;
@@ -1999,6 +2003,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     craftCrepeRustico,
     craftPaoRustico,
     craftWaffelMel,
+    craftBiofertilizante,
     sellProduct,
     sellAllItemsNoConfirm,
     buyFarinha,
@@ -4355,7 +4360,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           copy.happiness = Math.min(100, copy.happiness + 2);
         }
 
-        // Minhoca: produz 1 húmus a cada 3 dias
+        // Minhoca: produz 1 húmus a cada 3 dias + 1 minhoca viva a cada 5 dias
         if (a.type === 'minhoca' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
           const humusAmt = specialization === 'organica' ? 2 : 1;
           setTimeout(() => {
@@ -4365,8 +4370,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               return { ...prev, humus: newTotal };
             });
           }, 0);
-          logsToAdd.push({ msg: `🪱 ${a.name} (minhoca) produziu ${humusAmt} húmus!`, type: 'success' });
+          logsToAdd.push({ msg: `🪱 ${a.name} produziu ${humusAmt} húmus!`, type: 'success' });
           updateMissionProgress('organic_day', 1, nextDayValue);
+        }
+        if (a.type === 'minhoca' && a.isAdult !== false && (a.age || 0) > 0 && (a.age || 0) % 5 === 0) {
+          setTimeout(() => {
+            setInventory(prev => ({ ...prev, minhoca_viva: (prev as any).minhoca_viva + 1 }));
+          }, 0);
+          logsToAdd.push({ msg: `🪱 ${a.name} gerou 1 Minhoca Viva!`, type: 'success' });
         }
 
         // Caracol: produz 1 muco a cada 3 dias (2x na chuva)
@@ -4763,6 +4774,36 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             }
           });
         }
+      }
+
+      // --- LAYER 4: Auto-reprodução de minhocas ---
+      {
+        const minhocas = finalAnimalsWithAdulthood.filter(a => a.type === 'minhoca' && a.isAdult !== false);
+        const MAX_MINHOCAS = 20;
+        minhocas.forEach(a => {
+          if (finalAnimalsWithAdulthood.filter(x => x.type === 'minhoca').length >= MAX_MINHOCAS) return;
+          if ((a.age || 0) > 0 && (a.age || 0) % 10 === 0) {
+            const newId = finalAnimalsWithAdulthood.length > 0 ? Math.max(...finalAnimalsWithAdulthood.map(x => x.id)) + 500 + Math.floor(Math.random() * 100) : 500;
+            const filhote: Animal = {
+              id: newId,
+              type: 'minhoca',
+              name: `Minhoca #${newId}`,
+              hunger: 100,
+              happiness: 100,
+              consecutiveHappyDays: 0,
+              daysBelow80: 0,
+              isBestFriend: false,
+              trait: 'trabalhadora' as any,
+              age: 0,
+              maxAge: Math.round(365 * (1 + (Math.random() * 0.4 - 0.2))),
+              isAdult: false,
+              adulthoodDay: nextDayValue + 5,
+              hasProducedToday: false,
+            };
+            finalAnimalsWithAdulthood.push(filhote);
+            logsToAdd.push({ msg: `🪱 ${a.name} se reproduziu! Nova minhoca chegou à fazenda!`, type: 'success' });
+          }
+        });
       }
 
       // Reset weeklyProduction every 7 days
@@ -6694,6 +6735,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             craftCrepeRustico,
             craftPaoRustico,
             craftWaffelMel,
+            craftBiofertilizante,
           }}
           onClose={() => setShowQueijariaModal(false)}
           onOpenMelhorias={() => setShowUpgradesModal(true)}
