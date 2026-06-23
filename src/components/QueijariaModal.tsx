@@ -321,7 +321,6 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                   { label: 'Crepe Rústico', emoji: '🥞', req: `🥚 1 Ovo (${inventory.egg}/1) + 🌾 1 Farinha (${(inventory as any).farinha ?? 0}/1) • Nv3`, canCraft: farmLevel >= 3 && (inventory.egg ?? 0) >= 1 && ((inventory as any).farinha ?? 0) >= 1, reqLevel: 3, onClick: (e: React.MouseEvent) => c.craftCrepeRustico(e) },
                   { label: 'Pão Rústico', emoji: '🥐', req: `🌾 2 Farinha (${(inventory as any).farinha ?? 0}/2) + 🥛 1 Leite (${inventory.milk}/1) • Nv3`, canCraft: farmLevel >= 3 && ((inventory as any).farinha ?? 0) >= 2 && (inventory.milk ?? 0) >= 1, reqLevel: 3, onClick: (e: React.MouseEvent) => c.craftPaoRustico(e) },
                   { label: 'Waffle de Mel', emoji: '🧇', req: `🌾 1 Farinha (${(inventory as any).farinha ?? 0}/1) + 🥚 1 Ovo (${inventory.egg}/1) + 🍯 1 Mel (${(inventory as any).mel ?? 0}/1) • Nv6`, canCraft: farmLevel >= 6 && ((inventory as any).farinha ?? 0) >= 1 && (inventory.egg ?? 0) >= 1 && ((inventory as any).mel ?? 0) >= 1, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftWaffelMel(e) },
-                  { label: 'Biofertilizante Líquido', emoji: '🧴', req: `🪱 3 Húmus (${inventory.humus ?? 0}/3) • Nv6`, canCraft: farmLevel >= 6 && (inventory.humus ?? 0) >= 3, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftBiofertilizante(e) },
                 ].map((r, i) => (
                   <div key={i} className="bg-white border-2 border-orange-100 rounded-xl p-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
@@ -352,6 +351,7 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                   { label: 'Sabonete Natural', emoji: '🧼', req: `🐌 1 Muco (${inventory.muco ?? 0}/1) + 🧈 1 Manteiga (${inventory.butter ?? 0}/1) + 🥛 1 Leite (${inventory.milk}/1) • Nv9`, canCraft: farmLevel >= 9 && (inventory.muco ?? 0) >= 1 && (inventory.butter ?? 0) >= 1 && inventory.milk >= 1, reqLevel: 9, onClick: (e: React.MouseEvent) => c.craftSaboneteNatural(e) },
                   { label: 'Ração Orgânica (+3d buff)', emoji: '🌿', req: `🪱 2 Húmus (${inventory.humus ?? 0}/2) • Nv6`, canCraft: farmLevel >= 6 && (inventory.humus ?? 0) >= 2, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftRacaoOrganica(e) },
                   { label: 'Fertilizante (+5d buff)', emoji: '🌱', req: `🪱 3 Húmus (${inventory.humus ?? 0}/3) • Nv8`, canCraft: farmLevel >= 8 && (inventory.humus ?? 0) >= 3, reqLevel: 8, onClick: (e: React.MouseEvent) => c.craftFertilizante(e) },
+                  { label: 'Biofertilizante Líquido', emoji: '🧴', req: `🪱 3 Húmus (${inventory.humus ?? 0}/3) • Nv6`, canCraft: farmLevel >= 6 && (inventory.humus ?? 0) >= 3, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftBiofertilizante(e) },
                 ].map((r, i) => (
                   <div key={i} className="bg-white border-2 border-green-100 rounded-xl p-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">

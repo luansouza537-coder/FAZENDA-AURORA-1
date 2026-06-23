@@ -151,26 +151,6 @@ export default function GameSidebar({
                       { key: 'ovo_defumado', label: '🥚 Ovo Defumado', qty: (inventory as any).ovo_defumado ?? 0, priceKey: 'ovo_defumado' as any },
                       { key: 'conserva_codorna', label: '🥚 Conserva Codorna', qty: (inventory as any).conserva_codorna ?? 0, priceKey: 'conserva_codorna' as any },
                     ]
-                  },
-                  {
-                    title: '🐾 Animais Especiais',
-                    bg: 'bg-green-50/60 border-green-200',
-                    items: [
-                      { key: 'quail_egg', label: '🐦 Ov. Codorna', qty: inventory.quail_egg ?? 0, priceKey: 'quail_egg' as any },
-                      { key: 'alpaca_wool', label: '🦙 Lã Alpaca', qty: inventory.alpaca_wool ?? 0, priceKey: 'alpaca_wool' as any },
-                      { key: 'angora_wool', label: '🐰 Lã Angorá', qty: inventory.angora_wool ?? 0, priceKey: 'angora_wool' as any },
-                      { key: 'humus', label: '🪱 Húmus', qty: inventory.humus ?? 0, priceKey: 'humus' as any },
-                      { key: 'minhoca_viva', label: '🪱 Minhoca Viva', qty: (inventory as any).minhoca_viva ?? 0, priceKey: 'minhoca_viva' as any },
-                      { key: 'biofertilizante', label: '🧴 Biofertilizante', qty: (inventory as any).biofertilizante ?? 0, priceKey: 'biofertilizante' as any },
-                      { key: 'muco', label: '🐌 Muco', qty: inventory.muco ?? 0, priceKey: 'muco' as any },
-                      { key: 'seda_bruta', label: '🐛 Seda Bruta', qty: inventory.seda_bruta ?? 0, priceKey: 'seda_bruta' as any },
-                      { key: 'coxa_ra', label: '🐸 Coxa Rã', qty: inventory.coxa_ra ?? 0, priceKey: 'coxa_ra' as any },
-                      { key: 'carne_avestruz', label: '🦤 Carne Avestruz', qty: inventory.carne_avestruz ?? 0, priceKey: 'carne_avestruz' as any },
-                      { key: 'couro_avestruz', label: '🦤 Couro Avestruz', qty: inventory.couro_avestruz ?? 0, priceKey: 'couro_avestruz' as any },
-                      { key: 'carne_jacare', label: '🐊 Carne Jacaré', qty: inventory.carne_jacare ?? 0, priceKey: 'carne_jacare' as any },
-                      { key: 'couro_jacare', label: '🐊 Couro Jacaré', qty: inventory.couro_jacare ?? 0, priceKey: 'couro_jacare' as any },
-                      ...(farmLevel >= 10 ? [{ key: 'folha_amoreira', label: '🌿 Folha Amoreira', qty: inventory.folha_amoreira ?? 0 }] : []),
-                    ]
                   }
                 ];
 
@@ -597,7 +577,77 @@ export default function GameSidebar({
                     🧇 Waffle de Mel ({getActualSellPrice('waffle_mel' as any)}💰)
                   </button>
                   )}
+                  {/* Produtos orgânicos e exóticos — ex-seção Animais Especiais */}
+                  {(inventory.quail_egg ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('quail_egg' as any, 1, e)} disabled={(inventory.quail_egg ?? 0) < 1}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
+                    🐦 Ov.Codorna · {inventory.quail_egg ?? 0}u ({getActualSellPrice('quail_egg' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.alpaca_wool ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('alpaca_wool' as any, 1, e)} disabled={(inventory.alpaca_wool ?? 0) < 1}
+                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300">
+                    🦙 Lã Alpaca · {inventory.alpaca_wool ?? 0}u ({getActualSellPrice('alpaca_wool' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.angora_wool ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('angora_wool' as any, 1, e)} disabled={(inventory.angora_wool ?? 0) < 1}
+                    className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 disabled:opacity-40 text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-indigo-300">
+                    🐰 Lã Angorá · {inventory.angora_wool ?? 0}u ({getActualSellPrice('angora_wool' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.seda_bruta ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('seda_bruta' as any, 1, e)} disabled={(inventory.seda_bruta ?? 0) < 1}
+                    className="bg-sky-50 hover:bg-sky-100 border border-sky-300 disabled:opacity-40 text-sky-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-sky-300">
+                    🐛 Seda Bruta · {inventory.seda_bruta ?? 0}u ({getActualSellPrice('seda_bruta' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.humus ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('humus' as any, 1, e)} disabled={(inventory.humus ?? 0) < 1}
+                    className="bg-lime-50 hover:bg-lime-100 border border-lime-300 disabled:opacity-40 text-lime-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-lime-300">
+                    🪱 Húmus · {inventory.humus ?? 0}u ({getActualSellPrice('humus' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).minhoca_viva ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('minhoca_viva' as any, 1, e)} disabled={((inventory as any).minhoca_viva ?? 0) < 1}
+                    className="bg-lime-50 hover:bg-lime-100 border border-lime-300 disabled:opacity-40 text-lime-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-lime-300">
+                    🪱 Minhoca Viva · {(inventory as any).minhoca_viva ?? 0}u ({getActualSellPrice('minhoca_viva' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).biofertilizante ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('biofertilizante' as any, 1, e)} disabled={((inventory as any).biofertilizante ?? 0) < 1}
+                    className="bg-green-50 hover:bg-green-100 border border-green-300 disabled:opacity-40 text-green-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-green-300">
+                    🧴 Biofertilizante · {(inventory as any).biofertilizante ?? 0}u ({getActualSellPrice('biofertilizante' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.muco ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('muco' as any, 1, e)} disabled={(inventory.muco ?? 0) < 1}
+                    className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300">
+                    🐌 Muco · {inventory.muco ?? 0}u ({getActualSellPrice('muco' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.coxa_ra ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('coxa_ra' as any, 1, e)} disabled={(inventory.coxa_ra ?? 0) < 1}
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300">
+                    🐸 Coxa Rã · {inventory.coxa_ra ?? 0}u ({getActualSellPrice('coxa_ra' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.carne_avestruz ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('carne_avestruz' as any, 1, e)} disabled={(inventory.carne_avestruz ?? 0) < 1}
+                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
+                    🦤 Carne Avestruz · {inventory.carne_avestruz ?? 0}u ({getActualSellPrice('carne_avestruz' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.carne_jacare ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('carne_jacare' as any, 1, e)} disabled={(inventory.carne_jacare ?? 0) < 1}
+                    className="bg-green-50 hover:bg-green-100 border border-green-300 disabled:opacity-40 text-green-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
+                    🐊 Carne Jacaré · {inventory.carne_jacare ?? 0}u ({getActualSellPrice('carne_jacare' as any)}💰)
+                  </button>
+                  )}
                 </div>
+                {farmLevel >= 10 && (inventory.folha_amoreira ?? 0) > 0 && (
+                  <div className="mt-2 text-[9px] font-mono text-stone-500 text-center">🌿 Folha Amoreira: {inventory.folha_amoreira ?? 0}u (insumo — não vendável)</div>
+                )}
 
               </div>
 
