@@ -441,10 +441,10 @@ export function useInventory({
       return;
     }
     setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) - 3 }));
-    setQueijosEmMaturacao(prev => [...prev, { tipo: 'buffalo_mozzarella', diasRestantes: 5 }]);
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'buffalo_mozzarella', diasRestantes: 10 }]);
     setTotalQueijosFabricados(prev => prev + 1);
     applyCraftCost('buffalo_mozzarella');
-    addLog('🧀 Iniciou a maturação de Muçarela de Búfala (5 dias).', 'success');
+    addLog('🧀 Iniciou a maturação de Muçarela de Búfala (10 dias).', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', 'Muçarela Búfala', event);
   };
