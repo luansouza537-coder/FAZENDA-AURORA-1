@@ -74,6 +74,18 @@ export type InventoryState = {
   queijo_parmesao: number;
   queijo_serra: number;
   kit_gourmet: number;
+  farinha: number;
+  fio_lhama: number;
+  cachecol_lhama: number;
+  gorro_lhama: number;
+  luvas_lhama: number;
+  poncho_lhama: number;
+  manta_lhama: number;
+  iogurte_bufala: number;
+  manteiga_bufala: number;
+  doce_leite_bufala: number;
+  burrata: number;
+  massa_fresca: number;
 };
 
 export interface UseAnimalsProps {
