@@ -511,6 +511,72 @@ export default function GameSidebar({
                     🍲 Sopa ({getActualSellPrice('sopa_cogumelo' as any)}💰)
                   </button>
                   )}
+                  {(inventory.fio_lhama ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('fio_lhama' as any, 1, e)} disabled={(inventory.fio_lhama ?? 0) < 1}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
+                    🧵 Fio Lhama ({getActualSellPrice('fio_lhama' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.cachecol_lhama ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('cachecol_lhama' as any, 1, e)} disabled={(inventory.cachecol_lhama ?? 0) < 1}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
+                    🧣 Cachecol Lhama ({getActualSellPrice('cachecol_lhama' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.gorro_lhama ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('gorro_lhama' as any, 1, e)} disabled={(inventory.gorro_lhama ?? 0) < 1}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
+                    🎩 Gorro Lhama ({getActualSellPrice('gorro_lhama' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.luvas_lhama ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('luvas_lhama' as any, 1, e)} disabled={(inventory.luvas_lhama ?? 0) < 1}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
+                    🧤 Luvas Lhama ({getActualSellPrice('luvas_lhama' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.poncho_lhama ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('poncho_lhama' as any, 1, e)} disabled={(inventory.poncho_lhama ?? 0) < 1}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
+                    🥻 Poncho Lhama ({getActualSellPrice('poncho_lhama' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.manta_lhama ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('manta_lhama' as any, 1, e)} disabled={(inventory.manta_lhama ?? 0) < 1}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
+                    🛋️ Manta Lhama ({getActualSellPrice('manta_lhama' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.iogurte_bufala ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('iogurte_bufala' as any, 1, e)} disabled={(inventory.iogurte_bufala ?? 0) < 1}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
+                    🥛 Iog.Búfala ({getActualSellPrice('iogurte_bufala' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.manteiga_bufala ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('manteiga_bufala' as any, 1, e)} disabled={(inventory.manteiga_bufala ?? 0) < 1}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
+                    🧈 Mant.Búfala ({getActualSellPrice('manteiga_bufala' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.doce_leite_bufala ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('doce_leite_bufala' as any, 1, e)} disabled={(inventory.doce_leite_bufala ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🍮 Doce Leite Búfala ({getActualSellPrice('doce_leite_bufala' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.burrata ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('burrata' as any, 1, e)} disabled={(inventory.burrata ?? 0) < 1}
+                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
+                    🧀 Burrata ({getActualSellPrice('burrata' as any)}💰)
+                  </button>
+                  )}
+                  {(inventory.massa_fresca ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('massa_fresca' as any, 1, e)} disabled={(inventory.massa_fresca ?? 0) < 1}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
+                    🍝 Massa Fresca ({getActualSellPrice('massa_fresca' as any)}💰)
+                  </button>
+                  )}
                 </div>
 
               </div>
@@ -587,10 +653,8 @@ export default function GameSidebar({
                 })}
               </div>
 
-              {/* --- LOJA DE INSUMOS: Farinha e Folha de Amoreira --- */}
-              {farmLevel >= 10 && (
-                <>
-                <div className="mt-4 bg-white/80 p-3 rounded-2xl border-2 border-amber-300 hover:border-amber-400 transition-all flex flex-col gap-2.5 shadow-xs">
+              {/* --- LOJA DE INSUMOS: Farinha --- */}
+              <div className="mt-4 bg-white/80 p-3 rounded-2xl border-2 border-amber-300 hover:border-amber-400 transition-all flex flex-col gap-2.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-sans font-black text-amber-900 text-xs uppercase leading-tight">🌾 Farinha de Trigo</h4>
@@ -621,6 +685,7 @@ export default function GameSidebar({
                   </div>
                 </div>
 
+                {farmLevel >= 10 && (
                 <div className="mt-4 bg-white/80 p-3 rounded-2xl border-2 border-emerald-300 hover:border-emerald-400 transition-all flex flex-col gap-2.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div>
@@ -651,8 +716,7 @@ export default function GameSidebar({
                     </button>
                   </div>
                 </div>
-                </>
-              )}
+                )}
             </div>
 
             {/* --- DIÁRIO DA FAZENDA (ACTION LOGS) --- */}

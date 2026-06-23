@@ -25,6 +25,17 @@ const SellAllModal: React.FC<SellAllModalProps> = ({
     { key: 'queijoCoalho', label: 'Queijo Coalho', qty: inventory.queijoCoalho || 0, icon: '🧀' },
     { key: 'queijoMucarela', label: 'Queijo Muçarela', qty: inventory.queijoMucarela || 0, icon: '🧀' },
     { key: 'queijoBrie', label: 'Queijo Brie', qty: inventory.queijoBrie || 0, icon: '🧀' },
+    { key: 'fio_lhama', label: 'Fio de Lhama', qty: inventory.fio_lhama || 0, icon: '🧵' },
+    { key: 'cachecol_lhama', label: 'Cachecol de Lhama', qty: inventory.cachecol_lhama || 0, icon: '🧣' },
+    { key: 'gorro_lhama', label: 'Gorro de Lhama', qty: inventory.gorro_lhama || 0, icon: '🎩' },
+    { key: 'luvas_lhama', label: 'Luvas de Lhama', qty: inventory.luvas_lhama || 0, icon: '🧤' },
+    { key: 'poncho_lhama', label: 'Poncho de Lhama', qty: inventory.poncho_lhama || 0, icon: '🥻' },
+    { key: 'manta_lhama', label: 'Manta de Lhama', qty: inventory.manta_lhama || 0, icon: '🛋️' },
+    { key: 'iogurte_bufala', label: 'Iogurte de Búfala', qty: inventory.iogurte_bufala || 0, icon: '🥛' },
+    { key: 'manteiga_bufala', label: 'Manteiga de Búfala', qty: inventory.manteiga_bufala || 0, icon: '🧈' },
+    { key: 'doce_leite_bufala', label: 'Doce de Leite Búfala', qty: inventory.doce_leite_bufala || 0, icon: '🍮' },
+    { key: 'burrata', label: 'Burrata', qty: inventory.burrata || 0, icon: '🧀' },
+    { key: 'massa_fresca', label: 'Massa Fresca', qty: inventory.massa_fresca || 0, icon: '🍝' },
   ].filter(i => i.qty > 0);
 
   const hasItems = itemsToSell.length > 0;
