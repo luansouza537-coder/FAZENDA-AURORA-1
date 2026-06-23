@@ -45,7 +45,7 @@ export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
       try {
         const text = ev.target?.result as string;
         const parsed = JSON.parse(text);
-        if (typeof parsed !== 'object' || parsed === null || !('day' in parsed)) {
+        if (typeof parsed !== 'object' || parsed === null || !('currentDay' in parsed || 'day' in parsed)) {
           setImportError('Arquivo inválido — não parece um save da Fazenda Aurora.');
           return;
         }
