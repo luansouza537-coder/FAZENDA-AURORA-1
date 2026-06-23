@@ -42,7 +42,7 @@ const SellAllModal: React.FC<SellAllModalProps> = ({
     { key: 'minhoca_viva', label: 'Minhoca Viva', qty: inventory.minhoca_viva || 0, icon: '🪱' },
     { key: 'biofertilizante', label: 'Biofertilizante Líquido', qty: inventory.biofertilizante || 0, icon: '🧴' },
     { key: 'serum_facial', label: 'Sérum Facial', qty: inventory.serum_facial || 0, icon: '💧' },
-    { key: 'mascara_facial', label: 'Máscara Facial', qty: inventory.mascara_facial || 0, icon: '😷' },
+    { key: 'mascara_facial', label: 'Máscara Facial', qty: inventory.mascara_facial || 0, icon: '🧖' },
   ].filter(i => i.qty > 0);
 
   const hasItems = itemsToSell.length > 0;

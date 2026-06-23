@@ -739,14 +739,14 @@ export function useInventory({
 
   const craftMascaraFacial = (event?: React.MouseEvent) => {
     if (event) event.preventDefault();
-    if (farmLevel < 8) { addLog('😷 Máscara Facial requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (farmLevel < 8) { addLog('🧖 Máscara Facial requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.muco ?? 0) < 3) { addLog('🐌 Falta Muco de Caracol! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Muco!', event); return; }
     setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 3, mascara_facial: (prev.mascara_facial ?? 0) + 1 }));
     applyCraftCost('mascara_facial');
-    addLog('😷 Você formulou 1 Máscara Facial de mucina!', 'success');
+    addLog('🧖 Você formulou 1 Máscara Facial de mucina!', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('😷', '+1 Máscara Facial', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+    spawnFeedback('🧖', '+1 Máscara Facial', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   const craftRacaoOrganica = (event?: React.MouseEvent) => {

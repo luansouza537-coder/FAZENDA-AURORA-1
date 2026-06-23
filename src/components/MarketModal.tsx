@@ -244,7 +244,7 @@ const MarketModal: React.FC<MarketModalProps> = ({
                     { key: 'biofertilizante', label: '🧴 Biofertilizante', base: 55 },
                     { key: 'muco', label: '🐌 Muco de Caracol', base: 48 },
                     { key: 'serum_facial', label: '💧 Sérum Facial', base: 95 },
-                    { key: 'mascara_facial', label: '😷 Máscara Facial', base: 75 },
+                    { key: 'mascara_facial', label: '🧖 Máscara Facial', base: 75 },
                     { key: 'angora_wool', label: '🐇 Lã Angorá', base: 90 },
                     { key: 'seda_bruta', label: '🪲 Seda Bruta', base: 80 },
                     { key: 'coxa_ra', label: '🐸 Coxa de Rã', base: 70 },

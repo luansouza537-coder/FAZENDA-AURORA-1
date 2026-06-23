@@ -434,7 +434,7 @@ export default function GameSidebar({
                   {(inventory.mascara_facial ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('mascara_facial' as any, 1, e)} disabled={(inventory.mascara_facial ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
-                    😷 Máscara Facial ({getActualSellPrice('mascara_facial' as any)}💰)
+                    🧖 Máscara Facial ({getActualSellPrice('mascara_facial' as any)}💰)
                   </button>
                   )}
                   {(inventory.colete_couro ?? 0) > 0 && (
