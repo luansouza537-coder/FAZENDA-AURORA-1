@@ -41,6 +41,7 @@ export interface AnimalListRowProps {
   onCollectWool: (id: number, e: React.MouseEvent) => void;
   onCollectEgg: (id: number, e: React.MouseEvent) => void;
   onSellOx: (id: number, e: React.MouseEvent) => void;
+  onCollectMel?: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
   calculatePorcoValue: (animal: Animal) => number;
   onSellPorco: (id: number, e: React.MouseEvent) => void;
@@ -55,12 +56,13 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   onCollectWool,
   onCollectEgg,
   onSellOx,
+  onCollectMel,
   calculateBoiValue,
   calculatePorcoValue,
   onSellPorco,
 }) => {
   if (animal.type === 'porco') return null;
-  const noHungerAnimal = ['minhoca','caracol'].includes(animal.type);
+  const noHungerAnimal = ['minhoca','caracol','colmeia_abelhas'].includes(animal.type);
   const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
   const valueOfPorcoRow = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
@@ -78,6 +80,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
     lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
     codorna: '🐦', alpaca: '🦙', minhoca: '🪱', caracol: '🐌',
     coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊', porco: '🐷',
+    colmeia_abelhas: '🍯',
   };
   return (
     <div
@@ -122,6 +125,9 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
         {animal.type === 'boi' && animal.isAdult !== false && (
           <button onClick={e => onSellOx(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-red-100 border border-red-300 text-red-800 hover:bg-red-200 cursor-pointer">💰{valueOfOx}</button>
         )}
+        {animal.type === 'colmeia_abelhas' && animal.melReady && (
+          <button onClick={e => onCollectMel?.(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 cursor-pointer">🍯</button>
+        )}
         {animal.type === 'porco' && animal.isAdult !== false && (
           <button onClick={e => onSellPorco(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-red-100 border border-red-300 text-red-800 hover:bg-red-200 cursor-pointer">💰{valueOfPorcoRow}</button>
         )}
@@ -160,6 +166,7 @@ export interface AnimalCardProps {
   onCollectAvestruzPena: (id: number, e: React.MouseEvent) => void;
   onSellAvestruz: (id: number, e: React.MouseEvent) => void;
   onSellJacare: (id: number, e: React.MouseEvent) => void;
+  onCollectMel?: (id: number, e: React.MouseEvent) => void;
   onSellAnimal: (id: number, e: React.MouseEvent) => void;
   onRetireAnimal: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
@@ -209,6 +216,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onCollectAvestruzPena,
   onSellAvestruz,
   onSellJacare,
+  onCollectMel,
   onSellAnimal,
   onRetireAnimal,
   calculateBoiValue,
@@ -239,7 +247,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
   const valueOfPorco = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
 
-  const noHungerAnimal = ['minhoca', 'caracol'].includes(animal.type);
+  const noHungerAnimal = ['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type);
   const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
 
   const isReady = (
@@ -386,7 +394,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
           {/* Animal Badge */}
           <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'minhoca' ? '🪱 Minhoca' : animal.type === 'caracol' ? '🐌 Caracol' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : '🐾 Animal'}
+            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'minhoca' ? '🪱 Minhoca' : animal.type === 'caracol' ? '🐌 Caracol' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
           {animal.trait && (() => {
@@ -431,6 +439,11 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 ? <span className="text-[9px] bg-teal-100 border border-teal-300 text-teal-700 font-black px-1.5 py-0.5 rounded-full">🐌 Muco hoje!</span>
                 : <span className="text-[9px] bg-amber-50 border border-amber-200 text-amber-700 font-black px-1.5 py-0.5 rounded-full">🐌 Muco em {daysLeft}d</span>;
             })()}
+            {animal.type === 'colmeia_abelhas' && (
+              animal.melReady
+                ? <span className="text-[9px] bg-amber-100 border border-amber-400 text-amber-800 font-black px-1.5 py-0.5 rounded-full animate-pulse">🍯 Mel pronto!</span>
+                : <span className="text-[9px] bg-amber-50 border border-amber-200 text-amber-700 font-black px-1.5 py-0.5 rounded-full">🍯 Mel aguardando</span>
+            )}
           </div>
           {/* MECHANIC 3: Cabra — badge de lactação */}
           {animal.type === 'cabra' && (
@@ -622,6 +635,12 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               </>
             )}
             {animal.type === 'jacare' && <span className="select-none">🐊</span>}
+            {animal.type === 'colmeia_abelhas' && (
+              <>
+                <span className="select-none">🍯</span>
+                {animal.melReady && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🐝</span>}
+              </>
+            )}
           </div>
 
           {/* Avatar tooltip */}
@@ -858,6 +877,17 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 🦚 Animal de prestígio — bônus passivos ativos {animal.happiness > 80 ? '✅' : '❌ (felicidade < 80)'}
               </span>
             )}
+            {animal.type === 'colmeia_abelhas' && (
+              animal.melReady ? (
+                <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">
+                  🍯 Mel pronto para colheita!
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">
+                  ⏳ Aguardando próximo ciclo de mel
+                </span>
+              )
+            )}
           </div>
         );
       })()}
@@ -868,7 +898,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {/* Alimentar (Dynamic feed count based on animal type) */}
         {(() => {
           // Animais que não comem ração
-          const noFeedUI = ['minhoca', 'caracol', 'bicho_seda'];
+          const noFeedUI = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
           if (noFeedUI.includes(animal.type)) {
             return <span className="text-[10px] text-stone-400 font-mono italic flex-1 flex items-center justify-center">Sem ração necessária 🌿</span>;
           }
@@ -1331,6 +1361,19 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               🐊 Abater {!licencaExotica && '⚠️'}
             </button>
           )
+        )}
+
+        {/* Colmeia de Abelhas: coletar mel */}
+        {animal.type === 'colmeia_abelhas' && (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); onCollectMel?.(animal.id, e); }}
+            disabled={!animal.melReady}
+            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.melReady ? 'bg-amber-500 hover:bg-amber-400 border-b-4 border-amber-700 shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+            title={animal.melReady ? 'Colher mel da colmeia' : 'Mel ainda não está pronto'}
+          >
+            🍯 Colher Mel
+          </button>
         )}
 
         {/* Cruzar (Layer 2: Reprodução Controlada) */}

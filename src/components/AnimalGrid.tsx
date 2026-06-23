@@ -84,6 +84,7 @@ interface AnimalGridProps {
   sendToAbatedouro?: (animalId: number, animalType: 'boi' | 'porco') => void;
   abatedouroUnlocked?: boolean;
   hasCertSanitario?: boolean;
+  collectMel?: (id: number, e?: React.MouseEvent) => void;
 }
 
 export default function AnimalGrid({
@@ -160,6 +161,7 @@ export default function AnimalGrid({
   sendToAbatedouro,
   abatedouroUnlocked,
   hasCertSanitario,
+  collectMel,
 }: AnimalGridProps) {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   return (
@@ -637,6 +639,19 @@ export default function AnimalGrid({
                     </button>
                   </div>
 
+                  {/* Colmeia de Abelhas (Nível 4+) */}
+                  <div className={`flex flex-col items-center p-3.5 rounded-[24px] border-2 w-full max-w-[190px] text-center shadow-md relative ${farmLevel < 4 ? 'bg-stone-100/90 border-stone-300 opacity-70' : 'bg-white/90 border-[#fbbf24]'}`}>
+                    {farmLevel < 4 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">🔒 Nv4</span>}
+                    <span className="text-4xl">🍯</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Colmeia de Abelhas</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Mel 40💰/u por ciclo. Sem ração! Apicultor amplia produção.</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('colmeia_abelhas')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('colmeia_abelhas', e)} disabled={gold < getAnimalPurchasePrice('colmeia_abelhas') || farmLevel < 4}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 4 ? '🔒 Nível 4' : 'Comprar 🍯'}
+                    </button>
+                  </div>
+
                   </div>{/* fim grid BUG 1 FIX */}
                 </motion.div>
               )}
@@ -676,6 +691,7 @@ export default function AnimalGrid({
                         lhama:'🦙', pato:'🦆', ganso:'🦢', bufalo:'🐃', pavao:'🦚',
                         codorna:'🐦', alpaca:'🦙', minhoca:'🪱', caracol:'🐌',
                         coelho_angora:'🐰', bicho_seda:'🐛', ra:'🐸', avestruz:'🦤', jacare:'🐊',
+                        colmeia_abelhas:'🍯',
                       };
                       const lotColors = ['border-amber-400/60','border-green-400/60','border-blue-400/60','border-purple-400/60','border-rose-400/60'];
                       const lotColor = lotColors[lotIndex] ?? 'border-amber-400/60';
@@ -934,6 +950,7 @@ export default function AnimalGrid({
                         sendToAbatedouro={sendToAbatedouro}
                         abatedouroUnlocked={abatedouroUnlocked}
                         hasCertSanitario={hasCertSanitario}
+                        onCollectMel={collectMel}
                       />
                     ));
                   })()}
