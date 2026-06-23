@@ -1173,8 +1173,19 @@ export function useInventory({
     const queijoParmesaoQty = inventory.queijo_parmesao || 0;
     const queijoSerraQty = inventory.queijo_serra || 0;
     const kitGourmetQty = inventory.kit_gourmet || 0;
+    const fioLhamaQty = (inventory as any).fio_lhama || 0;
+    const cachecolLhamaQty = (inventory as any).cachecol_lhama || 0;
+    const gorroLhamaQty = (inventory as any).gorro_lhama || 0;
+    const luvasLhamaQty = (inventory as any).luvas_lhama || 0;
+    const ponchoLhamaQty = (inventory as any).poncho_lhama || 0;
+    const mantaLhamaQty = (inventory as any).manta_lhama || 0;
+    const iogurteBufalaQty = (inventory as any).iogurte_bufala || 0;
+    const mantegaBufalaQty = (inventory as any).manteiga_bufala || 0;
+    const doceLeiteQty = (inventory as any).doce_leite_bufala || 0;
+    const burrataQty = (inventory as any).burrata || 0;
+    const massaFrescaQty = (inventory as any).massa_fresca || 0;
 
-    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + coleteCouroQty + bolsaExoticaQty;
+    const allExtras = peixeQty + melQty + cogumeloQty + hidromelQty + risotoQty + conservaPeixeQty + melEnvasadoQty + sopaCogumeloQty + quailEggQty + alpacaWoolQty + humusQty + mucoQty + angoraWoolQty + sedaBrutaQty + coxaRaQty + carneAvestruzQty + couroAvestruzQty + carneJacareQty + couroJacareQty + queijoCabraQty + iogurteCabraQty + leiteCondensadoQty + tapeteLhamaQty + cachecolAngoraQty + tecidoAlpacaQty + fioSedaQty + mantaPremiumQty + patePatoQty + ovoDefumadoQty + conservaCodornaQty + cremeCosmeticoQty + saboneteNaturalQty + coleteCouroQty + bolsaExoticaQty + fioLhamaQty + cachecolLhamaQty + gorroLhamaQty + luvasLhamaQty + ponchoLhamaQty + mantaLhamaQty + iogurteBufalaQty + mantegaBufalaQty + doceLeiteQty + burrataQty + massaFrescaQty;
 
     if (milkQty === 0 && woolQty === 0 && cheeseQty === 0 && scarfQty === 0 && eggQty === 0 && mayoQty === 0 && coalhoQty === 0 && mucarelaQty === 0 && brieQty === 0 && goatMilkQty === 0 && llamaWoolQty === 0 && duckEggQty === 0 && gooseEggQty === 0 && buffaloMilkQty === 0 && buffaloMozzQty === 0 && butterQty === 0 && yogurtQty === 0 && fertileEggQty === 0 && allExtras === 0) {
       if (!quietValue) {
@@ -1237,6 +1248,17 @@ export function useInventory({
     const saboneteNaturalPrice = getDynamicTransactionPrice('sabonete_natural');
     const coleteCouroPrice = getDynamicTransactionPrice('colete_couro');
     const bolsaExoticaPrice = getDynamicTransactionPrice('bolsa_exotica');
+    const fioLhamaPrice = getDynamicTransactionPrice('fio_lhama' as any);
+    const cachecolLhamaPrice = getDynamicTransactionPrice('cachecol_lhama' as any);
+    const gorroLhamaPrice = getDynamicTransactionPrice('gorro_lhama' as any);
+    const luvasLhamaPrice = getDynamicTransactionPrice('luvas_lhama' as any);
+    const ponchoLhamaPrice = getDynamicTransactionPrice('poncho_lhama' as any);
+    const mantaLhamaPrice = getDynamicTransactionPrice('manta_lhama' as any);
+    const iogurteBufalaPrice = getDynamicTransactionPrice('iogurte_bufala' as any);
+    const mantegaBufalaPrice = getDynamicTransactionPrice('manteiga_bufala' as any);
+    const doceLeitePrice = getDynamicTransactionPrice('doce_leite_bufala' as any);
+    const burrataPrice = getDynamicTransactionPrice('burrata' as any);
+    const massaFrescaPrice = getDynamicTransactionPrice('massa_fresca' as any);
 
     const _lm = getFreightMultiplier ? getFreightMultiplier('laticinios') : 1;
     const _em = getFreightMultiplier ? getFreightMultiplier('ovos') : 1;
@@ -1260,7 +1282,10 @@ export function useInventory({
       (woolQty * woolPrice + llamaWoolQty * llamaWoolPrice + alpacaWoolQty * alpacaWoolPrice +
        angoraWoolQty * angoraWoolPrice + scarfQty * scarfPrice + tapeteLhamaQty * tapeteLhamaPrice +
        cachecolAngoraQty * cachecolAngoraPrice + tecidoAlpacaQty * tecidoAlpacaPrice +
-       fioSedaQty * fioSedaPrice + mantaPremiumQty * mantaPremiumPrice) * _tm +
+       fioSedaQty * fioSedaPrice + mantaPremiumQty * mantaPremiumPrice +
+       fioLhamaQty * fioLhamaPrice + cachecolLhamaQty * cachecolLhamaPrice +
+       gorroLhamaQty * gorroLhamaPrice + luvasLhamaQty * luvasLhamaPrice +
+       ponchoLhamaQty * ponchoLhamaPrice + mantaLhamaQty * mantaLhamaPrice) * _tm +
       (coxaRaQty * coxaRaPrice + carneAvestruzQty * carneAvestruzPrice +
        carneJacareQty * carneJacarePrice + peixeQty * peixePrice) * _cm +
       (humusQty * humusPrice + mucoQty * mucoPrice + melQty * melPrice +
@@ -1272,7 +1297,10 @@ export function useInventory({
        hidromelQty * hidromelPrice +
        risotoQty * risotoPrice + conservaPeixeQty * conservaPeixePrice +
        sopaCogumeloQty * sopaCogumeloPrice +
-       kitGourmetQty * getDynamicTransactionPrice('kit_gourmet' as any)) * _xm
+       kitGourmetQty * getDynamicTransactionPrice('kit_gourmet' as any)) * _xm +
+      (iogurteBufalaQty * iogurteBufalaPrice + mantegaBufalaQty * mantegaBufalaPrice +
+       doceLeiteQty * doceLeitePrice + burrataQty * burrataPrice) * _lm +
+      massaFrescaQty * massaFrescaPrice * _em
     );
 
     if (totalEarningCalculated <= 0) return;
@@ -1309,6 +1337,10 @@ export function useInventory({
       bolsa_exotica: 0,
       peixe: 0, mel: 0, cogumelo: 0, hidromel: 0, risoto_cogumelo: 0,
       conserva_peixe: 0, mel_envasado: 0, sopa_cogumelo: 0,
+      fio_lhama: 0, cachecol_lhama: 0, gorro_lhama: 0, luvas_lhama: 0,
+      poncho_lhama: 0, manta_lhama: 0,
+      iogurte_bufala: 0, manteiga_bufala: 0, doce_leite_bufala: 0, burrata: 0,
+      massa_fresca: 0,
     }));
 
     // Update weekly sales statistics — include ALL sold item types so supply/demand pricing works
@@ -1355,6 +1387,17 @@ export function useInventory({
       if (conservaPeixeQty > 0) updated.conserva_peixe = (prev.conserva_peixe || 0) + conservaPeixeQty;
       if (melEnvasadoQty > 0) updated.mel_envasado = (prev.mel_envasado || 0) + melEnvasadoQty;
       if (sopaCogumeloQty > 0) updated.sopa_cogumelo = (prev.sopa_cogumelo || 0) + sopaCogumeloQty;
+      if (fioLhamaQty > 0) updated.fio_lhama = (prev.fio_lhama || 0) + fioLhamaQty;
+      if (cachecolLhamaQty > 0) updated.cachecol_lhama = (prev.cachecol_lhama || 0) + cachecolLhamaQty;
+      if (gorroLhamaQty > 0) updated.gorro_lhama = (prev.gorro_lhama || 0) + gorroLhamaQty;
+      if (luvasLhamaQty > 0) updated.luvas_lhama = (prev.luvas_lhama || 0) + luvasLhamaQty;
+      if (ponchoLhamaQty > 0) updated.poncho_lhama = (prev.poncho_lhama || 0) + ponchoLhamaQty;
+      if (mantaLhamaQty > 0) updated.manta_lhama = (prev.manta_lhama || 0) + mantaLhamaQty;
+      if (iogurteBufalaQty > 0) updated.iogurte_bufala = (prev.iogurte_bufala || 0) + iogurteBufalaQty;
+      if (mantegaBufalaQty > 0) updated.manteiga_bufala = (prev.manteiga_bufala || 0) + mantegaBufalaQty;
+      if (doceLeiteQty > 0) updated.doce_leite_bufala = (prev.doce_leite_bufala || 0) + doceLeiteQty;
+      if (burrataQty > 0) updated.burrata = (prev.burrata || 0) + burrataQty;
+      if (massaFrescaQty > 0) updated.massa_fresca = (prev.massa_fresca || 0) + massaFrescaQty;
       return updated;
     });
 
@@ -1422,6 +1465,17 @@ export function useInventory({
     if (mantaPremiumQty > 0) messageParts.push(`${mantaPremiumQty} mantas premium`);
     if (coleteCouroQty > 0) messageParts.push(`${coleteCouroQty} coletes de couro`);
     if (bolsaExoticaQty > 0) messageParts.push(`${bolsaExoticaQty} bolsas exóticas`);
+    if (fioLhamaQty > 0) messageParts.push(`${fioLhamaQty} fios de lhama`);
+    if (cachecolLhamaQty > 0) messageParts.push(`${cachecolLhamaQty} cachecóis de lhama`);
+    if (gorroLhamaQty > 0) messageParts.push(`${gorroLhamaQty} gorros de lhama`);
+    if (luvasLhamaQty > 0) messageParts.push(`${luvasLhamaQty} luvas de lhama`);
+    if (ponchoLhamaQty > 0) messageParts.push(`${ponchoLhamaQty} ponchos de lhama`);
+    if (mantaLhamaQty > 0) messageParts.push(`${mantaLhamaQty} mantas de lhama`);
+    if (iogurteBufalaQty > 0) messageParts.push(`${iogurteBufalaQty} iogurtes de búfala`);
+    if (mantegaBufalaQty > 0) messageParts.push(`${mantegaBufalaQty} manteiga de búfala`);
+    if (doceLeiteQty > 0) messageParts.push(`${doceLeiteQty} doce de leite búfala`);
+    if (burrataQty > 0) messageParts.push(`${burrataQty} burratas`);
+    if (massaFrescaQty > 0) messageParts.push(`${massaFrescaQty} massas frescas`);
 
     addLog(`💰 Você vendeu tudo: ${messageParts.join(', ')} por ${totalEarningCalculated} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));
