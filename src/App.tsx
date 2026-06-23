@@ -4444,7 +4444,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           const daysSince = nextDayValue - lastMel;
           // Chuva pausa o ciclo: não marca pronto em dia de chuva
           if (daysSince >= cycleBySeason && weather !== 'chuva' && nextWeather !== 'chuva') {
-            updatedAnimalsList = updatedAnimalsList.map(b => b.id === a.id ? { ...b, melReady: true } : b);
+            copy.melReady = true;
           }
         }
 
@@ -5616,6 +5616,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (w.role === 'queijeiro') action = queijeiroAction;
           if (w.role === 'artesao') action = artesaoAction;
           if (w.role === 'cozinheiro') action = cozinheiroAction;
+          if (w.role === 'apicultor') action = `Dia ${nextDayValue}: cuidou das colmeias`;
           if (w.role === 'comerciante_residente') action = `Dia ${nextDayValue}: negociando no mercado`;
           return { ...w, lastAction: action };
         }));
@@ -5689,7 +5690,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const newDaysUntil = loanDaysUntilInterest - 1;
         if (newDaysUntil <= 0) {
           const interest = Math.round(loanAmount * loanInterestRate);
-          setGold(prev => Math.max(0, prev - interest));
+          setGold(prev => {
+            if (prev < interest) { setDebt(d => d + (interest - prev)); return 0; }
+            return prev - interest;
+          });
           const newWeeks = loanWeeksLeft - 1;
           setLoanWeeksLeft(newWeeks);
           setLoanDaysUntilInterest(7);
@@ -5697,6 +5701,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setLoanActive(false);
             setLoanAmount(0);
             logsToAdd.push({ msg: `🏦 Empréstimo quitado! Último pagamento de juros: ${interest} moedas.`, type: 'success' });
+            checkAndUnlockAchievement('secret_2');
             setTimeout(() => addNotification(`🏦 Empréstimo quitado!`, 'success', nextDayValue), 0);
           } else {
             logsToAdd.push({ msg: `🏦 Juros semanais do empréstimo: -${interest} moedas. Ainda ${newWeeks} semana(s) restantes.`, type: 'event' });

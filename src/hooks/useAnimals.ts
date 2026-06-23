@@ -325,9 +325,10 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal) return;
 
-    let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' = 'racaoBovina';
+    let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' = 'racaoBovina';
     let feedLabel = 'Ração Bovina';
-    if (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo' || animal.type === 'porco') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+    if (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+    else if (animal.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
     else if (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
     else if (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
     else if (animal.type === 'pato' || animal.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }

@@ -673,8 +673,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
       {/* Stats - Fome and Felicidade */}
       <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
 
-        {/* Hunger bar — hidden for minhoca/caracol (never need food) */}
-        {!['minhoca', 'caracol'].includes(animal.type) && (
+        {/* Hunger bar — hidden for animals that never need feeding */}
+        {!['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'].includes(animal.type) && (
         <div className="relative group/hungertooltip">
           <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
             <span className="flex items-center gap-1">🍽️ Fome</span>
