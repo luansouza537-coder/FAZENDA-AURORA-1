@@ -872,7 +872,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       fertile_egg: [36, 36, 36, 36, 36, 36, 36],
       quail_egg: [22, 22, 22, 22, 22, 22, 22],
       alpaca_wool: [65, 65, 65, 65, 65, 65, 65],
-      humus: [35, 35, 35, 35, 35, 35, 35],
+      humus: [22, 22, 22, 22, 22, 22, 22],
       muco: [120, 120, 120, 120, 120, 120, 120],
       angora_wool: [90, 90, 90, 90, 90, 90, 90],
       seda_bruta: [100, 100, 100, 100, 100, 100, 100],
@@ -1764,7 +1764,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'fertile_egg') return 36;
     if (itemType === 'quail_egg') return farmLevel >= 5 ? 18 : 16;
     if (itemType === 'alpaca_wool') return farmLevel >= 6 ? 75 : 65;
-    if (itemType === 'humus') return 15;    // era 20 — Grupo B (sem custo ração)
+    if (itemType === 'humus') return 22;    // rebalanceado — sem custo de ração
     if (itemType === 'muco') return 35;     // era 120 — Grupo B (OP sem ração)
     if (itemType === 'angora_wool') return 90;
     if (itemType === 'seda_bruta') return 100;
