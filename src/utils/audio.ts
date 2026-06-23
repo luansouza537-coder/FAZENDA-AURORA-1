@@ -174,6 +174,7 @@ class SoundFXManager {
         alpaca:  { freq: 320, type: 'sine',     duration: 0.35 },
         minhoca: { freq: 200, type: 'sine',     duration: 0.2 },
         caracol: { freq: 180, type: 'sine',     duration: 0.3 },
+        colmeia_abelhas: { freq: 440, type: 'sine', duration: 0.25 },
         coelho_angora: { freq: 650, type: 'sine', duration: 0.1 },
         bicho_seda: { freq: 900, type: 'sine',  duration: 0.1 },
         ra:      { freq: 250, type: 'square',   duration: 0.2 },

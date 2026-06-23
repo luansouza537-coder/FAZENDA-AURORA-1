@@ -258,6 +258,7 @@ export function useAnimals({
     if (type === 'caracol') basePrice = 40;
     if (type === 'coelho_angora') basePrice = 130;
     if (type === 'bicho_seda') basePrice = 80;
+    if (type === 'colmeia_abelhas') basePrice = 80;
     if (type === 'ra') basePrice = 130;
     if (type === 'avestruz') basePrice = 600;
     if (type === 'jacare') basePrice = 900;
@@ -1100,20 +1101,21 @@ export function useAnimals({
     if (type === 'avestruz' && farmLevel < 15) { addLog('🔒 Avestruz requer Nível 15!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'jacare' && farmLevel < 18) { addLog('🔒 Jacaré requer Nível 18!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'porco' && farmLevel < 4) { addLog('🔒 Porco requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'colmeia_abelhas' && farmLevel < 4) { addLog('🔒 Colmeia de Abelhas requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
 
     const { feedType } = getAnimalFeedType(type);
-    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
+    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
 
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
-    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? `Minhoca #${newId}` : getRandomName(type);
+    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? `Minhoca #${newId}` : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : getRandomName(type);
 
     // Custom initial stats
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80
 
     // F1: maxAge por tipo com variação ±20%
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400, porco: 120 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
-    const variation = 1 + (Math.random() * 0.4 - 0.2);
+    const variation = type === 'colmeia_abelhas' ? 1 : 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
 
     const newAnimal: Animal = {
@@ -1229,12 +1231,12 @@ export function useAnimals({
     }
 
     const { feedType } = getAnimalFeedType(type);
-    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
+    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
 
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
-    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? `Minhoca #${newId}` : getRandomName(type);
+    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? `Minhoca #${newId}` : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : getRandomName(type);
     const happiness = Math.floor(Math.random() * 21) + 60;
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400, porco: 120 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);

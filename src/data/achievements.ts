@@ -128,4 +128,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
   { id: 'secret_8', title: 'Fazenda Feliz', emoji: '😊', description: 'Todos os animais felizes ao mesmo tempo com 10 ou mais animais', secret: true },
   { id: 'secret_9', title: 'Na Última Hora', emoji: '⏰', description: 'Completou uma missão nos últimos 2 dias antes de expirar', secret: true },
   { id: 'secret_10', title: 'Império Aurora', emoji: '🌌', description: 'Atingiu o nível máximo 20', secret: true },
+  { id: 'bee_first', title: 'Primeira Colheita', emoji: '🍯', description: 'Colheu mel de uma colmeia pela primeira vez', secret: false },
+  { id: 'bee_master', title: 'Apicultor Mestre', emoji: '🐝', description: 'Teve 5 ou mais colmeias simultaneamente', secret: false },
+  { id: 'bee_spring', title: 'Enxame Dourado', emoji: '🌸', description: 'Teve 3 ou mais colmeias durante a Primavera ao mesmo tempo', secret: true },
 ];

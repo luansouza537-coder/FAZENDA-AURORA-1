@@ -10,4 +10,5 @@ export const WORKER_TYPES = [
   { role: 'comerciante_residente'as const, name: 'Comerciante',        emoji: '💰',  dailyCost: 120, desc: '+8% no preço de venda de leite, lã, ovos, seda, couro e carne bruta.',                                                           minLevel: 10 },
   { role: 'artesao'              as const, name: 'Artesão',            emoji: '🧵',  dailyCost: 45,  desc: 'Produz 1 item têxtil por dia: prioriza Manta Premium, Fio de Seda, Tecido, Cachecol Angorá e Tapete. Até 3 artesãos simultâneos.', minLevel: 6  },
   { role: 'cozinheiro'           as const, name: 'Cozinheiro',         emoji: '👨‍🍳',  dailyCost: 50,  desc: 'Produz 1 item gastronômico por dia: prioriza Hidromel, Mel Envasado, Risoto, Conservas e Sopa. Até 3 cozinheiros simultâneos.',   minLevel: 7  },
+  { role: 'apicultor'            as const, name: 'Apicultor',          emoji: '🐝',  dailyCost: 25,  desc: '+1 mel extra por colmeia a cada coleta. Colmeias nunca ficam doentes. No inverno, ciclo de produção reduz de 10 para 7 dias.', minLevel: 5  },
 ];

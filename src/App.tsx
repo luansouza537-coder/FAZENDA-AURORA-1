@@ -2177,6 +2177,34 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     addToast('+Ovo coletado!', 'success', '🥚');
   }, [collectEgg, addToast]);
 
+  const collectMel = useCallback((id: number, event: React.MouseEvent) => {
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'colmeia_abelhas' || !animal.melReady) return;
+    const seasIdx = Math.floor(((currentDay - 1) % 120) / 30);
+    const hasApicultor = workers.some(w => w.role === 'apicultor');
+    const hasFlorestaBonus = landBiomes.some(b => b.biome === 'floresta');
+    // Base 1 + sol bonus + floresta bonus + apicultor bonus + coleta no prazo bonus
+    let melAmt = 1;
+    if (weather === 'sol') melAmt += 1;
+    if (hasFlorestaBonus) melAmt += 1;
+    if (hasApicultor) melAmt += 1;
+    // Coleta no prazo: se coletou no mesmo dia que ficou pronto (+1)
+    const cycleBySeason = seasIdx === 0 ? 2 : seasIdx === 1 ? 3 : seasIdx === 2 ? 5 : (hasApicultor ? 7 : 10);
+    const lastMel = animal.lastMelDay ?? currentDay;
+    if (currentDay - lastMel === cycleBySeason) melAmt += 1;
+    setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) + melAmt }));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, melReady: false, lastMelDay: currentDay } : a));
+    checkAndUnlockAchievement('bee_first');
+    addLog(`🍯 Colheu ${melAmt} mel da Colmeia de Abelhas!`, 'success');
+    sfx.playSound('colmeia_abelhas');
+    spawnFeedback('🍯', `+${melAmt} Mel`, event);
+  }, [animals, currentDay, workers, landBiomes, weather, setInventory, setAnimals, checkAndUnlockAchievement, addLog, sfx, spawnFeedback]);
+
+  const collectMelWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectMel(id, event);
+    addToast('+Mel colhido!', 'success', '🍯');
+  }, [collectMel, addToast]);
+
   // --- useWorkers hook ---
   const {
     workers,
@@ -2351,6 +2379,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     const hasCaracol = animals.some(a => a.type === 'caracol');
     const hasBichoSeda = animals.some(a => a.type === 'bicho_seda');
     if (hasCaracol && hasBichoSeda) checkAndUnlockAchievement('secret_6');
+
+    const colmeiaCount = animals.filter(a => a.type === 'colmeia_abelhas').length;
+    if (colmeiaCount >= 5) checkAndUnlockAchievement('bee_master');
+    const seasIdxAch = Math.floor(((currentDay - 1) % 120) / 30);
+    if (colmeiaCount >= 3 && seasIdxAch === 0) checkAndUnlockAchievement('bee_spring');
 
     if (animals.length >= 10 && animals.every(a => a.happiness >= 80)) checkAndUnlockAchievement('secret_8');
 
@@ -2725,7 +2758,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       const copy = { ...animal };
 
       // Animals that don't eat: skip hunger processing. Sal Mineral e Silagem evitam perda de fome.
-      const noHungerTypes = ['minhoca', 'caracol'];
+      const noHungerTypes = ['minhoca', 'caracol', 'colmeia_abelhas'];
       const skipHunger = noHungerTypes.includes(copy.type) || silagemDays > 0;
 
       // Perda de fome diária: 12 + random 0-7 (gulosa consome +20%)
@@ -3207,6 +3240,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     { catalogId: 'lc_29', client: 'Empório Orgânico Raiz Viva', product: 'iogurte_cabra' as const, description: 'Loja especializada em alimentos naturais e funcionais, frequentada por atletas, veganos e pessoas com intolerância ao leite de vaca. O iogurte de cabra é o produto mais procurado da prateleira refrigerada — leve, digestivo e com sabor que a clientela fiel reconhece. Eles já têm lista de espera toda vez que o estoque acaba. Precisam de fornecedor confiável com entrega semanal.', baseMarket: 55, pricePerUnit: 78, weeklyGoal: 4, durationDays: 90, minLevel: 5, completionBonus: 600, completionXP: 65 },
     { catalogId: 'lc_30', client: 'Ateliê Espaço & Forma', product: 'tapete_lhama' as const, description: 'Ateliê de decoração de interiores que cria ambientes rústico-modernos para clientes de alto padrão. Os tapetes de lhama são peça assinada da linha principal — textura única, coloração natural, impossível de imitar com material sintético. Cada peça que sai daqui vai para salas de estar de mansões, chalés e apartamentos de luxo. Eles pagam bem e não regateiam com quem entrega qualidade.', baseMarket: 110, pricePerUnit: 155, weeklyGoal: 2, durationDays: 90, minLevel: 5, completionBonus: 600, completionXP: 65 },
     // --- Nível 6 ---
+    { catalogId: 'lc_bee1', client: 'Confeitaria Artesanal Dulce', product: 'mel_envasado' as const, description: 'Confeitaria artesanal especializada em doces finos com ingredientes naturais. O mel envasado da fazenda seria o ingrediente-estrela de toda a linha de bolos, tortas e geleias. Eles vendem para lojas gourmet e feiras gastronômicas — precisam de regularidade e qualidade garantida.', baseMarket: 200, pricePerUnit: 285, weeklyGoal: 2, durationDays: 120, minLevel: 6, completionBonus: 700, completionXP: 90 },
     { catalogId: 'lc_11', client: 'Empório Colonial Serra', product: 'yogurt' as const, description: 'Loja especializada em produtos artesanais da roça — mel, conservas, defumados e laticínios. O iogurte natural da fazenda seria o novo destaque da prateleira refrigerada. Eles vendem experiência, não só produto: o nome da sua fazenda vai aparecer no rótulo.', baseMarket: 35, pricePerUnit: 50, weeklyGoal: 4, durationDays: 120, minLevel: 6, completionBonus: 510, completionXP: 85 },
     { catalogId: 'lc_12', client: 'Pousada Cantareira', product: 'goose_egg' as const, description: 'Pousada à beira de lagoa que serve café da manhã diferenciado como atrativo principal. Ovos de ganso aparecem no buffet como iguaria — maiores, mais ricos, raros de encontrar. Os hóspedes fotografam, comentam nas redes. A pousada quer garantir fornecimento antes que a concorrência feche primeiro.', baseMarket: 50, pricePerUnit: 72, weeklyGoal: 3, durationDays: 120, minLevel: 6, completionBonus: 555, completionXP: 90 },
     { catalogId: 'lc_32', client: 'Casa de Tecidos Meridional', product: 'tecido_alpaca' as const, description: 'Loja tradicional de tecidos finos que abastece costureiras, estilistas e pequenas confecções da região Sul. O tecido de alpaca é o mais procurado pelos clientes que fazem casacos, blazers e peças de alfaiataria — cai bem, não amassa, e tem uma aparência premium inegável. A casa existe há quarenta anos e sabe reconhecer qualidade. Eles querem parceiro de longa data, não fornecedor de oportunidade.', baseMarket: 180, pricePerUnit: 255, weeklyGoal: 3, durationDays: 120, minLevel: 6, completionBonus: 1950, completionXP: 165 },
@@ -3907,7 +3941,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           bovinos:  ['vaca', 'boi', 'bufalo'],
           fibras:   ['ovelha', 'lhama', 'alpaca', 'coelho_angora', 'cabra'],
           aves:     ['galinha', 'codorna', 'pato', 'ganso', 'pavao'],
-          exoticos: ['ra', 'avestruz', 'jacare', 'bicho_seda', 'caracol', 'minhoca'],
+          exoticos: ['ra', 'avestruz', 'jacare', 'bicho_seda', 'caracol', 'minhoca', 'colmeia_abelhas'],
         };
         // Peões que cobrem cada categoria (veterinario cobre tudo)
         const catWorkers: Record<string, string[]> = {
@@ -4245,6 +4279,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             { title: '📰 Festival de Ovos', desc: 'Todos os ovos +20% por 3 dias!', items: ['egg','duck_egg','goose_egg','quail_egg','fertile_egg'], mult: 1.20, daysLeft: 3 },
             { title: '📰 Crise do Laticínio', desc: 'Leites -20% esta semana.', items: ['milk','goat_milk','buffalo_milk'], mult: 0.80, daysLeft: 5 },
             { title: '📰 Boom Orgânico', desc: 'Húmus e mel +35% por 2 dias!', items: ['humus','mel','mel_envasado'], mult: 1.35, daysLeft: 2 },
+            { title: '📰 Safra de Mel', desc: 'Mel e derivados +30% por 3 dias!', items: ['mel','mel_envasado','hidromel','waffle_mel'], mult: 1.30, daysLeft: 3 },
             { title: '📰 Procura de Luxo', desc: 'Produtos exóticos +20% por 3 dias!', items: ['couro_jacare','carne_jacare','muco','bolsa_exotica','colete_couro','creme_cosmetico','sabonete_natural','serum_facial','mascara_facial'], mult: 1.20, daysLeft: 3 },
             { title: '📰 Concorrência Importada', desc: 'Lã e cachecol -15% por 4 dias.', items: ['wool','scarf','llama_wool'], mult: 0.85, daysLeft: 4 },
           ];
@@ -4400,6 +4435,19 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }, 0);
           logsToAdd.push({ msg: `🐌 ${a.name} (caracol) produziu ${finalMuco} muco!`, type: 'success' });
           updateMissionProgress('organic_day', 1, nextDayValue);
+        }
+
+        // Colmeia de Abelhas: marca melReady=true quando ciclo completo (por estação)
+        if (a.type === 'colmeia_abelhas' && !a.melReady) {
+          const seasIdx = Math.floor(((nextDayValue - 1) % 120) / 30);
+          const hasApicultor = workers.some(w => w.role === 'apicultor');
+          const cycleBySeason = seasIdx === 0 ? 2 : seasIdx === 1 ? 3 : seasIdx === 2 ? 5 : (hasApicultor ? 7 : 10);
+          const lastMel = a.lastMelDay ?? nextDayValue;
+          const daysSince = nextDayValue - lastMel;
+          // Chuva pausa o ciclo: não marca pronto em dia de chuva
+          if (daysSince >= cycleBySeason && weather !== 'chuva' && nextWeather !== 'chuva') {
+            updatedAnimalsList = updatedAnimalsList.map(b => b.id === a.id ? { ...b, melReady: true } : b);
+          }
         }
 
         // Bicho-da-seda: a cada 14 dias produz 3 seda_bruta; consome 1 folha_amoreira/dia
@@ -5281,7 +5329,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (type === 'coelho_angora') return 'racaoCoelho';
             return 'racaoCarnivora';
           };
-          const noFeedTypes = ['minhoca', 'caracol', 'bicho_seda'];
+          const noFeedTypes = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
           // Pre-compute which animals can be fed (using closure inventory snapshot)
           // Silagem ativa: não consome ração do inventário
           const tmpInv2 = { ...inventory } as Record<string, number>;
@@ -5328,6 +5376,16 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           setAnimals(prev => prev.map(a => {
             if (['jacare', 'ra', 'caracol'].includes(a.type)) {
               return { ...a, happiness: Math.min(100, (a.happiness ?? 0) + 5), isSick: false, sickDays: 0 };
+            }
+            return a;
+          }));
+        }
+
+        // --- Apicultor: colmeias nunca ficam doentes ---
+        if (workers.some(w => w.role === 'apicultor')) {
+          setAnimals(prev => prev.map(a => {
+            if (a.type === 'colmeia_abelhas') {
+              return { ...a, isSick: false, sickDays: 0, happiness: Math.min(100, (a.happiness ?? 100)) };
             }
             return a;
           }));
@@ -5581,14 +5639,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           logsToAdd.push({ msg: `🐟 Lago produziu ${fishAmt} peixe(s)!`, type: 'success' });
         }
 
-        // Floresta biome: produces honey every 5 days, mushroom every 4 days
+        // Floresta biome: produces mushroom every 4 days (mel now produced by colmeias)
         const florestaCount = landBiomes.filter(b => b.biome === 'floresta').length;
-        if (florestaCount > 0 && nextDayValue % 5 === 0) {
-          const melAmt = florestaCount;
-          setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) + melAmt }));
-          setBiomeWeeklyIncome(prev => ({ ...prev, floresta: prev.floresta + melAmt * 80 }));
-          logsToAdd.push({ msg: `🍯 Floresta produziu ${melAmt} mel!`, type: 'success' });
-        }
         if (florestaCount > 0 && nextDayValue % 4 === 0) {
           const cogAmt = florestaCount;
           setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) + cogAmt }));
@@ -5845,6 +5897,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     else if (type === 'alpaca') revenue = getItemBaseSellPrice('alpaca_wool') / 4;
     else if (type === 'minhoca') revenue = getItemBaseSellPrice('humus') / 3 + getItemBaseSellPrice('minhoca_viva') / 5;
     else if (type === 'caracol') revenue = getItemBaseSellPrice('muco') / 3;
+    else if (type === 'colmeia_abelhas') revenue = getItemBaseSellPrice('mel') / 3; // avg cycle ~3 days
     else if (type === 'coelho_angora') revenue = getItemBaseSellPrice('angora_wool') / 5;
     else if (type === 'bicho_seda') revenue = getItemBaseSellPrice('seda_bruta') * 3 / 14;
     else if (type === 'ra') revenue = getItemBaseSellPrice('coxa_ra') / 7;
@@ -6528,6 +6581,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             collectMilk={collectMilkWithToast}
             collectWool={collectWool}
             collectEgg={collectEggWithToast}
+            collectMel={collectMelWithToast}
             sellOx={sellOx}
             calculateBoiValue={calculateBoiValue}
             calculatePorcoValue={calculatePorcoValue}

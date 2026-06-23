@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao' | 'codorna' | 'alpaca' | 'minhoca' | 'caracol' | 'coelho_angora' | 'bicho_seda' | 'ra' | 'avestruz' | 'jacare' | 'porco';
+export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao' | 'codorna' | 'alpaca' | 'minhoca' | 'caracol' | 'coelho_angora' | 'bicho_seda' | 'ra' | 'avestruz' | 'jacare' | 'porco' | 'colmeia_abelhas';
 
 export type AnimalTrait = 'gulosa' | 'preguicosa' | 'feliz' | 'estressada' | 'saudavel' | 'trabalhadora';
 
@@ -40,6 +40,10 @@ export interface Animal {
   daysUntilWool?: number;
   daysSinceLastWool?: number;
   woolReady?: boolean;
+
+  // Colmeia specific
+  melReady?: boolean;
+  lastMelDay?: number;
 
   // Ox specific
   weightGain?: number; // 0.0 to 1.0 (0% to 100%)
@@ -89,7 +93,7 @@ export interface Animal {
 // Funcionalidade 4: Contratos de fornecimento
 export interface Contract {
   id: string;
-  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'buffalo_mozzarella' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'goose_egg' | 'angora_wool' | 'alpaca_wool' | 'llama_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'boi' | 'porco' | 'boi_porco' | 'mayo' | 'queijo_cabra' | 'iogurte_cabra' | 'tapete_lhama' | 'leite_condensado' | 'tecido_alpaca' | 'cachecol_angora' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'fio_seda' | 'carne_jacare' | 'couro_jacare';
+  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'buffalo_mozzarella' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'goose_egg' | 'angora_wool' | 'alpaca_wool' | 'llama_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'mel' | 'boi' | 'porco' | 'boi_porco' | 'mayo' | 'queijo_cabra' | 'iogurte_cabra' | 'tapete_lhama' | 'leite_condensado' | 'tecido_alpaca' | 'cachecol_angora' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'fio_seda' | 'carne_jacare' | 'couro_jacare';
   quantity: number;
   delivered: number;
   pricePerUnit: number;
