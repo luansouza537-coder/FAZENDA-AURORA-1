@@ -75,6 +75,17 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   conserva_peixe:   { energy: 1, water: 1 },
   mel_envasado:     { energy: 1, water: 0 },
   sopa_cogumelo:    { energy: 1, water: 2 },
+  fio_lhama:        { energy: 1, water: 0 },
+  cachecol_lhama:   { energy: 1, water: 0 },
+  gorro_lhama:      { energy: 1, water: 0 },
+  luvas_lhama:      { energy: 1, water: 0 },
+  poncho_lhama:     { energy: 2, water: 0 },
+  manta_lhama:      { energy: 2, water: 0 },
+  iogurte_bufala:   { energy: 1, water: 1 },
+  manteiga_bufala:  { energy: 1, water: 0 },
+  doce_leite_bufala:{ energy: 2, water: 0 },
+  burrata:          { energy: 1, water: 0 },
+  massa_fresca:     { energy: 1, water: 1 },
 };
 
 export function useInventory({
@@ -130,6 +141,11 @@ export function useInventory({
     colete_couro: 'luxo', bolsa_exotica: 'luxo',
     hidromel: 'luxo', risoto_cogumelo: 'luxo', conserva_peixe: 'luxo',
     sopa_cogumelo: 'luxo', kit_gourmet: 'luxo',
+    fio_lhama: 'texteis', cachecol_lhama: 'texteis', gorro_lhama: 'texteis',
+    luvas_lhama: 'texteis', poncho_lhama: 'texteis', manta_lhama: 'texteis',
+    iogurte_bufala: 'laticinios', manteiga_bufala: 'laticinios',
+    doce_leite_bufala: 'laticinios', burrata: 'laticinios',
+    massa_fresca: 'ovos',
   };
 
   // --- INVENTORY STATE ---
@@ -204,6 +220,18 @@ export function useInventory({
           queijo_serra: inv.queijo_serra ?? 0,
           kit_gourmet: inv.kit_gourmet ?? 0,
           racaoSuina: inv.racaoSuina ?? 0,
+          farinha: inv.farinha ?? 0,
+          fio_lhama: inv.fio_lhama ?? 0,
+          cachecol_lhama: inv.cachecol_lhama ?? 0,
+          gorro_lhama: inv.gorro_lhama ?? 0,
+          luvas_lhama: inv.luvas_lhama ?? 0,
+          poncho_lhama: inv.poncho_lhama ?? 0,
+          manta_lhama: inv.manta_lhama ?? 0,
+          iogurte_bufala: inv.iogurte_bufala ?? 0,
+          manteiga_bufala: inv.manteiga_bufala ?? 0,
+          doce_leite_bufala: inv.doce_leite_bufala ?? 0,
+          burrata: inv.burrata ?? 0,
+          massa_fresca: inv.massa_fresca ?? 0,
         };
       }
     } catch (e) {}
@@ -272,6 +300,18 @@ export function useInventory({
       queijo_serra: 0,
       kit_gourmet: 0,
       racaoSuina: 0,
+      farinha: 0,
+      fio_lhama: 0,
+      cachecol_lhama: 0,
+      gorro_lhama: 0,
+      luvas_lhama: 0,
+      poncho_lhama: 0,
+      manta_lhama: 0,
+      iogurte_bufala: 0,
+      manteiga_bufala: 0,
+      doce_leite_bufala: 0,
+      burrata: 0,
+      massa_fresca: 0,
     };
   });
 
@@ -295,7 +335,7 @@ export function useInventory({
   });
 
   // --- QUEIJARIA STATES ---
-  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt' | 'parmesao' | 'serra' | 'butter' | 'queijo_cabra' | 'iogurte_cabra'; diasRestantes: number }[]>(() => {
+  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt' | 'parmesao' | 'serra' | 'butter' | 'queijo_cabra' | 'iogurte_cabra' | 'iogurte_bufala' | 'manteiga_bufala' | 'doce_leite_bufala' | 'burrata'; diasRestantes: number }[]>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
       if (saved) {
@@ -1049,6 +1089,17 @@ export function useInventory({
     else if (itemType === 'sabonete_natural') label = 'Sabonete Natural';
     else if (itemType === 'colete_couro') label = 'Colete de Couro';
     else if (itemType === 'bolsa_exotica') label = 'Bolsa Exótica';
+    else if (itemType === 'fio_lhama') label = 'Fio de Lhama';
+    else if (itemType === 'cachecol_lhama') label = 'Cachecol de Lhama';
+    else if (itemType === 'gorro_lhama') label = 'Gorro de Lhama';
+    else if (itemType === 'luvas_lhama') label = 'Luvas de Lhama';
+    else if (itemType === 'poncho_lhama') label = 'Poncho de Lhama';
+    else if (itemType === 'manta_lhama') label = 'Manta de Lhama';
+    else if (itemType === 'iogurte_bufala') label = 'Iogurte de Búfala';
+    else if (itemType === 'manteiga_bufala') label = 'Manteiga de Búfala';
+    else if (itemType === 'doce_leite_bufala') label = 'Doce de Leite de Búfala';
+    else if (itemType === 'burrata') label = 'Burrata';
+    else if (itemType === 'massa_fresca') label = 'Massa Fresca';
 
     addLog(`💰 Venda realizada: ${qty} unidades de ${label} por +${profit} moedas!`, 'success');
 
@@ -1438,7 +1489,177 @@ export function useInventory({
     spawnFeedback('🍲', 'Sopa!', event);
   };
 
+  // --- LHAMA CHAIN CRAFT FUNCTIONS ---
+
+  const craftFioLhama = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 3) { addLog('🧶 Fio de Lhama requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.llama_wool ?? 0) < 1) { addLog('🦙 Falta Lã de Lhama! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Lhama!', event); return; }
+    setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) - 1, fio_lhama: (prev.fio_lhama ?? 0) + 1 }));
+    applyCraftCost('fio_lhama');
+    addLog('🧶 Você fiou 1 Fio de Lhama!', 'success');
+    setFarmXp(prev => prev + 2);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧶', '+1 Fio Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftCachecolLhama = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 4) { addLog('🧣 Cachecol de Lhama requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.fio_lhama ?? 0) < 1) { addLog('🧶 Falta Fio de Lhama! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Fio Lhama!', event); return; }
+    if ((inventory.llama_wool ?? 0) < 1) { addLog('🦙 Falta Lã de Lhama! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Lhama!', event); return; }
+    setInventory(prev => ({ ...prev, fio_lhama: (prev.fio_lhama ?? 0) - 1, llama_wool: (prev.llama_wool ?? 0) - 1, cachecol_lhama: (prev.cachecol_lhama ?? 0) + 1 }));
+    applyCraftCost('cachecol_lhama');
+    addLog('🧣 Você confeccionou 1 Cachecol de Lhama!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧣', '+1 Cachecol Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftGorroLhama = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 4) { addLog('🧢 Gorro de Lhama requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.llama_wool ?? 0) < 2) { addLog('🦙 Falta Lã de Lhama! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Lhama!', event); return; }
+    setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) - 2, gorro_lhama: (prev.gorro_lhama ?? 0) + 1 }));
+    applyCraftCost('gorro_lhama');
+    addLog('🧢 Você confeccionou 1 Gorro de Lhama!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧢', '+1 Gorro Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftLuvasLhama = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 5) { addLog('🧤 Luvas de Lhama requerem Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.llama_wool ?? 0) < 2) { addLog('🦙 Falta Lã de Lhama! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Lã Lhama!', event); return; }
+    setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) - 2, luvas_lhama: (prev.luvas_lhama ?? 0) + 1 }));
+    applyCraftCost('luvas_lhama');
+    addLog('🧤 Você confeccionou 1 par de Luvas de Lhama!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧤', '+1 Luvas Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftPonchoLhama = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 5) { addLog('🦙 Poncho de Lhama requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.fio_lhama ?? 0) < 2) { addLog('🧶 Falta Fio de Lhama! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Fio Lhama!', event); return; }
+    setInventory(prev => ({ ...prev, fio_lhama: (prev.fio_lhama ?? 0) - 2, poncho_lhama: (prev.poncho_lhama ?? 0) + 1 }));
+    applyCraftCost('poncho_lhama');
+    addLog('🦙 Você confeccionou 1 Poncho de Lhama!', 'success');
+    setFarmXp(prev => prev + 4);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🦙', '+1 Poncho Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftMantaLhama = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 6) { addLog('🛏️ Manta de Lhama requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.poncho_lhama ?? 0) < 1) { addLog('🦙 Falta Poncho de Lhama! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Poncho!', event); return; }
+    if ((inventory.fio_lhama ?? 0) < 1) { addLog('🧶 Falta Fio de Lhama! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Fio Lhama!', event); return; }
+    setInventory(prev => ({ ...prev, poncho_lhama: (prev.poncho_lhama ?? 0) - 1, fio_lhama: (prev.fio_lhama ?? 0) - 1, manta_lhama: (prev.manta_lhama ?? 0) + 1 }));
+    applyCraftCost('manta_lhama');
+    addLog('🛏️ Você criou 1 Manta de Lhama artesanal!', 'success');
+    setFarmXp(prev => prev + 5);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🛏️', '+1 Manta Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  // --- BÚFALA DERIVATIVES (maturação) ---
+
+  const craftIogurteBufala = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 4) { addLog('🥛 Iogurte de Búfala requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.buffalo_milk ?? 0) < 2) { addLog('🐃 Falta Leite de Búfala! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Búfala!', event); return; }
+    if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
+    setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) - 2 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'iogurte_bufala', diasRestantes: 2 }]);
+    applyCraftCost('iogurte_bufala');
+    addLog('🥛 Iogurte de Búfala em fermentação! Pronto em 2 dias.', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥛', 'Fermentando... 2d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftManteiganBufala = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 4) { addLog('🧈 Manteiga de Búfala requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.buffalo_milk ?? 0) < 2) { addLog('🐃 Falta Leite de Búfala! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Búfala!', event); return; }
+    if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
+    setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) - 2 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'manteiga_bufala', diasRestantes: 1 }]);
+    applyCraftCost('manteiga_bufala');
+    addLog('🧈 Manteiga de Búfala em preparo! Pronta em 1 dia.', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧈', 'Preparando... 1d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftDoceLeitelBufala = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 5) { addLog('🍮 Doce de Leite de Búfala requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.buffalo_milk ?? 0) < 3) { addLog('🐃 Falta Leite de Búfala! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Búfala!', event); return; }
+    if ((inventory.manteiga_bufala ?? 0) < 1) { addLog('🧈 Falta Manteiga de Búfala! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Mant.Búfala!', event); return; }
+    if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
+    setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) - 3, manteiga_bufala: (prev.manteiga_bufala ?? 0) - 1 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'doce_leite_bufala', diasRestantes: 3 }]);
+    applyCraftCost('doce_leite_bufala');
+    addLog('🍮 Doce de Leite de Búfala em preparo! Pronto em 3 dias.', 'success');
+    setFarmXp(prev => prev + 4);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🍮', 'Cozinhando... 3d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftBurrata = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 7) { addLog('🧀 Burrata requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.buffalo_milk ?? 0) < 3) { addLog('🐃 Falta Leite de Búfala! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Búfala!', event); return; }
+    if ((inventory.buffalo_mozzarella ?? 0) < 1) { addLog('🧀 Falta Muçarela de Búfala! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Muçarela!', event); return; }
+    if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
+    setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) - 3, buffalo_mozzarella: (prev.buffalo_mozzarella ?? 0) - 1 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'burrata', diasRestantes: 4 }]);
+    applyCraftCost('burrata');
+    addLog('🧀 Burrata em maturação! Pronta em 4 dias.', 'success');
+    setFarmXp(prev => prev + 5);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧀', 'Maturando... 4d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  // --- MASSA FRESCA ---
+
+  const craftMassaFresca = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 5) { addLog('🍝 Massa Fresca requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.goose_egg ?? 0) < 1) { addLog('🪿 Falta Ovo de Ganso! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ov.Ganso!', event); return; }
+    if ((inventory.farinha ?? 0) < 1) { addLog('🌾 Falta Farinha! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Farinha!', event); return; }
+    setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) - 1, farinha: (prev.farinha ?? 0) - 1, massa_fresca: (prev.massa_fresca ?? 0) + 1 }));
+    applyCraftCost('massa_fresca');
+    addLog('🍝 Você preparou 1 Massa Fresca com ovo de ganso!', 'success');
+    setFarmXp(prev => prev + 4);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🍝', '+1 Massa Fresca', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
   // --- BUY FUNCTIONS ---
+
+  const buyFarinha = (qty: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const pricePerUnit = 6;
+    const totalCost = pricePerUnit * qty;
+    if (gold < totalCost) {
+      addLog(`💰 Moedas insuficientes! Requer ${totalCost} moedas.`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Falta 💰!', event);
+      return;
+    }
+    setGold(prev => prev - totalCost);
+    onGoldSpent?.(totalCost);
+    setInventory(prev => ({ ...prev, farinha: (prev.farinha ?? 0) + qty }));
+    setWeeklyStats(prev => ({ ...prev, spending: prev.spending + totalCost }));
+    addLog(`🌾 Compra realizada: +${qty} Farinha de Trigo por ${totalCost} moedas!`, 'success');
+    triggerAudioResult(() => sfx.playSound('click'));
+    spawnFeedback('🌾', `-${totalCost}💰`, event);
+  };
 
   const buyFolhaAmoreira = (qty: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -1516,10 +1737,22 @@ export function useInventory({
     craftConservaPeixe,
     craftMelEnvasado,
     craftSopaCogumelo,
+    craftFioLhama,
+    craftCachecolLhama,
+    craftGorroLhama,
+    craftLuvasLhama,
+    craftPonchoLhama,
+    craftMantaLhama,
+    craftIogurteBufala,
+    craftManteiganBufala,
+    craftDoceLeitelBufala,
+    craftBurrata,
+    craftMassaFresca,
     // Sell functions
     sellProduct,
     sellAllItemsNoConfirm,
     // Buy functions
+    buyFarinha,
     buyFolhaAmoreira,
   };
 }

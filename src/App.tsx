@@ -814,6 +814,18 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       peixe: 0,
       mel: 0,
       cogumelo: 0,
+      farinha: 0,
+      fio_lhama: 0,
+      cachecol_lhama: 0,
+      gorro_lhama: 0,
+      luvas_lhama: 0,
+      poncho_lhama: 0,
+      manta_lhama: 0,
+      iogurte_bufala: 0,
+      manteiga_bufala: 0,
+      doce_leite_bufala: 0,
+      burrata: 0,
+      massa_fresca: 0,
     });
     setRacaoOrganicaDays(0);
     setFertilizanteDays(0);
@@ -1786,6 +1798,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if ((itemType as string) === 'queijo_parmesao') return 200;
     if ((itemType as string) === 'queijo_serra') return 280;
     if ((itemType as string) === 'kit_gourmet') return 2000;
+    if ((itemType as string) === 'fio_lhama') return 45;
+    if ((itemType as string) === 'cachecol_lhama') return 80;
+    if ((itemType as string) === 'gorro_lhama') return 75;
+    if ((itemType as string) === 'luvas_lhama') return 70;
+    if ((itemType as string) === 'poncho_lhama') return 140;
+    if ((itemType as string) === 'manta_lhama') return 200;
+    if ((itemType as string) === 'iogurte_bufala') return 55;
+    if ((itemType as string) === 'manteiga_bufala') return 70;
+    if ((itemType as string) === 'doce_leite_bufala') return 95;
+    if ((itemType as string) === 'burrata') return 220;
+    if ((itemType as string) === 'massa_fresca') return 130;
     return 0;
   };
 
@@ -1958,8 +1981,20 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     craftConservaPeixe,
     craftMelEnvasado,
     craftSopaCogumelo,
+    craftFioLhama,
+    craftCachecolLhama,
+    craftGorroLhama,
+    craftLuvasLhama,
+    craftPonchoLhama,
+    craftMantaLhama,
+    craftIogurteBufala,
+    craftManteiganBufala,
+    craftDoceLeitelBufala,
+    craftBurrata,
+    craftMassaFresca,
     sellProduct,
     sellAllItemsNoConfirm,
+    buyFarinha,
     buyFolhaAmoreira,
   } = useInventory({
     gold,
@@ -3105,8 +3140,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     });
 
     readyQueijos.forEach(tipo => {
-      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : tipo === 'queijo_cabra' ? 'Queijo de Cabra' : tipo === 'iogurte_cabra' ? 'Iogurte de Cabra' : tipo === 'parmesao' ? 'Queijo Parmesão' : tipo === 'serra' ? 'Queijo da Serra' : tipo === 'butter' ? 'Manteiga' : 'Queijo Brie';
-      const emoji = tipo === 'butter' ? '🧈' : tipo === 'yogurt' || tipo === 'iogurte_cabra' ? '🥛' : '🧀';
+      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : tipo === 'queijo_cabra' ? 'Queijo de Cabra' : tipo === 'iogurte_cabra' ? 'Iogurte de Cabra' : tipo === 'parmesao' ? 'Queijo Parmesão' : tipo === 'serra' ? 'Queijo da Serra' : tipo === 'butter' ? 'Manteiga' : tipo === 'iogurte_bufala' ? 'Iogurte de Búfala' : tipo === 'manteiga_bufala' ? 'Manteiga de Búfala' : tipo === 'doce_leite_bufala' ? 'Doce de Leite Búfala' : tipo === 'burrata' ? 'Burrata' : 'Queijo Brie';
+      const emoji = tipo === 'butter' || tipo === 'manteiga_bufala' ? '🧈' : tipo === 'yogurt' || tipo === 'iogurte_cabra' || tipo === 'iogurte_bufala' ? '🥛' : tipo === 'doce_leite_bufala' ? '🍮' : '🧀';
       logs.push({
         msg: `${emoji} Sua ${label} ficou pronta e está disponível no Armazém!`,
         type: 'success'
@@ -4735,7 +4770,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setInventory(inv => {
           const nextInv = { ...inv };
           readyQueijos.forEach(tipo => {
-            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'queijo_cabra' ? 'queijo_cabra' : tipo === 'iogurte_cabra' ? 'iogurte_cabra' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : tipo === 'butter' ? 'butter' : 'queijoBrie';
+            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'queijo_cabra' ? 'queijo_cabra' : tipo === 'iogurte_cabra' ? 'iogurte_cabra' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : tipo === 'butter' ? 'butter' : tipo === 'iogurte_bufala' ? 'iogurte_bufala' : tipo === 'manteiga_bufala' ? 'manteiga_bufala' : tipo === 'doce_leite_bufala' ? 'doce_leite_bufala' : tipo === 'burrata' ? 'burrata' : 'queijoBrie';
             nextInv[key] = (nextInv[key] ?? 0) + 1;
           });
           return nextInv;
@@ -6455,6 +6490,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             getEstacaoKey={getEstacaoKey}
             getFeedPriceWithModifiers={getFeedPriceWithModifiers}
             buyFeed={buyFeed}
+            buyFarinha={buyFarinha}
             buyFolhaAmoreira={buyFolhaAmoreira}
             sellProduct={sellProduct}
             triggerAudioResult={triggerAudioResult}
@@ -6588,6 +6624,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             craftMelEnvasado, craftSopaCogumelo,
             craftCremeCosmetico, craftSaboneteNatural, craftRacaoOrganica, craftFertilizante,
             craftColeteCouro, craftBolsaExotica, craftKitGourmet,
+            craftFioLhama, craftCachecolLhama, craftGorroLhama, craftLuvasLhama,
+            craftPonchoLhama, craftMantaLhama,
+            craftIogurteBufala, craftManteiganBufala, craftDoceLeitelBufala, craftBurrata,
+            craftMassaFresca,
           }}
           onClose={() => setShowQueijariaModal(false)}
           onOpenMelhorias={() => setShowUpgradesModal(true)}

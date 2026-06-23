@@ -36,6 +36,7 @@ export interface GameSidebarProps {
   getEstacaoKey: (day: number) => 'primavera' | 'verao' | 'outono' | 'inverno';
   getFeedPriceWithModifiers: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina', day?: number) => number;
   buyFeed: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina', qty: number, e: React.MouseEvent) => void;
+  buyFarinha: (qty: number, e: React.MouseEvent) => void;
   buyFolhaAmoreira: (qty: number, e: React.MouseEvent) => void;
   sellProduct: (itemType: any, qty: number, e: React.MouseEvent) => void;
   triggerAudioResult: (action: () => void) => void;
@@ -62,6 +63,7 @@ export default function GameSidebar({
   getEstacaoKey,
   getFeedPriceWithModifiers,
   buyFeed,
+  buyFarinha,
   buyFolhaAmoreira,
   sellProduct,
   triggerAudioResult,
@@ -585,8 +587,40 @@ export default function GameSidebar({
                 })}
               </div>
 
-              {/* --- LOJA DE INSUMOS: Folha de Amoreira --- */}
+              {/* --- LOJA DE INSUMOS: Farinha e Folha de Amoreira --- */}
               {farmLevel >= 10 && (
+                <>
+                <div className="mt-4 bg-white/80 p-3 rounded-2xl border-2 border-amber-300 hover:border-amber-400 transition-all flex flex-col gap-2.5 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-sans font-black text-amber-900 text-xs uppercase leading-tight">🌾 Farinha de Trigo</h4>
+                      <p className="text-[9px] text-amber-700/70 font-mono mt-0.5">Ingrediente para Massa Fresca</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[8px] text-amber-700 font-mono uppercase font-black tracking-wider leading-none">Estoque</span>
+                      <span className="font-mono text-sm font-black text-amber-800">{inventory.farinha ?? 0}u</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-amber-200/50">
+                    <button
+                      type="button"
+                      onClick={(e) => buyFarinha(1, e)}
+                      disabled={gold < 6}
+                      className="bg-stone-100 hover:bg-stone-200 text-amber-900 text-[9px] font-mono font-bold py-1 px-0.5 rounded-lg border border-amber-200 disabled:opacity-40 transition-all cursor-pointer text-center leading-none"
+                    >
+                      +1u (6💰)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => buyFarinha(10, e)}
+                      disabled={gold < 60}
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 text-[9px] font-mono font-bold py-1 px-0.5 rounded-lg border border-amber-200 disabled:opacity-40 transition-all cursor-pointer text-center leading-none"
+                    >
+                      +10u (60💰)
+                    </button>
+                  </div>
+                </div>
+
                 <div className="mt-4 bg-white/80 p-3 rounded-2xl border-2 border-emerald-300 hover:border-emerald-400 transition-all flex flex-col gap-2.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div>
@@ -617,6 +651,7 @@ export default function GameSidebar({
                     </button>
                   </div>
                 </div>
+                </>
               )}
             </div>
 
