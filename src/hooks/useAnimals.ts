@@ -1229,8 +1229,8 @@ export function useAnimals({
     const { feedType } = getAnimalFeedType(type);
     const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
 
-    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : getRandomName(type);
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
+    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? `Minhoca #${newId}` : getRandomName(type);
     const happiness = Math.floor(Math.random() * 21) + 60;
     const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400, porco: 120 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;

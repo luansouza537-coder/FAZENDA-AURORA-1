@@ -1905,7 +1905,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Final processed sell prices including dynamic pricing equations
-  const COMERCIANTE_BONUS_ITEMS = new Set(['milk','wool','egg','goat_milk','llama_wool','duck_egg','goose_egg','buffalo_milk','quail_egg','alpaca_wool','humus','muco','angora_wool','seda_bruta','coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare']);
+  const COMERCIANTE_BONUS_ITEMS = new Set(['milk','wool','egg','goat_milk','llama_wool','duck_egg','goose_egg','buffalo_milk','quail_egg','alpaca_wool','humus','minhoca_viva','muco','angora_wool','seda_bruta','coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare']);
   const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'colete_couro' | 'bolsa_exotica'): number => {
     const base = getDynamicTransactionPrice(itemType);
     const hasComercianteBonus = workers.some(w => w.role === 'comerciante_residente') && COMERCIANTE_BONUS_ITEMS.has(itemType);
@@ -4375,7 +4375,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
         if (a.type === 'minhoca' && a.isAdult !== false && (a.age || 0) > 0 && (a.age || 0) % 5 === 0) {
           setTimeout(() => {
-            setInventory(prev => ({ ...prev, minhoca_viva: (prev as any).minhoca_viva + 1 }));
+            setInventory(prev => ({ ...prev, minhoca_viva: ((prev as any).minhoca_viva ?? 0) + 1 }));
           }, 0);
           logsToAdd.push({ msg: `🪱 ${a.name} gerou 1 Minhoca Viva!`, type: 'success' });
         }
@@ -4793,7 +4793,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               consecutiveHappyDays: 0,
               daysBelow80: 0,
               isBestFriend: false,
-              trait: 'trabalhadora' as any,
+              trait: 'trabalhadora' as AnimalTrait,
               age: 0,
               maxAge: Math.round(365 * (1 + (Math.random() * 0.4 - 0.2))),
               isAdult: false,
@@ -5837,7 +5837,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     else if (type === 'pavao') revenue = 0;
     else if (type === 'codorna') revenue = getItemBaseSellPrice('quail_egg') * 2;
     else if (type === 'alpaca') revenue = getItemBaseSellPrice('alpaca_wool') / 4;
-    else if (type === 'minhoca') revenue = getItemBaseSellPrice('humus') / 3;
+    else if (type === 'minhoca') revenue = getItemBaseSellPrice('humus') / 3 + getItemBaseSellPrice('minhoca_viva') / 5;
     else if (type === 'caracol') revenue = getItemBaseSellPrice('muco') / 3;
     else if (type === 'coelho_angora') revenue = getItemBaseSellPrice('angora_wool') / 5;
     else if (type === 'bicho_seda') revenue = getItemBaseSellPrice('seda_bruta') * 3 / 14;

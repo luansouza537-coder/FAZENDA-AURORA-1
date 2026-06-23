@@ -239,7 +239,9 @@ const MarketModal: React.FC<MarketModalProps> = ({
                   {([
                     { key: 'quail_egg', label: '🐦 Ovo de Codorna', base: 8 },
                     { key: 'alpaca_wool', label: '🦙 Lã de Alpaca', base: 65 },
-                    { key: 'humus', label: '🪱 Húmus', base: 20 },
+                    { key: 'humus', label: '🪱 Húmus', base: 22 },
+                    { key: 'minhoca_viva', label: '🪱 Minhoca Viva', base: 18 },
+                    { key: 'biofertilizante', label: '🧴 Biofertilizante', base: 55 },
                     { key: 'muco', label: '🐌 Muco de Caracol', base: 120 },
                     { key: 'angora_wool', label: '🐇 Lã Angorá', base: 90 },
                     { key: 'seda_bruta', label: '🪲 Seda Bruta', base: 80 },
