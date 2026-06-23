@@ -2197,7 +2197,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (hasFlorestaBonus) melAmt += 1;
     if (hasApicultor) melAmt += 1;
     const cycleBySeason = seasIdx === 0 ? 2 : seasIdx === 1 ? 3 : seasIdx === 2 ? 5 : (hasApicultor ? 7 : 10);
-    const lastMel = animal.lastMelDay ?? currentDay;
+    const lastMel = animal.lastMelDay ?? (currentDay - cycleBySeason);
     if (currentDay - lastMel === cycleBySeason) melAmt += 1;
     setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) + melAmt }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, melReady: false, lastMelDay: currentDay } : a));
@@ -2205,7 +2205,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     addLog(`🍯 Colheu ${melAmt} mel da Colmeia de Abelhas!`, 'success');
     sfx.playSound('colmeia_abelhas');
     spawnFeedback('🍯', `+${melAmt} Mel`, event);
-  }, [animals, currentDay, workers, landBiomes, weather, setInventory, setAnimals, checkAndUnlockAchievement, addLog, sfx, spawnFeedback]);
+  }, [animals, currentDay, workers, landBiomes, weather, setInventory, setAnimals, checkAndUnlockAchievement, addLog, spawnFeedback]);
 
   const collectMelWithToast = useCallback((id: number, event: React.MouseEvent) => {
     collectMel(id, event);
@@ -4440,7 +4440,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           const seasIdx = Math.floor(((nextDayValue - 1) % 120) / 30);
           const hasApicultor = workers.some(w => w.role === 'apicultor');
           const cycleBySeason = seasIdx === 0 ? 2 : seasIdx === 1 ? 3 : seasIdx === 2 ? 5 : (hasApicultor ? 7 : 10);
-          const lastMel = a.lastMelDay ?? nextDayValue;
+          const lastMel = a.lastMelDay ?? (nextDayValue - cycleBySeason);
           const daysSince = nextDayValue - lastMel;
           // Chuva pausa o ciclo: não marca pronto em dia de chuva
           if (daysSince >= cycleBySeason && weather !== 'chuva' && nextWeather !== 'chuva') {
