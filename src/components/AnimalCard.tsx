@@ -72,7 +72,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
     (animal.type === 'porco' && (animal.weightGain || 0) >= 0.8) ||
     (animal.type === 'cabra' && animal.isLactating && animal.hasProducedToday) ||
     (animal.type === 'pato' && animal.hasProducedToday) ||
-    (animal.type === 'bufalo' && animal.hasProducedToday);
+    (animal.type === 'bufalo' && animal.hasProducedToday && animal.isLactating !== false);
   const typeLabel: Record<string, string> = {
     vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐',
     lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
@@ -244,7 +244,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
   const isReady = (
     (animal.type === 'vaca' && animal.hasProducedToday) ||
-    (animal.type === 'bufalo' && animal.hasProducedToday) ||
+    (animal.type === 'bufalo' && animal.hasProducedToday && animal.isLactating !== false) ||
     (animal.type === 'galinha' && animal.hasProducedToday) ||
     (animal.type === 'codorna' && animal.hasProducedToday) ||
     (animal.type === 'pato' && animal.hasProducedToday) ||
@@ -436,6 +436,24 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               </span>
             )
           )}
+          {/* Búfala — badge de lactação */}
+          {animal.type === 'bufalo' && (
+            (animal.isLactating ?? true) ? (
+              <span
+                className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-green-100 border border-green-400 text-green-800 cursor-help"
+                title="Produzindo leite de búfala"
+              >
+                🍼 Lactando
+              </span>
+            ) : (
+              <span
+                className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-help"
+                title={`Período seco: ${10 - (animal.lactationCycle ?? 0)} dia(s) para voltar à lactação`}
+              >
+                🔴 Seco ({10 - (animal.lactationCycle ?? 0)}d)
+              </span>
+            )
+          )}
           {/* MECHANIC 4: Lhama — badge de lã acumulada */}
           {animal.type === 'lhama' && (
             <span
@@ -611,7 +629,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               : animal.type === 'ganso'
               ? "🦢 Bota ovos de ganso a cada 3 dias no Outono/Inverno e a cada 5 dias nas demais estações. Funciona como alarme de eventos negativos."
               : animal.type === 'bufalo'
-              ? "🐃 Produz leite de búfala (3u/dia, 28💰/u). No Verão sofre estresse térmico (-1u). Seu leite pode virar Muçarela de Búfala (120💰)."
+              ? "🐃 Produz leite de búfala (3u/dia, 28–35💰/u). Ciclo: 8 dias lactando + 2 dias secos. No Verão sofre estresse térmico (-1u). Seu leite pode virar Muçarela de Búfala (120💰)."
               : animal.type === 'pavao'
               ? "🦚 Animal de prestígio. Com felicidade ≥80%, concede +10% felicidade para todos os animais e +3-5% nos preços de venda."
               : "🥚 Bota ricos ovos de quintal se manter felicidade > 30% e fome > 25%."}

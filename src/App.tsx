@@ -4013,7 +4013,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // --- LONG CONTRACTS: Liquidação semanal de prêmios ---
       let longContractBonusForGold = 0;
       if (isWeeklyBillDay) {
-        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, cheese: 20, queijoCoalho: 28, queijoMucarela: 55, queijoBrie: 90, butter: 45, yogurt: 35, goat_milk: 14, buffalo_milk: 28, buffalo_mozzarella: 120, duck_egg: 18, quail_egg: 22, goose_egg: 50, alpaca_wool: 65, angora_wool: 90, llama_wool: 45, muco: 35, mel_envasado: 80, seda_bruta: 100, boi: 300, porco: 180, boi_porco: 300, mayo: 16, queijo_cabra: 90, iogurte_cabra: 55, tapete_lhama: 110, leite_condensado: 100, tecido_alpaca: 180, cachecol_angora: 160, coxa_ra: 110, carne_avestruz: 220, couro_avestruz: 300, fio_seda: 200, carne_jacare: 300, couro_jacare: 500 };
+        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, cheese: 20, queijoCoalho: 28, queijoMucarela: 55, queijoBrie: 90, butter: 45, yogurt: 35, goat_milk: 14, buffalo_milk: 28, buffalo_mozzarella: 120, duck_egg: 38, quail_egg: 22, goose_egg: 50, alpaca_wool: 65, angora_wool: 90, llama_wool: 45, muco: 35, mel_envasado: 80, seda_bruta: 100, boi: 300, porco: 180, boi_porco: 300, mayo: 16, queijo_cabra: 90, iogurte_cabra: 55, tapete_lhama: 110, leite_condensado: 100, tecido_alpaca: 180, cachecol_angora: 160, coxa_ra: 110, carne_avestruz: 220, couro_avestruz: 300, fio_seda: 200, carne_jacare: 300, couro_jacare: 500 };
         contracts.forEach(c => {
           if (c.contractType !== 'long' || !c.active || c.cycleType === 'monthly') return;
           const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
@@ -4429,10 +4429,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const basePestChance = 0.05;
         const hasDuckAlive = finalAnimals.some(a => a.type === 'pato' && a.isAdult !== false);
         const pestChance = hasDuckAlive ? basePestChance * 0.6 : basePestChance;
-        if (antiPestDays <= 0 && hasDuckAlive && Math.random() < (basePestChance - pestChance) * 3) {
+        const pestRoll = Math.random();
+        if (antiPestDays <= 0 && hasDuckAlive && pestRoll >= pestChance && pestRoll < basePestChance) {
           logsToAdd.push({ msg: `🦆 Os patos patrulharam o celeiro e espantaram as pragas hoje!`, type: 'info' });
         }
-        if (antiPestDays <= 0 && Math.random() < pestChance) {
+        if (antiPestDays <= 0 && pestRoll < pestChance) {
           const pestItems: Array<keyof typeof inventory> = ['milk', 'goat_milk', 'egg', 'duck_egg', 'goose_egg'];
           const itemLabels: Record<string, string> = { milk: 'leite', goat_milk: 'l.cabra', egg: 'ovos', duck_egg: 'ov.pato', goose_egg: 'ov.ganso' };
           const lossMultiplier = insurance.active ? 0.3 : 1.0;
@@ -4665,7 +4666,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           hasProducedToday: false,
           ...(r.type === 'ovelha' && { daysUntilWool: 3, daysSinceLastWool: 0, woolReady: false }),
           ...(r.type === 'cabra' && { isLactating: false, lactationCycle: 0 }),
-          ...(r.type === 'bufalo' && { heatStress: false }),
+          ...(r.type === 'bufalo' && { heatStress: false, isLactating: false, lactationCycle: 0 }),
           ...(r.type === 'boi' && { weightGain: 0.05 }),
         };
         // 15% chance of good trait
