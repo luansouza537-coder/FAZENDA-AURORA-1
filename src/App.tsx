@@ -1754,7 +1754,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     }
     if (itemType === 'goat_milk') return farmLevel >= 4 ? 16 : 14;
     if (itemType === 'llama_wool') return 28;
-    if (itemType === 'duck_egg') return 28;
+    if (itemType === 'duck_egg') return 38;
     if (itemType === 'goose_egg') return 50;
     if (itemType === 'buffalo_milk') return farmLevel >= 6 ? 35 : 28;
     if (itemType === 'buffalo_mozzarella') return 165;
@@ -2918,18 +2918,30 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         logs.push({ msg: `🦢 ${copy.name} nada tranquilamente.`, type: 'info' });
       }
       else if (copy.type === 'bufalo') {
-        // Summer heat stress
-        // We don't have currentDay here but we can check currentW or use approximation
+        // Ciclo de lactação: 8 dias lactando + 2 dias secos (fallback: isLactating ?? true para saves antigos)
+        const lactCycle = (copy.lactationCycle ?? 0) + 1;
+        if (lactCycle >= 10) {
+          copy.lactationCycle = 0;
+          copy.isLactating = true; // reinicia ciclo
+        } else if (lactCycle >= 8) {
+          copy.lactationCycle = lactCycle;
+          copy.isLactating = false; // período seco (dias 8 e 9)
+        } else {
+          copy.lactationCycle = lactCycle;
+          copy.isLactating = copy.isLactating ?? true;
+        }
+
         const ageRatio = (copy.age !== undefined && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
-        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
+        const canProduce = copy.isLactating !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐃 ${copy.name} produziu leite de búfala!`, type: 'info' });
+        } else if (copy.isLactating === false) {
+          logs.push({ msg: `🐃 ${copy.name} está no período seco (${10 - lactCycle} dia(s) restante(s)).`, type: 'info' });
         }
-        // Only lose 50% happiness from hunger (handled below by overriding)
       }
       else if (copy.type === 'pavao') {
         // Pavão: animal de prestígio passivo — sem produção
@@ -4415,8 +4427,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // MECHANIC 1: Sistema de Pragas (Pato reduz probabilidade)
       {
         const basePestChance = 0.05;
-        const hasDuckAlive = finalAnimals.some(a => a.type === 'pato');
+        const hasDuckAlive = finalAnimals.some(a => a.type === 'pato' && a.isAdult !== false);
         const pestChance = hasDuckAlive ? basePestChance * 0.6 : basePestChance;
+        if (antiPestDays <= 0 && hasDuckAlive && Math.random() < (basePestChance - pestChance) * 3) {
+          logsToAdd.push({ msg: `🦆 Os patos patrulharam o celeiro e espantaram as pragas hoje!`, type: 'info' });
+        }
         if (antiPestDays <= 0 && Math.random() < pestChance) {
           const pestItems: Array<keyof typeof inventory> = ['milk', 'goat_milk', 'egg', 'duck_egg', 'goose_egg'];
           const itemLabels: Record<string, string> = { milk: 'leite', goat_milk: 'l.cabra', egg: 'ovos', duck_egg: 'ov.pato', goose_egg: 'ov.ganso' };
@@ -4615,7 +4630,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (jBonus > 0) {
             logsToAdd.push({ msg: `🌱 ${a.name} cresceu bem! Recebe +${Math.round(jBonus*100)}% de produção permanente por boa criação na juventude.`, type: 'success' });
           }
-          return { ...a, isAdult: true, adulthoodDay: undefined, juvenileBonus: jBonus, maxAge: a.maxAge ?? Math.round(baseMax * (1 + (Math.random() * 0.4 - 0.2))) };
+          const bufaloPatch = a.type === 'bufalo' ? { isLactating: true, lactationCycle: 0 } : {};
+          return { ...a, isAdult: true, adulthoodDay: undefined, juvenileBonus: jBonus, maxAge: a.maxAge ?? Math.round(baseMax * (1 + (Math.random() * 0.4 - 0.2))), ...bufaloPatch };
         }
         return a;
       });
@@ -5228,11 +5244,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (workers.some(w => w.role === 'ordenhador')) {
           const cowMilkCollected = finalAnimals.filter(a => a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday && !(machines.milkerPurchased && machines.milkerActive)).length;
           const goatMilkCollected = finalAnimals.filter(a => a.type === 'cabra' && a.isAdult !== false && a.hasProducedToday).length;
-          const buffaloMilkCollected = finalAnimals.filter(a => a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday).length;
+          const buffaloMilkCollected = finalAnimals.filter(a => a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false).length;
           const alpacaWoolCollected = finalAnimals.filter(a => a.type === 'alpaca' && a.isAdult !== false && a.woolReady).length;
           const ordenhadorIds = new Set(finalAnimals.filter(a => {
             if (a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday && !(machines.milkerPurchased && machines.milkerActive)) return true;
-            if ((a.type === 'cabra' || a.type === 'bufalo') && a.isAdult !== false && a.hasProducedToday) return true;
+            if (a.type === 'cabra' && a.isAdult !== false && a.hasProducedToday) return true;
+            if (a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false) return true;
             if (a.type === 'alpaca' && a.isAdult !== false && a.woolReady) return true;
             return false;
           }).map(a => a.id));

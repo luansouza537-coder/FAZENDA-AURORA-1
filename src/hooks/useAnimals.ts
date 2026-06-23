@@ -631,6 +631,11 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'bufalo') return;
 
+    if (animal.isLactating === false) {
+      addLog(`🐃 ${animal.name} está no período seco — volta a lactar em breve!`, 'error');
+      spawnFeedback('🔴', 'Período Seco', event);
+      return;
+    }
     if (!animal.hasProducedToday) {
       addLog(`🐃 ${animal.name} já foi ordenhada hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
@@ -1126,7 +1131,7 @@ export function useAnimals({
       ...(type === 'lhama' && { woolAccumulated: 0 }),
       ...(type === 'pato' && { hasProducedToday: false }),
       ...(type === 'ganso' && { inLayingSeason: false, daysSinceLastGooseEgg: 0, hasProducedToday: false }),
-      ...(type === 'bufalo' && { hasProducedToday: false, heatStress: false }),
+      ...(type === 'bufalo' && { hasProducedToday: false, heatStress: false, isLactating: true, lactationCycle: 0 }),
       ...(type === 'pavao' && { hasProducedToday: false }),
       ...(type === 'codorna' && { hasProducedToday: false }),
       ...(type === 'alpaca' && { daysUntilWool: 4, daysSinceLastWool: 0, woolReady: false, heatStress: false }),
@@ -1247,7 +1252,7 @@ export function useAnimals({
       ...(type === 'porco' && { weightGain: 0.05 }),
       ...(type === 'cabra' && { isLactating: false, lactationCycle: 0 }),
       ...(type === 'lhama' && { woolAccumulated: 0 }),
-      ...(type === 'bufalo' && { heatStress: false }),
+      ...(type === 'bufalo' && { heatStress: false, isLactating: false, lactationCycle: 0 }),
       ...(type === 'pavao' && {}),
     };
 
