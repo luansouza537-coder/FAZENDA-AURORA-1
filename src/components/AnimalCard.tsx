@@ -917,6 +917,15 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           </button>
         )}
 
+        {/* Alpaca: coletar lã */}
+        {animal.type === 'alpaca' && (
+          <button type="button" onClick={(e) => { e.preventDefault(); onCollectAlpacaWool(animal.id, e); }} disabled={!animal.woolReady}
+            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+            title={animal.woolReady ? 'Tosquiar alpaca' : `Aguarde ${4 - (animal.daysSinceLastWool ?? 0)} dia(s)`}>
+            <Scissors className="w-3.5 h-3.5" /> Tosquiar Alpaca
+          </button>
+        )}
+
         {/* Collect Egg (Chickens) */}
         {animal.type === 'galinha' && (
           <button
@@ -1246,15 +1255,6 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             </button>
           );
         })()}
-
-        {/* Alpaca: coletar lã */}
-        {animal.type === 'alpaca' && (
-          <button type="button" onClick={(e) => { e.preventDefault(); onCollectAlpacaWool(animal.id, e); }} disabled={!animal.woolReady}
-            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
-            title={animal.woolReady ? 'Tosquiar alpaca' : `Aguarde ${4 - (animal.daysSinceLastWool ?? 0)} dia(s)`}>
-            <Scissors className="w-3.5 h-3.5" /> Tosquiar Alpaca
-          </button>
-        )}
 
         {/* Coelho Angorá: coletar lã */}
         {animal.type === 'coelho_angora' && (
