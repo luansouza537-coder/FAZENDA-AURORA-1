@@ -37,7 +37,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
               👷 Funcionários da Fazenda
             </h3>
             <p className="text-[#fbbf24] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-              Vagas: {workers.length}/{Math.max(1, Math.floor(farmLevel / 3))} • 1 vaga a cada 3 níveis
+              Vagas: {workers.length}/{farmLevel} • 1 vaga por nível
             </p>
             <button onClick={onClose} className="absolute top-4 right-4 text-[#fef3c7] bg-[#022c22] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
           </div>
@@ -122,7 +122,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                 const hiredCount = workers.filter(w => w.role === wt.role).length;
                 const alreadyHired = hiredCount > 0;
                 const atRoleMax = hiredCount >= maxPerRole;
-                const maxSlots = Math.max(1, Math.floor(farmLevel / 3));
+                const maxSlots = farmLevel;
                 const atMax = workers.length >= maxSlots;
                 const levelOk = farmLevel >= wt.minLevel;
                 const canHire = !atRoleMax && !atMax && levelOk;
