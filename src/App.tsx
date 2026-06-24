@@ -2624,7 +2624,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       setShowSavedToast(true);
       setTimeout(() => setShowSavedToast(false), 2000);
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
     let price = 2500;
@@ -3943,7 +3943,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (maintPaid) {
         // A. Ordenhadeira Automática
         if (machines.milkerPurchased && machines.milkerActive) {
-          setMachineUsageStats(prev => ({ ...prev, milker: prev.milker + 1 }));
           const milkerBonus = 1 + (milkerLevel - 1) * 0.2;
           const productionMult = productionBoostDays > 0 ? 1.15 : 1;
 
@@ -4027,6 +4026,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + sheepMilkCollected }));
             logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${sheepMilkCollected} Leite(s) de Ovelha de ${milkedSheep} ovelha(s)!`, type: 'success' });
           }
+          if (milkCollected + goatMilkCollected + buffaloMilkCollected + sheepMilkCollected > 0) {
+            setMachineUsageStats(prev => ({ ...prev, milker: prev.milker + 1 }));
+          }
         }
 
         // B. Tosquiadeira Elétrica
@@ -4043,8 +4045,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             shearedSheep++;
             return { ...a, woolReady: false, daysSinceLastWool: 0 };
           });
-          setMachineUsageStats(prev => ({ ...prev, shearer: prev.shearer + 1 }));
           if (woolCollected > 0) {
+            setMachineUsageStats(prev => ({ ...prev, shearer: prev.shearer + 1 }));
             setInventory(prev => ({ ...prev, wool: prev.wool + woolCollected }));
             setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + 1, totalWool: (prev.totalWool || 0) + woolCollected }));
             setWeeklyStats(prev => ({ ...prev, wool: prev.wool + woolCollected }));
@@ -7118,6 +7120,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           camaraFriaLevel={camaraFriaLevel} setCamaraFriaLevel={setCamaraFriaLevel}
           buyMachine={buyMachine} toggleMachine={toggleMachine}
           machineUsageStats={machineUsageStats}
+          infraEnergyPerDay={(hasFridge ? 18 : 0) + (hasSilo ? 9 : 0) + (hasStable ? 12 : 0) + (hasBebedouro ? 8 : 0) + (queijariaNivel > 0 ? queijariaNivel * 9 : 0) + (abatedouroUnlocked ? 38 : 0)}
           ownedOneTimeEffects={[
             ...(hasBebedouro ? ['bebedouro'] : []),
             ...(hasCertSanitario ? ['cert_sanitario'] : []),

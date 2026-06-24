@@ -75,6 +75,7 @@ interface MelhoriasModalProps {
   buyMachine: (key: 'milker' | 'shearer' | 'feeder') => void;
   toggleMachine: (key: 'milker' | 'shearer' | 'feeder') => void;
   machineUsageStats: { milker: number; shearer: number; feeder: number };
+  infraEnergyPerDay: number;
 }
 
 const VEHICLE_CATEGORIES = [
@@ -669,8 +670,9 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 const shearerE = p.machines.shearerPurchased && p.machines.shearerActive ? 21 : 0;
                 const feederE = p.machines.feederPurchased && p.machines.feederActive ? 15 : 0;
                 const totalMachineE = milkerE + shearerE + feederE;
-                const solarDiscount = Math.min(p.solarLevel * 0.15, 0.90);
-                const discountedE = Math.round(totalMachineE * (1 - solarDiscount));
+                const totalBruto = totalMachineE + p.infraEnergyPerDay;
+                const solarDiscount = p.solarLevel === 1 ? 0.4 : p.solarLevel === 2 ? 0.7 : p.solarLevel >= 3 ? 1.0 : 0;
+                const discountedE = Math.round(totalBruto * (1 - solarDiscount));
                 return (
                   <div className="border-2 border-blue-200 rounded-2xl p-4 bg-blue-50">
                     <p className="font-display font-black text-xs uppercase text-blue-800 mb-3">⚡ Medidor de Consumo de Energia</p>
@@ -687,9 +689,15 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                         </div>
                       ))}
                     </div>
+                    {p.infraEnergyPerDay > 0 && (
+                      <div className="flex items-center justify-between text-xs font-mono bg-white rounded-xl px-3 py-2 border border-stone-100 mb-1">
+                        <span className="text-stone-500">🏗️ Infraestrutura (fridge/silo/etc):</span>
+                        <span className="font-black text-stone-600">{p.infraEnergyPerDay}⚡/dia</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between text-xs font-mono bg-white rounded-xl px-3 py-2 border border-blue-100">
                       <span className="text-stone-500">Total bruto/dia:</span>
-                      <span className="font-black text-orange-600">{totalMachineE}⚡</span>
+                      <span className="font-black text-orange-600">{totalBruto}⚡</span>
                     </div>
                     {solarDiscount > 0 && (
                       <div className="flex items-center justify-between text-xs font-mono bg-white rounded-xl px-3 py-2 border border-yellow-100 mt-1">
