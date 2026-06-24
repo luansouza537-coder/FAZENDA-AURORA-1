@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao' | 'codorna' | 'alpaca' | 'minhoca' | 'caracol' | 'coelho_angora' | 'bicho_seda' | 'ra' | 'avestruz' | 'jacare' | 'porco' | 'colmeia_abelhas';
+export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao' | 'codorna' | 'alpaca' | 'minhoca' | 'caracol' | 'coelho_angora' | 'bicho_seda' | 'ra' | 'avestruz' | 'jacare' | 'porco' | 'colmeia_abelhas' | 'ovelha_leiteira';
 
 export type AnimalTrait = 'gulosa' | 'preguicosa' | 'feliz' | 'estressada' | 'saudavel' | 'trabalhadora';
 
@@ -93,7 +93,7 @@ export interface Animal {
 // Funcionalidade 4: Contratos de fornecimento
 export interface Contract {
   id: string;
-  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'buffalo_mozzarella' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'goose_egg' | 'angora_wool' | 'alpaca_wool' | 'llama_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'mel' | 'boi' | 'porco' | 'boi_porco' | 'mayo' | 'queijo_cabra' | 'iogurte_cabra' | 'tapete_lhama' | 'leite_condensado' | 'tecido_alpaca' | 'cachecol_angora' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'fio_seda' | 'carne_jacare' | 'couro_jacare';
+  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'buffalo_mozzarella' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'goose_egg' | 'angora_wool' | 'alpaca_wool' | 'llama_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'mel' | 'boi' | 'porco' | 'boi_porco' | 'mayo' | 'queijo_cabra' | 'iogurte_cabra' | 'tapete_lhama' | 'leite_condensado' | 'tecido_alpaca' | 'cachecol_angora' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'fio_seda' | 'carne_jacare' | 'couro_jacare' | 'sheep_milk' | 'queijo_pecorino' | 'iogurte_ovelha' | 'ricota_ovelha' | 'doce_leite_ovelha';
   quantity: number;
   delivered: number;
   pricePerUnit: number;

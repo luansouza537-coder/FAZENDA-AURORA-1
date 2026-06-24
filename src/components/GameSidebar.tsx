@@ -359,6 +359,36 @@ export default function GameSidebar({
                     🥛 Iog.Cabra · {inventory.iogurte_cabra ?? 0}u ({getActualSellPrice('iogurte_cabra')}💰)
                   </button>
                   )}
+                  {((inventory as any).sheep_milk ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('sheep_milk' as any, 1, e)} disabled={((inventory as any).sheep_milk ?? 0) < 1}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
+                    🥛 L.Ovelha · {(inventory as any).sheep_milk ?? 0}u ({getActualSellPrice('sheep_milk' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).queijo_pecorino ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('queijo_pecorino' as any, 1, e)} disabled={((inventory as any).queijo_pecorino ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🧀 Pecorino · {(inventory as any).queijo_pecorino ?? 0}u ({getActualSellPrice('queijo_pecorino' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).iogurte_ovelha ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('iogurte_ovelha' as any, 1, e)} disabled={((inventory as any).iogurte_ovelha ?? 0) < 1}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
+                    🥛 Iog.Ovelha · {(inventory as any).iogurte_ovelha ?? 0}u ({getActualSellPrice('iogurte_ovelha' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).ricota_ovelha ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('ricota_ovelha' as any, 1, e)} disabled={((inventory as any).ricota_ovelha ?? 0) < 1}
+                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
+                    🧀 Ricota Ovelha · {(inventory as any).ricota_ovelha ?? 0}u ({getActualSellPrice('ricota_ovelha' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).doce_leite_ovelha ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('doce_leite_ovelha' as any, 1, e)} disabled={((inventory as any).doce_leite_ovelha ?? 0) < 1}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
+                    🍯 D.Leite Ovelha · {(inventory as any).doce_leite_ovelha ?? 0}u ({getActualSellPrice('doce_leite_ovelha' as any)}💰)
+                  </button>
+                  )}
                   {(inventory.leite_condensado ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('leite_condensado', 1, e)} disabled={(inventory.leite_condensado ?? 0) < 1}
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">

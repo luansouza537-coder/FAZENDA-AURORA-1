@@ -92,6 +92,10 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   pao_rustico:      { energy: 1, water: 1 },
   waffle_mel:       { energy: 1, water: 1 },
   biofertilizante:  { energy: 1, water: 1 },
+  queijo_pecorino:  { energy: 2, water: 1 },
+  iogurte_ovelha:   { energy: 1, water: 0 },
+  ricota_ovelha:    { energy: 1, water: 1 },
+  doce_leite_ovelha:{ energy: 2, water: 0 },
 };
 
 export function useInventory({
@@ -129,7 +133,7 @@ export function useInventory({
   };
 
   const PRODUCT_FREIGHT_CAT: Record<string, string> = {
-    milk: 'laticinios', goat_milk: 'laticinios', buffalo_milk: 'laticinios',
+    milk: 'laticinios', goat_milk: 'laticinios', sheep_milk: 'laticinios', buffalo_milk: 'laticinios',
     butter: 'laticinios', yogurt: 'laticinios', iogurte_cabra: 'laticinios',
     leite_condensado: 'laticinios', cheese: 'laticinios', queijoCoalho: 'laticinios',
     queijoMucarela: 'laticinios', queijoBrie: 'laticinios', buffalo_mozzarella: 'laticinios',
@@ -151,6 +155,8 @@ export function useInventory({
     luvas_lhama: 'texteis', poncho_lhama: 'texteis', manta_lhama: 'texteis',
     iogurte_bufala: 'laticinios', manteiga_bufala: 'laticinios',
     doce_leite_bufala: 'laticinios', burrata: 'laticinios',
+    queijo_pecorino: 'laticinios', iogurte_ovelha: 'laticinios',
+    ricota_ovelha: 'laticinios', doce_leite_ovelha: 'laticinios',
     massa_fresca: 'ovos',
     crepe_rustico: 'ovos', pao_rustico: 'ovos', waffle_mel: 'organicos',
     minhoca_viva: 'organicos', biofertilizante: 'organicos',
@@ -247,6 +253,11 @@ export function useInventory({
           waffle_mel: inv.waffle_mel ?? 0,
           minhoca_viva: inv.minhoca_viva ?? 0,
           biofertilizante: inv.biofertilizante ?? 0,
+          sheep_milk: inv.sheep_milk ?? 0,
+          queijo_pecorino: inv.queijo_pecorino ?? 0,
+          iogurte_ovelha: inv.iogurte_ovelha ?? 0,
+          ricota_ovelha: inv.ricota_ovelha ?? 0,
+          doce_leite_ovelha: inv.doce_leite_ovelha ?? 0,
         };
       }
     } catch (e) {}
@@ -334,6 +345,11 @@ export function useInventory({
       waffle_mel: 0,
       minhoca_viva: 0,
       biofertilizante: 0,
+      sheep_milk: 0,
+      queijo_pecorino: 0,
+      iogurte_ovelha: 0,
+      ricota_ovelha: 0,
+      doce_leite_ovelha: 0,
     };
   });
 
@@ -350,10 +366,11 @@ export function useInventory({
           milk: pf.milk ?? 3, egg: pf.egg ?? 3, goat_milk: pf.goat_milk ?? 3,
           duck_egg: pf.duck_egg ?? 3, goose_egg: pf.goose_egg ?? 3,
           buffalo_milk: pf.buffalo_milk ?? 3, fertile_egg: pf.fertile_egg ?? 3,
+          sheep_milk: pf.sheep_milk ?? 3,
         };
       }
     } catch (e) {}
-    return { milk: 3, egg: 3, goat_milk: 3, duck_egg: 3, goose_egg: 3, buffalo_milk: 3, fertile_egg: 3 };
+    return { milk: 3, egg: 3, goat_milk: 3, duck_egg: 3, goose_egg: 3, buffalo_milk: 3, fertile_egg: 3, sheep_milk: 3 };
   });
 
   // --- QUEIJARIA STATES ---
@@ -580,6 +597,60 @@ export function useInventory({
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥛', 'Fermentando... 1d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftQueijoPecorino = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 5) { addLog('🧀 Queijo Pecorino requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.sheep_milk ?? 0) < 5) { addLog('🐑 Falta Leite de Ovelha! Precisa de 5.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Ovelha!', event); return; }
+    if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
+    setInventory(prev => ({ ...prev, sheep_milk: (prev.sheep_milk ?? 0) - 5 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'queijo_pecorino', diasRestantes: 10 }]);
+    applyCraftCost('queijo_pecorino');
+    addLog('🧀 Queijo Pecorino em maturação! Pronto em 10 dias.', 'success');
+    setFarmXp(prev => prev + 5);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧀', 'Maturando... 10d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftIoguteOvelha = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 3) { addLog('🥛 Iogurte de Ovelha requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.sheep_milk ?? 0) < 2) { addLog('🐑 Falta Leite de Ovelha! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Ovelha!', event); return; }
+    if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
+    setInventory(prev => ({ ...prev, sheep_milk: (prev.sheep_milk ?? 0) - 2 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'iogurte_ovelha', diasRestantes: 2 }]);
+    applyCraftCost('iogurte_ovelha');
+    addLog('🥛 Iogurte de Ovelha em fermentação! Pronto em 2 dias.', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥛', 'Fermentando... 2d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftRicotaOvelha = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 4) { addLog('🥛 Ricota de Ovelha requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.sheep_milk ?? 0) < 3) { addLog('🐑 Falta Leite de Ovelha! Precisa de 3.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Ovelha!', event); return; }
+    setInventory(prev => ({ ...prev, sheep_milk: (prev.sheep_milk ?? 0) - 3, ricota_ovelha: (prev.ricota_ovelha ?? 0) + 1 }));
+    applyCraftCost('ricota_ovelha');
+    addLog('🥛 Você fabricou 1 Ricota de Ovelha com 3 leites!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥛', '+1 Ricota Ovelha', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftDoceLeiteOvelha = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 6) { addLog('🍮 Doce de Leite de Ovelha requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.sheep_milk ?? 0) < 4) { addLog('🐑 Falta Leite de Ovelha! Precisa de 4.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta L.Ovelha!', event); return; }
+    if (queijosEmMaturacao.length >= maxPrateleiras) { addLog('Prateleiras cheias! Aguarde outros produtos terminarem.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Prateleiras Cheias!', event); return; }
+    setInventory(prev => ({ ...prev, sheep_milk: (prev.sheep_milk ?? 0) - 4 }));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'doce_leite_ovelha', diasRestantes: 3 }]);
+    applyCraftCost('doce_leite_ovelha');
+    addLog('🍮 Doce de Leite de Ovelha em preparo! Pronto em 3 dias.', 'success');
+    setFarmXp(prev => prev + 4);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🍮', 'Cozinhando... 3d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   const craftLeiteCondensado = (event?: React.MouseEvent) => {
@@ -1903,6 +1974,10 @@ export function useInventory({
     craftYogurt,
     craftQueijoCabra,
     craftIogurteCabra,
+    craftQueijoPecorino,
+    craftIoguteOvelha,
+    craftRicotaOvelha,
+    craftDoceLeiteOvelha,
     craftLeiteCondensado,
     craftTapeteLhama,
     craftCachecolAngora,

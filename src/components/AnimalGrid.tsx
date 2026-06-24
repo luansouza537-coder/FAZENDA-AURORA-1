@@ -55,6 +55,7 @@ interface AnimalGridProps {
   reproducaoAtiva: boolean;
   REPRODUCAO_CONFIG: Partial<Record<AnimalType, { gestacao: number; minAge: number }>>;
   collectGoatMilk: (id: number, e?: React.MouseEvent) => void;
+  collectSheepMilk: (id: number, e?: React.MouseEvent) => void;
   collectLlamaWool: (id: number, e?: React.MouseEvent) => void;
   collectDuckEgg: (id: number, e?: React.MouseEvent) => void;
   collectGooseProduct: (id: number, e?: React.MouseEvent) => void;
@@ -132,6 +133,7 @@ export default function AnimalGrid({
   reproducaoAtiva,
   REPRODUCAO_CONFIG,
   collectGoatMilk,
+  collectSheepMilk,
   collectLlamaWool,
   collectDuckEgg,
   collectGooseProduct,
@@ -652,6 +654,25 @@ export default function AnimalGrid({
                     </button>
                   </div>
 
+                  {/* Ovelha Leiteira */}
+                  <div className="bg-white rounded-2xl border-2 border-stone-200 p-3 flex flex-col items-center text-center gap-1 shadow-sm">
+                    <span className="text-4xl">🐑</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Ovelha Leiteira</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite de ovelha 28💰/u. Queijo pecorino, ricota e mais. Ciclo 40d lactação / 15d secagem.</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('ovelha_leiteira')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('ovelha_leiteira', e)} disabled={gold < getAnimalPurchasePrice('ovelha_leiteira') || farmLevel < 5}
+                      className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 5 ? '🔒 Nível 5' : 'Comprar 🐑'}
+                    </button>
+                    {farmLevel >= 5 && (
+                      <button type="button" onClick={(e) => buyAnimalFilhote('ovelha_leiteira', e)} disabled={gold < 90}
+                        className="mt-1 bg-pink-500 hover:bg-pink-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 border-pink-800 tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                        title="Compra um filhote de Ovelha Leiteira por 90 moedas. Cresce em 10 dias.">
+                        🐑 Filhote (90💰)
+                      </button>
+                    )}
+                  </div>
+
                   </div>{/* fim grid BUG 1 FIX */}
                 </motion.div>
               )}
@@ -921,6 +942,7 @@ export default function AnimalGrid({
                         onCollectEgg={collectEgg}
                         onSellOx={sellOx}
                         onCollectGoatMilk={collectGoatMilk}
+                        onCollectSheepMilk={collectSheepMilk}
                         onCollectLlamaWool={collectLlamaWool}
                         onCollectDuckEgg={collectDuckEgg}
                         onCollectGooseProduct={collectGooseProduct}

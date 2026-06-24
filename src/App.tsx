@@ -1623,14 +1623,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const getSeasonalityMultiplier = (itemType: string, day: number): number => {
     const estacao = getEstacaoKey(day);
     // --- LATICÍNIOS (leite, manteiga, iogurte, leite condensado) ---
-    const laticinios = new Set(['milk','goat_milk','buffalo_milk','butter','yogurt','iogurte_cabra','leite_condensado']);
+    const laticinios = new Set(['milk','goat_milk','sheep_milk','buffalo_milk','butter','yogurt','iogurte_cabra','leite_condensado','iogurte_ovelha','ricota_ovelha','doce_leite_ovelha']);
     if (laticinios.has(itemType)) {
       if (estacao === 'primavera') return 1.1;
       if (estacao === 'verao') return 1.2;
       return 1.0;
     }
     // --- QUEIJOS ---
-    const queijos = new Set(['cheese','queijoCoalho','queijoMucarela','queijoBrie','queijo_cabra','buffalo_mozzarella']);
+    const queijos = new Set(['cheese','queijoCoalho','queijoMucarela','queijoBrie','queijo_cabra','buffalo_mozzarella','queijo_pecorino']);
     if (queijos.has(itemType)) {
       if (estacao === 'verao') return 1.1;
       if (estacao === 'outono') return 1.2;
@@ -1758,6 +1758,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       return 14;  // era 16 — proporcional ao ovo
     }
     if (itemType === 'goat_milk') return farmLevel >= 4 ? 16 : 14;
+    if (itemType === 'sheep_milk') return farmLevel >= 5 ? 28 : 24;
+    if (itemType === 'queijo_pecorino') return 280;
+    if (itemType === 'iogurte_ovelha') return 80;
+    if (itemType === 'ricota_ovelha') return 95;
+    if (itemType === 'doce_leite_ovelha') return 160;
     if (itemType === 'llama_wool') return 28;
     if (itemType === 'duck_egg') return 38;
     if (itemType === 'goose_egg') return 50;
@@ -1967,6 +1972,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     craftYogurt,
     craftQueijoCabra,
     craftIogurteCabra,
+    craftQueijoPecorino,
+    craftIoguteOvelha,
+    craftRicotaOvelha,
+    craftDoceLeiteOvelha,
     craftLeiteCondensado,
     craftTapeteLhama,
     craftCachecolAngora,
@@ -2063,6 +2072,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     feedAnimal,
     collectEgg,
     collectGoatMilk,
+    collectSheepMilk,
     collectLlamaWool,
     collectDuckEgg,
     collectGooseProduct,
@@ -2936,6 +2946,36 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             // bonus applied via ref copy (won't work here as we iterate separately; handled below)
           }
         });
+      }
+      else if (copy.type === 'ovelha_leiteira') {
+        // Ciclo de lactação: 40 dias lactando + 15 dias secagem
+        if (copy.isLactating) {
+          copy.lactationCycle = (copy.lactationCycle ?? 0) + 1;
+          if ((copy.lactationCycle ?? 0) >= 40) {
+            copy.isLactating = false;
+            copy.lactationCycle = 15;
+            copy.hasProducedToday = false;
+            logs.push({ msg: `🐑 ${copy.name} entrou no período de secagem (15 dias).`, type: 'info' });
+          } else {
+            const ageRatio = (copy.age !== undefined && copy.maxAge) ? copy.age / copy.maxAge : 0.5;
+            const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
+            const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
+            const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
+            const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
+            copy.hasProducedToday = canProduce;
+            if (canProduce) {
+              logs.push({ msg: `🐑 ${copy.name} está lactando e produziu leite de ovelha!`, type: 'info' });
+            }
+          }
+        } else {
+          copy.lactationCycle = Math.max(0, (copy.lactationCycle ?? 15) - 1);
+          if ((copy.lactationCycle ?? 0) <= 0) {
+            copy.isLactating = true;
+            copy.lactationCycle = 0;
+            logs.push({ msg: `🐑 ${copy.name} voltou ao período de lactação!`, type: 'success' });
+          }
+          copy.hasProducedToday = false;
+        }
       }
       else if (copy.type === 'lhama') {
         // Accumulate wool each day (regardless of season)
@@ -6606,6 +6646,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             reproducaoAtiva={reproducaoAtiva}
             REPRODUCAO_CONFIG={REPRODUCAO_CONFIG}
             collectGoatMilk={collectGoatMilk}
+            collectSheepMilk={collectSheepMilk}
             collectLlamaWool={collectLlamaWool}
             collectDuckEgg={collectDuckEgg}
             collectGooseProduct={collectGooseProduct}
@@ -6799,6 +6840,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             craftPaoRustico,
             craftWaffelMel,
             craftBiofertilizante,
+            craftQueijoPecorino,
+            craftIoguteOvelha,
+            craftRicotaOvelha,
+            craftDoceLeiteOvelha,
           }}
           onClose={() => setShowQueijariaModal(false)}
           onOpenMelhorias={() => setShowUpgradesModal(true)}

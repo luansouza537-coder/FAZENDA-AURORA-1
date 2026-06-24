@@ -156,6 +156,7 @@ export interface AnimalCardProps {
   onCollectEgg: (id: number, e: React.MouseEvent) => void;
   onSellOx: (id: number, e: React.MouseEvent) => void;
   onCollectGoatMilk: (id: number, e: React.MouseEvent) => void;
+  onCollectSheepMilk: (id: number, e: React.MouseEvent) => void;
   onCollectLlamaWool: (id: number, e: React.MouseEvent) => void;
   onCollectDuckEgg: (id: number, e: React.MouseEvent) => void;
   onCollectGooseProduct: (id: number, e: React.MouseEvent) => void;
@@ -206,6 +207,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onCollectEgg,
   onSellOx,
   onCollectGoatMilk,
+  onCollectSheepMilk,
   onCollectLlamaWool,
   onCollectDuckEgg,
   onCollectGooseProduct,
@@ -394,7 +396,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
           {/* Animal Badge */}
           <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'minhoca' ? '🪱 Minhoca' : animal.type === 'caracol' ? '🐌 Caracol' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
+            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhoca' : animal.type === 'caracol' ? '🐌 Caracol' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
           {animal.trait && !['minhoca', 'caracol'].includes(animal.type) && (() => {
@@ -458,6 +460,24 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               <span
                 className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-help"
                 title={`Em período de secagem: ${animal.lactationCycle ?? 0} dias restantes para a próxima lactação`}
+              >
+                ⏳ Secagem ({animal.lactationCycle ?? 0}d)
+              </span>
+            )
+          )}
+          {/* Ovelha Leiteira — badge de lactação */}
+          {animal.type === 'ovelha_leiteira' && (
+            (animal.isLactating ?? true) ? (
+              <span
+                className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-green-100 border border-green-400 text-green-800 cursor-help"
+                title="Produzindo leite de ovelha"
+              >
+                🍼 Lactando
+              </span>
+            ) : (
+              <span
+                className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-help"
+                title={`Secagem: ${animal.lactationCycle ?? 0} dias restantes para a próxima lactação`}
               >
                 ⏳ Secagem ({animal.lactationCycle ?? 0}d)
               </span>
@@ -818,6 +838,23 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 )}
               </>
             )}
+            {animal.type === 'ovelha_leiteira' && (
+              <>
+                {animal.isLactating && animal.hasProducedToday ? (
+                  <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">
+                    🥛 Leite de ovelha pronto! (1 unidade)
+                  </span>
+                ) : animal.isLactating ? (
+                  <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">
+                    ⏳ Leite coletado hoje (retorna amanhã)
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">
+                    🔒 Secagem: {animal.lactationCycle ?? 0} dias restantes
+                  </span>
+                )}
+              </>
+            )}
             {animal.type === 'lhama' && (
               <>
                 {(animal.woolAccumulated ?? 0) >= 3 && Math.floor(((currentDay - 1) % 120) / 30) === 0 ? (
@@ -1072,7 +1109,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         )}
 
         {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré, cabra, lhama e búfalo (têm botões próprios) */}
-        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'lhama' && animal.type !== 'bufalo' && animal.type !== 'ganso' && (() => {
+        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'ovelha_leiteira' && animal.type !== 'lhama' && animal.type !== 'bufalo' && animal.type !== 'ganso' && (() => {
           const age = animal.age ?? 0;
           const maxAge = animal.maxAge ?? 90;
           const lifeFraction = Math.min(1, age / maxAge);
@@ -1126,6 +1163,48 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             🏡 Aposentar
           </button>
         )}
+
+        {/* Coletar Leite de Ovelha Leiteira — apenas adultas */}
+        {animal.type === 'ovelha_leiteira' && animal.isAdult !== false && (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); onCollectSheepMilk(animal.id, e); }}
+            disabled={!animal.isLactating || !animal.hasProducedToday}
+            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.isLactating && animal.hasProducedToday ? 'bg-[#3b82f6] hover:bg-[#2563eb] border-b-4 border-[#1d4ed8] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+            title={!animal.isLactating ? `Em período de secagem — ${animal.lactationCycle ?? 0} dias restantes` : !animal.hasProducedToday ? 'Leite já coletado hoje' : 'Coletar leite de ovelha'}
+          >
+            🥛 Coletar
+          </button>
+        )}
+
+        {/* Vender Ovelha Leiteira — aparece após botão de coleta */}
+        {animal.type === 'ovelha_leiteira' && animal.isAdult !== false && (() => {
+          const age = animal.age ?? 0;
+          const maxAge = animal.maxAge ?? 90;
+          const lifeFraction = Math.min(1, age / maxAge);
+          const sellPct = Math.max(0.10, 0.80 - lifeFraction * 0.70);
+          if (pendingSell) {
+            return (
+              <div className="flex items-center gap-1.5 bg-orange-50 border-2 border-orange-300 rounded-xl px-2 py-1.5 animate-pulse-once">
+                <span className="text-[9px] font-mono font-black text-orange-700 leading-tight">
+                  Vender {animal.name}?<br/>
+                  <span className="text-orange-500">~{Math.round(sellPct * 100)}% do valor</span>
+                </span>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); onSellAnimal(animal.id, e); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(false); }}
+                  className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+              </div>
+            );
+          }
+          return (
+            <button type="button" onClick={(e) => { e.preventDefault(); setPendingSell(true); }}
+              className="text-[10px] font-mono font-black px-3 py-1.5 rounded-xl border-2 border-b-4 border-orange-400 bg-orange-50 text-orange-800 hover:bg-orange-100 hover:scale-[1.03] active:translate-y-0.5 cursor-pointer transition-all shadow-sm"
+              title={`Vender por ~${Math.round(sellPct * 100)}% do valor.`}>
+              💸 Vender ({Math.round(sellPct * 100)}%)
+            </button>
+          );
+        })()}
 
         {/* Coletar Leite de Cabra — apenas adultas */}
         {animal.type === 'cabra' && animal.isAdult !== false && (
