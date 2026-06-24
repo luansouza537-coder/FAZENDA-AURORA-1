@@ -11,4 +11,5 @@ export const WORKER_TYPES = [
   { role: 'artesao'              as const, name: 'Artesão',            emoji: '🧵',  dailyCost: 150, desc: 'Produz 1 item têxtil por dia: prioriza Manta Premium, Fio de Seda, Tecido, Cachecol Angorá e Tapete. Até 3 artesãos simultâneos.', minLevel: 6  },
   { role: 'cozinheiro'           as const, name: 'Cozinheiro',         emoji: '👨‍🍳',  dailyCost: 170, desc: 'Produz 1 item gastronômico por dia: prioriza Hidromel, Mel Envasado, Risoto, Conservas e Sopa. Até 3 cozinheiros simultâneos.',   minLevel: 7  },
   { role: 'apicultor'            as const, name: 'Apicultor',          emoji: '🐝',  dailyCost: 80,  desc: '+1 mel extra por colmeia a cada coleta. Colmeias nunca ficam doentes. No inverno, ciclo de produção reduz de 10 para 7 dias.', minLevel: 5  },
+  { role: 'helicicultor'        as const, name: 'Helicicultor',       emoji: '🐌',  dailyCost: 18,  desc: 'Especialista em criação de caracóis. Elimina penalidades de calor e seca. +1 muco extra por coleta. Produção a cada 2 dias.', minLevel: 7  },
 ];

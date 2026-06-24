@@ -2242,8 +2242,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'caracol' || !animal.mucoReady) return;
     const hasFlorestaBonus = landBiomes.some(b => b.biome === 'floresta');
+    const hasHelicicultor = workers.some(w => w.role === 'helicicultor');
     const baseMuco = (weather === 'chuva') ? 2 : 1;
-    const mucoAmt = (specialization === 'organica' ? baseMuco * 2 : baseMuco) + (hasFlorestaBonus ? 1 : 0);
+    const mucoAmt = (specialization === 'organica' ? baseMuco * 2 : baseMuco) + (hasFlorestaBonus ? 1 : 0) + (hasHelicicultor ? 1 : 0);
     setInventory(prev => {
       const newTotal = (prev.muco ?? 0) + mucoAmt;
       if (newTotal >= 20) checkAndUnlockAchievement('organic_master');
@@ -4513,8 +4514,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           logsToAdd.push({ msg: `🪱 ${a.name} gerou 1 Minhoca Viva!`, type: 'success' });
         }
 
-        // Criatório de Caracóis: a cada 3 dias marca mucoReady (2x na chuva ao coletar)
-        if (a.type === 'caracol' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
+        // Criatório de Caracóis: a cada 3 dias (2 com helicicultor) marca mucoReady
+        const helicicultor = workers.some(w => w.role === 'helicicultor');
+        const caracolCycle = helicicultor ? 2 : 3;
+        if (a.type === 'caracol' && (a.age || 0) > 0 && (a.age || 0) % caracolCycle === 0) {
           copy.mucoReady = true;
           logsToAdd.push({ msg: `🐌 ${a.name} produziu muco — pronto para coletar!`, type: 'success' });
           updateMissionProgress('organic_day', 1, nextDayValue);
@@ -4599,13 +4602,15 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao') happyDelta += 5;
           if (a.type === 'jacare') happyDelta += 8;
           if (a.type === 'pato' || a.type === 'ganso') happyDelta -= 5;
-          if (a.type === 'minhoca' || a.type === 'caracol') happyDelta -= 5;
+          if (a.type === 'minhoca') happyDelta -= 5;
+          if (a.type === 'caracol' && !workers.some(w => w.role === 'helicicultor')) happyDelta -= 5;
         }
 
         if (currentSeasonIdx === 1) { // verão
           if (a.type === 'lhama' || a.type === 'alpaca') happyDelta -= 8;
           if (a.type === 'jacare' || a.type === 'ra') happyDelta += 5;
-          if (a.type === 'minhoca' || a.type === 'caracol') happyDelta -= 10;
+          if (a.type === 'minhoca') happyDelta -= 10;
+          if (a.type === 'caracol' && !workers.some(w => w.role === 'helicicultor')) happyDelta -= 10;
         }
         if (currentSeasonIdx === 3) { // inverno
           if (a.type === 'lhama' || a.type === 'alpaca') happyDelta += 5;
