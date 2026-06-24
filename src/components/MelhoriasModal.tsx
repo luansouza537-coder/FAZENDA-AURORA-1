@@ -74,6 +74,7 @@ interface MelhoriasModalProps {
   setCamaraFriaLevel: (v: number) => void;
   buyMachine: (key: 'milker' | 'shearer' | 'feeder') => void;
   toggleMachine: (key: 'milker' | 'shearer' | 'feeder') => void;
+  machineUsageStats: { milker: number; shearer: number; feeder: number };
 }
 
 const VEHICLE_CATEGORIES = [
@@ -661,6 +662,64 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                   </div>
                 );
               })}
+
+              {/* Painel de Consumo de Energia */}
+              {(() => {
+                const milkerE = p.machines.milkerPurchased && p.machines.milkerActive ? 27 : 0;
+                const shearerE = p.machines.shearerPurchased && p.machines.shearerActive ? 21 : 0;
+                const feederE = p.machines.feederPurchased && p.machines.feederActive ? 15 : 0;
+                const totalMachineE = milkerE + shearerE + feederE;
+                const solarDiscount = Math.min(p.solarLevel * 0.15, 0.90);
+                const discountedE = Math.round(totalMachineE * (1 - solarDiscount));
+                return (
+                  <div className="border-2 border-blue-200 rounded-2xl p-4 bg-blue-50">
+                    <p className="font-display font-black text-xs uppercase text-blue-800 mb-3">⚡ Medidor de Consumo de Energia</p>
+                    <div className="grid grid-cols-3 gap-2 mb-3">
+                      {[
+                        { label: '🥛 Ordenhadeira', e: milkerE, active: p.machines.milkerPurchased && p.machines.milkerActive },
+                        { label: '✂️ Tosquiadeira', e: shearerE, active: p.machines.shearerPurchased && p.machines.shearerActive },
+                        { label: '🌾 Alimentador', e: feederE, active: p.machines.feederPurchased && p.machines.feederActive },
+                      ].map(({ label, e, active }) => (
+                        <div key={label} className={`rounded-xl p-2 text-center border ${active ? 'bg-white border-blue-200' : 'bg-stone-100 border-stone-200 opacity-50'}`}>
+                          <p className="text-[10px] font-mono text-stone-500">{label}</p>
+                          <p className={`font-black text-sm ${active ? 'text-orange-600' : 'text-stone-400'}`}>{e}⚡/dia</p>
+                          <p className="text-[10px] text-stone-400 font-mono">{active ? 'LIGADA' : 'DESLIG.'}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-mono bg-white rounded-xl px-3 py-2 border border-blue-100">
+                      <span className="text-stone-500">Total bruto/dia:</span>
+                      <span className="font-black text-orange-600">{totalMachineE}⚡</span>
+                    </div>
+                    {solarDiscount > 0 && (
+                      <div className="flex items-center justify-between text-xs font-mono bg-white rounded-xl px-3 py-2 border border-yellow-100 mt-1">
+                        <span className="text-stone-500">☀️ Desconto Solar (Nv{p.solarLevel}):</span>
+                        <span className="font-black text-yellow-600">-{Math.round(solarDiscount * 100)}% → {discountedE}⚡/dia</span>
+                      </div>
+                    )}
+
+                    {/* Contador de Uso das Máquinas */}
+                    {(p.machines.milkerPurchased || p.machines.shearerPurchased || p.machines.feederPurchased) && (
+                      <div className="mt-3 pt-3 border-t border-blue-100">
+                        <p className="font-display font-black text-xs uppercase text-blue-700 mb-2">🔢 Contador de Uso das Máquinas</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { label: '🥛 Ordenhadeira', count: p.machineUsageStats.milker, owned: p.machines.milkerPurchased },
+                            { label: '✂️ Tosquiadeira', count: p.machineUsageStats.shearer, owned: p.machines.shearerPurchased },
+                            { label: '🌾 Alimentador', count: p.machineUsageStats.feeder, owned: p.machines.feederPurchased },
+                          ].map(({ label, count, owned }) => (
+                            <div key={label} className={`rounded-xl p-2 text-center border ${owned ? 'bg-white border-blue-200' : 'bg-stone-100 border-stone-200 opacity-40'}`}>
+                              <p className="text-[10px] font-mono text-stone-500">{label}</p>
+                              <p className="font-black text-lg text-blue-700">{count}</p>
+                              <p className="text-[10px] text-stone-400 font-mono">usos</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 

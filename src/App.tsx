@@ -562,6 +562,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [feederLevel, setFeederLevel] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).feederLevel ?? 1; } catch(e) {} return 1;
   });
+  const [machineUsageStats, setMachineUsageStats] = useState<{ milker: number; shearer: number; feeder: number }>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).machineUsageStats ?? { milker: 0, shearer: 0, feeder: 0 }; } catch(e) {} return { milker: 0, shearer: 0, feeder: 0 };
+  });
 
   // --- EFEITOS DO MERCADOR EXTRAS ---
   const [productionBoostDays, setProductionBoostDays] = useState<number>(() => {
@@ -2606,6 +2609,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest,
         insuranceTheft, insuranceClimate,
         milkerLevel, shearerLevel, feederLevel,
+        machineUsageStats,
         productionBoostDays, antiPestDays,
         worldEvent,
         financialLog,
@@ -3652,6 +3656,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (feederFedCount > 0) {
         setInventory(prev => ({ ...prev, ...invAfterAuto }));
         setStats(prev => ({ ...prev, totalFed: prev.totalFed + feederFedCount }));
+        setMachineUsageStats(prev => ({ ...prev, feeder: prev.feeder + 1 }));
         logsToAdd.push({
           msg: `🌾 Alimentador Automático: Alimentou ${feederFedCount} animal(is) — consumiu ${feederFedCount} unidade(s) de ração do Armazém. (ouro não deduzido aqui)`,
           type: 'info'
@@ -3938,6 +3943,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (maintPaid) {
         // A. Ordenhadeira Automática
         if (machines.milkerPurchased && machines.milkerActive) {
+          setMachineUsageStats(prev => ({ ...prev, milker: prev.milker + 1 }));
           const milkerBonus = 1 + (milkerLevel - 1) * 0.2;
           const productionMult = productionBoostDays > 0 ? 1.15 : 1;
 
@@ -4037,6 +4043,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             shearedSheep++;
             return { ...a, woolReady: false, daysSinceLastWool: 0 };
           });
+          setMachineUsageStats(prev => ({ ...prev, shearer: prev.shearer + 1 }));
           if (woolCollected > 0) {
             setInventory(prev => ({ ...prev, wool: prev.wool + woolCollected }));
             setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + 1, totalWool: (prev.totalWool || 0) + woolCollected }));
@@ -7110,6 +7117,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           celeiroLevel={celeiroLevel} setCeleiroLevel={setCeleiroLevel}
           camaraFriaLevel={camaraFriaLevel} setCamaraFriaLevel={setCamaraFriaLevel}
           buyMachine={buyMachine} toggleMachine={toggleMachine}
+          machineUsageStats={machineUsageStats}
           ownedOneTimeEffects={[
             ...(hasBebedouro ? ['bebedouro'] : []),
             ...(hasCertSanitario ? ['cert_sanitario'] : []),
