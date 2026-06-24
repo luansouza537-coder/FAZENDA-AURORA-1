@@ -2808,7 +2808,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       }
 
       // Evento de humor aleatório por animal (15% chance - saudavel é imune)
-      if (Math.random() < 0.15 && copy.trait !== 'saudavel') {
+      if (Math.random() < 0.15 && copy.trait !== 'saudavel' && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(copy.type)) {
         if (Math.random() > 0.5) {
           copy.happiness = Math.max(0, copy.happiness - 20);
           logs.push({
@@ -4989,7 +4989,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setInventory(inv => {
           const nextInv = { ...inv };
           readyQueijos.forEach(tipo => {
-            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'queijo_cabra' ? 'queijo_cabra' : tipo === 'iogurte_cabra' ? 'iogurte_cabra' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : tipo === 'butter' ? 'butter' : tipo === 'iogurte_bufala' ? 'iogurte_bufala' : tipo === 'manteiga_bufala' ? 'manteiga_bufala' : tipo === 'doce_leite_bufala' ? 'doce_leite_bufala' : tipo === 'burrata' ? 'burrata' : 'queijoBrie';
+            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'queijo_cabra' ? 'queijo_cabra' : tipo === 'iogurte_cabra' ? 'iogurte_cabra' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : tipo === 'butter' ? 'butter' : tipo === 'iogurte_bufala' ? 'iogurte_bufala' : tipo === 'manteiga_bufala' ? 'manteiga_bufala' : tipo === 'doce_leite_bufala' ? 'doce_leite_bufala' : tipo === 'burrata' ? 'burrata' : tipo === 'queijo_pecorino' ? 'queijo_pecorino' : tipo === 'iogurte_ovelha' ? 'iogurte_ovelha' : tipo === 'doce_leite_ovelha' ? 'doce_leite_ovelha' : 'queijoBrie';
             nextInv[key] = (nextInv[key] ?? 0) + 1;
           });
           return nextInv;

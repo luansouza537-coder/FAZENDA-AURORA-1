@@ -399,7 +399,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhoca' : animal.type === 'caracol' ? '🐌 Caracol' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
-          {animal.trait && !['minhoca', 'caracol'].includes(animal.type) && (() => {
+          {animal.trait && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (() => {
             const t = getTraitInfo(animal.trait);
             return (
               <span
@@ -412,16 +412,16 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           })()}
           {/* Status badges row */}
           <div className="flex flex-wrap gap-1 mt-1">
-            {!animal.isAdult && !['minhoca', 'caracol'].includes(animal.type) && (
+            {!animal.isAdult && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (
               <span className="text-[9px] bg-pink-100 border border-pink-300 text-pink-700 font-black px-1.5 py-0.5 rounded-full">😴 Filhote</span>
             )}
             {animal.isSick && (
               <span className="text-[9px] bg-red-100 border border-red-300 text-red-700 font-black px-1.5 py-0.5 rounded-full animate-pulse">🤒 Doente</span>
             )}
-            {(animal.stressedDays ?? 0) > 0 && (
+            {(animal.stressedDays ?? 0) > 0 && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (
               <span className="text-[9px] bg-orange-100 border border-orange-300 text-orange-700 font-black px-1.5 py-0.5 rounded-full">⚠️ Estressado</span>
             )}
-            {isCritical && !['minhoca','caracol'].includes(animal.type) && (
+            {isCritical && !['minhoca','caracol','colmeia_abelhas'].includes(animal.type) && (
               <span className="text-[9px] bg-red-200 border border-red-400 text-red-800 font-black px-1.5 py-0.5 rounded-full animate-pulse">💀 Crítico</span>
             )}
             {isReady && (
@@ -511,7 +511,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             </span>
           )}
           {/* Filhote badge */}
-          {!animal.isAdult && animal.adulthoodDay !== undefined && !['minhoca', 'caracol'].includes(animal.type) && (
+          {!animal.isAdult && animal.adulthoodDay !== undefined && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (
             <span
               className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-pink-100 border border-pink-400 text-pink-800 cursor-help"
               title={`Filhote: adulto no dia ${animal.adulthoodDay}`}
@@ -529,7 +529,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             </span>
           )}
           {/* F1/F2: Idade e badge idoso */}
-          {animal.age !== undefined && animal.maxAge !== undefined && !['minhoca', 'caracol'].includes(animal.type) && (() => {
+          {animal.age !== undefined && animal.maxAge !== undefined && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (() => {
             const phase = getLifePhase(animal);
             const retirable = animal.isAdult !== false && animal.age >= animal.maxAge * 0.75;
             const retireHint = retirable ? ' • Clique para aposentar' : '';
