@@ -3038,7 +3038,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (canProduce) {
           copy.daysSinceLastGooseEgg = 0;
           copy.hasProducedToday = true;
-          logs.push({ msg: `🦢 ${copy.name} botou um ovo de ganso!`, type: 'info' });
+          logs.push({ msg: `🦢 ${copy.name} botou um ovo de ganso! (pronto para coletar)`, type: 'info' });
         } else {
           copy.daysSinceLastGooseEgg = daysSince;
           copy.hasProducedToday = false;
@@ -4766,9 +4766,19 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
 
-      // Ganso: produz goose_egg a cada 3 dias (sem avicultor = coleta manual; avicultor coleta abaixo)
+      // Pato: auto-coleta duck_egg sem avicultor (com avicultor, o avicultor coleta abaixo)
       {
-        const producingGansos = finalAnimals.filter(a => a.type === 'ganso' && a.hasProducedToday && !workers.some(w => w.role === 'avicultor'));
+        const producingPatos = finalAnimals.filter(a => a.type === 'pato' && a.isAdult !== false && a.hasProducedToday && !workers.some(w => w.role === 'avicultor'));
+        if (producingPatos.length > 0) {
+          setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) + producingPatos.length }));
+          logsToAdd.push({ msg: `🦆 ${producingPatos.length} pato(s) botaram ${producingPatos.length} ovo(s) de pato!`, type: 'success' });
+          setAnimals(prev => prev.map(a => producingPatos.some(p => p.id === a.id) ? { ...a, hasProducedToday: false } : a));
+        }
+      }
+
+      // Ganso: produz goose_egg a cada 3 dias (sem avicultor = coleta automática; avicultor coleta abaixo)
+      {
+        const producingGansos = finalAnimals.filter(a => a.type === 'ganso' && a.isAdult !== false && a.hasProducedToday && !workers.some(w => w.role === 'avicultor'));
         if (producingGansos.length > 0) {
           setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) + producingGansos.length }));
           logsToAdd.push({ msg: `🦢 ${producingGansos.length} ganso(s) botaram ${producingGansos.length} ovo(s) de ganso!`, type: 'success' });
