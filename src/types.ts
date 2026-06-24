@@ -63,7 +63,6 @@ export interface Animal {
   // feathersReady removed — feathers only exist post-slaughter
 
   // Ganso
-  inLayingSeason?: boolean;  // se está na época de postura
   nextAlarmDay?: number;     // dia do próximo evento que o ganso vai alertar
   daysSinceLastGooseEgg?: number; // dias desde o último ovo de ganso
 
@@ -158,6 +157,7 @@ export interface Inventory {
   conserva_peixe: number;
   mel_envasado: number;
   sopa_cogumelo: number;
+  sheep_milk?: number;
 }
 
 export interface FarmStats {

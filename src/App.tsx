@@ -4004,7 +4004,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             return { ...a, hasProducedToday: false };
           });
           if (sheepMilkCollected > 0) {
-            setInventory(prev => ({ ...prev, sheep_milk: ((prev as any).sheep_milk ?? 0) + sheepMilkCollected }));
+            setInventory(prev => ({ ...prev, sheep_milk: (prev.sheep_milk ?? 0) + sheepMilkCollected }));
             setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + sheepMilkCollected }));
             logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${sheepMilkCollected} Leite(s) de Ovelha de ${milkedSheep} ovelha(s)!`, type: 'success' });
           }
@@ -4539,9 +4539,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
         }
 
-        // Bicho-da-seda: a cada 14 dias produz 3 seda_bruta; consome 1 folha_amoreira/dia
+        // Bicho-da-seda: a cada 10 dias produz 3 seda_bruta; consome 1 folha_amoreira/dia
         if (a.type === 'bicho_seda') {
-          if ((a.age || 0) > 0 && (a.age || 0) % 14 === 0) {
+          if ((a.age || 0) > 0 && (a.age || 0) % 10 === 0) {
             setTimeout(() => {
               setInventory(prev => {
                 const newTotal = (prev.seda_bruta ?? 0) + 3;
@@ -4783,6 +4783,23 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) + producingGansos.length }));
           logsToAdd.push({ msg: `🦢 ${producingGansos.length} ganso(s) botaram ${producingGansos.length} ovo(s) de ganso!`, type: 'success' });
           setAnimals(prev => prev.map(a => producingGansos.some(g => g.id === a.id) ? { ...a, hasProducedToday: false } : a));
+        }
+      }
+
+      // Alpaca: auto-coleta alpaca_wool sem ordenhador (ordenhador coleta abaixo)
+      {
+        const producingAlpacas = finalAnimals.filter(
+          a => a.type === 'alpaca' && a.isAdult !== false && a.woolReady
+            && !workers.some(w => w.role === 'ordenhador')
+        );
+        if (producingAlpacas.length > 0) {
+          setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) + producingAlpacas.length }));
+          logsToAdd.push({ msg: `🦙 ${producingAlpacas.length} alpaca(s) produziram ${producingAlpacas.length} lã de alpaca!`, type: 'success' });
+          setAnimals(prev => prev.map(a =>
+            producingAlpacas.some(p => p.id === a.id)
+              ? { ...a, woolReady: false, daysSinceLastWool: 0 }
+              : a
+          ));
         }
       }
 
@@ -5519,7 +5536,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             logsToAdd.push({ msg: `🐃 Ordenhador coletou +${buffaloMilkCollected} leite(s) de búfala automaticamente!`, type: 'success' });
           }
           if (sheepMilkCollected > 0) {
-            setInventory(prev => ({ ...prev, sheep_milk: ((prev as any).sheep_milk ?? 0) + sheepMilkCollected }));
+            setInventory(prev => ({ ...prev, sheep_milk: (prev.sheep_milk ?? 0) + sheepMilkCollected }));
             logsToAdd.push({ msg: `🐑 Ordenhador coletou +${sheepMilkCollected} leite(s) de ovelha automaticamente!`, type: 'success' });
           }
           if (alpacaWoolCollected > 0) {
@@ -6029,7 +6046,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     else if (type === 'caracol') revenue = getItemBaseSellPrice('muco') / 3;
     else if (type === 'colmeia_abelhas') revenue = getItemBaseSellPrice('mel') / 3; // avg cycle ~3 days
     else if (type === 'coelho_angora') revenue = getItemBaseSellPrice('angora_wool') / 5;
-    else if (type === 'bicho_seda') revenue = getItemBaseSellPrice('seda_bruta') * 3 / 14;
+    else if (type === 'bicho_seda') revenue = getItemBaseSellPrice('seda_bruta') * 3 / 10;
     else if (type === 'ra') revenue = getItemBaseSellPrice('coxa_ra') / 7;
     else if (type === 'avestruz') revenue = getItemBaseSellPrice('carne_avestruz') / 30;
     else if (type === 'jacare') revenue = getItemBaseSellPrice('carne_jacare') / 60; // very long term

@@ -1129,6 +1129,8 @@ export function useInventory({
     }));
 
     // F4: deduzir da entrega de contratos ativos
+    // REGRA: todo produto em Contract['product'] DEVE ter entrada aqui.
+    // Ao adicionar novo produto de contrato em types.ts, adicionar aqui também.
     const contractProductMap: Record<string, Contract['product']> = {
       milk: 'milk', wool: 'wool', egg: 'egg',
       cheese: 'cheese', queijoCoalho: 'queijoCoalho', queijoMucarela: 'queijoMucarela', queijoBrie: 'queijoBrie',
@@ -1136,15 +1138,15 @@ export function useInventory({
       goat_milk: 'goat_milk', buffalo_milk: 'buffalo_milk', buffalo_mozzarella: 'buffalo_mozzarella',
       duck_egg: 'duck_egg', quail_egg: 'quail_egg', goose_egg: 'goose_egg',
       alpaca_wool: 'alpaca_wool', angora_wool: 'angora_wool', llama_wool: 'llama_wool',
-      muco: 'muco', mel_envasado: 'mel_envasado', seda_bruta: 'seda_bruta',
+      muco: 'muco', mel: 'mel', mel_envasado: 'mel_envasado', seda_bruta: 'seda_bruta',
       mayo: 'mayo', queijo_cabra: 'queijo_cabra', iogurte_cabra: 'iogurte_cabra',
       tapete_lhama: 'tapete_lhama', leite_condensado: 'leite_condensado', tecido_alpaca: 'tecido_alpaca',
       cachecol_angora: 'cachecol_angora', coxa_ra: 'coxa_ra',
       carne_avestruz: 'carne_avestruz', couro_avestruz: 'couro_avestruz',
       fio_seda: 'fio_seda', carne_jacare: 'carne_jacare', couro_jacare: 'couro_jacare',
-      sheep_milk: 'sheep_milk' as any, queijo_pecorino: 'queijo_pecorino' as any,
-      iogurte_ovelha: 'iogurte_ovelha' as any, ricota_ovelha: 'ricota_ovelha' as any,
-      doce_leite_ovelha: 'doce_leite_ovelha' as any,
+      sheep_milk: 'sheep_milk', queijo_pecorino: 'queijo_pecorino',
+      iogurte_ovelha: 'iogurte_ovelha', ricota_ovelha: 'ricota_ovelha',
+      doce_leite_ovelha: 'doce_leite_ovelha',
     };
     const contractProduct = contractProductMap[itemType as string];
     if (contractProduct) {
