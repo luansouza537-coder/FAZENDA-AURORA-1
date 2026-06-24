@@ -2254,7 +2254,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     addLog(`🐌 Coletou ${mucoAmt} muco do Criatório de Caracóis!`, 'success');
     spawnFeedback('🐌', `+${mucoAmt} Muco`, event);
     triggerAudioResult(() => sfx.playSound('click'));
-  }, [animals, weather, landBiomes, specialization, setInventory, setAnimals, checkAndUnlockAchievement, addLog, spawnFeedback]);
+  }, [animals, weather, landBiomes, specialization, workers, setInventory, setAnimals, checkAndUnlockAchievement, addLog, spawnFeedback]);
 
   // --- useMissions hook ---
   const { generateDailyMissions, generateWeeklyMissions, generateEpicMissions } = useMissions({ animals, farmLevel, inventory });
@@ -4461,6 +4461,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
 
+      const helicicultor = workers.some(w => w.role === 'helicicultor');
+      const caracolCycle = helicicultor ? 2 : 3;
+
       const finalAnimals = survivorsAfterAge.map(a => {
         const copy = { ...a };
 
@@ -4515,12 +4518,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
 
         // Criatório de Caracóis: a cada 3 dias (2 com helicicultor) marca mucoReady
-        const helicicultor = workers.some(w => w.role === 'helicicultor');
-        const caracolCycle = helicicultor ? 2 : 3;
         if (a.type === 'caracol' && (a.age || 0) > 0 && (a.age || 0) % caracolCycle === 0) {
+          if (!copy.mucoReady) {
+            logsToAdd.push({ msg: `🐌 ${a.name} produziu muco — pronto para coletar!`, type: 'success' });
+            updateMissionProgress('organic_day', 1, nextDayValue);
+          }
           copy.mucoReady = true;
-          logsToAdd.push({ msg: `🐌 ${a.name} produziu muco — pronto para coletar!`, type: 'success' });
-          updateMissionProgress('organic_day', 1, nextDayValue);
         }
 
         // Colmeia de Abelhas: marca melReady=true quando ciclo completo (por estação)
@@ -4603,14 +4606,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (a.type === 'jacare') happyDelta += 8;
           if (a.type === 'pato' || a.type === 'ganso') happyDelta -= 5;
           if (a.type === 'minhoca') happyDelta -= 5;
-          if (a.type === 'caracol' && !workers.some(w => w.role === 'helicicultor')) happyDelta -= 5;
+          if (a.type === 'caracol') happyDelta -= (helicicultor ? 2 : 5);
         }
 
         if (currentSeasonIdx === 1) { // verão
           if (a.type === 'lhama' || a.type === 'alpaca') happyDelta -= 8;
           if (a.type === 'jacare' || a.type === 'ra') happyDelta += 5;
           if (a.type === 'minhoca') happyDelta -= 10;
-          if (a.type === 'caracol' && !workers.some(w => w.role === 'helicicultor')) happyDelta -= 10;
+          if (a.type === 'caracol') happyDelta -= (helicicultor ? 5 : 10);
         }
         if (currentSeasonIdx === 3) { // inverno
           if (a.type === 'lhama' || a.type === 'alpaca') happyDelta += 5;
@@ -5730,6 +5733,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (w.role === 'artesao') action = artesaoAction;
           if (w.role === 'cozinheiro') action = cozinheiroAction;
           if (w.role === 'apicultor') action = `Dia ${nextDayValue}: cuidou das colmeias`;
+          if (w.role === 'helicicultor') action = `Dia ${nextDayValue}: monitorou o Criatório de Caracóis`;
           if (w.role === 'comerciante_residente') action = `Dia ${nextDayValue}: negociando no mercado`;
           return { ...w, lastAction: action };
         }));
