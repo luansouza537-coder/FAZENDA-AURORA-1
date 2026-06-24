@@ -1142,6 +1142,9 @@ export function useInventory({
       cachecol_angora: 'cachecol_angora', coxa_ra: 'coxa_ra',
       carne_avestruz: 'carne_avestruz', couro_avestruz: 'couro_avestruz',
       fio_seda: 'fio_seda', carne_jacare: 'carne_jacare', couro_jacare: 'couro_jacare',
+      sheep_milk: 'sheep_milk' as any, queijo_pecorino: 'queijo_pecorino' as any,
+      iogurte_ovelha: 'iogurte_ovelha' as any, ricota_ovelha: 'ricota_ovelha' as any,
+      doce_leite_ovelha: 'doce_leite_ovelha' as any,
     };
     const contractProduct = contractProductMap[itemType as string];
     if (contractProduct) {
@@ -1230,6 +1233,11 @@ export function useInventory({
     else if (itemType === 'crepe_rustico') label = 'Crepe Rústico';
     else if (itemType === 'pao_rustico') label = 'Pão Rústico';
     else if (itemType === 'waffle_mel') label = 'Waffle de Mel';
+    else if (itemType === 'sheep_milk') label = 'Leite de Ovelha';
+    else if (itemType === 'queijo_pecorino') label = 'Queijo Pecorino';
+    else if (itemType === 'iogurte_ovelha') label = 'Iogurte de Ovelha';
+    else if (itemType === 'ricota_ovelha') label = 'Ricota de Ovelha';
+    else if (itemType === 'doce_leite_ovelha') label = 'Doce de Leite de Ovelha';
 
     addLog(`💰 Venda realizada: ${qty} unidades de ${label} por +${profit} moedas!`, 'success');
 

@@ -3299,7 +3299,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     { catalogId: 'lc_33', client: 'Cachecol & Cia', product: 'cachecol_angora' as const, description: 'Marca de acessórios de inverno que vende peças por catálogo e e-commerce para todo o Brasil. O cachecol angorá é o item mais vendido da coleção — macio, quente e com apelo visual que fotografa bem nas redes sociais. A demanda explode entre abril e julho, mas eles precisam de estoque o ano todo. Buscam um fornecedor que entenda o ritmo da moda e não deixe a linha parar.', baseMarket: 160, pricePerUnit: 228, weeklyGoal: 3, durationDays: 150, minLevel: 9, completionBonus: 2200, completionXP: 185 },
     // --- Nível 10 ---
     { catalogId: 'lc_19', client: 'Instituto Gastronômico São Paulo', product: 'queijoBrie' as const, description: 'Escola de gastronomia de prestígio nacional, com cursos frequentados por chefs de todo o Brasil. O queijo brie é usado em aulas de técnicas francesas, degustação e harmonização. A exigência é alta: consistência de textura e sabor a cada lote. Ser fornecedor do Instituto é uma referência que abre portas.', baseMarket: 90, pricePerUnit: 130, weeklyGoal: 3, durationDays: 150, minLevel: 10, completionBonus: 1250, completionXP: 160 },
-    { catalogId: 'lc_20', client: 'Distribuidora Colmeia Real', product: 'mel_envasado' as const, description: 'Distribuidora que abastece bares, restaurantes e cafeterias com mel envasado em embalagens personalizadas. Trabalham com mais de 300 pontos de venda na região e precisam de volume constante para não furar o estoque dos clientes. Pagam na entrega e renovam automaticamente se as metas forem cumpridas.', baseMarket: 230, pricePerUnit: 115, weeklyGoal: 4, durationDays: 150, minLevel: 10, completionBonus: 1480, completionXP: 180 },
+    { catalogId: 'lc_20', client: 'Distribuidora Colmeia Real', product: 'mel_envasado' as const, description: 'Distribuidora que abastece bares, restaurantes e cafeterias com mel envasado em embalagens personalizadas. Trabalham com mais de 300 pontos de venda na região e precisam de volume constante para não furar o estoque dos clientes. Pagam na entrega e renovam automaticamente se as metas forem cumpridas.', baseMarket: 230, pricePerUnit: 300, weeklyGoal: 4, durationDays: 150, minLevel: 10, completionBonus: 1480, completionXP: 180 },
     { catalogId: 'lc_34', client: 'Restaurante Flor da Serra', product: 'coxa_ra' as const, description: 'Restaurante de culinária regional premiado pelo guia gastronômico estadual. A coxa de rã grelhada com manteiga de ervas é o prato mais pedido do cardápio de degustação. O chef fez questão de incluir proteína exótica local como diferencial competitivo — e os clientes adoraram. O volume é pequeno, mas o preço pago por unidade está entre os mais altos que você vai encontrar.', baseMarket: 110, pricePerUnit: 158, weeklyGoal: 3, durationDays: 120, minLevel: 10, completionBonus: 1200, completionXP: 110 },
     // --- Nível 11 ---
     // --- Nível 12 ---
@@ -4169,7 +4169,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // --- LONG CONTRACTS: Liquidação semanal de prêmios ---
       let longContractBonusForGold = 0;
       if (isWeeklyBillDay) {
-        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, cheese: 20, queijoCoalho: 28, queijoMucarela: 55, queijoBrie: 90, butter: 45, yogurt: 35, goat_milk: 14, buffalo_milk: 28, buffalo_mozzarella: 120, duck_egg: 38, quail_egg: 22, goose_egg: 50, alpaca_wool: 65, angora_wool: 90, llama_wool: 45, muco: 35, mel_envasado: 230, seda_bruta: 100, boi: 300, porco: 180, boi_porco: 300, mayo: 16, queijo_cabra: 90, iogurte_cabra: 55, tapete_lhama: 110, leite_condensado: 100, tecido_alpaca: 180, cachecol_angora: 160, coxa_ra: 110, carne_avestruz: 220, couro_avestruz: 300, fio_seda: 200, carne_jacare: 300, couro_jacare: 500, sheep_milk: 28, queijo_pecorino: 280, iogurte_ovelha: 80, ricota_ovelha: 95, doce_leite_ovelha: 160 };
+        const LONG_BASE_PRICES: Record<string, number> = { milk: 5, egg: 4, wool: 12, cheese: 20, queijoCoalho: 28, queijoMucarela: 55, queijoBrie: 90, butter: 45, yogurt: 35, goat_milk: 14, buffalo_milk: 28, buffalo_mozzarella: 120, duck_egg: 18, quail_egg: 22, goose_egg: 50, alpaca_wool: 65, angora_wool: 90, llama_wool: 45, muco: 48, mel_envasado: 230, seda_bruta: 100, boi: 300, porco: 180, boi_porco: 300, mayo: 16, queijo_cabra: 90, iogurte_cabra: 55, tapete_lhama: 110, leite_condensado: 100, tecido_alpaca: 180, cachecol_angora: 160, coxa_ra: 110, carne_avestruz: 220, couro_avestruz: 300, fio_seda: 200, carne_jacare: 300, couro_jacare: 500, sheep_milk: 28, queijo_pecorino: 280, iogurte_ovelha: 80, ricota_ovelha: 95, doce_leite_ovelha: 160 };
         contracts.forEach(c => {
           if (c.contractType !== 'long' || !c.active || c.cycleType === 'monthly') return;
           const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
@@ -4963,7 +4963,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // abaixo apenas marca inativos — sem side-effects no updater.
       contracts.forEach(c => {
         if (!c.active) return;
-        if (nextDayValue > c.deadline) {
+        if (nextDayValue >= c.deadline) {
           if (c.contractType === 'long') {
             const completionRate = c.quantity > 0 ? c.delivered / c.quantity : 0;
             if (completionRate >= 0.8) {
@@ -4987,7 +4987,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       });
       setContracts(prev => prev.map(c => {
         if (!c.active) return c;
-        if (nextDayValue > c.deadline) return { ...c, active: false };
+        if (nextDayValue >= c.deadline) return { ...c, active: false };
         return c;
       }));
 
