@@ -4823,9 +4823,18 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
 
+      // --- LAYER 0: Migração de nomes legados + limpeza de filhotes de reprodução removida ---
+      const migratedAnimals = finalAnimalsWithClimate
+        .filter(a => !(a.type === 'minhoca' && a.isAdult === false))
+        .map(a => {
+          if (a.type === 'minhoca' && a.name !== 'Minhocário') return { ...a, name: 'Minhocário' };
+          if (a.type === 'caracol' && a.name !== 'Criatório de Caracóis') return { ...a, name: 'Criatório de Caracóis' };
+          return a;
+        });
+
       // --- LAYER 1: Filhotes atingindo maturidade ---
       const baseMaxAgeMapAdult: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400 };
-      const finalAnimalsWithAdulthood: Animal[] = finalAnimalsWithClimate.map(a => {
+      const finalAnimalsWithAdulthood: Animal[] = migratedAnimals.map(a => {
         if (!a.isAdult && a.adulthoodDay !== undefined && nextDayValue >= a.adulthoodDay) {
           logsToAdd.push({ msg: `🎉 ${a.name} cresceu e se tornou adulto! Pronto para produzir!`, type: 'success' });
           setTimeout(() => addNotification(`🎉 ${a.name} (${a.type}) cresceu e está pronto para produzir!`, 'success', nextDayValue), 0);

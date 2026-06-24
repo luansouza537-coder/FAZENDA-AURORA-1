@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <!-- Fundo verde gramado -->
+  <rect width="80" height="80" rx="16" fill="#5A9E3A"/>
+  <rect x="0" y="52" width="80" height="28" rx="0" fill="#4A8A2E"/>
+
+  <!-- Caracol 1 (grande, centro-esquerda) -->
+  <!-- Corpo -->
+  <ellipse cx="22" cy="60" rx="10" ry="6" fill="#D2B48C"/>
+  <!-- Cabeça -->
+  <ellipse cx="32" cy="58" rx="5" ry="4" fill="#C4A882"/>
+  <!-- Casca (espiral) -->
+  <circle cx="20" cy="54" r="9" fill="#8B6914"/>
+  <circle cx="20" cy="54" r="7" fill="#A07820"/>
+  <circle cx="20" cy="54" r="5" fill="#8B6914"/>
+  <circle cx="20" cy="54" r="3" fill="#A07820"/>
+  <circle cx="20" cy="54" r="1.2" fill="#6B5010"/>
+  <!-- Olhos em antenas -->
+  <line x1="31" y1="55" x2="29" y2="50" stroke="#C4A882" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="34" y1="55" x2="33" y2="50" stroke="#C4A882" stroke-width="1.2" stroke-linecap="round"/>
+  <circle cx="29" cy="49.5" r="1.5" fill="#1a1a1a"/>
+  <circle cx="33" cy="49.5" r="1.5" fill="#1a1a1a"/>
+
+  <!-- Caracol 2 (menor, direita) -->
+  <ellipse cx="58" cy="64" rx="8" ry="5" fill="#D2B48C"/>
+  <ellipse cx="66" cy="62" rx="4" ry="3.5" fill="#C4A882"/>
+  <circle cx="56" cy="59" r="7" fill="#6B4C9A"/>
+  <circle cx="56" cy="59" r="5.5" fill="#7D5CAB"/>
+  <circle cx="56" cy="59" r="3.5" fill="#6B4C9A"/>
+  <circle cx="56" cy="59" r="1.8" fill="#7D5CAB"/>
+  <circle cx="56" cy="59" r="0.9" fill="#5A3D85"/>
+  <line x1="65" y1="60" x2="63" y2="56" stroke="#C4A882" stroke-width="1" stroke-linecap="round"/>
+  <line x1="67" y1="60" x2="66" y2="56" stroke="#C4A882" stroke-width="1" stroke-linecap="round"/>
+  <circle cx="63" cy="55.5" r="1.2" fill="#1a1a1a"/>
+  <circle cx="66" cy="55.5" r="1.2" fill="#1a1a1a"/>
+
+  <!-- Caracol 3 (pequeno, fundo) -->
+  <ellipse cx="42" cy="68" rx="6" ry="4" fill="#D2B48C" opacity="0.9"/>
+  <circle cx="40" cy="65" r="5" fill="#8B6914" opacity="0.9"/>
+  <circle cx="40" cy="65" r="3.5" fill="#A07820" opacity="0.9"/>
+  <circle cx="40" cy="65" r="2" fill="#8B6914" opacity="0.9"/>
+  <circle cx="40" cy="65" r="0.8" fill="#6B5010"/>
+
+  <!-- Grama -->
+  <line x1="10" y1="52" x2="8" y2="44" stroke="#3D7A24" stroke-width="2" stroke-linecap="round"/>
+  <line x1="14" y1="52" x2="14" y2="43" stroke="#4A8A2E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="70" y1="52" x2="68" y2="44" stroke="#3D7A24" stroke-width="2" stroke-linecap="round"/>
+  <line x1="74" y1="52" x2="75" y2="43" stroke="#4A8A2E" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Rastro de muco brilhante -->
+  <path d="M48 66 Q52 64 58 66" stroke="#B8FFEE" stroke-width="1.5" fill="none" opacity="0.6" stroke-linecap="round"/>
+  <path d="M28 62 Q35 60 40 62" stroke="#B8FFEE" stroke-width="1.5" fill="none" opacity="0.5" stroke-linecap="round"/>
+</svg>
