@@ -661,6 +661,12 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 {animal.melReady && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🐝</span>}
               </>
             )}
+            {animal.type === 'ovelha_leiteira' && (
+              <>
+                <span className="select-none">🐑</span>
+                {animal.isLactating && animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-droplet-flow select-none">🥛</span>}
+              </>
+            )}
           </div>
 
           {/* Avatar tooltip */}

@@ -712,7 +712,7 @@ export default function AnimalGrid({
                         lhama:'🦙', pato:'🦆', ganso:'🦢', bufalo:'🐃', pavao:'🦚',
                         codorna:'🐦', alpaca:'🦙', minhoca:'🪱', caracol:'🐌',
                         coelho_angora:'🐰', bicho_seda:'🐛', ra:'🐸', avestruz:'🦤', jacare:'🐊',
-                        colmeia_abelhas:'🍯',
+                        colmeia_abelhas:'🍯', ovelha_leiteira:'🐑',
                       };
                       const lotColors = ['border-amber-400/60','border-green-400/60','border-blue-400/60','border-purple-400/60','border-rose-400/60'];
                       const lotColor = lotColors[lotIndex] ?? 'border-amber-400/60';
