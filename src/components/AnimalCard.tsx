@@ -649,13 +649,13 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             )}
             {animal.type === 'minhoca' && (
               <>
-                <img src="/minhocario.svg" alt="Minhocário" className="w-12 h-12 object-contain select-none" />
+                <span className="select-none">🪱</span>
                 {animal.humusReady && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🌱</span>}
               </>
             )}
             {animal.type === 'caracol' && (
               <>
-                <img src="/criatorio-caracois.svg" alt="Criatório de Caracóis" className="w-12 h-12 object-contain select-none" />
+                <span className="select-none">🐌</span>
                 {animal.mucoReady && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">✨</span>}
               </>
             )}
