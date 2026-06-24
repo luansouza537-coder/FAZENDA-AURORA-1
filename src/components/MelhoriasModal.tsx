@@ -249,7 +249,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             {/* Poço d'Água */}
             <div className="bg-white border-4 border-blue-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-blue-800 mb-1">💧 Poço d'Água</h4>
-              <p className="text-xs text-stone-500 font-mono mb-2">Reduz conta de água por nível (máx 75%). Atual: Nível {p.wellLevel}/5 (-{Math.round(Math.min(p.wellLevel * 15, 75))}% água) • 1 upgrade por dia</p>
+              <p className="text-xs text-stone-500 font-mono mb-2">Reduz conta de água por nível (máx 75%). Nível 4: +3 felicidade/dia para rã e jacaré. Nível 5: -10% chance de seca. Atual: Nível {p.wellLevel}/5 (-{Math.round(Math.min(p.wellLevel * 15, 75))}% água) • 1 upgrade por dia</p>
               {p.lastUpgradeDay === p.currentDay && <p className="text-[10px] text-amber-600 font-mono mb-1">⏳ Já foi feito 1 upgrade hoje. Volte amanhã!</p>}
               <div className="grid grid-cols-5 gap-1">
                 {[{ lvl: 1, price: 700 }, { lvl: 2, price: 2000 }, { lvl: 3, price: 5500 }, { lvl: 4, price: 25000 }, { lvl: 5, price: 70000 }].map(({ lvl, price }) => {

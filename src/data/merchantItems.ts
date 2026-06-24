@@ -8,7 +8,7 @@ export const MERCHANT_SPECIAL_ITEMS = [
   { id: 'manual_producao',      label: '📚 Manual de Produção Avançada', desc: '+15% produção de todos animais por 7 dias',                      price: 160, effect: 'production_boost_7days' },
   { id: 'suplemento_mineral',   label: '💊 Suplemento Mineral',          desc: '+20% produção de leite e ovos por 7 dias',                       price: 90,  effect: 'suplemento_mineral_7days' },
   { id: 'bandagem_vet',         label: '🩹 Bandagem Veterinária',        desc: 'Cura 1 animal doente (o mais grave)',                             price: 45,  effect: 'cure_one_sick' },
-  { id: 'cisterna',             label: '🪣 Cisterna de Água',            desc: 'Reduz conta de água em 30% permanente',                          price: 200, effect: 'cisterna',             oneTime: true },
+  { id: 'cisterna',             label: '🪣 Cisterna de Água',            desc: 'Reduz conta de água em 30% permanente',                          price: 900, effect: 'cisterna',             oneTime: true },
   { id: 'kit_climatico',        label: '🛡️ Kit de Proteção Climática',   desc: 'Próxima tempestade E próxima seca não afetam a fazenda',         price: 130, effect: 'block_storm_drought' },
   { id: 'silagem_premium',      label: '🌽 Silagem Premium',             desc: 'Animais não consomem ração do Armazém por 5 dias',               price: 110, effect: 'silagem_5days' },
   { id: 'contrato_transporte',  label: '🚚 Contrato de Transporte',      desc: 'Isenta de multa nas próximas 3 entregas vencidas',               price: 95,  effect: 'isencao_multa_2x' },
