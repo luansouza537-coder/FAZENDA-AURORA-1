@@ -705,7 +705,7 @@ export default function AnimalGrid({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {/* 🏡 PAINEL VISUAL DE SLOTS */}
                 <div className="col-span-full mb-1">
-                  <div className="flex flex-wrap gap-1.5">
+                  {gridExpanded && <div className="flex flex-wrap gap-1.5">
                     {Array.from({ length: landLots * 5 }).map((_, i) => {
                       const lotIndex = Math.floor(i / 5);
                       const slotAnimal = animals[i];
@@ -746,7 +746,7 @@ export default function AnimalGrid({
                         <span className="text-white/20 text-lg">🔒</span>
                       </div>
                     )}
-                  </div>
+                  </div>}
                   <div className="flex items-center gap-2 mt-1 ml-0.5">
                     <p className="text-[9px] text-amber-200/50 font-mono">{animals.length}/{landLots * 5} slots ocupados · {landLots} lote(s) · separadores por lote</p>
                     <button
@@ -758,8 +758,6 @@ export default function AnimalGrid({
                     </button>
                   </div>
                 </div>
-
-                {gridExpanded && <>
 
                 {/* Worker Visual Feedback Bar */}
                 {workers.length > 0 && (
@@ -1000,7 +998,6 @@ export default function AnimalGrid({
                     ));
                   })()}
                 </AnimatePresence>
-                </>}
               </div>
             )}
 

@@ -1152,10 +1152,19 @@ export function useInventory({
         const toDeliver = Math.min(qty, remaining);
         const newDelivered = c.delivered + toDeliver;
         if (newDelivered >= c.quantity) {
-          setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
+          if (c.contractType === 'long') {
+            const bonus = c.completionBonus ?? 0;
+            const xp = c.completionXP ?? 0;
+            if (bonus > 0) setGold(prev => prev + bonus);
+            setFarmXp(prev => prev + xp);
+            setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
+            addLog(`🏆 Contrato com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
+          } else {
+            setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
+            addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
+            setFarmXp(prev => prev + 20);
+          }
           setTimeout(() => onContractDelivered?.(), 0);
-          addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
-          setFarmXp(prev => prev + 20);
           return { ...c, delivered: newDelivered, active: false };
         }
         return { ...c, delivered: newDelivered };
