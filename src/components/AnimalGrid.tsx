@@ -167,6 +167,7 @@ export default function AnimalGrid({
 }: AnimalGridProps) {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [workersExpanded, setWorkersExpanded] = useState(true);
+  const [gridExpanded, setGridExpanded] = useState(true);
   return (
           <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b-4 border-[#78350f]/60 pb-3 gap-3">
@@ -746,8 +747,19 @@ export default function AnimalGrid({
                       </div>
                     )}
                   </div>
-                  <p className="text-[9px] text-amber-200/50 font-mono mt-1 ml-0.5">{animals.length}/{landLots * 5} slots ocupados · {landLots} lote(s) · separadores por lote</p>
+                  <div className="flex items-center gap-2 mt-1 ml-0.5">
+                    <p className="text-[9px] text-amber-200/50 font-mono">{animals.length}/{landLots * 5} slots ocupados · {landLots} lote(s) · separadores por lote</p>
+                    <button
+                      onClick={() => setGridExpanded(e => !e)}
+                      className="text-[9px] text-[#fbbf24]/60 hover:text-[#fbbf24] font-black cursor-pointer select-none transition-colors"
+                      title={gridExpanded ? 'Minimizar animais' : 'Expandir animais'}
+                    >
+                      {gridExpanded ? '▲' : '▼'}
+                    </button>
+                  </div>
                 </div>
+
+                {gridExpanded && <>
 
                 {/* Worker Visual Feedback Bar */}
                 {workers.length > 0 && (
@@ -988,6 +1000,7 @@ export default function AnimalGrid({
                     ));
                   })()}
                 </AnimatePresence>
+                </>}
               </div>
             )}
 

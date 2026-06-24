@@ -1771,7 +1771,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'butter') return 55;   // era 45 — Grupo C
     if (itemType === 'yogurt') return 40;   // era 35 — Grupo C
     if (itemType === 'fertile_egg') return 36;
-    if (itemType === 'quail_egg') return farmLevel >= 5 ? 32 : 28;
+    if (itemType === 'quail_egg') return farmLevel >= 5 ? 18 : 14;
     if (itemType === 'alpaca_wool') return farmLevel >= 6 ? 75 : 65;
     if (itemType === 'humus') return 22;    // rebalanceado — sem custo de ração
     if (itemType === 'minhoca_viva') return 18;
