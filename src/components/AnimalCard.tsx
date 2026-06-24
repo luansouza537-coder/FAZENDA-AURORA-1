@@ -397,7 +397,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'minhoca' ? '🪱 Minhoca' : animal.type === 'caracol' ? '🐌 Caracol' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
-          {animal.trait && (() => {
+          {animal.trait && !['minhoca', 'caracol'].includes(animal.type) && (() => {
             const t = getTraitInfo(animal.trait);
             return (
               <span
@@ -410,7 +410,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           })()}
           {/* Status badges row */}
           <div className="flex flex-wrap gap-1 mt-1">
-            {!animal.isAdult && (
+            {!animal.isAdult && !['minhoca', 'caracol'].includes(animal.type) && (
               <span className="text-[9px] bg-pink-100 border border-pink-300 text-pink-700 font-black px-1.5 py-0.5 rounded-full">😴 Filhote</span>
             )}
             {animal.isSick && (
@@ -491,7 +491,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             </span>
           )}
           {/* Filhote badge */}
-          {!animal.isAdult && animal.adulthoodDay !== undefined && (
+          {!animal.isAdult && animal.adulthoodDay !== undefined && !['minhoca', 'caracol'].includes(animal.type) && (
             <span
               className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-pink-100 border border-pink-400 text-pink-800 cursor-help"
               title={`Filhote: adulto no dia ${animal.adulthoodDay}`}
@@ -509,7 +509,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             </span>
           )}
           {/* F1/F2: Idade e badge idoso */}
-          {animal.age !== undefined && animal.maxAge !== undefined && (() => {
+          {animal.age !== undefined && animal.maxAge !== undefined && !['minhoca', 'caracol'].includes(animal.type) && (() => {
             const phase = getLifePhase(animal);
             const retirable = animal.isAdult !== false && animal.age >= animal.maxAge * 0.75;
             const retireHint = retirable ? ' • Clique para aposentar' : '';
@@ -1136,7 +1136,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.isLactating && animal.hasProducedToday ? 'bg-[#3b82f6] hover:bg-[#2563eb] border-b-4 border-[#1d4ed8] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title={!animal.isLactating ? `Em período de secagem — ${animal.lactationCycle ?? 0} dias restantes` : !animal.hasProducedToday ? 'Leite já coletado hoje' : 'Coletar leite de cabra'}
           >
-            🥛 Leite Cabra
+            🥛 Coletar
           </button>
         )}
 

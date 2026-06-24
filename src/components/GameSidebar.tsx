@@ -350,103 +350,103 @@ export default function GameSidebar({
                   {(inventory.queijo_cabra ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('queijo_cabra', 1, e)} disabled={(inventory.queijo_cabra ?? 0) < 1}
                     className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
-                    🧀 Q.Cabra ({getActualSellPrice('queijo_cabra')}💰)
+                    🧀 Q.Cabra · {inventory.queijo_cabra ?? 0}u ({getActualSellPrice('queijo_cabra')}💰)
                   </button>
                   )}
                   {(inventory.iogurte_cabra ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('iogurte_cabra', 1, e)} disabled={(inventory.iogurte_cabra ?? 0) < 1}
                     className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
-                    🥛 Iog.Cabra ({getActualSellPrice('iogurte_cabra')}💰)
+                    🥛 Iog.Cabra · {inventory.iogurte_cabra ?? 0}u ({getActualSellPrice('iogurte_cabra')}💰)
                   </button>
                   )}
                   {(inventory.leite_condensado ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('leite_condensado', 1, e)} disabled={(inventory.leite_condensado ?? 0) < 1}
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
-                    🥛 L.Condensado ({getActualSellPrice('leite_condensado')}💰)
+                    🥛 L.Condensado · {inventory.leite_condensado ?? 0}u ({getActualSellPrice('leite_condensado')}💰)
                   </button>
                   )}
                   {(inventory.tapete_lhama ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('tapete_lhama', 1, e)} disabled={(inventory.tapete_lhama ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
-                    🪢 Tapete Lhama ({getActualSellPrice('tapete_lhama')}💰)
+                    🪢 Tapete Lhama · {inventory.tapete_lhama ?? 0}u ({getActualSellPrice('tapete_lhama')}💰)
                   </button>
                   )}
                   {(inventory.cachecol_angora ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('cachecol_angora', 1, e)} disabled={(inventory.cachecol_angora ?? 0) < 1}
                     className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 disabled:opacity-40 disabled:cursor-not-allowed text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-indigo-300">
-                    🧣 Cachecol Angorá ({getActualSellPrice('cachecol_angora')}💰)
+                    🧣 Cachecol Angorá · {inventory.cachecol_angora ?? 0}u ({getActualSellPrice('cachecol_angora')}💰)
                   </button>
                   )}
                   {(inventory.tecido_alpaca ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('tecido_alpaca', 1, e)} disabled={(inventory.tecido_alpaca ?? 0) < 1}
                     className="bg-violet-50 hover:bg-violet-100 border border-violet-300 disabled:opacity-40 text-violet-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
-                    🧶 Tecido Alpaca ({getActualSellPrice('tecido_alpaca')}💰)
+                    🧶 Tecido Alpaca · {inventory.tecido_alpaca ?? 0}u ({getActualSellPrice('tecido_alpaca')}💰)
                   </button>
                   )}
                   {(inventory.fio_seda ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('fio_seda', 1, e)} disabled={(inventory.fio_seda ?? 0) < 1}
                     className="bg-sky-50 hover:bg-sky-100 border border-sky-300 disabled:opacity-40 text-sky-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
-                    🪡 Fio de Seda ({getActualSellPrice('fio_seda')}💰)
+                    🪡 Fio de Seda · {inventory.fio_seda ?? 0}u ({getActualSellPrice('fio_seda')}💰)
                   </button>
                   )}
                   {(inventory.manta_premium ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('manta_premium', 1, e)} disabled={(inventory.manta_premium ?? 0) < 1}
                     className="bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
-                    ✨ Manta Premium ({getActualSellPrice('manta_premium')}💰)
+                    ✨ Manta Premium · {inventory.manta_premium ?? 0}u ({getActualSellPrice('manta_premium')}💰)
                   </button>
                   )}
                   {(inventory.pate_pato ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('pate_pato', 1, e)} disabled={(inventory.pate_pato ?? 0) < 1}
                     className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
-                    🥞 Panquecinhas ({getActualSellPrice('pate_pato')}💰)
+                    🥞 Panquecinhas · {inventory.pate_pato ?? 0}u ({getActualSellPrice('pate_pato')}💰)
                   </button>
                   )}
                   {(inventory.ovo_defumado ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('ovo_defumado', 1, e)} disabled={(inventory.ovo_defumado ?? 0) < 1}
                     className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
-                    🥚 Ov.Defumado ({getActualSellPrice('ovo_defumado')}💰)
+                    🥚 Ov.Defumado · {inventory.ovo_defumado ?? 0}u ({getActualSellPrice('ovo_defumado')}💰)
                   </button>
                   )}
                   {(inventory.conserva_codorna ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('conserva_codorna', 1, e)} disabled={(inventory.conserva_codorna ?? 0) < 1}
                     className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
-                    🥚 Conserva Codorna ({getActualSellPrice('conserva_codorna')}💰)
+                    🥚 Conserva Codorna · {inventory.conserva_codorna ?? 0}u ({getActualSellPrice('conserva_codorna')}💰)
                   </button>
                   )}
                   {(inventory.creme_cosmetico ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('creme_cosmetico', 1, e)} disabled={(inventory.creme_cosmetico ?? 0) < 1}
                     className="bg-pink-50 hover:bg-pink-100 border border-pink-300 disabled:opacity-40 disabled:cursor-not-allowed text-pink-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-pink-300">
-                    🧴 Creme Cosm. ({getActualSellPrice('creme_cosmetico')}💰)
+                    🧴 Creme Cosm. · {inventory.creme_cosmetico ?? 0}u ({getActualSellPrice('creme_cosmetico')}💰)
                   </button>
                   )}
                   {(inventory.sabonete_natural ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('sabonete_natural', 1, e)} disabled={(inventory.sabonete_natural ?? 0) < 1}
                     className="bg-teal-50 hover:bg-teal-100 border border-teal-300 disabled:opacity-40 disabled:cursor-not-allowed text-teal-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-teal-300">
-                    🧼 Sabonete Nat. ({getActualSellPrice('sabonete_natural')}💰)
+                    🧼 Sabonete Nat. · {inventory.sabonete_natural ?? 0}u ({getActualSellPrice('sabonete_natural')}💰)
                   </button>
                   )}
                   {(inventory.serum_facial ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('serum_facial' as any, 1, e)} disabled={(inventory.serum_facial ?? 0) < 1}
                     className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
-                    💧 Sérum Facial ({getActualSellPrice('serum_facial' as any)}💰)
+                    💧 Sérum Facial · {inventory.serum_facial ?? 0}u ({getActualSellPrice('serum_facial' as any)}💰)
                   </button>
                   )}
                   {(inventory.mascara_facial ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('mascara_facial' as any, 1, e)} disabled={(inventory.mascara_facial ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
-                    🧖 Máscara Facial ({getActualSellPrice('mascara_facial' as any)}💰)
+                    🧖 Máscara Facial · {inventory.mascara_facial ?? 0}u ({getActualSellPrice('mascara_facial' as any)}💰)
                   </button>
                   )}
                   {(inventory.colete_couro ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('colete_couro', 1, e)} disabled={(inventory.colete_couro ?? 0) < 1}
                     className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
-                    🦺 Colete Couro ({getActualSellPrice('colete_couro')}💰)
+                    🦺 Colete Couro · {inventory.colete_couro ?? 0}u ({getActualSellPrice('colete_couro')}💰)
                   </button>
                   )}
                   {(inventory.bolsa_exotica ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('bolsa_exotica', 1, e)} disabled={(inventory.bolsa_exotica ?? 0) < 1}
                     className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
-                    👜 Bolsa Exótica ({getActualSellPrice('bolsa_exotica')}💰)
+                    👜 Bolsa Exótica · {inventory.bolsa_exotica ?? 0}u ({getActualSellPrice('bolsa_exotica')}💰)
                   </button>
                   )}
                   {/* Biome exclusive products */}
@@ -454,7 +454,7 @@ export default function GameSidebar({
                   <button type="button" onClick={(e) => sellProduct('peixe' as any, 1, e)} disabled={(inventory.peixe ?? 0) < 1}
                     className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300"
                     title="Vende 1 Peixe do Lago. Preço base: 45 moedas.">
-                    🐟 Peixe ({getActualSellPrice('peixe' as any)}💰)
+                    🐟 Peixe · {inventory.peixe ?? 0}u ({getActualSellPrice('peixe' as any)}💰)
                   </button>
                   )}
 
@@ -462,7 +462,7 @@ export default function GameSidebar({
                   <button type="button" onClick={(e) => sellProduct('mel' as any, 1, e)} disabled={(inventory.mel ?? 0) < 1}
                     className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300"
                     title="Vende 1 Mel da Floresta. Preço base: 80 moedas.">
-                    🍯 Mel ({getActualSellPrice('mel' as any)}💰)
+                    🍯 Mel · {inventory.mel ?? 0}u ({getActualSellPrice('mel' as any)}💰)
                   </button>
                   )}
 
@@ -470,7 +470,7 @@ export default function GameSidebar({
                   <button type="button" onClick={(e) => sellProduct('cogumelo' as any, 1, e)} disabled={(inventory.cogumelo ?? 0) < 1}
                     className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300"
                     title="Vende 1 Cogumelo da Floresta. Preço base: 35 moedas.">
-                    🍄 Cogumelo ({getActualSellPrice('cogumelo' as any)}💰)
+                    🍄 Cogumelo · {inventory.cogumelo ?? 0}u ({getActualSellPrice('cogumelo' as any)}💰)
                   </button>
                   )}
 
@@ -478,115 +478,115 @@ export default function GameSidebar({
                   {(inventory.hidromel ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('hidromel' as any, 1, e)} disabled={(inventory.hidromel ?? 0) < 1}
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
-                    🍺 Hidromel ({getActualSellPrice('hidromel' as any)}💰)
+                    🍺 Hidromel · {inventory.hidromel ?? 0}u ({getActualSellPrice('hidromel' as any)}💰)
                   </button>
                   )}
                   {(inventory.risoto_cogumelo ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('risoto_cogumelo' as any, 1, e)} disabled={(inventory.risoto_cogumelo ?? 0) < 1}
                     className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300">
-                    🍄 Risoto ({getActualSellPrice('risoto_cogumelo' as any)}💰)
+                    🍄 Risoto · {inventory.risoto_cogumelo ?? 0}u ({getActualSellPrice('risoto_cogumelo' as any)}💰)
                   </button>
                   )}
                   {(inventory.conserva_peixe ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('conserva_peixe' as any, 1, e)} disabled={(inventory.conserva_peixe ?? 0) < 1}
                     className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
-                    🐟 Conserva ({getActualSellPrice('conserva_peixe' as any)}💰)
+                    🐟 Conserva · {inventory.conserva_peixe ?? 0}u ({getActualSellPrice('conserva_peixe' as any)}💰)
                   </button>
                   )}
                   {(inventory.mel_envasado ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('mel_envasado' as any, 1, e)} disabled={(inventory.mel_envasado ?? 0) < 1}
                     className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
-                    🍯 Mel Envasado ({getActualSellPrice('mel_envasado' as any)}💰)
+                    🍯 Mel Envasado · {inventory.mel_envasado ?? 0}u ({getActualSellPrice('mel_envasado' as any)}💰)
                   </button>
                   )}
                   {(inventory.sopa_cogumelo ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('sopa_cogumelo' as any, 1, e)} disabled={(inventory.sopa_cogumelo ?? 0) < 1}
                     className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
-                    🍲 Sopa ({getActualSellPrice('sopa_cogumelo' as any)}💰)
+                    🍲 Sopa · {inventory.sopa_cogumelo ?? 0}u ({getActualSellPrice('sopa_cogumelo' as any)}💰)
                   </button>
                   )}
                   {(inventory.fio_lhama ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('fio_lhama' as any, 1, e)} disabled={(inventory.fio_lhama ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
-                    🧵 Fio Lhama ({getActualSellPrice('fio_lhama' as any)}💰)
+                    🧵 Fio Lhama · {inventory.fio_lhama ?? 0}u ({getActualSellPrice('fio_lhama' as any)}💰)
                   </button>
                   )}
                   {(inventory.cachecol_lhama ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('cachecol_lhama' as any, 1, e)} disabled={(inventory.cachecol_lhama ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
-                    🧣 Cachecol Lhama ({getActualSellPrice('cachecol_lhama' as any)}💰)
+                    🧣 Cachecol Lhama · {inventory.cachecol_lhama ?? 0}u ({getActualSellPrice('cachecol_lhama' as any)}💰)
                   </button>
                   )}
                   {(inventory.gorro_lhama ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('gorro_lhama' as any, 1, e)} disabled={(inventory.gorro_lhama ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
-                    🎩 Gorro Lhama ({getActualSellPrice('gorro_lhama' as any)}💰)
+                    🎩 Gorro Lhama · {inventory.gorro_lhama ?? 0}u ({getActualSellPrice('gorro_lhama' as any)}💰)
                   </button>
                   )}
                   {(inventory.luvas_lhama ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('luvas_lhama' as any, 1, e)} disabled={(inventory.luvas_lhama ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
-                    🧤 Luvas Lhama ({getActualSellPrice('luvas_lhama' as any)}💰)
+                    🧤 Luvas Lhama · {inventory.luvas_lhama ?? 0}u ({getActualSellPrice('luvas_lhama' as any)}💰)
                   </button>
                   )}
                   {(inventory.poncho_lhama ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('poncho_lhama' as any, 1, e)} disabled={(inventory.poncho_lhama ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
-                    🥻 Poncho Lhama ({getActualSellPrice('poncho_lhama' as any)}💰)
+                    🥻 Poncho Lhama · {inventory.poncho_lhama ?? 0}u ({getActualSellPrice('poncho_lhama' as any)}💰)
                   </button>
                   )}
                   {(inventory.manta_lhama ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('manta_lhama' as any, 1, e)} disabled={(inventory.manta_lhama ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
-                    🛋️ Manta Lhama ({getActualSellPrice('manta_lhama' as any)}💰)
+                    🛋️ Manta Lhama · {inventory.manta_lhama ?? 0}u ({getActualSellPrice('manta_lhama' as any)}💰)
                   </button>
                   )}
                   {(inventory.iogurte_bufala ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('iogurte_bufala' as any, 1, e)} disabled={(inventory.iogurte_bufala ?? 0) < 1}
                     className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300">
-                    🥛 Iog.Búfala ({getActualSellPrice('iogurte_bufala' as any)}💰)
+                    🥛 Iog.Búfala · {inventory.iogurte_bufala ?? 0}u ({getActualSellPrice('iogurte_bufala' as any)}💰)
                   </button>
                   )}
                   {(inventory.manteiga_bufala ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('manteiga_bufala' as any, 1, e)} disabled={(inventory.manteiga_bufala ?? 0) < 1}
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
-                    🧈 Mant.Búfala ({getActualSellPrice('manteiga_bufala' as any)}💰)
+                    🧈 Mant.Búfala · {inventory.manteiga_bufala ?? 0}u ({getActualSellPrice('manteiga_bufala' as any)}💰)
                   </button>
                   )}
                   {(inventory.doce_leite_bufala ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('doce_leite_bufala' as any, 1, e)} disabled={(inventory.doce_leite_bufala ?? 0) < 1}
                     className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
-                    🍮 Doce Leite Búfala ({getActualSellPrice('doce_leite_bufala' as any)}💰)
+                    🍮 Doce Leite Búfala · {inventory.doce_leite_bufala ?? 0}u ({getActualSellPrice('doce_leite_bufala' as any)}💰)
                   </button>
                   )}
                   {(inventory.burrata ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('burrata' as any, 1, e)} disabled={(inventory.burrata ?? 0) < 1}
                     className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
-                    🧀 Burrata ({getActualSellPrice('burrata' as any)}💰)
+                    🧀 Burrata · {inventory.burrata ?? 0}u ({getActualSellPrice('burrata' as any)}💰)
                   </button>
                   )}
                   {(inventory.massa_fresca ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('massa_fresca' as any, 1, e)} disabled={(inventory.massa_fresca ?? 0) < 1}
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
-                    🍝 M.Fresca Ganso ({getActualSellPrice('massa_fresca' as any)}💰)
+                    🍝 M.Fresca Ganso · {inventory.massa_fresca ?? 0}u ({getActualSellPrice('massa_fresca' as any)}💰)
                   </button>
                   )}
                   {(inventory.crepe_rustico ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('crepe_rustico' as any, 1, e)} disabled={(inventory.crepe_rustico ?? 0) < 1}
                     className="bg-orange-50 hover:bg-orange-100 border border-orange-300 disabled:opacity-40 text-orange-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-orange-300">
-                    🥞 Crepe Rústico ({getActualSellPrice('crepe_rustico' as any)}💰)
+                    🥞 Crepe Rústico · {inventory.crepe_rustico ?? 0}u ({getActualSellPrice('crepe_rustico' as any)}💰)
                   </button>
                   )}
                   {(inventory.pao_rustico ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('pao_rustico' as any, 1, e)} disabled={(inventory.pao_rustico ?? 0) < 1}
                     className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
-                    🥐 Pão Rústico ({getActualSellPrice('pao_rustico' as any)}💰)
+                    🥐 Pão Rústico · {inventory.pao_rustico ?? 0}u ({getActualSellPrice('pao_rustico' as any)}💰)
                   </button>
                   )}
                   {(inventory.waffle_mel ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('waffle_mel' as any, 1, e)} disabled={(inventory.waffle_mel ?? 0) < 1}
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 disabled:opacity-40 text-yellow-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm col-span-2">
-                    🧇 Waffle de Mel ({getActualSellPrice('waffle_mel' as any)}💰)
+                    🧇 Waffle de Mel · {inventory.waffle_mel ?? 0}u ({getActualSellPrice('waffle_mel' as any)}💰)
                   </button>
                   )}
                   {/* Produtos orgânicos e exóticos — ex-seção Animais Especiais */}

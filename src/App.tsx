@@ -1802,7 +1802,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if ((itemType as string) === 'hidromel') return 260;
     if ((itemType as string) === 'risoto_cogumelo') return 120;
     if ((itemType as string) === 'conserva_peixe') return 140;
-    if ((itemType as string) === 'mel_envasado') return 350;
+    if ((itemType as string) === 'mel_envasado') return 230;
     if ((itemType as string) === 'sopa_cogumelo') return 80;
     if ((itemType as string) === 'queijo_parmesao') return 200;
     if ((itemType as string) === 'queijo_serra') return 280;
@@ -5499,9 +5499,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           // (this covers minhocas on days the composteiro should reinforce collection).
           // We only add the worker bonus here to avoid duplicate humus from main loop.
           const totalHumus = bonusHumus;
-          if (minhocasProducing > 0 || bonusHumus > 0) {
-            if (totalHumus > 0) {
-              setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) + totalHumus }));
+          if (minhocasProducing > 0) {
+            const totalWithBonus = bonusHumus;
+            if (totalWithBonus > 0) {
+              setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) + totalWithBonus }));
             }
             logsToAdd.push({ msg: `🌱 Composteiro supervisionou ${minhocasProducing} minhoca(s)${bonusHumus > 0 ? ' + bônus de compostagem!' : '!'} `, type: 'success' });
           }
