@@ -45,6 +45,10 @@ export interface Animal {
   melReady?: boolean;
   lastMelDay?: number;
 
+  // Minhocário / Criatório specific
+  humusReady?: boolean;
+  mucoReady?: boolean;
+
   // Ox specific
   weightGain?: number; // 0.0 to 1.0 (0% to 100%)
 

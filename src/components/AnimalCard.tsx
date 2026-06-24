@@ -168,6 +168,8 @@ export interface AnimalCardProps {
   onSellAvestruz: (id: number, e: React.MouseEvent) => void;
   onSellJacare: (id: number, e: React.MouseEvent) => void;
   onCollectMel?: (id: number, e: React.MouseEvent) => void;
+  onCollectHumus?: (id: number, e: React.MouseEvent) => void;
+  onCollectMuco?: (id: number, e: React.MouseEvent) => void;
   onSellAnimal: (id: number, e: React.MouseEvent) => void;
   onRetireAnimal: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
@@ -219,6 +221,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onSellAvestruz,
   onSellJacare,
   onCollectMel,
+  onCollectHumus,
+  onCollectMuco,
   onSellAnimal,
   onRetireAnimal,
   calculateBoiValue,
@@ -1466,6 +1470,32 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             title={animal.melReady ? 'Colher mel da colmeia' : 'Mel ainda não está pronto'}
           >
             🍯 Colher Mel
+          </button>
+        )}
+
+        {/* Minhocário: coletar húmus */}
+        {animal.type === 'minhoca' && (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); onCollectHumus?.(animal.id, e); }}
+            disabled={!animal.humusReady}
+            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.humusReady ? 'bg-green-600 hover:bg-green-500 border-b-4 border-green-800 shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+            title={animal.humusReady ? 'Coletar húmus do Minhocário' : 'Húmus ainda não está pronto'}
+          >
+            🌱 Coletar Húmus
+          </button>
+        )}
+
+        {/* Criatório de Caracóis: coletar muco */}
+        {animal.type === 'caracol' && (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); onCollectMuco?.(animal.id, e); }}
+            disabled={!animal.mucoReady}
+            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.mucoReady ? 'bg-purple-600 hover:bg-purple-500 border-b-4 border-purple-800 shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+            title={animal.mucoReady ? 'Coletar muco do Criatório de Caracóis' : 'Muco ainda não está pronto'}
+          >
+            🐌 Coletar Muco
           </button>
         )}
 

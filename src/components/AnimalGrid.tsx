@@ -86,6 +86,8 @@ interface AnimalGridProps {
   abatedouroUnlocked?: boolean;
   hasCertSanitario?: boolean;
   collectMel?: (id: number, e?: React.MouseEvent) => void;
+  collectHumus?: (id: number, e: React.MouseEvent) => void;
+  collectMuco?: (id: number, e: React.MouseEvent) => void;
 }
 
 export default function AnimalGrid({
@@ -164,6 +166,8 @@ export default function AnimalGrid({
   abatedouroUnlocked,
   hasCertSanitario,
   collectMel,
+  collectHumus,
+  collectMuco,
 }: AnimalGridProps) {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [workersExpanded, setWorkersExpanded] = useState(true);
@@ -994,6 +998,8 @@ export default function AnimalGrid({
                         abatedouroUnlocked={abatedouroUnlocked}
                         hasCertSanitario={hasCertSanitario}
                         onCollectMel={collectMel}
+                        onCollectHumus={collectHumus}
+                        onCollectMuco={collectMuco}
                       />
                     ));
                   })()}

@@ -2222,6 +2222,39 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     addToast('+Mel colhido!', 'success', '🍯');
   }, [collectMel, addToast]);
 
+  const collectHumus = useCallback((id: number, event: React.MouseEvent) => {
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'minhoca' || !animal.humusReady) return;
+    const hasFlorestaBonus = landBiomes.some(b => b.biome === 'floresta');
+    const humusAmt = (specialization === 'organica' ? 2 : 1) + (hasFlorestaBonus ? 1 : 0);
+    setInventory(prev => {
+      const newTotal = (prev.humus ?? 0) + humusAmt;
+      if (newTotal >= 20) checkAndUnlockAchievement('organic_master');
+      return { ...prev, humus: newTotal };
+    });
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, humusReady: false } : a));
+    addLog(`🪱 Coletou ${humusAmt} húmus do Minhocário!`, 'success');
+    spawnFeedback('🌱', `+${humusAmt} Húmus`, event);
+    triggerAudioResult(() => sfx.playSound('click'));
+  }, [animals, landBiomes, specialization, setInventory, setAnimals, checkAndUnlockAchievement, addLog, spawnFeedback]);
+
+  const collectMuco = useCallback((id: number, event: React.MouseEvent) => {
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'caracol' || !animal.mucoReady) return;
+    const hasFlorestaBonus = landBiomes.some(b => b.biome === 'floresta');
+    const baseMuco = (weather === 'chuva') ? 2 : 1;
+    const mucoAmt = (specialization === 'organica' ? baseMuco * 2 : baseMuco) + (hasFlorestaBonus ? 1 : 0);
+    setInventory(prev => {
+      const newTotal = (prev.muco ?? 0) + mucoAmt;
+      if (newTotal >= 20) checkAndUnlockAchievement('organic_master');
+      return { ...prev, muco: newTotal };
+    });
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, mucoReady: false } : a));
+    addLog(`🐌 Coletou ${mucoAmt} muco do Criatório de Caracóis!`, 'success');
+    spawnFeedback('🐌', `+${mucoAmt} Muco`, event);
+    triggerAudioResult(() => sfx.playSound('click'));
+  }, [animals, weather, landBiomes, specialization, setInventory, setAnimals, checkAndUnlockAchievement, addLog, spawnFeedback]);
+
   // --- useMissions hook ---
   const { generateDailyMissions, generateWeeklyMissions, generateEpicMissions } = useMissions({ animals, farmLevel, inventory });
 
@@ -4467,17 +4500,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           copy.happiness = Math.min(100, copy.happiness + 2);
         }
 
-        // Minhoca: produz 1 húmus a cada 3 dias + 1 minhoca viva a cada 5 dias
+        // Minhocário: a cada 3 dias marca humusReady + a cada 5 dias gera Minhoca Viva automática
         if (a.type === 'minhoca' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
-          const humusAmt = specialization === 'organica' ? 2 : 1;
-          setTimeout(() => {
-            setInventory(prev => {
-              const newTotal = (prev.humus ?? 0) + humusAmt;
-              if (newTotal >= 20) checkAndUnlockAchievement('organic_master');
-              return { ...prev, humus: newTotal };
-            });
-          }, 0);
-          logsToAdd.push({ msg: `🪱 ${a.name} produziu ${humusAmt} húmus!`, type: 'success' });
+          copy.humusReady = true;
+          logsToAdd.push({ msg: `🪱 ${a.name} produziu húmus — pronto para coletar!`, type: 'success' });
           updateMissionProgress('organic_day', 1, nextDayValue);
         }
         if (a.type === 'minhoca' && a.isAdult !== false && (a.age || 0) > 0 && (a.age || 0) % 5 === 0) {
@@ -4487,19 +4513,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           logsToAdd.push({ msg: `🪱 ${a.name} gerou 1 Minhoca Viva!`, type: 'success' });
         }
 
-        // Caracol: produz 1 muco a cada 3 dias (2x na chuva)
+        // Criatório de Caracóis: a cada 3 dias marca mucoReady (2x na chuva ao coletar)
         if (a.type === 'caracol' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
-          // Easter egg: if player has 'sal' in inventory, don't produce (salt kills snails — just a comment here)
-          const mucoAmt = (nextWeather === 'chuva' || weather === 'chuva') ? 2 : 1;
-          const finalMuco = specialization === 'organica' ? mucoAmt * 2 : mucoAmt;
-          setTimeout(() => {
-            setInventory(prev => {
-              const newTotal = (prev.muco ?? 0) + finalMuco;
-              if (newTotal >= 20) checkAndUnlockAchievement('organic_master');
-              return { ...prev, muco: newTotal };
-            });
-          }, 0);
-          logsToAdd.push({ msg: `🐌 ${a.name} (caracol) produziu ${finalMuco} muco!`, type: 'success' });
+          copy.mucoReady = true;
+          logsToAdd.push({ msg: `🐌 ${a.name} produziu muco — pronto para coletar!`, type: 'success' });
           updateMissionProgress('organic_day', 1, nextDayValue);
         }
 
@@ -6667,6 +6684,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             collectWool={collectWool}
             collectEgg={collectEggWithToast}
             collectMel={collectMelWithToast}
+            collectHumus={collectHumus}
+            collectMuco={collectMuco}
             sellOx={sellOx}
             calculateBoiValue={calculateBoiValue}
             calculatePorcoValue={calculatePorcoValue}
