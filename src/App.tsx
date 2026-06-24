@@ -3719,8 +3719,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           3:  '🦆 Pato de Quintal & 🐦 Codorna desbloqueados!',
           4:  '🎉 Nível 4! Desconto de 10% em todos os animais desbloqueado!',
           5:  '🦙 Alpaca desbloqueada!',
-          6:  '🪱 Minhoca desbloqueada!',
-          7:  '🐌 Caracol desbloqueado!',
+          6:  '🪱 Minhocário desbloqueado!',
+          7:  '🐌 Criatório de Caracóis desbloqueado!',
           8:  '🐰 Coelho Angorá desbloqueado!',
           10: '🐛 Bicho-da-Seda desbloqueado!',
           12: '🐸 Rã desbloqueada!',
@@ -4904,36 +4904,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             }
           });
         }
-      }
-
-      // --- LAYER 4: Auto-reprodução de minhocas ---
-      {
-        const minhocas = finalAnimalsWithAdulthood.filter(a => a.type === 'minhoca' && a.isAdult !== false);
-        const MAX_MINHOCAS = 20;
-        minhocas.forEach(a => {
-          if (finalAnimalsWithAdulthood.filter(x => x.type === 'minhoca').length >= MAX_MINHOCAS) return;
-          if ((a.age || 0) > 0 && (a.age || 0) % 10 === 0) {
-            const newId = finalAnimalsWithAdulthood.length > 0 ? Math.max(...finalAnimalsWithAdulthood.map(x => x.id)) + 500 + Math.floor(Math.random() * 100) : 500;
-            const filhote: Animal = {
-              id: newId,
-              type: 'minhoca',
-              name: `Minhoca #${newId}`,
-              hunger: 100,
-              happiness: 100,
-              consecutiveHappyDays: 0,
-              daysBelow80: 0,
-              isBestFriend: false,
-              trait: 'trabalhadora' as AnimalTrait,
-              age: 0,
-              maxAge: Math.round(365 * (1 + (Math.random() * 0.4 - 0.2))),
-              isAdult: false,
-              adulthoodDay: nextDayValue + 5,
-              hasProducedToday: false,
-            };
-            finalAnimalsWithAdulthood.push(filhote);
-            logsToAdd.push({ msg: `🪱 ${a.name} se reproduziu! Nova minhoca chegou à fazenda!`, type: 'success' });
-          }
-        });
       }
 
       // Reset weeklyProduction every 7 days
@@ -7209,7 +7179,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                   { key: 'fibras' as FarmSpecialization, emoji: '🧶', title: 'FIBRAS', desc: 'Foco em ovelhas e lhamas', bonuses: '+20% produção de lã\n-10% ração de ovelha/lhama\n+10% custo de outros animais', minLevel: 1 },
                   { key: 'avicultura' as FarmSpecialization, emoji: '🥚', title: 'AVICULTURA', desc: 'Foco em galinhas, patos e gansos', bonuses: '+20% produção de ovos\n-10% ração de aves\n+10% custo de outros animais', minLevel: 1 },
                   { key: 'diversificada' as FarmSpecialization, emoji: '🌿', title: 'DIVERSIFICADA', desc: 'Sem bônus nem penalidades', bonuses: 'Jogo no modo padrão\nSem modificadores especiais\nLiberdade total de escolha', minLevel: 1 },
-                  { key: 'organica' as FarmSpecialization, emoji: '🌱', title: 'ORGÂNICA', desc: 'Foco em minhocas e caracóis (Nv5+)', bonuses: '+20% produção de húmus/muco\nMinhoca e caracol nunca morrem\nEspecial: animais da terra', minLevel: 5 },
+                  { key: 'organica' as FarmSpecialization, emoji: '🌱', title: 'ORGÂNICA', desc: 'Foco em Minhocário e Criatório de Caracóis (Nv5+)', bonuses: '+20% produção de húmus/muco\nMinhocário e Criatório nunca morrem\nEspecial: animais da terra', minLevel: 5 },
                   { key: 'exotica' as FarmSpecialization, emoji: '🦎', title: 'EXÓTICA', desc: 'Foco em animais raros (Nv8+)', bonuses: '+25% preços de couro/carne rara\nJacaré sem incidentes\nCouro de avestruz garantido na morte', minLevel: 8 },
                 ].filter(opt => farmLevel >= opt.minLevel).map(opt => (
                   <button

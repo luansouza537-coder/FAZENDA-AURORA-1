@@ -110,7 +110,7 @@ export const getLevelUpDetails = (level: number): { title: string; perks: string
         perks: [
           "Poço d'Água e Sistema de Irrigação desbloqueados nas Melhorias!",
           "Queijaria pode ser expandida para novas receitas!",
-          "🪱 Minhoca desbloqueada: produz húmus passivamente, nunca precisa de ração!"
+          "🪱 Minhocário desbloqueado: produz húmus passivamente, nunca precisa de ração!"
         ]
       };
     case 7:
@@ -120,7 +120,7 @@ export const getLevelUpDetails = (level: number): { title: string; perks: string
           "Bônus de +10% nos preços de venda de produtos processados!",
           "Energia Solar disponível nas Melhorias — reduza custos de energia!",
           "Turismo rural desbloqueado: receba visitantes na fazenda!",
-          "🐌 Caracol desbloqueado: produz muco cosmético (120💰) — 2x na chuva!"
+          "🐌 Criatório de Caracóis desbloqueado: produz muco cosmético (120💰) — 2x na chuva!"
         ]
       };
     case 8:

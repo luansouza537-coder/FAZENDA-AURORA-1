@@ -534,7 +534,7 @@ export default function AnimalGrid({
                       <line x1="29" y1="4" x2="28" y2="2" stroke="#a21caf" strokeWidth="1" strokeLinecap="round"/>
                       <line x1="31" y1="4" x2="32" y2="2" stroke="#a21caf" strokeWidth="1" strokeLinecap="round"/>
                     </svg>
-                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Minhoca</h4>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Minhocário</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Produz húmus 35💰/u a cada 3 dias. Não precisa de ração!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('minhoca')}</span>
                     <button type="button" onClick={(e) => buyAnimal('minhoca', e)} disabled={gold < getAnimalPurchasePrice('minhoca') || farmLevel < 6}
@@ -547,7 +547,7 @@ export default function AnimalGrid({
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 7 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv7+</span>}
                     <span className="text-4xl">🐌</span>
-                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Caracol</h4>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Criatório de Caracóis</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Muco 35💰/u a cada 3 dias. Sem ração!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('caracol')}</span>
                     <button type="button" onClick={(e) => buyAnimal('caracol', e)} disabled={gold < getAnimalPurchasePrice('caracol') || farmLevel < 7}

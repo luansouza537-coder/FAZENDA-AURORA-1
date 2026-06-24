@@ -1142,8 +1142,8 @@ export function useAnimals({
     if (type === 'pato' && farmLevel < 3) { addLog('🔒 Pato de Quintal requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'codorna' && farmLevel < 3) { addLog('🔒 Codorna requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'alpaca' && farmLevel < 5) { addLog('🔒 Alpaca requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'minhoca' && farmLevel < 6) { addLog('🔒 Minhoca requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'caracol' && farmLevel < 7) { addLog('🔒 Caracol requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'minhoca' && farmLevel < 6) { addLog('🔒 Minhocário requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'caracol' && farmLevel < 7) { addLog('🔒 Criatório de Caracóis requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'coelho_angora' && farmLevel < 8) { addLog('🔒 Coelho Angorá requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'bicho_seda' && farmLevel < 10) { addLog('🔒 Bicho-da-Seda requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'ra' && farmLevel < 12) { addLog('🔒 Rã requer Nível 12!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
@@ -1222,8 +1222,8 @@ export function useAnimals({
     else if (type === 'codorna') typeLabel = '🐦 Codorna';
     else if (type === 'alpaca') typeLabel = '🦙 Alpaca';
     else if (type === 'ovelha_leiteira') typeLabel = '🐑 Ovelha Leiteira';
-    else if (type === 'minhoca') typeLabel = '🪱 Minhoca';
-    else if (type === 'caracol') typeLabel = '🐌 Caracol';
+    else if (type === 'minhoca') typeLabel = '🪱 Minhocário';
+    else if (type === 'caracol') typeLabel = '🐌 Criatório de Caracóis';
     else if (type === 'coelho_angora') typeLabel = '🐰 Coelho Angorá';
     else if (type === 'bicho_seda') typeLabel = '🐛 Bicho-da-Seda';
     else if (type === 'ra') typeLabel = '🐸 Rã';

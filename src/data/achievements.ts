@@ -123,7 +123,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
   { id: 'secret_3', title: 'Queijeiro Completo', emoji: '🧀', description: 'Fabricou os 3 tipos de queijo (Coalho, Muçarela e Brie)', secret: true },
   { id: 'secret_4', title: 'Filho do Inverno', emoji: '❄️', description: 'Sobreviveu a um inverno completo', secret: true },
   { id: 'secret_5', title: 'Couro Raro', emoji: '🐊', description: 'Vendeu couro de jacaré pela primeira vez', secret: true },
-  { id: 'secret_6', title: 'Biomas Unidos', emoji: '🌿', description: 'Teve um caracol e um bicho-seda ao mesmo tempo', secret: true },
+  { id: 'secret_6', title: 'Biomas Unidos', emoji: '🌿', description: 'Teve um Criatório de Caracóis e um bicho-seda ao mesmo tempo', secret: true },
   { id: 'secret_7', title: 'Dia Sóbrio', emoji: '🧘', description: 'Passou o Dia 1 sem gastar nenhuma moeda', secret: true },
   { id: 'secret_8', title: 'Fazenda Feliz', emoji: '😊', description: 'Todos os animais felizes ao mesmo tempo com 10 ou mais animais', secret: true },
   { id: 'secret_9', title: 'Na Última Hora', emoji: '⏰', description: 'Completou uma missão nos últimos 2 dias antes de expirar', secret: true },
