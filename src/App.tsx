@@ -3946,6 +3946,24 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + buffaloMilkCollected }));
             logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${buffaloMilkCollected} Leite(s) de Búfala de ${milkedBuffalos} búfala(s)!`, type: 'success' });
           }
+
+          // Ovelhas Leiteiras (checa isLactating)
+          let sheepMilkCollected = 0;
+          let milkedSheep = 0;
+          updatedAnimalsList = updatedAnimalsList.map(a => {
+            if (a.type !== 'ovelha_leiteira' || a.isAdult === false || !a.hasProducedToday || !a.isLactating) return a;
+            let qty = 1;
+            if (a.trait === 'trabalhadora') qty = 2;
+            qty = Math.round(qty * milkerBonus * productionMult);
+            sheepMilkCollected += qty;
+            milkedSheep++;
+            return { ...a, hasProducedToday: false };
+          });
+          if (sheepMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, sheep_milk: ((prev as any).sheep_milk ?? 0) + sheepMilkCollected }));
+            setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + sheepMilkCollected }));
+            logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${sheepMilkCollected} Leite(s) de Ovelha de ${milkedSheep} ovelha(s)!`, type: 'success' });
+          }
         }
 
         // B. Tosquiadeira Elétrica

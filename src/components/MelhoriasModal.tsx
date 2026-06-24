@@ -408,34 +408,6 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               })}
             </div>
 
-            {/* Oficina de Automação */}
-            {(p.machines.milkerPurchased || p.machines.shearerPurchased || p.machines.feederPurchased) && (
-              <div className="bg-white border-4 border-cyan-300 rounded-3xl p-4">
-                <h4 className="font-display font-black text-sm uppercase text-cyan-800 mb-1">⚙️ Oficina de Automação</h4>
-                <p className="text-xs text-stone-500 font-mono mb-3">Melhore suas máquinas para aumentar eficiência e produção.</p>
-                <div className="space-y-2">
-                  {p.machines.milkerPurchased && (
-                    <div className="flex items-center justify-between">
-                      <div><span className="text-xs font-black text-stone-700">🐄 Ordenhadeira</span><span className="ml-2 text-[10px] text-stone-500 font-mono">Nv{p.milkerLevel}/3 (+{(p.milkerLevel-1)*20}% produção)</span></div>
-                      {p.milkerLevel < 3 ? <button disabled={p.gold < p.milkerLevel * 800} onClick={() => { const cost = p.milkerLevel * 800; if (p.gold >= cost) { p.setGold(prev => prev - cost); p.setMilkerLevel(prev => Math.min(3, prev + 1)); p.addLog(`⚙️ Ordenhadeira melhorada para Nv${p.milkerLevel + 1}! +20% de produção de leite!`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }} className={`text-xs font-mono font-black py-1 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${p.gold >= p.milkerLevel * 800 ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}>Nv{p.milkerLevel + 1} ({(p.milkerLevel * 800).toLocaleString()}💰)</button> : <span className="text-xs text-emerald-600 font-black">✅ MAX</span>}
-                    </div>
-                  )}
-                  {p.machines.shearerPurchased && (
-                    <div className="flex items-center justify-between">
-                      <div><span className="text-xs font-black text-stone-700">✂️ Tosquiadeira</span><span className="ml-2 text-[10px] text-stone-500 font-mono">Nv{p.shearerLevel}/3 (+{(p.shearerLevel-1)*20}% produção)</span></div>
-                      {p.shearerLevel < 3 ? <button disabled={p.gold < p.shearerLevel * 800} onClick={() => { const cost = p.shearerLevel * 800; if (p.gold >= cost) { p.setGold(prev => prev - cost); p.setShearerLevel(prev => Math.min(3, prev + 1)); p.addLog(`⚙️ Tosquiadeira melhorada para Nv${p.shearerLevel + 1}! +20% de produção de lã!`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }} className={`text-xs font-mono font-black py-1 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${p.gold >= p.shearerLevel * 800 ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}>Nv{p.shearerLevel + 1} ({(p.shearerLevel * 800).toLocaleString()}💰)</button> : <span className="text-xs text-emerald-600 font-black">✅ MAX</span>}
-                    </div>
-                  )}
-                  {p.machines.feederPurchased && (
-                    <div className="flex items-center justify-between">
-                      <div><span className="text-xs font-black text-stone-700">🥣 Alimentador</span><span className="ml-2 text-[10px] text-stone-500 font-mono">Nv{p.feederLevel}/3 (+{(p.feederLevel-1)*15}% fome recuperada)</span></div>
-                      {p.feederLevel < 3 ? <button disabled={p.gold < p.feederLevel * 600} onClick={() => { const cost = p.feederLevel * 600; if (p.gold >= cost) { p.setGold(prev => prev - cost); p.setFeederLevel(prev => Math.min(3, prev + 1)); p.addLog(`⚙️ Alimentador melhorado para Nv${p.feederLevel + 1}! +15% de fome recuperada!`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }} className={`text-xs font-mono font-black py-1 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${p.gold >= p.feederLevel * 600 ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}>Nv{p.feederLevel + 1} ({(p.feederLevel * 600).toLocaleString()}💰)</button> : <span className="text-xs text-emerald-600 font-black">✅ MAX</span>}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* Estruturas simples */}
             {[
               { key: 'stable', label: '🏠 Estábulo', color: 'stone', price: 1800, state: p.hasStable, setState: p.setHasStable, desc: `No inverno, animais perdem 50% menos felicidade (recuperam +5 por dia). ${p.hasStable ? '✅ Instalado' : 'Não instalado'}`, log: '🏠 Estábulo construído! Animais mais confortáveis no inverno.', reqLevel: 0 },
@@ -620,7 +592,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <p className="text-xs text-stone-500 font-mono mb-2">💡 Após compradas, as máquinas operam no final de cada dia com o interruptor <strong>LIGADO</strong>. Consomem energia (⚡) por dia.</p>
               {([
-                { key: 'milker' as const, emoji: '🥛', name: 'Ordenhadeira Automática', desc: 'Coleta automaticamente o leite de TODAS as vacas produtoras ao final de cada dia.', cost: 2500, minLevel: 6, energy: 8, purchased: p.machines.milkerPurchased, active: p.machines.milkerActive },
+                { key: 'milker' as const, emoji: '🥛', name: 'Ordenhadeira Automática', desc: 'Coleta automaticamente o leite de TODAS as vacas, cabras e ovelhas leiteiras produtoras ao final de cada dia.', cost: 2500, minLevel: 6, energy: 8, purchased: p.machines.milkerPurchased, active: p.machines.milkerActive },
                 { key: 'shearer' as const, emoji: '✂️', name: 'Tosquiadeira Elétrica', desc: 'Coleta automaticamente a lã de TODAS as ovelhas com lã madura no fim do dia.', cost: 2000, minLevel: 5, energy: 6, purchased: p.machines.shearerPurchased, active: p.machines.shearerActive },
                 { key: 'feeder' as const, emoji: '🌾', name: 'Alimentador Automático', desc: 'Alimenta TODOS os animais no final do dia. Consome ração do Armazém (1 unidade por animal).', cost: 1500, minLevel: 4, energy: 5, purchased: p.machines.feederPurchased, active: p.machines.feederActive },
               ]).map(({ key, emoji, name, desc, cost, minLevel, energy, purchased, active }) => {
@@ -649,13 +621,41 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                           {!levelOk ? `🔒 Nível ${minLevel}` : `Comprar (${cost.toLocaleString()}💰)`}
                         </button>
                       ) : (
-                        <button
-                          type="button"
-                          onClick={() => p.toggleMachine(key)}
-                          className={`font-mono font-black text-xs px-4 py-2 rounded-xl border-b-2 cursor-pointer transition-all uppercase ${active ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-800' : 'bg-stone-400 hover:bg-stone-300 text-white border-stone-600'}`}
-                        >
-                          {active ? '🟢 LIGADO' : '🔴 DESLIGADO'}
-                        </button>
+                        <div className="flex flex-col gap-2 items-end">
+                          <button
+                            type="button"
+                            onClick={() => p.toggleMachine(key)}
+                            className={`font-mono font-black text-xs px-4 py-2 rounded-xl border-b-2 cursor-pointer transition-all uppercase ${active ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-800' : 'bg-stone-400 hover:bg-stone-300 text-white border-stone-600'}`}
+                          >
+                            {active ? '🟢 LIGADO' : '🔴 DESLIGADO'}
+                          </button>
+                          {(() => {
+                            const lvl = key === 'milker' ? p.milkerLevel : key === 'shearer' ? p.shearerLevel : p.feederLevel;
+                            const upgCost = key === 'feeder' ? lvl * 600 : lvl * 800;
+                            const canUpg = lvl < 3 && p.gold >= upgCost;
+                            const pctLabel = key === 'feeder' ? `+${(lvl-1)*15}% fome` : `+${(lvl-1)*20}% prod.`;
+                            if (lvl >= 3) return <span className="text-[10px] text-emerald-600 font-black">⚙️ Nv3 MAX</span>;
+                            return (
+                              <button
+                                type="button"
+                                disabled={!canUpg}
+                                onClick={() => {
+                                  if (!canUpg) return;
+                                  p.setGold(prev => prev - upgCost);
+                                  if (key === 'milker') p.setMilkerLevel(prev => Math.min(3, prev + 1));
+                                  else if (key === 'shearer') p.setShearerLevel(prev => Math.min(3, prev + 1));
+                                  else p.setFeederLevel(prev => Math.min(3, prev + 1));
+                                  p.addLog(`⚙️ Máquina melhorada para Nv${lvl + 1}!`, 'success');
+                                  p.triggerAudioResult(() => p.sfx.playSound('levelup'));
+                                }}
+                                className={`text-[10px] font-mono font-black py-1 px-2 rounded-lg border-b-2 transition-all cursor-pointer ${canUpg ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                                title={`Nível atual: ${lvl}/3 (${pctLabel})`}
+                              >
+                                ⚙️ Nv{lvl}→{lvl+1} ({upgCost.toLocaleString()}💰)
+                              </button>
+                            );
+                          })()}
+                        </div>
                       )}
                     </div>
                   </div>
