@@ -166,6 +166,7 @@ export default function AnimalGrid({
   collectMel,
 }: AnimalGridProps) {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [workersExpanded, setWorkersExpanded] = useState(true);
   return (
           <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b-4 border-[#78350f]/60 pb-3 gap-3">
@@ -750,20 +751,30 @@ export default function AnimalGrid({
 
                 {/* Worker Visual Feedback Bar */}
                 {workers.length > 0 && (
-                  <div className="col-span-full flex flex-wrap gap-2 mb-3">
-                    {workers.map(worker => {
-                      const def = workerTypes.find(w => w.role === worker.role);
-                      return (
-                        <div key={worker.id} className="flex items-center gap-1.5 bg-gradient-to-r from-[#064e3b] to-[#065f46] border-2 border-[#fbbf24]/70 rounded-full pl-2 pr-3 py-1 shadow-sm">
-                          <span className="text-sm leading-none">{def?.emoji ?? '👷'}</span>
-                          <div className="flex flex-col leading-none">
-                            <span className="text-[10px] font-mono text-[#fef3c7] font-black leading-tight">{worker.name}</span>
-                            <span className="text-[8px] text-[#fbbf24]/80 font-mono leading-tight">-{worker.dailyCost}💰/dia</span>
-                          </div>
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5"></span>
-                        </div>
-                      );
-                    })}
+                  <div className="col-span-full mb-3">
+                    <button
+                      onClick={() => setWorkersExpanded(e => !e)}
+                      className="flex items-center gap-1.5 text-[10px] text-[#fbbf24]/80 font-mono font-black uppercase tracking-wider mb-1.5 cursor-pointer hover:text-[#fbbf24] transition-colors"
+                    >
+                      👷 Funcionários ({workers.length}) {workersExpanded ? '▲' : '▼'}
+                    </button>
+                    {workersExpanded && (
+                      <div className="flex flex-wrap gap-2">
+                        {workers.map(worker => {
+                          const def = workerTypes.find(w => w.role === worker.role);
+                          return (
+                            <div key={worker.id} className="flex items-center gap-1.5 bg-gradient-to-r from-[#064e3b] to-[#065f46] border-2 border-[#fbbf24]/70 rounded-full pl-2 pr-3 py-1 shadow-sm">
+                              <span className="text-sm leading-none">{def?.emoji ?? '👷'}</span>
+                              <div className="flex flex-col leading-none">
+                                <span className="text-[10px] font-mono text-[#fef3c7] font-black leading-tight">{worker.name}</span>
+                                <span className="text-[8px] text-[#fbbf24]/80 font-mono leading-tight">-{worker.dailyCost}💰/sem</span>
+                              </div>
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5"></span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
                 {/* Feature 1: Animal Filter Bar */}

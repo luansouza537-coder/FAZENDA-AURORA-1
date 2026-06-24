@@ -1771,7 +1771,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'butter') return 55;   // era 45 — Grupo C
     if (itemType === 'yogurt') return 40;   // era 35 — Grupo C
     if (itemType === 'fertile_egg') return 36;
-    if (itemType === 'quail_egg') return farmLevel >= 5 ? 18 : 16;
+    if (itemType === 'quail_egg') return farmLevel >= 5 ? 32 : 28;
     if (itemType === 'alpaca_wool') return farmLevel >= 6 ? 75 : 65;
     if (itemType === 'humus') return 22;    // rebalanceado — sem custo de ração
     if (itemType === 'minhoca_viva') return 18;
@@ -2992,7 +2992,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
-        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
+        const canProduce = copy.isAdult !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🦆 ${copy.name} botou um ovo de pato!`, type: 'info' });

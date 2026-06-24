@@ -157,9 +157,15 @@ export default function GameSidebar({
                 return (
                   <div className="space-y-3 mb-4">
                     {groups.map(group => {
-                      // cheese, scarf e mayo têm craft rápido em "Refinar" — sempre visíveis para fechar o loop visual
+                      // cheese, scarf e mayo só aparecem se há estoque OU ingredientes suficientes
+                      const canCraftItem = (key: string): boolean => {
+                        if (key === 'cheese') return (inventory.milk ?? 0) >= 3;
+                        if (key === 'scarf') return (inventory.wool ?? 0) >= 2;
+                        if (key === 'mayo') return (inventory.egg ?? 0) >= 2;
+                        return false;
+                      };
                       const ALWAYS_SHOW = new Set(['cheese', 'scarf', 'mayo']);
-                      const visibleItems = group.items.filter(item => showEmptyItems || item.qty > 0 || ALWAYS_SHOW.has(item.key));
+                      const visibleItems = group.items.filter(item => showEmptyItems || item.qty > 0 || (ALWAYS_SHOW.has(item.key) && canCraftItem(item.key)));
                       if (visibleItems.length === 0) return null;
                       return (
                         <div key={group.title}>

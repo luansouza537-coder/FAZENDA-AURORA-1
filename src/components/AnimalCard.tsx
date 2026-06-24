@@ -244,6 +244,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const [pendingSellAvestruz, setPendingSellAvestruz] = useState(false);
   const [pendingSellJacare, setPendingSellJacare] = useState(false);
   const [pendingSellPorco, setPendingSellPorco] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const isEditing = editingId === animal.id;
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
@@ -345,6 +346,15 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
       {animal.isHighQuality && (
         <span className="absolute top-6 right-1 text-[8px] bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-black z-10">✨ Premium</span>
       )}
+
+      {/* Collapse toggle */}
+      <button
+        onClick={() => setCollapsed(c => !c)}
+        className="absolute bottom-2 right-3 text-[10px] text-[#fbbf24]/60 hover:text-[#fbbf24] font-black z-10 cursor-pointer select-none"
+        title={collapsed ? 'Expandir card' : 'Minimizar card'}
+      >
+        {collapsed ? '▼' : '▲'}
+      </button>
 
       {/* Animal header with edit rename */}
       <div className="flex items-center justify-between gap-3 mb-4">
@@ -697,7 +707,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
       </div>
 
       {/* Stats - Fome and Felicidade */}
-      <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
+      {!collapsed && <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
 
         {/* Hunger bar — hidden for animals that never need feeding */}
         {!['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'].includes(animal.type) && (
@@ -755,10 +765,9 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           </div>
         </div>
 
-      </div>
+      </div>}
 
-      {/* Production Info Box */}
-      {(() => {
+      {!collapsed && (() => {
         const isReady = (animal.type === 'vaca' && animal.hasProducedToday) || (animal.type === 'ovelha' && animal.woolReady) || (animal.type === 'boi' && (animal.weightGain || 0) >= 0.8) || (animal.type === 'galinha' && animal.hasProducedToday) || (animal.type === 'cabra' && animal.isLactating && animal.hasProducedToday) || (animal.type === 'lhama' && (animal.woolAccumulated ?? 0) >= 3) || (animal.type === 'pato' && animal.hasProducedToday) || (animal.type === 'bufalo' && animal.hasProducedToday);
         return (
           <div className={`border rounded-[18px] p-3 text-center mb-4 text-xs font-extrabold flex flex-col items-center justify-center gap-1.5 uppercase tracking-wide shadow-sm min-h-[58px] ${
@@ -935,8 +944,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         );
       })()}
 
-      {/* CARD ACTION BUTTONS */}
-      <div className="flex gap-2 flex-wrap justify-between mt-auto">
+      {!collapsed && <div className="flex gap-2 flex-wrap justify-between mt-auto">
 
         {/* Alimentar (Dynamic feed count based on animal type) */}
         {(() => {
@@ -946,7 +954,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             return <span className="text-[10px] text-stone-400 font-mono italic flex-1 flex items-center justify-center">Sem ração necessária 🌿</span>;
           }
           // BUG FIX: novos animais usam a ração correta na UI
-          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
+          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'ovelha_leiteira' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
           const feedQty = inventory[feedType] ?? 0;
           const label = feedType === 'racaoBovina' ? 'Ração Bovina' : feedType === 'racaoSuina' ? 'Ração Suína' : feedType === 'racaoOvinos' ? 'Ração de Ovinos' : feedType === 'racaoAves' ? 'Ração de Aves' : feedType === 'racaoAquatica' ? 'Ração Aquática' : feedType === 'racaoCoelho' ? 'Ração de Coelhos' : 'Ração Carnívora';
           return (
@@ -1484,10 +1492,9 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             </button>
           );
         })()}
-      </div>
+      </div>}
 
-        {/* Improvement 2: Profit Panel Badge */}
-        {showProfitPanel && (() => {
+        {!collapsed && showProfitPanel && (() => {
           const prof = getAnimalDailyProfit(animal.type);
           const badgeColor = prof.profit > 5
             ? 'bg-emerald-100 border-emerald-400 text-emerald-800'
