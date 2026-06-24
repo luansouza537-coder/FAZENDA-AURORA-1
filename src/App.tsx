@@ -2699,7 +2699,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         let feedLabel = 'Ração Bovina';
         if (a.type === 'vaca' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
         else if (a.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
-        else if (a.type === 'ovelha' || a.type === 'cabra' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
+        else if (a.type === 'ovelha' || a.type === 'ovelha_leiteira' || a.type === 'cabra' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
         else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
         else if (a.type === 'pato' || a.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
         else if (a.type === 'coelho_angora') { feedType = 'racaoCoelho'; feedLabel = 'Ração de Coelhos'; }
@@ -2999,12 +2999,16 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
       else if (copy.type === 'ganso') {
-        // Track days for egg timers
-        copy.daysSinceLastGooseEgg = (copy.daysSinceLastGooseEgg ?? 0) + 1;
-        // Ganso infeliz reduz felicidade de patos e galinhas (handled below)
-        // Alarm mechanic: check upcoming events (simplified — notify if weather is rainy next day)
-        // This is handled in atualizarClimaEEventos, so just log ganso behavior here
-        logs.push({ msg: `🦢 ${copy.name} nada tranquilamente.`, type: 'info' });
+        const daysSince = (copy.daysSinceLastGooseEgg ?? 0) + 1;
+        const canProduce = daysSince >= 3 && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && copy.isAdult !== false;
+        if (canProduce) {
+          copy.daysSinceLastGooseEgg = 0;
+          copy.hasProducedToday = true;
+          logs.push({ msg: `🦢 ${copy.name} botou um ovo de ganso!`, type: 'info' });
+        } else {
+          copy.daysSinceLastGooseEgg = daysSince;
+          copy.hasProducedToday = false;
+        }
       }
       else if (copy.type === 'bufalo') {
         // Ciclo de lactação: 8 dias lactando + 2 dias secos (fallback: isLactating ?? true para saves antigos)
@@ -4737,6 +4741,16 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
 
+      // Ganso: produz goose_egg a cada 3 dias (sem avicultor = coleta manual; avicultor coleta abaixo)
+      {
+        const producingGansos = finalAnimals.filter(a => a.type === 'ganso' && a.hasProducedToday && !workers.some(w => w.role === 'avicultor'));
+        if (producingGansos.length > 0) {
+          setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) + producingGansos.length }));
+          logsToAdd.push({ msg: `🦢 ${producingGansos.length} ganso(s) botaram ${producingGansos.length} ovo(s) de ganso!`, type: 'success' });
+          setAnimals(prev => prev.map(a => producingGansos.some(g => g.id === a.id) ? { ...a, hasProducedToday: false } : a));
+        }
+      }
+
       // Rã: coleta automática de coxa_ra quando woolReady (handled via collect button but also auto here)
       // Auto-reset cooldown handled via daysSinceLastWool in processarFomeFelicidade
 
@@ -5372,20 +5386,23 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       // --- SISTEMA DE PEÕES (WORKERS) ---
       if (workers.length > 0) {
-        const workerCost = workers.reduce((sum, w) => sum + w.dailyCost, 0);
-        setGold(prev => {
+        // Salário semanal: debita apenas 1x por semana (a cada 7 dias)
+        const workerCost = nextDayValue % 7 === 0 ? workers.reduce((sum, w) => sum + w.dailyCost, 0) : 0;
+        if (workerCost > 0) setGold(prev => {
           if (prev < workerCost) { setDebt(d => d + (workerCost - prev)); return 0; }
           return prev - workerCost;
         });
-        logsToAdd.push({ msg: `👷 Funcionários trabalharam hoje! Custo diário: -${workerCost}💰`, type: 'info' });
-        addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'trabalhador', description: `Salário de ${workers.length} funcionário(s)`, amount: workerCost });
+        if (workerCost > 0) {
+          logsToAdd.push({ msg: `👷 Pagamento semanal de funcionários: -${workerCost}💰`, type: 'info' });
+          addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'trabalhador', description: `Salário semanal de ${workers.length} funcionário(s)`, amount: workerCost });
+        }
 
         // --- Tratador: alimenta todos os animais consumindo ração correta do inventário ---
         if (workers.some(w => w.role === 'tratador')) {
           const getFeedKeyForType2 = (type: string): keyof typeof inventory => {
             if (type === 'vaca' || type === 'boi' || type === 'bufalo') return 'racaoBovina';
             if (type === 'porco') return 'racaoSuina';
-            if (type === 'ovelha' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
+            if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
             if (type === 'galinha' || type === 'codorna' || type === 'pavao') return 'racaoAves';
             if (type === 'pato' || type === 'ganso') return 'racaoAquatica';
             if (type === 'coelho_angora') return 'racaoCoelho';
@@ -5453,16 +5470,18 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }));
         }
 
-        // --- Ordenhador: coleta leite de vaca/cabra/bufalo adultos; tosquia alpaca quando woolReady ---
+        // --- Ordenhador: coleta leite de vaca/cabra/bufalo/ovelha adultos; tosquia alpaca quando woolReady ---
         if (workers.some(w => w.role === 'ordenhador')) {
           const cowMilkCollected = finalAnimals.filter(a => a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday && !(machines.milkerPurchased && machines.milkerActive)).length;
           const goatMilkCollected = finalAnimals.filter(a => a.type === 'cabra' && a.isAdult !== false && a.hasProducedToday).length;
           const buffaloMilkCollected = finalAnimals.filter(a => a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false).length;
+          const sheepMilkCollected = finalAnimals.filter(a => a.type === 'ovelha_leiteira' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false).length;
           const alpacaWoolCollected = finalAnimals.filter(a => a.type === 'alpaca' && a.isAdult !== false && a.woolReady).length;
           const ordenhadorIds = new Set(finalAnimals.filter(a => {
             if (a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday && !(machines.milkerPurchased && machines.milkerActive)) return true;
             if (a.type === 'cabra' && a.isAdult !== false && a.hasProducedToday) return true;
             if (a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false) return true;
+            if (a.type === 'ovelha_leiteira' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false) return true;
             if (a.type === 'alpaca' && a.isAdult !== false && a.woolReady) return true;
             return false;
           }).map(a => a.id));
@@ -5484,6 +5503,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (buffaloMilkCollected > 0) {
             setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) + buffaloMilkCollected }));
             logsToAdd.push({ msg: `🐃 Ordenhador coletou +${buffaloMilkCollected} leite(s) de búfala automaticamente!`, type: 'success' });
+          }
+          if (sheepMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, sheep_milk: ((prev as any).sheep_milk ?? 0) + sheepMilkCollected }));
+            logsToAdd.push({ msg: `🐑 Ordenhador coletou +${sheepMilkCollected} leite(s) de ovelha automaticamente!`, type: 'success' });
           }
           if (alpacaWoolCollected > 0) {
             setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) + alpacaWoolCollected }));
@@ -5524,13 +5547,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
         }
 
-        // --- Avicultor: coleta ovos de galinha/codorna/pato; coleta carne de avestruz (woolReady) ---
+        // --- Avicultor: coleta ovos de galinha/pato/ganso; coleta carne de avestruz (woolReady) ---
         if (workers.some(w => w.role === 'avicultor')) {
           const eggsCollected = finalAnimals.filter(a => a.type === 'galinha' && a.isAdult !== false && a.hasProducedToday).length;
           const duckEggs = finalAnimals.filter(a => a.type === 'pato' && a.isAdult !== false && a.hasProducedToday).length;
+          const gooseEggs = finalAnimals.filter(a => a.type === 'ganso' && a.isAdult !== false && a.hasProducedToday).length;
           const ostrichReady = finalAnimals.filter(a => a.type === 'avestruz' && a.isAdult !== false && a.woolReady).length;
           const avicultorIds = new Set(finalAnimals.filter(a => {
-            if ((a.type === 'galinha' || a.type === 'pato') && a.isAdult !== false && a.hasProducedToday) return true;
+            if ((a.type === 'galinha' || a.type === 'pato' || a.type === 'ganso') && a.isAdult !== false && a.hasProducedToday) return true;
             if (a.type === 'avestruz' && a.isAdult !== false && a.woolReady) return true;
             return false;
           }).map(a => a.id));
@@ -5548,6 +5572,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (duckEggs > 0) {
             setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) + duckEggs }));
             logsToAdd.push({ msg: `🥚 Avicultor coletou +${duckEggs} ovo(s) de pato!`, type: 'success' });
+          }
+          if (gooseEggs > 0) {
+            setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) + gooseEggs }));
+            logsToAdd.push({ msg: `🦢 Avicultor coletou +${gooseEggs} ovo(s) de ganso!`, type: 'success' });
           }
         }
 
@@ -5571,23 +5599,43 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
         }
 
-        // --- Queijeiro: converte 3 leites em 1 queijo coalho por queijeiro contratado ---
+        // --- Queijeiro: converte 3 leites em queijo por tipo; prioridade vaca→cabra→búfala→ovelha ---
         const queijeirosCount = workers.filter(w => w.role === 'queijeiro').length;
         let queijeiroAction = `Dia ${nextDayValue}: sem leite suficiente`;
         if (queijeirosCount > 0) {
-          let milkPool = inventory.milk ?? 0;
-          let queijosFeitos = 0;
-          for (let i = 0; i < queijeirosCount; i++) {
-            if (milkPool >= 3) { milkPool -= 3; queijosFeitos++; }
+          type MilkRecipe = { inv: string; tipo: string; label: string; dias: number };
+          const milkPriority: MilkRecipe[] = [
+            { inv: 'milk',        tipo: 'coalho',            label: 'Queijo Coalho',    dias: 1  },
+            { inv: 'goat_milk',   tipo: 'queijo_cabra',      label: 'Queijo de Cabra',  dias: 3  },
+            { inv: 'buffalo_milk',tipo: 'mucarela',          label: 'Mussarela',        dias: 5  },
+            { inv: 'sheep_milk',  tipo: 'queijo_pecorino',   label: 'Queijo Pecorino',  dias: 10 },
+          ];
+          const milkDelta: Record<string, number> = {};
+          const getEff = (k: string) => ((inventory as Record<string,number>)[k] ?? 0) + (milkDelta[k] ?? 0);
+          const produced: { tipo: string; label: string; dias: number }[] = [];
+          let queijeirosLeft = queijeirosCount;
+          for (const recipe of milkPriority) {
+            while (queijeirosLeft > 0 && getEff(recipe.inv) >= 3) {
+              milkDelta[recipe.inv] = (milkDelta[recipe.inv] ?? 0) - 3;
+              produced.push({ tipo: recipe.tipo, label: recipe.label, dias: recipe.dias });
+              queijeirosLeft--;
+            }
           }
-          if (queijosFeitos > 0) {
-            setInventory(prev => ({ ...prev, milk: (prev.milk ?? 0) - queijosFeitos * 3 }));
+          if (produced.length > 0) {
+            setInventory(prev => {
+              const next = { ...prev } as Record<string, number>;
+              for (const [k, delta] of Object.entries(milkDelta)) {
+                next[k] = (next[k] ?? 0) + delta;
+              }
+              return next as typeof prev;
+            });
             setQueijosEmMaturacao(prev => [
               ...prev,
-              ...Array.from({ length: queijosFeitos }, () => ({ tipo: 'coalho' as const, diasRestantes: 1 })),
+              ...produced.map(p => ({ tipo: p.tipo as any, diasRestantes: p.dias })),
             ]);
-            logsToAdd.push({ msg: `🧀 ${queijeirosCount > 1 ? `${queijeirosCount} Queijeiros colocaram` : 'Queijeiro colocou'} ${queijosFeitos} Queijo(s) Coalho para maturar!`, type: 'success' });
-            queijeiroAction = `Dia ${nextDayValue}: produziu ${queijosFeitos} queijo(s) coalho`;
+            const summary = produced.map(p => p.label).join(', ');
+            logsToAdd.push({ msg: `🧀 Queijeiro(s) colocaram para maturar: ${summary}!`, type: 'success' });
+            queijeiroAction = `Dia ${nextDayValue}: produziu ${produced.length} queijo(s)`;
           }
         }
 

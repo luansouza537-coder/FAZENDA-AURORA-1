@@ -37,7 +37,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
               👷 Funcionários da Fazenda
             </h3>
             <p className="text-[#fbbf24] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
-              Vagas: {workers.length}/{farmLevel} • 1 vaga por nível
+              Vagas: {workers.length}/{farmLevel} • 1 vaga por nível • Salário semanal
             </p>
             <button onClick={onClose} className="absolute top-4 right-4 text-[#fef3c7] bg-[#022c22] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
           </div>
@@ -52,7 +52,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                       <div key={w.id} className="bg-[#022c22] rounded-xl px-3 py-2">
                         <div className="flex items-center justify-between">
                           <span className="text-[#fef3c7] font-mono text-sm">{wt?.emoji} {w.name}</span>
-                          <span className="text-[#fbbf24] font-mono text-xs">-{w.dailyCost}💰/dia</span>
+                          <span className="text-[#fbbf24] font-mono text-xs">-{w.dailyCost}💰/sem</span>
                           <button onClick={() => onFireWorker(w.id)} className="text-red-400 text-xs font-black px-2 py-1 rounded-lg border border-red-400/40 hover:bg-red-400/20 cursor-pointer">
                             Dispensar
                           </button>
@@ -65,7 +65,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                   })}
                 </div>
                 <div className="text-[#fbbf24] font-mono text-xs mt-3 text-right">
-                  Custo total: -{workers.reduce((s, w) => s + w.dailyCost, 0)}💰/dia
+                  Custo total: -{workers.reduce((s, w) => s + w.dailyCost, 0)}💰/semana
                 </div>
               </div>
             )}
@@ -138,7 +138,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                         </div>
                         <div className="text-[#fef3c7]/70 text-[11px] font-mono mt-1 leading-relaxed">{wt.desc}</div>
                         <div className="text-[#fbbf24] text-[10px] font-mono mt-1.5 flex items-center gap-2 flex-wrap">
-                          <span>-{wt.dailyCost}💰/dia{hiredCount > 1 ? ` × ${hiredCount} = -${wt.dailyCost * hiredCount}💰/dia` : ''}</span>
+                          <span>-{wt.dailyCost}💰/sem{hiredCount > 1 ? ` × ${hiredCount} = -${wt.dailyCost * hiredCount}💰/sem` : ''}</span>
                           {(wt.role === 'tratador') && <span className="text-[9px] bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30 rounded-full px-1.5 py-0.5">Remove debuff geral</span>}
                           {(wt.role === 'ordenhador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Bovinos sem debuff</span>}
                           {(wt.role === 'tosquiador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Fibras/Caprinos sem debuff</span>}
