@@ -71,6 +71,18 @@ import {
 } from 'lucide-react';
 import { Animal, AnimalType, AnimalTrait, FarmStats, LogMessage, Contract, FarmSpecialization, FairResult, LandLot, BiomeType } from './types';
 import { getRandomName, getUniqueOxName } from './names';
+
+// Custo de água por tipo de animal (fora do componente — valor estático, sem recriação por render)
+const WATER_COST_PER_ANIMAL: Partial<Record<AnimalType, number>> = {
+  minhoca: 0, caracol: 0, bicho_seda: 0, colmeia_abelhas: 0,
+  codorna: 1,
+  galinha: 2, pavao: 2, coelho_angora: 2,
+  pato: 3, ganso: 3, ovelha: 3, cabra: 3, lhama: 3, alpaca: 3, avestruz: 3,
+  boi: 4, porco: 4, ovelha_leiteira: 4,
+  vaca: 5, ra: 5,
+  bufalo: 6,
+  jacare: 7,
+};
 import { sfx, music } from './utils/audio';
 import SeasonalParticles from './components/SeasonalParticles';
 import { ContractsModal } from './components/ContractsModal';
@@ -3593,18 +3605,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
   // calcFairScore moved to useAnimals hook
 
-  // Consumo de água por tipo de animal (litros/semana equivalente em custo)
-  const WATER_COST_PER_ANIMAL: Partial<Record<AnimalType, number>> = {
-    minhoca: 0, caracol: 0, bicho_seda: 0, colmeia_abelhas: 0,
-    codorna: 1,
-    galinha: 2, pavao: 2, coelho_angora: 2,
-    pato: 3, ganso: 3, ovelha: 3, cabra: 3, lhama: 3, alpaca: 3, avestruz: 3,
-    boi: 4, porco: 4, ovelha_leiteira: 4,
-    vaca: 5, ra: 5,
-    bufalo: 6,
-    jacare: 7,
-  };
-
   // 7. Advance Day
   const advanceDay = (event: React.MouseEvent) => {
     try {
@@ -4300,7 +4300,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (hasLago && AQUATIC_TYPES.includes(a.type)) cost = Math.max(0, cost - 1);
         return sum + cost;
       }, 0);
-      const rainDiscount = weeklyRainyDays >= 3 ? 0.30 : weeklyRainyDays >= 2 ? 0.20 : weeklyRainyDays >= 1 ? 0.10 : 0;
+      // Incluir o dia atual na contagem de chuva (nextWeather já está calculado acima)
+      const effectiveRainyDays = weeklyRainyDays + (nextWeather === 'chuva' ? 1 : 0);
+      const rainDiscount = effectiveRainyDays >= 3 ? 0.30 : effectiveRainyDays >= 2 ? 0.20 : effectiveRainyDays >= 1 ? 0.10 : 0;
       const baseWaterCost = isWeeklyBillDay ? Math.round(15 + baseWaterAnimals + irrigationLevel * 5) : 0;
       const waterDiscount = Math.min(wellLevel * 0.15 + (hasCisterna ? 0.3 : 0) + (hasBebedouro ? 0.10 : 0) + rainDiscount, 0.90);
       const waterCost = isWeeklyBillDay ? Math.round(baseWaterCost * (1 - waterDiscount)) : 0;
@@ -4617,8 +4619,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
 
-      // Rastrear dias de chuva na semana para desconto de água
-      if (nextWeather === 'chuva') setWeeklyRainyDays(prev => prev + 1);
+      // Rastrear dias de chuva na semana (para desconto de água na próxima cobrança)
+      if (nextWeather === 'chuva' && !isWeeklyBillDay) setWeeklyRainyDays(prev => prev + 1);
 
       // IMPROVEMENT 2: Species-specific climate preferences
       const finalAnimalsWithClimate = finalAnimals.map(a => {
@@ -5140,16 +5142,21 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             return prev - cost;
           }); // extra 2x cost (total 3x)
           // Penalidade de felicidade para animais aquáticos durante seca
-          setTimeout(() => {
-            setAnimals(prev => prev.map(a => {
-              const penalty =
-                a.type === 'jacare' ? 8 :
-                a.type === 'ra' ? 5 :
-                (a.type === 'pato' || a.type === 'ganso') ? 5 :
-                a.type === 'bufalo' ? 3 : 0;
-              return penalty > 0 ? { ...a, happiness: Math.max(0, a.happiness - penalty) } : a;
-            }));
-          }, 0);
+          // Bebedouro e Seguro Climático protegem; Poço Nv4+ mitiga rã/jacaré
+          if (!hasBebedouro && !insuranceClimate.active) {
+            setTimeout(() => {
+              setAnimals(prev => prev.map(a => {
+                let penalty =
+                  a.type === 'jacare' ? 8 :
+                  a.type === 'ra' ? 5 :
+                  (a.type === 'pato' || a.type === 'ganso') ? 5 :
+                  a.type === 'bufalo' ? 3 : 0;
+                // Poço Nv4+ fornece água extra — mitiga penalidade de rã e jacaré
+                if (wellLevel >= 4 && (a.type === 'ra' || a.type === 'jacare')) penalty = Math.max(0, penalty - 3);
+                return penalty > 0 ? { ...a, happiness: Math.max(0, a.happiness - penalty) } : a;
+              }));
+            }, 0);
+          }
         } else if (currentSeasonIdx === 1 && Math.random() < (wellLevel >= 5 ? 0.045 : 0.05)) {
           if (insuranceClimate.active) {
             logsToAdd.push({ msg: `🌦️ Seca começou mas Seguro Climático protegeu sua fazenda! Sem custo extra.`, type: 'success' });
@@ -5164,7 +5171,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
         // Aviso semanal no verão sobre risco de seca
         if (isWeeklyBillDay && currentSeasonIdx === 1 && currentDrought === 0 && irrigationLevel < 2) {
-          logsToAdd.push({ msg: `☀️ Verão: 5% de chance de seca por dia! Considere Irrigação Nível 2 ou Seguro Climático.`, type: 'info' });
+          const droughtChancePct = wellLevel >= 5 ? '4.5%' : '5%';
+          logsToAdd.push({ msg: `☀️ Verão: ${droughtChancePct} de chance de seca por dia! Considere Irrigação Nível 2 ou Seguro Climático.`, type: 'info' });
         }
       }
 

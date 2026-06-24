@@ -49,7 +49,7 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   iogurte_cabra:    { energy: 1, water: 1 },
   leite_condensado: { energy: 2, water: 0 },
   tapete_lhama:     { energy: 2, water: 1 },
-  cachecol_angora:  { energy: 1, water: 0 },
+  cachecol_angora:  { energy: 1, water: 1 },
   tecido_alpaca:    { energy: 2, water: 1 },
   fio_seda:         { energy: 1, water: 2 },
   manta_premium:    { energy: 3, water: 2 },
@@ -93,7 +93,7 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   waffle_mel:       { energy: 1, water: 1 },
   biofertilizante:  { energy: 1, water: 1 },
   queijo_pecorino:  { energy: 2, water: 1 },
-  iogurte_ovelha:   { energy: 1, water: 0 },
+  iogurte_ovelha:   { energy: 1, water: 1 },
   ricota_ovelha:    { energy: 1, water: 1 },
   doce_leite_ovelha:{ energy: 2, water: 0 },
 };
