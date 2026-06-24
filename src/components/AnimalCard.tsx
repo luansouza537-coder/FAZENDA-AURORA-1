@@ -97,7 +97,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
       <span className="font-black text-[#78350f] w-28 truncate text-xs uppercase">{animal.name}</span>
       {animal.isBestFriend && <span className="text-[9px] bg-pink-100 border border-pink-300 text-pink-700 font-black px-1.5 py-0.5 rounded-full">💖 Amigo</span>}
       {animal.isCampiao && <span className="text-[9px] bg-yellow-100 border border-yellow-300 text-yellow-800 font-black px-1.5 py-0.5 rounded-full">🏆</span>}
-      {animal.isAdult === false && <span className="text-[9px] bg-blue-100 border border-blue-300 text-blue-700 font-black px-1.5 py-0.5 rounded-full">🍼 {Math.max(0, (animal.adulthoodDay ?? 0) - currentDay)}d</span>}
+      {animal.isAdult === false && !['minhoca', 'caracol'].includes(animal.type) && <span className="text-[9px] bg-blue-100 border border-blue-300 text-blue-700 font-black px-1.5 py-0.5 rounded-full">🍼 {Math.max(0, (animal.adulthoodDay ?? 0) - currentDay)}d</span>}
       {animal.isSick && <span className="text-[9px] bg-red-100 border border-red-300 text-red-700 font-black px-1.5 py-0.5 rounded-full animate-pulse">🤒</span>}
       <div className="flex items-center gap-1 ml-auto">
         <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>

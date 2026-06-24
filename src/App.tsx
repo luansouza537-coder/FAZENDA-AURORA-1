@@ -5498,7 +5498,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           // the composteiro adds any minhocas it "supervises" that didn't produce in the main loop
           // (this covers minhocas on days the composteiro should reinforce collection).
           // We only add the worker bonus here to avoid duplicate humus from main loop.
-          const totalHumus = bonusHumus;
           if (minhocasProducing > 0) {
             const totalWithBonus = bonusHumus;
             if (totalWithBonus > 0) {
