@@ -3081,7 +3081,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const basePhaseMult = ageRatio < 0.15 ? 0.6 : ageRatio < 0.50 ? 1.1 : ageRatio < 0.75 ? 1.0 : ageRatio < 0.90 ? 0.7 : 0.4;
         const adjustedPhaseMult = Math.min(1.15, basePhaseMult + (copy.isVeteran ? 0.05 : 0) + (copy.juvenileBonus || 0));
         const lifePhaseBlock = adjustedPhaseMult < 1.0 && Math.random() > adjustedPhaseMult;
-        const canProduce = copy.isLactating !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
+        const canProduce = copy.isAdult !== false && copy.isLactating !== false && copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock && !lifePhaseBlock;
         copy.hasProducedToday = canProduce;
         if (canProduce) {
           logs.push({ msg: `🐃 ${copy.name} produziu leite de búfala!`, type: 'info' });
