@@ -905,7 +905,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       iogurte_cabra: [55, 55, 55, 55, 55, 55, 55],
       leite_condensado: [100, 100, 100, 100, 100, 100, 100],
       tapete_lhama: [110, 110, 110, 110, 110, 110, 110],
-      cachecol_angora: [160, 160, 160, 160, 160, 160, 160],
+      cachecol_angora: [260, 260, 260, 260, 260, 260, 260],
       tecido_alpaca: [180, 180, 180, 180, 180, 180, 180],
       fio_seda: [200, 200, 200, 200, 200, 200, 200],
       manta_premium: [420, 420, 420, 420, 420, 420, 420],
@@ -3134,11 +3134,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         // happiness decays normally but reset from initial forced 100
       }
       else if (copy.type === 'coelho_angora') {
-        copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
-        if ((copy.daysSinceLastWool || 0) >= 5 && !copy.woolReady) {
-          if (copy.hunger > 20 && copy.happiness > 25) {
-            copy.woolReady = true;
-            logs.push({ msg: `🐰 ${copy.name} (coelho angorá) está pronto para tosquia!`, type: 'success' });
+        if (copy.isAdult !== false) {
+          copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
+          if ((copy.daysSinceLastWool || 0) >= 5 && !copy.woolReady) {
+            if (copy.hunger > 20 && copy.happiness > 25) {
+              copy.woolReady = true;
+              logs.push({ msg: `🐰 ${copy.name} (coelho angorá) está pronto para tosquia!`, type: 'success' });
+            }
           }
         }
       }
@@ -4880,7 +4882,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const coelhos = finalAnimals.filter(a => a.type === 'coelho_angora');
         if (coelhos.length >= 2 && coelhoReproCount < 4) {
           // Check if any coelho has age that's a multiple of 15
-          const shouldRepro = coelhos.some(c => (c.age || 0) > 0 && (c.age || 0) % 15 === 0);
+          const shouldRepro = coelhos.some(c => c.isAdult !== false && (c.age || 0) > 0 && (c.age || 0) % 15 === 0);
           if (shouldRepro) {
             const newId = finalAnimals.length > 0 ? Math.max(...finalAnimals.map(a => a.id)) + 100 : 100;
             const newBaby: Animal = {
@@ -5639,8 +5641,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             logsToAdd.push({ msg: `✂️ Tosquiador coletou +${woolCollected + bonus} lã(s)${bonus > 0 ? ' (lã premium!)' : ''} automaticamente!`, type: 'success' });
           }
           if (angoraCollected > 0) {
-            setInventory(prev => ({ ...prev, angora_wool: (prev.angora_wool ?? 0) + angoraCollected }));
-            logsToAdd.push({ msg: `🐇 Tosquiador coletou +${angoraCollected} lã angorá automaticamente!`, type: 'success' });
+            const angoraQty = angoraCollected * (specialization === 'fibras' ? 2 : 1);
+            setInventory(prev => ({ ...prev, angora_wool: (prev.angora_wool ?? 0) + angoraQty }));
+            logsToAdd.push({ msg: `🐇 Tosquiador coletou +${angoraQty} lã angorá automaticamente!`, type: 'success' });
           }
           if (llamaCollected > 0) {
             setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) + llamaCollected }));
