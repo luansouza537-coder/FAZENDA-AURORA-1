@@ -1071,6 +1071,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setShownMilestones([]);
     setVehicleTiers({});
     setCeleiroLevel(0); setCamaraFriaLevel(0);
+    craftEnergyRef.current = 0;
+    craftWaterRef.current = 0;
     triggerAudioResult(() => sfx.playSound('feed'));
   };
 
@@ -4325,7 +4327,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy + infraEnergy;
       const energyDiscount = solarLevel === 1 ? 0.4 : solarLevel === 2 ? 0.7 : solarLevel >= 3 ? 1.0 : 0;
       const energyCost = isWeeklyBillDay && machineEnergyCost > 0 ? Math.round(machineEnergyCost * (1 - energyDiscount)) : 0;
-      const craftEnergy = isWeeklyBillDay ? craftEnergyRef.current : 0;
+      const craftEnergy = isWeeklyBillDay ? Math.round(craftEnergyRef.current * (1 - energyDiscount)) : 0;
       const craftWater = isWeeklyBillDay ? craftWaterRef.current : 0;
       if (isWeeklyBillDay) { craftEnergyRef.current = 0; craftWaterRef.current = 0; }
       const totalWaterCost = waterCost + craftWater;

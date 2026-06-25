@@ -594,9 +594,9 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <p className="text-xs text-stone-500 font-mono mb-2">💡 Após compradas, as máquinas operam no final de cada dia com o interruptor <strong>LIGADO</strong>. Consomem energia (⚡) por dia.</p>
               {([
-                { key: 'milker' as const, emoji: '🥛', name: 'Ordenhadeira Automática', desc: 'Coleta automaticamente o leite de TODAS as vacas, cabras e ovelhas leiteiras produtoras ao final de cada dia.', cost: 2500, minLevel: 6, energy: 8, purchased: p.machines.milkerPurchased, active: p.machines.milkerActive },
-                { key: 'shearer' as const, emoji: '✂️', name: 'Tosquiadeira Elétrica', desc: 'Coleta automaticamente a lã de TODAS as ovelhas com lã madura no fim do dia.', cost: 2000, minLevel: 5, energy: 6, purchased: p.machines.shearerPurchased, active: p.machines.shearerActive },
-                { key: 'feeder' as const, emoji: '🌾', name: 'Alimentador Automático', desc: 'Alimenta TODOS os animais no final do dia. Consome ração do Armazém (1 unidade por animal).', cost: 1500, minLevel: 4, energy: 5, purchased: p.machines.feederPurchased, active: p.machines.feederActive },
+                { key: 'milker' as const, emoji: '🥛', name: 'Ordenhadeira Automática', desc: 'Coleta automaticamente o leite de TODAS as vacas, cabras e ovelhas leiteiras produtoras ao final de cada dia.', cost: 2500, minLevel: 6, energy: 27, purchased: p.machines.milkerPurchased, active: p.machines.milkerActive },
+                { key: 'shearer' as const, emoji: '✂️', name: 'Tosquiadeira Elétrica', desc: 'Coleta automaticamente a lã de TODAS as ovelhas com lã madura no fim do dia.', cost: 2000, minLevel: 5, energy: 21, purchased: p.machines.shearerPurchased, active: p.machines.shearerActive },
+                { key: 'feeder' as const, emoji: '🌾', name: 'Alimentador Automático', desc: 'Alimenta TODOS os animais no final do dia. Consome ração do Armazém (1 unidade por animal).', cost: 1500, minLevel: 4, energy: 15, purchased: p.machines.feederPurchased, active: p.machines.feederActive },
               ]).map(({ key, emoji, name, desc, cost, minLevel, energy, purchased, active }) => {
                 const levelOk = p.farmLevel >= minLevel;
                 const canBuy = !purchased && levelOk && p.gold >= cost;
