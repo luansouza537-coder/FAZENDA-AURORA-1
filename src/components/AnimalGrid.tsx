@@ -62,6 +62,8 @@ interface AnimalGridProps {
   collectBuffaloMilk: (id: number, e?: React.MouseEvent) => void;
   collectAlpacaWool: (id: number, e?: React.MouseEvent) => void;
   collectCoelhoWool: (id: number, e?: React.MouseEvent) => void;
+  collectBichoSeda: (id: number, e?: React.MouseEvent) => void;
+  feedBichoSeda: (id: number, e?: React.MouseEvent) => void;
   collectRa: (id: number, e?: React.MouseEvent) => void;
   collectAvestruzPena: (id: number, e?: React.MouseEvent) => void;
   sellAvestruz: (id: number, e?: React.MouseEvent) => void;
@@ -142,6 +144,8 @@ export default function AnimalGrid({
   collectBuffaloMilk,
   collectAlpacaWool,
   collectCoelhoWool,
+  collectBichoSeda,
+  feedBichoSeda,
   collectRa,
   collectAvestruzPena,
   sellAvestruz,
@@ -981,6 +985,8 @@ export default function AnimalGrid({
                         onCollectBuffaloMilk={collectBuffaloMilk}
                         onCollectAlpacaWool={collectAlpacaWool}
                         onCollectCoelhoWool={collectCoelhoWool}
+                        onCollectBichoSeda={collectBichoSeda}
+                        onFeedBichoSeda={feedBichoSeda}
                         onCollectRa={collectRa}
                         onCollectAvestruzPena={collectAvestruzPena}
                         onSellAvestruz={sellAvestruz}

@@ -97,7 +97,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
       <span className="font-black text-[#78350f] w-28 truncate text-xs uppercase">{animal.name}</span>
       {animal.isBestFriend && <span className="text-[9px] bg-pink-100 border border-pink-300 text-pink-700 font-black px-1.5 py-0.5 rounded-full">💖 Amigo</span>}
       {animal.isCampiao && <span className="text-[9px] bg-yellow-100 border border-yellow-300 text-yellow-800 font-black px-1.5 py-0.5 rounded-full">🏆</span>}
-      {animal.isAdult === false && !['minhoca', 'caracol'].includes(animal.type) && <span className="text-[9px] bg-blue-100 border border-blue-300 text-blue-700 font-black px-1.5 py-0.5 rounded-full">🍼 {Math.max(0, (animal.adulthoodDay ?? 0) - currentDay)}d</span>}
+      {animal.isAdult === false && !['minhoca', 'caracol', 'bicho_seda'].includes(animal.type) && <span className="text-[9px] bg-blue-100 border border-blue-300 text-blue-700 font-black px-1.5 py-0.5 rounded-full">🍼 {Math.max(0, (animal.adulthoodDay ?? 0) - currentDay)}d</span>}
       {animal.isSick && <span className="text-[9px] bg-red-100 border border-red-300 text-red-700 font-black px-1.5 py-0.5 rounded-full animate-pulse">🤒</span>}
       <div className="flex items-center gap-1 ml-auto">
         <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>
@@ -163,6 +163,8 @@ export interface AnimalCardProps {
   onCollectBuffaloMilk: (id: number, e: React.MouseEvent) => void;
   onCollectAlpacaWool: (id: number, e: React.MouseEvent) => void;
   onCollectCoelhoWool: (id: number, e: React.MouseEvent) => void;
+  onCollectBichoSeda: (id: number, e: React.MouseEvent) => void;
+  onFeedBichoSeda: (id: number, e: React.MouseEvent) => void;
   onCollectRa: (id: number, e: React.MouseEvent) => void;
   onCollectAvestruzPena: (id: number, e: React.MouseEvent) => void;
   onSellAvestruz: (id: number, e: React.MouseEvent) => void;
@@ -216,6 +218,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onCollectBuffaloMilk,
   onCollectAlpacaWool,
   onCollectCoelhoWool,
+  onCollectBichoSeda,
+  onFeedBichoSeda,
   onCollectRa,
   onCollectAvestruzPena,
   onSellAvestruz,
@@ -525,7 +529,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             </span>
           )}
           {/* Filhote badge */}
-          {!animal.isAdult && animal.adulthoodDay !== undefined && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (
+          {!animal.isAdult && animal.adulthoodDay !== undefined && !['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda'].includes(animal.type) && (
             <span
               className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-pink-100 border border-pink-400 text-pink-800 cursor-help"
               title={`Filhote: adulto no dia ${animal.adulthoodDay}`}
@@ -1417,6 +1421,24 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title={animal.woolReady ? 'Tosquiar coelho angorá' : 'Aguarde'}>
             <Scissors className="w-3.5 h-3.5" /> Tosquiar Coelho
+          </button>
+        )}
+
+        {/* Bicho-da-Seda: alimentar (fase Lagarta) */}
+        {animal.type === 'bicho_seda' && animal.age >= 3 && animal.age <= 12 && (
+          <button type="button" onClick={(e) => { e.preventDefault(); onFeedBichoSeda(animal.id, e); }}
+            className="rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none bg-green-600 hover:bg-green-500 border-b-4 border-green-800 shadow-md active:translate-y-0.5 hover:scale-[1.02]"
+            title="Alimentar lagarta com folha de amoreira">
+            🌿 Alimentar Lagarta
+          </button>
+        )}
+
+        {/* Bicho-da-Seda: coletar seda (fase Casulo) */}
+        {animal.type === 'bicho_seda' && animal.age >= 13 && animal.age <= 16 && (
+          <button type="button" onClick={(e) => { e.preventDefault(); onCollectBichoSeda(animal.id, e); }} disabled={!animal.woolReady}
+            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-amber-600 hover:bg-amber-500 border-b-4 border-amber-800 shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+            title={animal.woolReady ? 'Coletar seda bruta do casulo' : 'Casulo ainda não está pronto'}>
+            🧵 Coletar Seda
           </button>
         )}
 

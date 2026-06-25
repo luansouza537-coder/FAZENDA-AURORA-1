@@ -2102,6 +2102,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     collectWool,
     collectAlpacaWool,
     collectCoelhoWool,
+    collectBichoSeda,
+    feedBichoSeda,
     collectRa,
     collectAvestruzPena,
     sellAvestruz,
@@ -3154,6 +3156,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (bichoPhase === 'lagarta' && copy.hunger <= 0) {
           copy.happiness = Math.max(0, copy.happiness - 30);
           logs.push({ msg: `🐛 ${copy.name} (bicho-da-seda) está sem folha de amoreira! -30 felicidade!`, type: 'error' });
+        }
+        // Seta woolReady no 1º dia do Casulo (age === 13) para coleta manual
+        if (copy.age === 13 && !copy.woolReady) {
+          copy.woolReady = true;
+          logs.push({ msg: `🫙 ${copy.name} formou casulo! Clique para coletar a seda bruta.`, type: 'success' });
         }
       }
       else if (copy.type === 'ra') {
@@ -4584,24 +4591,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
         }
 
-        // Bicho-da-seda: ciclo de 20 dias com fases (ovo→lagarta→casulo→mariposa)
-        if (a.type === 'bicho_seda') {
-          const hasSericicultor = workers.some(w => w.role === 'sericicultor');
-          // Produz seda no 1º dia da fase Casulo (age === 13)
-          if (a.age === 13) {
-            const sedaQty = hasSericicultor ? 6 : 5;
-            setTimeout(() => {
-              setInventory(prev => {
-                const newTotal = (prev.seda_bruta ?? 0) + sedaQty;
-                if (newTotal >= 10) checkAndUnlockAchievement('silk_producer');
-                return { ...prev, seda_bruta: newTotal };
-              });
-              setStats(prev => ({ ...prev, totalSilk: (prev.totalSilk || 0) + sedaQty }));
-            }, 0);
-            logsToAdd.push({ msg: `🫙 ${a.name} (bicho-da-seda) formou casulo e produziu ${sedaQty} seda bruta!`, type: 'success' });
-            updateMissionProgress('collect_silk', sedaQty, nextDayValue);
-          }
-        }
+        // Bicho-da-seda: woolReady setado no processarFomeFelicidade (age===13) — coleta é manual
 
         // Codorna: produz quail_egg diariamente se hasProducedToday
         // (production set in processarFomeFelicidade, collected here)
@@ -4934,7 +4924,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               consecutiveHappyDays: 0,
               daysBelow80: 0,
               isBestFriend: false,
-              trait: getRandomTrait(),
+              isAdult: true,
               age: 0,
               maxAge: 20,
               daysUntilWool: 0,
@@ -6875,6 +6865,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             collectBuffaloMilk={collectBuffaloMilk}
             collectAlpacaWool={collectAlpacaWool}
             collectCoelhoWool={collectCoelhoWool}
+            collectBichoSeda={collectBichoSeda}
+            feedBichoSeda={feedBichoSeda}
             collectRa={collectRa}
             collectAvestruzPena={collectAvestruzPena}
             sellAvestruz={sellAvestruz}

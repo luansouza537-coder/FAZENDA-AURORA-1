@@ -904,6 +904,45 @@ export function useAnimals({
     onItemCollected?.(qty);
   };
 
+  // Collect Bicho-da-Seda silk (manual, fase Casulo)
+  const collectBichoSeda = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'bicho_seda') return;
+    if (!animal.woolReady) { addLog(`🫙 ${animal.name} ainda não formou casulo!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
+    const qty = specialization === 'fibras' ? 6 : 5;
+    setInventory(prev => {
+      const newTotal = (prev.seda_bruta ?? 0) + qty;
+      if (newTotal >= 10) checkAndUnlockAchievement?.('silk_producer');
+      return { ...prev, seda_bruta: newTotal };
+    });
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, woolReady: false } : a));
+    setStats(prev => ({ ...prev, totalSilk: (prev.totalSilk || 0) + qty }));
+    addLog(`🧵 ${animal.name} (bicho-da-seda) coletado! +${qty} seda bruta.`, 'success');
+    setFarmXp(prev => prev + qty);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧵', `+${qty} Seda Bruta`, event);
+    updateMissionProgress('collect_silk', qty);
+    onItemCollected?.(qty);
+  };
+
+  // Feed Bicho-da-Seda manually with folha_amoreira (fase Lagarta)
+  const feedBichoSeda = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'bicho_seda') return;
+    if ((inventory.folha_amoreira ?? 0) <= 0) {
+      addLog('🌿 Sem folha de amoreira no estoque!', 'error');
+      spawnFeedback('❌', 'Sem folha', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, folha_amoreira: (prev.folha_amoreira ?? 0) - 1 }));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, hunger: Math.min(100, a.hunger + 20), happiness: Math.min(100, a.happiness + 5) } : a));
+    addLog(`🌿 ${animal.name} alimentado com folha de amoreira!`, 'success');
+    triggerAudioResult(() => sfx.playSound('feed'));
+    spawnFeedback('🌿', '+5 Felicidade', event);
+  };
+
   // Collect Coelho Angorá Wool
   const collectCoelhoWool = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -1189,7 +1228,7 @@ export function useAnimals({
       consecutiveHappyDays: 0,
       daysBelow80: 0,
       isBestFriend: false,
-      trait: getRandomTrait(),
+      trait: type === 'bicho_seda' ? undefined : getRandomTrait(),
       age: 0,
       maxAge,
       isAdult: true,
@@ -1380,6 +1419,8 @@ export function useAnimals({
     collectWool,
     collectAlpacaWool,
     collectCoelhoWool,
+    collectBichoSeda,
+    feedBichoSeda,
     collectRa,
     collectAvestruzPena,
     sellAvestruz,
