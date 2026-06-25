@@ -410,7 +410,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
           {/* Animal Badge */}
           <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? '🐛 Bicho-da-Seda' : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
+            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
           {animal.trait && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (() => {
@@ -665,7 +665,11 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
               </>
             )}
-            {animal.type === 'bicho_seda' && <span className="select-none">🐛</span>}
+            {animal.type === 'bicho_seda' && (() => {
+              const phase = animal.age <= 2 ? 'ovo' : animal.age <= 12 ? 'lagarta' : animal.age <= 16 ? 'casulo' : 'mariposa';
+              const phaseEmoji = phase === 'ovo' ? '🥚' : phase === 'lagarta' ? '🐛' : phase === 'casulo' ? '🫙' : '🦋';
+              return <span className="select-none">{phaseEmoji}</span>;
+            })()}
             {animal.type === 'ra' && (
               <>
                 <span className="select-none">🐸</span>

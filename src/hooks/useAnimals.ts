@@ -215,6 +215,14 @@ export function useAnimals({
     return 0;
   });
 
+  const [bichoSedaReproCount, setBichoSedaReproCount] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) { const parsed = JSON.parse(saved); return parsed.bichoSedaReproCount ?? 0; }
+    } catch (e) {}
+    return 0;
+  });
+
   // --- FUNCIONALIDADE 2: Traits dos animais ---
   const TRAITS_LIST: AnimalTrait[] = ['gulosa', 'preguicosa', 'feliz', 'estressada', 'saudavel', 'trabalhadora'];
   const getRandomTrait = (): AnimalTrait => TRAITS_LIST[Math.floor(Math.random() * TRAITS_LIST.length)];
@@ -1167,7 +1175,7 @@ export function useAnimals({
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80
 
     // F1: maxAge por tipo com variação ±20%
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = type === 'colmeia_abelhas' ? 1 : 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -1293,7 +1301,7 @@ export function useAnimals({
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
     const name = type === 'boi' ? getUniqueOxName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : getRandomName(type);
     const happiness = Math.floor(Math.random() * 21) + 60;
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -1348,6 +1356,8 @@ export function useAnimals({
     setLicencaExotica,
     coelhoReproCount,
     setCoelhoReproCount,
+    bichoSedaReproCount,
+    setBichoSedaReproCount,
     // Functions
     getRandomTrait,
     getTraitInfo,

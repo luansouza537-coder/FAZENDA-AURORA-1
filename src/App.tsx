@@ -858,6 +858,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setEpidemicPrevented(false);
     setMerchantSpecialItems([]);
     setCoelhoReproCount(0);
+    setBichoSedaReproCount(0);
     setHasStable(false);
     setHasSilo(false);
     setHasFridge(false);
@@ -2080,6 +2081,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setLicencaExotica,
     coelhoReproCount,
     setCoelhoReproCount,
+    bichoSedaReproCount,
+    setBichoSedaReproCount,
     getRandomTrait,
     getTraitInfo,
     getAnimalFeedType,
@@ -2592,6 +2595,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         droughtDaysRemaining,
         licencaExotica,
         coelhoReproCount,
+        bichoSedaReproCount,
         racaoOrganicaDays,
         fertilizanteDays,
         prestigePoints,
@@ -3145,11 +3149,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
       else if (copy.type === 'bicho_seda') {
-        // bicho_seda: consumes folha_amoreira (handled in advanceDay)
-        // here just decay happiness if no folha_amoreira was available (tracked via hunger proxy — we use hunger=0 signal)
-        // hunger stays 100 if folha_amoreira was provided, else -30 set in advanceDay
-        copy.daysWithoutFood = 0; // reset so it won't die of daysWithoutFood (we handle separately)
-        if (copy.hunger <= 0) {
+        copy.daysWithoutFood = 0;
+        const bichoPhase = copy.age <= 2 ? 'ovo' : copy.age <= 12 ? 'lagarta' : copy.age <= 16 ? 'casulo' : 'mariposa';
+        if (bichoPhase === 'lagarta' && copy.hunger <= 0) {
           copy.happiness = Math.max(0, copy.happiness - 30);
           logs.push({ msg: `🐛 ${copy.name} (bicho-da-seda) está sem folha de amoreira! -30 felicidade!`, type: 'error' });
         }
@@ -3358,13 +3360,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     { catalogId: 'lc_34', client: 'Restaurante Flor da Serra', product: 'coxa_ra' as const, description: 'Restaurante de culinária regional premiado pelo guia gastronômico estadual. A coxa de rã grelhada com manteiga de ervas é o prato mais pedido do cardápio de degustação. O chef fez questão de incluir proteína exótica local como diferencial competitivo — e os clientes adoraram. O volume é pequeno, mas o preço pago por unidade está entre os mais altos que você vai encontrar.', baseMarket: 110, pricePerUnit: 158, weeklyGoal: 3, durationDays: 120, minLevel: 10, completionBonus: 1200, completionXP: 110 },
     // --- Nível 11 ---
     // --- Nível 12 ---
-    { catalogId: 'lc_38', client: 'Indústria Têxtil Fio Nobre', product: 'fio_seda' as const, description: 'Indústria têxtil de médio porte especializada em tecidos premium para o mercado de moda nacional. O fio de seda artesanal é a matéria-prima mais nobre do catálogo deles — usado em lenços, forros de ternos e coleções de noiva. Eles já importavam da Ásia, mas descobriram que a seda produzida aqui tem brilho e espessura superiores. Querem produção nacional, rastreável, com fornecimento garantido por seis meses.', baseMarket: 200, pricePerUnit: 285, weeklyGoal: 3, durationDays: 180, minLevel: 12, completionBonus: 3300, completionXP: 275 },
     // --- Nível 13 ---
     { catalogId: 'lc_22', client: 'Spa Monte Alegre', product: 'buffalo_mozzarella' as const, description: 'Spa e retiro de bem-estar que serve gastronomia funcional aos hóspedes. A mozzarella de búfala fresca é peça central do menu mediterrâneo — rica em proteína, leve e com sabor inconfundível. O spa tem lista de espera de três meses e não pode comprometer a qualidade do que serve.', baseMarket: 120, pricePerUnit: 170, weeklyGoal: 3, durationDays: 180, minLevel: 13, completionBonus: 2000, completionXP: 230 },
     { catalogId: 'lc_36', client: 'Restaurante Alto Pantanal', product: 'carne_avestruz' as const, description: 'Restaurante temático de culinária pantaneira que serve proteínas incomuns como diferencial gastronômico. A carne de avestruz entra no cardápio como filé magro, steak e carpaccio — vermelha como a bovina, mas muito mais saudável. O chef faz questão de explicar a origem de cada ingrediente para os clientes. Eles procuram fornecedor certificado que entregue animais com peso e qualidade constantes.', baseMarket: 220, pricePerUnit: 310, weeklyGoal: 2, durationDays: 150, minLevel: 13, completionBonus: 2000, completionXP: 165 },
     { catalogId: 'lc_37', client: 'Grife Savana Couros', product: 'couro_avestruz' as const, description: 'Grife brasileira de bolsas e acessórios de luxo que usa couros exóticos certificados. O couro de avestruz tem textura inconfundível — os folículos visíveis são a assinatura do material — e é extremamente resistente para o peso que tem. Cada peça da coleção é numerada e vendida em lojas próprias em São Paulo e no Rio. O volume é baixo, mas o valor por unidade é um dos mais altos do mercado nacional de couro.', baseMarket: 300, pricePerUnit: 425, weeklyGoal: 2, durationDays: 150, minLevel: 13, completionBonus: 2730, completionXP: 225 },
     // --- Nível 14 ---
-    { catalogId: 'lc_23', client: 'Exportadora Premium Aurora', product: 'seda_bruta' as const, description: 'Uma empresa têxtil internacional descobriu os produtos da sua fazenda e quer fornecimento exclusivo por seis meses. A seda bruta segue para processamento na Europa e entra em coleções de moda de luxo. É o maior contrato da sua carreira — e o mundo inteiro vai saber que a seda veio daqui.', baseMarket: 100, pricePerUnit: 145, weeklyGoal: 5, durationDays: 180, minLevel: 14, completionBonus: 2800, completionXP: 280 },
     // --- Nível 15 ---
     { catalogId: 'lc_24', client: 'Frigorífico Vale Verde', product: 'boi' as const, description: 'O maior frigorífico da região, com capacidade de processar centenas de cabeças por mês e clientes em redes de supermercados de cinco estados. Eles exigem regularidade absoluta: seis bois por mês, sem exceções. Cada trimestre cumprido gera bônus de fidelidade crescente. Quem entra nesse contrato entra no mercado de verdade.', baseMarket: 300, pricePerUnit: 420, weeklyGoal: 6, durationDays: 210, minLevel: 15, completionBonus: 3000, completionXP: 250, cycleType: 'monthly' as const, cycleLengthDays: 28 },
     // --- Nível 16 ---
@@ -4584,19 +4584,22 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
         }
 
-        // Bicho-da-seda: a cada 10 dias produz 3 seda_bruta; consome 1 folha_amoreira/dia
+        // Bicho-da-seda: ciclo de 20 dias com fases (ovo→lagarta→casulo→mariposa)
         if (a.type === 'bicho_seda') {
-          if ((a.age || 0) > 0 && (a.age || 0) % 10 === 0) {
+          const hasSericicultor = workers.some(w => w.role === 'sericicultor');
+          // Produz seda no 1º dia da fase Casulo (age === 13)
+          if (a.age === 13) {
+            const sedaQty = hasSericicultor ? 6 : 5;
             setTimeout(() => {
               setInventory(prev => {
-                const newTotal = (prev.seda_bruta ?? 0) + 3;
+                const newTotal = (prev.seda_bruta ?? 0) + sedaQty;
                 if (newTotal >= 10) checkAndUnlockAchievement('silk_producer');
                 return { ...prev, seda_bruta: newTotal };
               });
-              setStats(prev => ({ ...prev, totalSilk: (prev.totalSilk || 0) + 3 }));
+              setStats(prev => ({ ...prev, totalSilk: (prev.totalSilk || 0) + sedaQty }));
             }, 0);
-            logsToAdd.push({ msg: `🐛 ${a.name} (bicho-da-seda) produziu 3 seda bruta!`, type: 'success' });
-            updateMissionProgress('collect_silk', 3, nextDayValue);
+            logsToAdd.push({ msg: `🫙 ${a.name} (bicho-da-seda) formou casulo e produziu ${sedaQty} seda bruta!`, type: 'success' });
+            updateMissionProgress('collect_silk', sedaQty, nextDayValue);
           }
         }
 
@@ -4789,18 +4792,19 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       // --- NOVOS ANIMAIS: Produções e Mecânicas Diárias ---
 
-      // Bicho-da-seda: consome 1 folha_amoreira por bicho_seda por dia
+      // Bicho-da-seda: consome 1 folha_amoreira por lagarta por dia (apenas fase Lagarta, dias 3–12)
       {
-        const bichoCount = finalAnimals.filter(a => a.type === 'bicho_seda').length;
-        if (bichoCount > 0) {
+        const hasSericicultor = workers.some(w => w.role === 'sericicultor');
+        const lagartas = finalAnimals.filter(a => a.type === 'bicho_seda' && a.age >= 3 && a.age <= 12);
+        const lagaraCount = lagartas.length;
+        if (lagaraCount > 0 && !hasSericicultor) {
           setInventory(prev => {
             const available = prev.folha_amoreira ?? 0;
-            if (available >= bichoCount) {
-              return { ...prev, folha_amoreira: available - bichoCount };
+            if (available >= lagaraCount) {
+              return { ...prev, folha_amoreira: available - lagaraCount };
             } else {
-              // not enough folha: bichos lose hunger (signal: set hunger=0 on those without food)
-              const missing = bichoCount - available;
-              logsToAdd.push({ msg: `🐛 Faltaram ${missing} folha(s) de amoreira! Bichos-da-seda passando fome!`, type: 'error' });
+              const missing = lagaraCount - available;
+              logsToAdd.push({ msg: `🐛 Faltaram ${missing} folha(s) de amoreira! Lagartas passando fome!`, type: 'error' });
               return { ...prev, folha_amoreira: 0 };
             }
           });
@@ -4909,17 +4913,52 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
 
+      // Bicho-da-seda: reprodução na fase Mariposa (age === 17)
+      {
+        const hasSericicultor = workers.some(w => w.role === 'sericicultor');
+        const mariposas = finalAnimals.filter(a => a.type === 'bicho_seda' && a.age === 17);
+        mariposas.forEach(m => {
+          const chance = hasSericicultor ? 0.70 : 0.40;
+          if (Math.random() < chance && bichoSedaReproCount < 3) {
+            const newId = finalAnimals.length > 0 ? Math.max(...finalAnimals.map(a => a.id)) + 101 : 101;
+            const newBicho: Animal = {
+              id: newId,
+              type: 'bicho_seda',
+              name: getRandomName('bicho_seda'),
+              hunger: 100,
+              happiness: 90,
+              consecutiveHappyDays: 0,
+              daysBelow80: 0,
+              isBestFriend: false,
+              trait: getRandomTrait(),
+              age: 0,
+              maxAge: 20,
+              daysUntilWool: 0,
+              daysSinceLastWool: 0,
+              woolReady: false,
+            };
+            setAnimals(prev => [...prev, newBicho]);
+            setBichoSedaReproCount(prev => prev + 1);
+            logsToAdd.push({ msg: `🦋 ${m.name} virou mariposa e pôs ovos! Um novo bicho-da-seda chegou à fazenda!`, type: 'success' });
+          }
+        });
+      }
+
       // --- LAYER 0: Migração de nomes legados + limpeza de filhotes de reprodução removida ---
       const migratedAnimals = finalAnimalsWithClimate
         .filter(a => !(a.type === 'minhoca' && a.isAdult === false))
         .map(a => {
           if (a.type === 'minhoca' && a.name !== 'Minhocário') return { ...a, name: 'Minhocário' };
           if (a.type === 'caracol' && a.name !== 'Criatório de Caracóis') return { ...a, name: 'Criatório de Caracóis' };
+          // Migração: bicho_seda com maxAge 60 → 20 (apenas se ainda dentro do novo ciclo)
+          if (a.type === 'bicho_seda' && a.maxAge === 60) {
+            return a.age <= 20 ? { ...a, maxAge: 20 } : a;
+          }
           return a;
         });
 
       // --- LAYER 1: Filhotes atingindo maturidade ---
-      const baseMaxAgeMapAdult: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 60, ra: 120, avestruz: 365, jacare: 400 };
+      const baseMaxAgeMapAdult: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400 };
       const finalAnimalsWithAdulthood: Animal[] = migratedAnimals.map(a => {
         if (!a.isAdult && a.adulthoodDay !== undefined && nextDayValue >= a.adulthoodDay) {
           logsToAdd.push({ msg: `🎉 ${a.name} cresceu e se tornou adulto! Pronto para produzir!`, type: 'success' });
@@ -6119,7 +6158,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     else if (type === 'caracol') revenue = getItemBaseSellPrice('muco') / 3;
     else if (type === 'colmeia_abelhas') revenue = getItemBaseSellPrice('mel') / 3; // avg cycle ~3 days
     else if (type === 'coelho_angora') revenue = getItemBaseSellPrice('angora_wool') / 5;
-    else if (type === 'bicho_seda') revenue = getItemBaseSellPrice('seda_bruta') * 3 / 10;
+    else if (type === 'bicho_seda') revenue = getItemBaseSellPrice('seda_bruta') * 5 / 20;
     else if (type === 'ra') revenue = getItemBaseSellPrice('coxa_ra') / 7;
     else if (type === 'avestruz') revenue = getItemBaseSellPrice('carne_avestruz') / 30;
     else if (type === 'jacare') revenue = getItemBaseSellPrice('carne_jacare') / 60; // very long term
