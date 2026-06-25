@@ -4798,16 +4798,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const lagartas = finalAnimals.filter(a => a.type === 'bicho_seda' && a.age >= 3 && a.age <= 12);
         const lagaraCount = lagartas.length;
         if (lagaraCount > 0 && !hasSericicultor) {
-          setInventory(prev => {
-            const available = prev.folha_amoreira ?? 0;
-            if (available >= lagaraCount) {
-              return { ...prev, folha_amoreira: available - lagaraCount };
-            } else {
-              const missing = lagaraCount - available;
-              logsToAdd.push({ msg: `🐛 Faltaram ${missing} folha(s) de amoreira! Lagartas passando fome!`, type: 'error' });
-              return { ...prev, folha_amoreira: 0 };
-            }
-          });
+          const available = inventory.folha_amoreira ?? 0;
+          if (available >= lagaraCount) {
+            setInventory(prev => ({ ...prev, folha_amoreira: (prev.folha_amoreira ?? 0) - lagaraCount }));
+          } else {
+            const missing = lagaraCount - available;
+            logsToAdd.push({ msg: `🐛 Faltaram ${missing} folha(s) de amoreira! Lagartas passando fome!`, type: 'error' });
+            setInventory(prev => ({ ...prev, folha_amoreira: 0 }));
+            // Seta hunger=0 nas lagartas sem folha (sinaliza penalidade de -30 felicidade no processarFomeFelicidade)
+            const lagaraIds = new Set(lagartas.map(l => l.id));
+            setAnimals(prev => prev.map(a => lagaraIds.has(a.id) ? { ...a, hunger: 0 } : a));
+          }
         }
       }
 
@@ -4917,10 +4918,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       {
         const hasSericicultor = workers.some(w => w.role === 'sericicultor');
         const mariposas = finalAnimals.filter(a => a.type === 'bicho_seda' && a.age === 17);
+        const baseId = finalAnimals.length > 0 ? Math.max(...finalAnimals.map(a => a.id)) : 0;
+        let reproOffset = 0;
         mariposas.forEach(m => {
           const chance = hasSericicultor ? 0.70 : 0.40;
           if (Math.random() < chance && bichoSedaReproCount < 3) {
-            const newId = finalAnimals.length > 0 ? Math.max(...finalAnimals.map(a => a.id)) + 101 : 101;
+            const newId = baseId + 101 + reproOffset;
+            reproOffset += 1;
             const newBicho: Animal = {
               id: newId,
               type: 'bicho_seda',

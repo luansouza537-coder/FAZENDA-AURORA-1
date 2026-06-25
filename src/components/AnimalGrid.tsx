@@ -613,9 +613,9 @@ export default function AnimalGrid({
                   {/* Bicho-da-Seda (Nível 10+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 10 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv10+</span>}
-                    <span className="text-4xl">🐛</span>
+                    <span className="text-4xl">🥚</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Bicho-da-Seda</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">3 seda bruta (80💰/u) a cada 14 dias. Processe em Fio de Seda 200💰! Requer folha de amoreira diária.</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Ciclo de 20 dias: Ovo🥚 → Lagarta🐛 → Casulo🫙 → Mariposa🦋. Produz 5 seda bruta (100💰/u) na fase Casulo. Folha de amoreira necessária na fase Lagarta. Pode gerar novos bichos ao virar mariposa!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('bicho_seda')}</span>
                     <button type="button" onClick={(e) => buyAnimal('bicho_seda', e)} disabled={gold < getAnimalPurchasePrice('bicho_seda') || farmLevel < 10}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
