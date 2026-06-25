@@ -1366,7 +1366,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         })()}
 
         {/* Coletar Leite de Búfala */}
-        {animal.type === 'bufalo' && (
+        {animal.type === 'bufalo' && animal.isAdult !== false && (
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); onCollectBuffaloMilk(animal.id, e); }}
