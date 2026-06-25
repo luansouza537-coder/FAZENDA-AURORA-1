@@ -303,7 +303,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                   return (
                     <button key={lvl} disabled={p.irrigationLevel >= lvl || !canBuy}
                       onClick={() => { if (canBuy) { p.setGold(prev => prev - price); p.setIrrigationLevel(lvl); p.setLastUpgradeDay(p.currentDay); p.addLog(`🌊 Irrigação nível ${lvl} instalada!`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }}
-                      className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${p.irrigationLevel >= lvl ? 'bg-cyan-100 border-cyan-300 text-cyan-700' : canBuy ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                      className={`text-xs font-mono font-black py-2 px-2 rounded-xl border-b-2 transition-all cursor-pointer ${p.irrigationLevel >= lvl ? 'bg-blue-100 border-blue-300 text-blue-700' : canBuy ? 'bg-blue-500 hover:bg-blue-400 text-white border-blue-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                     >
                       {p.irrigationLevel >= lvl ? `✅ Nv${lvl}` : p.irrigationLevel < lvl - 1 || requiresFarmLevel12 ? `🔒 Nv${lvl}` : `Nv${lvl} (${price.toLocaleString()}💰)`}
                     </button>
@@ -367,7 +367,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                         {!levelOk && <div className="text-[10px] text-red-500 font-mono">🔒 Requer Nível {minLevel}</div>}
                       </div>
                       <button disabled={!canBuy} onClick={() => { if (!canBuy) return; p.setGold(prev => prev - price); p.setCamaraFriaLevel(level); p.addLog(`❄️ ${label} instalada! Capacidade de refrigeração ampliada.`, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); }}
-                        className={`shrink-0 text-[10px] font-black uppercase px-2 py-1.5 rounded-xl border-b-2 cursor-pointer transition-all ${purchased ? 'bg-sky-100 border-sky-300 text-sky-700 cursor-not-allowed' : canBuy ? 'bg-sky-500 hover:bg-sky-400 text-white border-sky-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}>
+                        className={`shrink-0 text-[10px] font-black uppercase px-2 py-1.5 rounded-xl border-b-2 cursor-pointer transition-all ${purchased ? 'bg-blue-100 border-blue-300 text-blue-700 cursor-not-allowed' : canBuy ? 'bg-blue-500 hover:bg-blue-400 text-white border-blue-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}>
                         {purchased ? '✅' : `${price.toLocaleString()}💰`}
                       </button>
                     </div>
@@ -650,7 +650,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                                   p.addLog(`⚙️ Máquina melhorada para Nv${lvl + 1}!`, 'success');
                                   p.triggerAudioResult(() => p.sfx.playSound('levelup'));
                                 }}
-                                className={`text-[10px] font-mono font-black py-1 px-2 rounded-lg border-b-2 transition-all cursor-pointer ${canUpg ? 'bg-cyan-500 hover:bg-cyan-400 text-white border-cyan-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                                className={`text-[10px] font-mono font-black py-1 px-2 rounded-lg border-b-2 transition-all cursor-pointer ${canUpg ? 'bg-blue-500 hover:bg-blue-400 text-white border-blue-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                                 title={`Nível atual: ${lvl}/3 (${pctLabel})`}
                               >
                                 ⚙️ Nv{lvl}→{lvl+1} ({upgCost.toLocaleString()}💰)

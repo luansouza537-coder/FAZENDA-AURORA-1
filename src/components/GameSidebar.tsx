@@ -85,7 +85,7 @@ export default function GameSidebar({
 
               {/* Toggle mostrar vazios */}
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] text-[#92400e] font-mono font-bold uppercase tracking-wider">Estoque</span>
+                <span className="text-xs text-[#92400e] font-mono font-bold uppercase tracking-wider">Estoque</span>
                 <button
                   onClick={() => setShowEmptyItems(prev => !prev)}
                   className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-lg border transition-all ${showEmptyItems ? 'bg-amber-200 border-amber-400 text-amber-900' : 'bg-stone-100 border-stone-300 text-stone-600'}`}
@@ -169,7 +169,7 @@ export default function GameSidebar({
                       if (visibleItems.length === 0) return null;
                       return (
                         <div key={group.title}>
-                          <div className={`text-[10px] font-black uppercase tracking-wider text-[#78350f] mb-1.5 border-b border-[#fbbf24]/40 pb-0.5`}>{group.title}</div>
+                          <div className={`text-xs font-black uppercase tracking-wider text-[#78350f] mb-1.5 border-b border-[#fbbf24]/40 pb-0.5`}>{group.title}</div>
                           <div className="grid grid-cols-2 gap-1.5">
                             {visibleItems.map(item => {
                               const trend = item.priceKey ? getPriceTrend(item.priceKey) : null;
@@ -229,7 +229,7 @@ export default function GameSidebar({
 
               {/* Advanced Refining/Manufaturing recipes — removido: toda produção centralizada no Ateliê */}
               <div className="space-y-3 border-t border-dashed border-[#fbbf24]/50 pt-3">
-                <h4 className="text-[11px] font-sans font-black uppercase text-[#92400e] tracking-wider pt-2 mb-2">Vendas Diretas p/ a Feira:</h4>
+                <h4 className="text-xs font-sans font-black uppercase text-[#92400e] tracking-wider pt-2 mb-2">Vendas Diretas p/ a Feira:</h4>
 
                 <div className="grid grid-cols-2 gap-2">
                   {inventory.milk > 0 && (

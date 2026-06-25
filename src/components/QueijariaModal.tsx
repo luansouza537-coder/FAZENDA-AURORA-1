@@ -181,7 +181,7 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
           {atelieTab === 'queijaria' && (
             <div className="bg-[#fef3c7] px-6 py-3 border-b-2 border-yellow-200 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono">
               <div className="text-xs text-[#78350f] leading-relaxed">
-                📦 <strong>Prateleiras:</strong> <span className="bg-[#f59e0b]/20 px-2 py-0.5 rounded-md font-bold text-amber-900">{queijosEmMaturacao.length} / {maxPrateleiras} ocupadas</span>
+                📦 <strong>Prateleiras:</strong> <span className="bg-[#f59e0b]/20 px-2 py-0.5 rounded-md font-bold text-[#78350f]">{queijosEmMaturacao.length} / {maxPrateleiras} ocupadas</span>
                 {racaoOrganicaDays > 0 && <span className="ml-2 text-green-700 font-bold">🌿 Ração Orgânica: {racaoOrganicaDays}d</span>}
                 {fertilizanteDays > 0 && <span className="ml-2 text-emerald-700 font-bold">🌱 Fertilizante: {fertilizanteDays}d</span>}
               </div>
@@ -256,7 +256,7 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                         <div className="flex items-center gap-2">
                           <span className="text-2xl">{r.emoji}</span>
                           <div>
-                            <div className="font-display font-black text-xs uppercase text-amber-900 flex items-center gap-1">
+                            <div className="font-display font-black text-xs uppercase text-[#78350f] flex items-center gap-1">
                               {r.label}
                               {farmLevel < r.reqLevel && <span className="text-[8px] bg-stone-400 text-white px-1 py-0.5 rounded">🔒 Nv{r.reqLevel}+</span>}
                             </div>

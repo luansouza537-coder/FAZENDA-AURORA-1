@@ -32,11 +32,11 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
           onClick={(e) => e.stopPropagation()}
           className="bg-[#064e3b] border-8 border-[#fbbf24] rounded-[36px] max-w-lg w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
         >
-          <div className="bg-[#065f46] p-5 border-b-4 border-[#fbbf24] text-center shrink-0">
+          <div className="bg-gradient-to-r from-[#065f46] to-emerald-800 p-5 border-b-4 border-emerald-950 text-center shrink-0">
             <h3 className="text-[#fef3c7] text-xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
               👷 Funcionários da Fazenda
             </h3>
-            <p className="text-[#fbbf24] text-[11px] font-mono font-bold uppercase tracking-widest mt-0.5">
+            <p className="text-[#fbbf24] text-xs font-mono font-bold uppercase tracking-widest mt-0.5">
               Vagas: {workers.length}/{farmLevel} • 1 vaga por nível • Salário semanal
             </p>
             <button onClick={onClose} className="absolute top-4 right-4 text-[#fef3c7] bg-[#022c22] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-lg font-bold">✕</button>
@@ -127,7 +127,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                 const levelOk = farmLevel >= wt.minLevel;
                 const canHire = !atRoleMax && !atMax && levelOk;
                 return (
-                  <div key={wt.role} className={`bg-[#065f46] border-2 rounded-2xl p-4 transition-all ${alreadyHired ? 'border-[#10b981]' : levelOk ? 'border-[#fbbf24]/50' : 'border-[#fbbf24]/15 opacity-60'}`}>
+                  <div key={wt.role} className={`bg-[#065f46] border-2 rounded-2xl p-4 transition-all ${alreadyHired ? 'border-[#10b981]' : levelOk ? 'border-[#fbbf24]/50' : 'border-[#fbbf24]/15 opacity-40'}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
