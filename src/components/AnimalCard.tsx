@@ -925,7 +925,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 })()}
               </>
             )}
-            {animal.type === 'bufalo' && (
+            {animal.type === 'bufalo' && animal.isAdult !== false && (
               <>
                 {animal.hasProducedToday ? (
                   <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">

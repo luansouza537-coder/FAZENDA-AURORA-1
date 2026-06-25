@@ -688,6 +688,11 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'bufalo') return;
 
+    if (animal.isAdult === false) {
+      addLog(`🐃 ${animal.name} ainda é um filhote — não produz leite!`, 'error');
+      spawnFeedback('🔴', 'Filhote', event);
+      return;
+    }
     if (animal.isLactating === false) {
       addLog(`🐃 ${animal.name} está no período seco — volta a lactar em breve!`, 'error');
       spawnFeedback('🔴', 'Período Seco', event);
@@ -699,14 +704,13 @@ export function useAnimals({
       return;
     }
 
-    const filhoteMultiplier = animal.isAdult === false ? 0.5 : 1.0;
     const currentSeason = Math.floor(((currentDay - 1) % 120) / 30);
     let qty = 3;
     if (currentSeason === 1 || animal.heatStress) qty = 2; // Summer heat stress
 
     if (animal.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
-    qty = Math.max(1, Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0) * filhoteMultiplier));
+    qty = Math.max(1, Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0)));
 
     setInventory(prev => ({ ...prev, buffalo_milk: (prev.buffalo_milk ?? 0) + qty }));
     // BUG FIX: reseta frescor ao coletar leite de búfala fresco
