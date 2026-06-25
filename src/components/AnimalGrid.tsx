@@ -231,6 +231,7 @@ export default function AnimalGrid({
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     <span className="text-4xl">🐄</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Vaca Leiteira</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite fresco 22💰/u todo dia. A base de toda fazenda próspera!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('vaca')}</span>
                     <div className="relative w-full">
                       {farmLevel >= 4 && (
@@ -261,6 +262,7 @@ export default function AnimalGrid({
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     <span className="text-4xl">🐑</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Ovelha de Lã</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã a cada 3 dias 20💰/u. Rende cachecol 85💰 se processada!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('ovelha')}</span>
                     <div className="relative w-full">
                       {farmLevel >= 4 && (
@@ -291,6 +293,7 @@ export default function AnimalGrid({
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     <span className="text-4xl">🐂</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Boi de Corte</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Engorda diariamente e vale até 300💰 na Feira! Quanto mais gordo, mais rico.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('boi')}</span>
                     <div className="relative w-full">
                       {farmLevel >= 4 && (
@@ -324,6 +327,7 @@ export default function AnimalGrid({
                     )}
                     <span className="text-4xl">🐔</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Galinha de Quintal</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">1 ovo/dia 15💰/u. Chance de ovo fértil e até Ovo Premium!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('galinha')}</span>
                     <button
                       type="button"
@@ -341,7 +345,7 @@ export default function AnimalGrid({
                     {farmLevel < 2 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv2+</span>}
                     <span className="text-4xl">🐐</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Cabra Leiteira</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite premium 38💰/u. Ciclo de lactação de 20d + bônus passivo de felicidade!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite de cabra 38💰/u — o mais caro do básico! Ciclo 20d + deixa todos os animais mais felizes passivamente.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('cabra')}</span>
                     <div className="relative w-full">
                       {farmLevel >= 4 && (
@@ -374,7 +378,7 @@ export default function AnimalGrid({
                     {farmLevel < 3 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">🔒 Nv3</span>}
                     <span className="text-4xl">🦆</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Pato de Quintal</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Ovos de pato 18💰/u! Reduz pragas 40%. Nível 3+</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Ovo de pato 18💰/u todo dia. Bônus: patrulha o celeiro e reduz pragas em 40%!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('pato')}</span>
                     <div className="relative w-full">
                       {farmLevel >= 4 && (
@@ -406,7 +410,7 @@ export default function AnimalGrid({
                     {farmLevel >= 4 && <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>}
                     <span className="text-4xl">🦙</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Lhama de Lã</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã 45💰/u (Primavera). Não perde felicidade no Inverno!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã 45💰/u colhida na Primavera. Resistente ao Inverno — nunca perde felicidade no frio!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('lhama')}</span>
                     <button
                       type="button"
@@ -424,7 +428,7 @@ export default function AnimalGrid({
                     {farmLevel >= 4 && <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>}
                     <span className="text-4xl">🦢</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Ganso Vigia</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Ovos de ganso 50💰/u (Outono/Inverno). Alarme de eventos!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Ovo de ganso 50💰/u no Outono e Inverno. Te avisa antes de eventos negativos — segurança grátis!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('ganso')}</span>
                     <button
                       type="button"
@@ -441,7 +445,7 @@ export default function AnimalGrid({
                     {farmLevel < 3 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv3+</span>}
                     <span className="text-4xl">🐦</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Codorna</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">2 ovos de codorna/dia 22💰/u. Ração de Aves.</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">2 ovos de codorna por dia 22💰 cada! Alta produção, baixo custo. Melhor custo-benefício das aves.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('codorna')}</span>
                     <button type="button" onClick={(e) => buyAnimal('codorna', e)} disabled={gold < getAnimalPurchasePrice('codorna') || farmLevel < 3}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -454,7 +458,7 @@ export default function AnimalGrid({
                     {farmLevel < 4 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv4+</span>}
                     <span className="text-4xl">🐃</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Búfalo Leiteiro</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite de búfala 28💰/u. Pode virar Muçarela 120💰!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt.0.5 leading-tight">Leite de búfala 28💰/u com ciclo de lactação. Processe e vire Muçarela de Búfala 120💰 — lucro triplo!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('bufalo')}</span>
                     <div className="relative w-full">
                       {farmLevel >= 4 && (
@@ -487,7 +491,7 @@ export default function AnimalGrid({
                     {farmLevel < 4 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">🔒 Nv4</span>}
                     <span className="text-4xl">🍯</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Colmeia de Abelhas</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Mel 40💰/u por ciclo. Sem ração! Apicultor amplia produção.</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Mel 40💰/u a cada 10 dias. Zero ração! Com Apicultor: +1 mel extra e ciclo menor no Inverno.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('colmeia_abelhas')}</span>
                     <button type="button" onClick={(e) => buyAnimal('colmeia_abelhas', e)} disabled={gold < getAnimalPurchasePrice('colmeia_abelhas') || farmLevel < 4}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -501,7 +505,7 @@ export default function AnimalGrid({
                     {farmLevel >= 5 && <span className="absolute -top-2.5 -right-2 bg-yellow-400 text-amber-900 font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">👑 Elite</span>}
                     <span className="text-4xl">🦚</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Pavão de Prestígio</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">+10% felicidade todos os animais. +3% preço de vendas. Penas 80💰/u!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Penas 80💰/u a cada 7 dias + bônus passivo: +10% felicidade de todos e +3% no preço de venda.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('pavao')}</span>
                     <button
                       type="button"
@@ -529,7 +533,7 @@ export default function AnimalGrid({
                     {farmLevel < 5 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv5+</span>}
                     <span className="text-4xl">🐑</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Ovelha Leiteira</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite de ovelha 28💰/u. Queijo pecorino, ricota e mais. Ciclo 40d lactação / 15d secagem.</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Leite de ovelha 28💰/u. Produz Pecorino, Ricota e mais! Ciclo longo de 40d mas altamente lucrativo.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('ovelha_leiteira')}</span>
                     <button type="button" onClick={(e) => buyAnimal('ovelha_leiteira', e)} disabled={gold < getAnimalPurchasePrice('ovelha_leiteira') || farmLevel < 5}
                       className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -549,7 +553,7 @@ export default function AnimalGrid({
                     {farmLevel < 5 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv5+</span>}
                     <span className="text-4xl">🦙</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Alpaca</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã 65💰/u a cada 4 dias. Estresse térmico no verão.</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã premium 65💰/u a cada 4 dias — mais valiosa que a lhama. Cuidado: sofre no Verão!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('alpaca')}</span>
                     <button type="button" onClick={(e) => buyAnimal('alpaca', e)} disabled={gold < getAnimalPurchasePrice('alpaca') || farmLevel < 5}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -572,7 +576,7 @@ export default function AnimalGrid({
                       <line x1="31" y1="4" x2="32" y2="2" stroke="#a21caf" strokeWidth="1" strokeLinecap="round"/>
                     </svg>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Minhocário</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Produz húmus 35💰/u a cada 3 dias. Não precisa de ração!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Húmus 35💰/u a cada 3 dias. Zero ração, zero trabalho. Bônus no bioma Floresta!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('minhoca')}</span>
                     <button type="button" onClick={(e) => buyAnimal('minhoca', e)} disabled={gold < getAnimalPurchasePrice('minhoca') || farmLevel < 6}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -585,7 +589,7 @@ export default function AnimalGrid({
                     {farmLevel < 7 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv7+</span>}
                     <span className="text-4xl">🐌</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Criatório de Caracóis</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Muco 35💰/u a cada 3 dias. Sem ração!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Muco 35💰/u a cada 3 dias. Sem ração! Base de cosméticos premium — Creme 85💰 e Sérum 130💰.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('caracol')}</span>
                     <button type="button" onClick={(e) => buyAnimal('caracol', e)} disabled={gold < getAnimalPurchasePrice('caracol') || farmLevel < 7}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -598,7 +602,7 @@ export default function AnimalGrid({
                     {farmLevel < 8 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv8+</span>}
                     <span className="text-4xl">🐰</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Coelho Angorá</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã 90💰/u a cada 5 dias. Reproduz (máx 4x)!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã angorá 90💰/u a cada 5 dias. Se reproduz sozinho — máximo de 4 filhotes de graça!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('coelho_angora')}</span>
                     <button type="button" onClick={(e) => buyAnimal('coelho_angora', e)} disabled={gold < getAnimalPurchasePrice('coelho_angora') || farmLevel < 8}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -611,7 +615,7 @@ export default function AnimalGrid({
                     {farmLevel < 10 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv10+</span>}
                     <span className="text-4xl">🐛</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Bicho-da-Seda</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">3 seda bruta (80💰/u) a cada 14 dias. Requer folha de amoreira/dia!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">3 seda bruta (80💰/u) a cada 14 dias. Processe em Fio de Seda 200💰! Requer folha de amoreira diária.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('bicho_seda')}</span>
                     <button type="button" onClick={(e) => buyAnimal('bicho_seda', e)} disabled={gold < getAnimalPurchasePrice('bicho_seda') || farmLevel < 10}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -624,7 +628,7 @@ export default function AnimalGrid({
                     {farmLevel < 12 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv12+</span>}
                     <span className="text-4xl">🐸</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Rã</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Coxa de rã 110💰/u a cada 7 dias. +50% na chuva!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Coxa de rã 110💰/u a cada 7 dias. Em dias de chuva produz +50% — uma mina com o clima certo!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('ra')}</span>
                     <button type="button" onClick={(e) => buyAnimal('ra', e)} disabled={gold < getAnimalPurchasePrice('ra') || farmLevel < 12}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -658,7 +662,7 @@ export default function AnimalGrid({
                       <ellipse cx="13" cy="27" rx="5" ry="4" fill="#b45309" transform="rotate(-20 13 27)"/>
                     </svg>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Avestruz</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Penas 90💰/u (7d), carne 220💰, couro 260💰 (na morte)!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Penas 90💰/u a cada 7 dias + carne 220💰 e couro 260💰 na morte. O mais lucrativo das aves raras!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('avestruz')}</span>
                     <button type="button" onClick={(e) => buyAnimal('avestruz', e)} disabled={gold < getAnimalPurchasePrice('avestruz') || farmLevel < 15}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
@@ -672,7 +676,7 @@ export default function AnimalGrid({
                     {farmLevel >= 18 && <span className="absolute -top-2.5 -right-2 bg-red-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">⚠️ Exótico</span>}
                     <span className="text-4xl">🐊</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Jacaré</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Carne 300💰, couro 500💰 (na morte). Requer Licença Exótica!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Carne 300💰 e couro 500💰 na morte — o animal mais valioso do jogo! Requer Licença Exótica.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('jacare')}</span>
                     <button type="button" onClick={(e) => buyAnimal('jacare', e)} disabled={gold < getAnimalPurchasePrice('jacare') || farmLevel < 18}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
