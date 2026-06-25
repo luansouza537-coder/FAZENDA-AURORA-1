@@ -602,7 +602,7 @@ export default function AnimalGrid({
                     {farmLevel < 8 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv8+</span>}
                     <span className="text-4xl">🐰</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Coelho Angorá</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Lã angorá 90💰/u a cada 5 dias. Se reproduz sozinho — máximo de 4 filhotes de graça!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Produz lã angorá de altíssima qualidade através de tosquia gentil a cada temporada. Sem abate — só carinho e tesoura! Transforme a lã em fio e depois em cachecóis premium.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('coelho_angora')}</span>
                     <button type="button" onClick={(e) => buyAnimal('coelho_angora', e)} disabled={gold < getAnimalPurchasePrice('coelho_angora') || farmLevel < 8}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
