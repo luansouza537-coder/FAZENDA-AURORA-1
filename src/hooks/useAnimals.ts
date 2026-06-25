@@ -931,12 +931,17 @@ export function useAnimals({
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'bicho_seda') return;
-    if ((inventory.folha_amoreira ?? 0) <= 0) {
+    let hadLeaf = false;
+    setInventory(prev => {
+      if ((prev.folha_amoreira ?? 0) <= 0) return prev;
+      hadLeaf = true;
+      return { ...prev, folha_amoreira: (prev.folha_amoreira ?? 0) - 1 };
+    });
+    if (!hadLeaf && (inventory.folha_amoreira ?? 0) <= 0) {
       addLog('🌿 Sem folha de amoreira no estoque!', 'error');
       spawnFeedback('❌', 'Sem folha', event);
       return;
     }
-    setInventory(prev => ({ ...prev, folha_amoreira: (prev.folha_amoreira ?? 0) - 1 }));
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, hunger: Math.min(100, a.hunger + 20), happiness: Math.min(100, a.happiness + 5) } : a));
     addLog(`🌿 ${animal.name} alimentado com folha de amoreira!`, 'success');
     triggerAudioResult(() => sfx.playSound('feed'));
@@ -1247,6 +1252,8 @@ export function useAnimals({
       ...(type === 'codorna' && { hasProducedToday: false }),
       ...(type === 'alpaca' && { daysUntilWool: 4, daysSinceLastWool: 0, woolReady: false, heatStress: false }),
       ...(type === 'coelho_angora' && { daysUntilWool: 5, daysSinceLastWool: 0, woolReady: false }),
+      ...(type === 'bicho_seda' && { daysUntilWool: 0, daysSinceLastWool: 0, woolReady: false }),
+      ...(type === 'ra' && { daysUntilWool: 0, daysSinceLastWool: 0, woolReady: false }),
       ...(type === 'avestruz' && { daysUntilWool: 7, daysSinceLastWool: 0, woolReady: false }),
     };
 

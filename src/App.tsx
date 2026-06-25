@@ -4924,6 +4924,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               consecutiveHappyDays: 0,
               daysBelow80: 0,
               isBestFriend: false,
+              trait: undefined,
               isAdult: true,
               age: 0,
               maxAge: 20,
