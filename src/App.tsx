@@ -4302,7 +4302,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       }));
 
       // Água: custo por tipo de animal + descontos acumulados
-      const hasLago = landLots.some(l => l.biome === 'lago');
+      const hasLago = landBiomes.some(l => l.biome === 'lago');
       const AQUATIC_TYPES = ['pato', 'ganso', 'ra', 'jacare', 'bufalo'];
       const baseWaterAnimals = animals.reduce((sum, a) => {
         let cost = WATER_COST_PER_ANIMAL[a.type] ?? 3;
