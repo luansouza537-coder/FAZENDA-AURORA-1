@@ -951,6 +951,28 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 🦚 Animal de prestígio — bônus passivos ativos {animal.happiness > 80 ? '✅' : '❌ (felicidade < 80)'}
               </span>
             )}
+            {animal.type === 'minhoca' && (
+              animal.humusReady ? (
+                <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">
+                  🌱 Húmus pronto para coletar!
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">
+                  ⏳ Aguardando próxima produção de húmus
+                </span>
+              )
+            )}
+            {animal.type === 'caracol' && (
+              animal.mucoReady ? (
+                <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">
+                  💧 Muco pronto para coletar!
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">
+                  ⏳ Aguardando próxima produção de muco
+                </span>
+              )
+            )}
             {animal.type === 'colmeia_abelhas' && (
               animal.melReady ? (
                 <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">
