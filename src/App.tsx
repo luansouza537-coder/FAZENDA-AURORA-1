@@ -4265,7 +4265,18 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           const missed = deliveredThisWeek < goal * 0.5;
           const newMissed = missed ? (c.missedWeeks ?? 0) + 1 : 0;
           if (newMissed >= 2) {
-            logsToAdd.push({ msg: `📜 Contrato com "${c.client}" cancelado por 2 semanas sem entrega mínima.`, type: 'error' });
+            const cancelRate = c.quantity > 0 ? c.delivered / c.quantity : 0;
+            if (cancelRate >= 0.8 && (c.completionBonus ?? 0) > 0) {
+              const bonus = c.completionBonus ?? 0;
+              const xp = c.completionXP ?? 0;
+              setGold(prev => prev + bonus);
+              setFarmXp(prev => prev + xp);
+              addFinancialEntry?.({ day: nextDayValue, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
+              setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted || 0) + 1 }));
+              logsToAdd.push({ msg: `🏆 Contrato com "${c.client}" cancelado por inatividade, mas entrega foi suficiente! Bônus: +${bonus}💰`, type: 'success' });
+            } else {
+              logsToAdd.push({ msg: `📜 Contrato com "${c.client}" cancelado por 2 semanas sem entrega mínima.`, type: 'error' });
+            }
             return { ...c, active: false, weekStartDelivered: c.delivered, missedWeeks: newMissed };
           }
           return { ...c, weekStartDelivered: c.delivered, missedWeeks: newMissed };
@@ -5096,6 +5107,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               if (bonus > 0) {
                 setGold(prev => prev + bonus);
                 setFarmXp(prev => prev + xp);
+                addFinancialEntry?.({ day: nextDayValue, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
                 logsToAdd.push({ msg: `🏆 Contrato com "${c.client}" concluído com sucesso! Bônus: +${bonus}💰 +${xp} XP!`, type: 'success' });
                 setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success', nextDayValue), 0);
               }
