@@ -63,7 +63,8 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
 }) => {
   if (animal.type === 'porco') return null;
   const noHungerAnimal = ['minhoca','caracol','colmeia_abelhas'].includes(animal.type);
-  const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
+  const noHappinessAnimal = ['minhoca','caracol','colmeia_abelhas','bicho_seda'].includes(animal.type);
+  const isCritical = (!noHappinessAnimal && animal.happiness < 20) || (!noHungerAnimal && animal.hunger < 25);
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
   const valueOfPorcoRow = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
   const isReady =
@@ -259,7 +260,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const valueOfPorco = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
 
   const noHungerAnimal = ['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type);
-  const isCritical = animal.happiness < 20 || (!noHungerAnimal && animal.hunger < 25);
+  const noHappinessAnimal = ['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda'].includes(animal.type);
+  const isCritical = (!noHappinessAnimal && animal.happiness < 20) || (!noHungerAnimal && animal.hunger < 25);
 
   const isReady = (
     (animal.type === 'vaca' && animal.hasProducedToday) ||
