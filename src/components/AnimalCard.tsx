@@ -100,7 +100,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
       {animal.isAdult === false && !['minhoca', 'caracol', 'bicho_seda'].includes(animal.type) && <span className="text-[9px] bg-blue-100 border border-blue-300 text-blue-700 font-black px-1.5 py-0.5 rounded-full">🍼 {Math.max(0, (animal.adulthoodDay ?? 0) - currentDay)}d</span>}
       {animal.isSick && <span className="text-[9px] bg-red-100 border border-red-300 text-red-700 font-black px-1.5 py-0.5 rounded-full animate-pulse">🤒</span>}
       <div className="flex items-center gap-1 ml-auto">
-        <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>
+        {animal.type !== 'bicho_seda' && <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>}
         {!noHungerAnimal && <span className="text-[10px] font-mono text-stone-500">🍽️{animal.hunger}%</span>}
         {(animal.type === 'boi' || animal.type === 'porco') && <span className="text-[10px] font-mono text-stone-500">🔥{Math.floor((animal.weightGain||0)*100)}%</span>}
         {isCritical && <span className="text-[9px] bg-red-500 text-white font-black px-1.5 py-0.5 rounded-full animate-pulse">⚠️</span>}
@@ -757,8 +757,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         </div>
         )}
 
-        {/* Happiness bar */}
-        <div className="relative group/happinesstooltip">
+        {/* Happiness bar — hidden for bicho-da-seda (sem impacto funcional no ciclo) */}
+        {animal.type !== 'bicho_seda' && <div className="relative group/happinesstooltip">
           <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
             <span className="flex items-center gap-1">😊 Felicidade
               {/* IMPROVEMENT 4: Cabra bonus tooltip */}
@@ -785,7 +785,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             • <span className="text-green-400 font-bold">100% por 3 dias</span>: Torna-se Melhor Amigo de confiança!
             <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[5px] w-0.5 h-0.5 border-4 border-transparent border-t-[#fbbf24] bg-transparent" />
           </div>
-        </div>
+        </div>}
 
       </div>}
 
@@ -971,10 +971,11 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {/* Alimentar (Dynamic feed count based on animal type) */}
         {(() => {
           // Animais que não comem ração
-          const noFeedUI = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
+          const noFeedUI = ['minhoca', 'caracol', 'colmeia_abelhas'];
           if (noFeedUI.includes(animal.type)) {
             return <span className="text-[10px] text-stone-400 font-mono italic flex-1 flex items-center justify-center">Sem ração necessária 🌿</span>;
           }
+          if (animal.type === 'bicho_seda') return null;
           // BUG FIX: novos animais usam a ração correta na UI
           const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'ovelha_leiteira' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
           const feedQty = inventory[feedType] ?? 0;
