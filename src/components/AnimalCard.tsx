@@ -987,6 +987,23 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 </span>
               )
             )}
+            {animal.type === 'bicho_seda' && (() => {
+              const age = animal.age ?? 0;
+              if (age <= 2) {
+                const daysLeft = 3 - age;
+                return <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">🥚 Ovo chocando… Lagarta em {daysLeft} dia(s)</span>;
+              }
+              if (age <= 12) {
+                const daysLeft = 13 - age;
+                return <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">🐛 Lagarta crescendo… Casulo em {daysLeft} dia(s)</span>;
+              }
+              if (age <= 16) {
+                return animal.woolReady
+                  ? <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">🫙 Casulo formado! Colete a seda bruta</span>
+                  : <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">🫙 Casulo se formando… seda em breve</span>;
+              }
+              return <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">🦋 Mariposa — pode pôr ovos novos</span>;
+            })()}
           </div>
         );
       })()}
@@ -1170,8 +1187,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           </button>
         )}
 
-        {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré, cabra, lhama e búfalo (têm botões próprios) */}
-        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'ovelha_leiteira' && animal.type !== 'lhama' && animal.type !== 'bufalo' && animal.type !== 'ganso' && (() => {
+        {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré, cabra, lhama, búfalo, bicho_seda (têm botões próprios ou ciclo curto sem sentido de venda) */}
+        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'ovelha_leiteira' && animal.type !== 'lhama' && animal.type !== 'bufalo' && animal.type !== 'ganso' && animal.type !== 'bicho_seda' && (() => {
           const age = animal.age ?? 0;
           const maxAge = animal.maxAge ?? 90;
           const lifeFraction = Math.min(1, age / maxAge);
@@ -1214,8 +1231,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           );
         })()}
 
-        {/* Aposentar Animal (75%+ vida útil, exceto boi) */}
-        {animal.isAdult !== false && animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75 && animal.type !== 'boi' && animal.type !== 'porco' && (
+        {/* Aposentar Animal (75%+ vida útil, exceto boi, porco e bicho_seda) */}
+        {animal.isAdult !== false && animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75 && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'bicho_seda' && (
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); onRetireAnimal(animal.id, e); }}
