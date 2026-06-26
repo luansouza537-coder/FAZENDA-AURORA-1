@@ -261,7 +261,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
   const noHungerAnimal = ['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type);
   const noHappinessAnimal = ['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda'].includes(animal.type);
-  const isCritical = (!noHappinessAnimal && animal.happiness < 20) || (!noHungerAnimal && animal.hunger < 25);
+  const bichoIsLagarta = animal.type === 'bicho_seda' && animal.age >= 3 && animal.age <= 12;
+  const isCritical = (!noHappinessAnimal && animal.happiness < 20) || (!noHungerAnimal && animal.hunger < 25) || (bichoIsLagarta && animal.hunger < 25);
 
   const isReady = (
     (animal.type === 'vaca' && animal.hasProducedToday) ||
@@ -731,10 +732,10 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
       </div>
 
       {/* Stats - Fome and Felicidade — oculto para animais sem barras */}
-      {!collapsed && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
+      {!collapsed && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (animal.type !== 'bicho_seda' || bichoIsLagarta) && <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
 
-        {/* Hunger bar */}
-        {(
+        {/* Hunger bar — bicho_seda só na fase Lagarta (age 3–12) */}
+        {(animal.type !== 'bicho_seda' || bichoIsLagarta) && (
         <div className="relative group/hungertooltip">
           <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
             <span className="flex items-center gap-1">🍽️ Fome</span>

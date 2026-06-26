@@ -3153,7 +3153,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       else if (copy.type === 'bicho_seda') {
         copy.daysWithoutFood = 0;
         const bichoPhase = copy.age <= 2 ? 'ovo' : copy.age <= 12 ? 'lagarta' : copy.age <= 16 ? 'casulo' : 'mariposa';
-        if (bichoPhase === 'lagarta' && copy.hunger <= 0) {
+        // Ovo, Casulo e Mariposa não comem — congelar fome em 100
+        if (bichoPhase !== 'lagarta') {
+          copy.hunger = 100;
+        } else if (copy.hunger <= 0) {
           copy.happiness = Math.max(0, copy.happiness - 30);
           logs.push({ msg: `🐛 ${copy.name} (bicho-da-seda) está sem folha de amoreira! -30 felicidade!`, type: 'error' });
         }
