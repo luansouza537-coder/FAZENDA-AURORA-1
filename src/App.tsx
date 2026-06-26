@@ -1824,10 +1824,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if ((itemType as string) === 'mel') return 80;
     if ((itemType as string) === 'cogumelo') return 35;
     if ((itemType as string) === 'hidromel') return 260;
-    if ((itemType as string) === 'risoto_cogumelo') return 120;
+    if ((itemType as string) === 'risoto_cogumelo') return 150;
     if ((itemType as string) === 'conserva_peixe') return 140;
     if ((itemType as string) === 'mel_envasado') return 230;
-    if ((itemType as string) === 'sopa_cogumelo') return 80;
+    if ((itemType as string) === 'sopa_cogumelo') return 100;
     if ((itemType as string) === 'queijo_parmesao') return 200;
     if ((itemType as string) === 'queijo_serra') return 280;
     if ((itemType as string) === 'kit_gourmet') return 2000;

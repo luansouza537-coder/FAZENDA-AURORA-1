@@ -191,7 +191,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                   {([
                     { biome: 'pasto' as BiomeType, emoji: '🌾', label: 'Pasto', price: 50, desc: 'Padrão', minLevel: 1 },
                     { biome: 'lago' as BiomeType, emoji: '🌊', label: 'Lago', price: 120, desc: 'Rã 2x, Pato/Ganso +20%', minLevel: 8 },
-                    { biome: 'floresta' as BiomeType, emoji: '🌲', label: 'Floresta', price: 150, desc: 'Minhocário/Criatório +50%', minLevel: 10 },
+                    { biome: 'floresta' as BiomeType, emoji: '🌲', label: 'Floresta', price: 150, desc: 'Minhocário/Criatório +50%', minLevel: 5 },
                     { biome: 'pomar' as BiomeType, emoji: '🍎', label: 'Pomar', price: 200, desc: 'Todos +2 felicidade/dia', minLevel: 12 },
                   ]).map(({ biome, emoji, label, price, desc, minLevel }) => {
                     const owned = p.landBiomes.filter(b => b.biome === biome).length;

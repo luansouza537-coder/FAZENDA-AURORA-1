@@ -1680,7 +1680,7 @@ export function useInventory({
     if ((inventory.cogumelo ?? 0) < 3) { addLog('🍄 Precisa: 3 Cogumelos', 'error'); return; }
     setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) - 3, risoto_cogumelo: (prev.risoto_cogumelo ?? 0) + 1 }));
     applyCraftCost('risoto_cogumelo');
-    addLog('🍄 Risoto de Cogumelo preparado! (+120💰)', 'success');
+    addLog('🍄 Risoto de Cogumelo preparado! (+150💰)', 'success');
     setFarmXp(prev => prev + 3);
     spawnFeedback('🍄', 'Risoto!', event);
   };
@@ -1710,7 +1710,7 @@ export function useInventory({
     if ((inventory.cogumelo ?? 0) < 2) { addLog('🍲 Precisa: 2 Cogumelos', 'error'); return; }
     setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) - 2, sopa_cogumelo: (prev.sopa_cogumelo ?? 0) + 1 }));
     applyCraftCost('sopa_cogumelo');
-    addLog('🍲 Sopa de Cogumelo preparada! (+80💰)', 'success');
+    addLog('🍲 Sopa de Cogumelo preparada! (+100💰)', 'success');
     setFarmXp(prev => prev + 2);
     spawnFeedback('🍲', 'Sopa!', event);
   };
