@@ -100,7 +100,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
       {animal.isAdult === false && !['minhoca', 'caracol', 'bicho_seda'].includes(animal.type) && <span className="text-[9px] bg-blue-100 border border-blue-300 text-blue-700 font-black px-1.5 py-0.5 rounded-full">🍼 {Math.max(0, (animal.adulthoodDay ?? 0) - currentDay)}d</span>}
       {animal.isSick && <span className="text-[9px] bg-red-100 border border-red-300 text-red-700 font-black px-1.5 py-0.5 rounded-full animate-pulse">🤒</span>}
       <div className="flex items-center gap-1 ml-auto">
-        {animal.type !== 'bicho_seda' && <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>}
+        {!['bicho_seda', 'minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>}
         {!noHungerAnimal && <span className="text-[10px] font-mono text-stone-500">🍽️{animal.hunger}%</span>}
         {(animal.type === 'boi' || animal.type === 'porco') && <span className="text-[10px] font-mono text-stone-500">🔥{Math.floor((animal.weightGain||0)*100)}%</span>}
         {isCritical && <span className="text-[9px] bg-red-500 text-white font-black px-1.5 py-0.5 rounded-full animate-pulse">⚠️</span>}
@@ -757,8 +757,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         </div>
         )}
 
-        {/* Happiness bar — hidden for bicho-da-seda (sem impacto funcional no ciclo) */}
-        {animal.type !== 'bicho_seda' && <div className="relative group/happinesstooltip">
+        {/* Happiness bar — hidden for animals where happiness has no functional impact */}
+        {!['bicho_seda', 'minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && <div className="relative group/happinesstooltip">
           <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
             <span className="flex items-center gap-1">😊 Felicidade
               {/* IMPROVEMENT 4: Cabra bonus tooltip */}
