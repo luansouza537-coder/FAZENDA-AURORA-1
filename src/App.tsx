@@ -4956,12 +4956,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // --- LAYER 0: Migração de nomes legados + limpeza de filhotes de reprodução removida ---
       const migratedAnimals = finalAnimalsWithClimate
         .filter(a => !(a.type === 'minhoca' && a.isAdult === false))
+        // Remove bicho_seda imortais de saves antigos (maxAge base era 60, criando valores 48–72)
+        .filter(a => !(a.type === 'bicho_seda' && a.age > 20))
         .map(a => {
           if (a.type === 'minhoca' && a.name !== 'Minhocário') return { ...a, name: 'Minhocário' };
           if (a.type === 'caracol' && a.name !== 'Criatório de Caracóis') return { ...a, name: 'Criatório de Caracóis' };
-          // Migração: bicho_seda com maxAge 60 → 20 (apenas se ainda dentro do novo ciclo)
-          if (a.type === 'bicho_seda' && a.maxAge === 60) {
-            return { ...a, maxAge: Math.max(a.age + 1, 20), trait: undefined };
+          // Migração: bicho_seda com maxAge incorreto (saves antigos tinham base 60 em vez de 20)
+          if (a.type === 'bicho_seda' && a.maxAge > 20) {
+            return { ...a, maxAge: 20, trait: undefined };
           }
           // Migração: limpar trait de bicho_seda existentes
           if (a.type === 'bicho_seda' && a.trait !== undefined) {
