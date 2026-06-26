@@ -417,7 +417,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
-          {animal.trait && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (() => {
+          {animal.trait && !['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda'].includes(animal.type) && (() => {
             const t = getTraitInfo(animal.trait);
             return (
               <span
@@ -732,7 +732,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
       {!collapsed && <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
 
         {/* Hunger bar — hidden for animals that never need feeding */}
-        {!['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'].includes(animal.type) && (
+        {!['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (
         <div className="relative group/hungertooltip">
           <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
             <span className="flex items-center gap-1">🍽️ Fome</span>

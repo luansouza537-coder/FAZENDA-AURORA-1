@@ -4947,7 +4947,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (a.type === 'caracol' && a.name !== 'Criatório de Caracóis') return { ...a, name: 'Criatório de Caracóis' };
           // Migração: bicho_seda com maxAge 60 → 20 (apenas se ainda dentro do novo ciclo)
           if (a.type === 'bicho_seda' && a.maxAge === 60) {
-            return a.age <= 20 ? { ...a, maxAge: 20 } : a;
+            return a.age <= 20 ? { ...a, maxAge: 20, trait: undefined } : a;
+          }
+          // Migração: limpar trait de bicho_seda existentes
+          if (a.type === 'bicho_seda' && a.trait !== undefined) {
+            return { ...a, trait: undefined };
           }
           return a;
         });
