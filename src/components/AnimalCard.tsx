@@ -728,11 +728,11 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         </div>
       </div>
 
-      {/* Stats - Fome and Felicidade */}
-      {!collapsed && <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
+      {/* Stats - Fome and Felicidade — oculto para animais sem barras */}
+      {!collapsed && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
 
-        {/* Hunger bar — hidden for animals that never need feeding */}
-        {!['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (
+        {/* Hunger bar */}
+        {(
         <div className="relative group/hungertooltip">
           <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
             <span className="flex items-center gap-1">🍽️ Fome</span>
@@ -757,8 +757,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         </div>
         )}
 
-        {/* Happiness bar — hidden for animals where happiness has no functional impact */}
-        {!['bicho_seda', 'minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && <div className="relative group/happinesstooltip">
+        {/* Happiness bar — hidden for bicho-da-seda */}
+        {animal.type !== 'bicho_seda' && <div className="relative group/happinesstooltip">
           <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
             <span className="flex items-center gap-1">😊 Felicidade
               {/* IMPROVEMENT 4: Cabra bonus tooltip */}
