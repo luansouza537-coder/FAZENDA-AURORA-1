@@ -5034,44 +5034,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setReproducaoAtiva(prev => prev.filter(r => nextDayValue < r.gestacaoEnd));
       }
 
-      // --- LAYER 3: Reprodução Natural (Galinha) ---
-      {
-        const galinhas = finalAnimalsWithAdulthood.filter(a => a.type === 'galinha' && a.isAdult !== false);
-        const totalGalinhas = galinhas.length;
-        const maxGalinhas = 10;
-        let naturalBirths = 0;
-        const maxNaturalPerDay = 2;
-        if (totalGalinhas < maxGalinhas) {
-          galinhas.forEach(a => {
-            if (naturalBirths >= maxNaturalPerDay) return;
-            if (finalAnimalsWithAdulthood.length >= maxAnimalsLayer2) return;
-            if ((a.happiness ?? 0) > 80 && Math.random() < 0.03) {
-              const newId2 = finalAnimalsWithAdulthood.length > 0 ? Math.max(...finalAnimalsWithAdulthood.map(x => x.id)) + 300 + Math.floor(Math.random() * 100) : 300;
-              const pintinho: Animal = {
-                id: newId2,
-                type: 'galinha',
-                name: getRandomName('galinha'),
-                hunger: 80,
-                happiness: 90,
-                consecutiveHappyDays: 0,
-                daysBelow80: 0,
-                isBestFriend: false,
-                trait: getRandomTrait(),
-                age: 0,
-                maxAge: Math.round(60 * (1 + (Math.random() * 0.4 - 0.2))),
-                isAdult: false,
-                adulthoodDay: nextDayValue + 7,
-                hasProducedToday: false,
-              };
-              finalAnimalsWithAdulthood.push(pintinho);
-              naturalBirths++;
-              logsToAdd.push({ msg: `🐣 ${a.name} chocou um pintinho! ${pintinho.name} chegou à fazenda!`, type: 'success' });
-              setReproHistory(prev => [{ day: nextDayValue, animalType: 'galinha' as AnimalType, name: pintinho.name, method: 'natural' }, ...prev].slice(0, 50));
-            }
-          });
-        }
-      }
-
       // Reset weeklyProduction every 7 days
       const animalsWithWeekly = nextDayValue % 7 === 0
         ? finalAnimalsWithAdulthood.map(a => ({ ...a, weeklyProduction: 0 }))
