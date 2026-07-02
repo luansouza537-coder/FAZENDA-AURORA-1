@@ -627,23 +627,23 @@ export default function AnimalGrid({
                     </button>
                   </div>
 
-                  {/* Rã (Nível 12+) */}
+                  {/* Rã (Nível 8+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
-                    {farmLevel < 12 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv12+</span>}
+                    {farmLevel < 8 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv8+</span>}
                     <span className="text-4xl">🐸</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Rã</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Coxa de rã 110💰/u a cada 7 dias. Em dias de chuva produz +50% — uma mina com o clima certo!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('ra')}</span>
-                    <button type="button" onClick={(e) => buyAnimal('ra', e)} disabled={gold < getAnimalPurchasePrice('ra') || farmLevel < 12}
+                    <button type="button" onClick={(e) => buyAnimal('ra', e)} disabled={gold < getAnimalPurchasePrice('ra') || farmLevel < 8}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
-                      {farmLevel < 12 ? 'Nível 12+' : 'Comprar + 1 🌾'}
+                      {farmLevel < 8 ? 'Nível 8+' : 'Comprar + 1 🌾'}
                     </button>
                   </div>
 
-                  {/* Avestruz (Nível 15+) */}
+                  {/* Avestruz (Nível 10+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
-                    {farmLevel < 15 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv15+</span>}
-                    {farmLevel >= 15 && <span className="absolute -top-2.5 -right-2 bg-purple-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">🌟 Raro</span>}
+                    {farmLevel < 10 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv10+</span>}
+                    {farmLevel >= 10 && <span className="absolute -top-2.5 -right-2 bg-purple-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">🌟 Raro</span>}
                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Avestruz">
                       {/* corpo */}
                       <ellipse cx="20" cy="28" rx="9" ry="8" fill="#d97706"/>
@@ -668,23 +668,23 @@ export default function AnimalGrid({
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Avestruz</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Penas 90💰/u a cada 7 dias + carne 220💰 e couro 260💰 na morte. O mais lucrativo das aves raras!</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('avestruz')}</span>
-                    <button type="button" onClick={(e) => buyAnimal('avestruz', e)} disabled={gold < getAnimalPurchasePrice('avestruz') || farmLevel < 15}
+                    <button type="button" onClick={(e) => buyAnimal('avestruz', e)} disabled={gold < getAnimalPurchasePrice('avestruz') || farmLevel < 10}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
-                      {farmLevel < 15 ? 'Nível 15+' : 'Comprar + 1 🌾'}
+                      {farmLevel < 10 ? 'Nível 10+' : 'Comprar + 1 🌾'}
                     </button>
                   </div>
 
-                  {/* Jacaré (Nível 18+) */}
+                  {/* Jacaré (Nível 13+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
-                    {farmLevel < 18 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv18+</span>}
-                    {farmLevel >= 18 && <span className="absolute -top-2.5 -right-2 bg-red-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">⚠️ Exótico</span>}
+                    {farmLevel < 13 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv13+</span>}
+                    {farmLevel >= 13 && <span className="absolute -top-2.5 -right-2 bg-red-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">⚠️ Exótico</span>}
                     <span className="text-4xl">🐊</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Jacaré</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Carne 300💰 e couro 500💰 na morte — o animal mais valioso do jogo! Requer Licença Exótica.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('jacare')}</span>
-                    <button type="button" onClick={(e) => buyAnimal('jacare', e)} disabled={gold < getAnimalPurchasePrice('jacare') || farmLevel < 18}
+                    <button type="button" onClick={(e) => buyAnimal('jacare', e)} disabled={gold < getAnimalPurchasePrice('jacare') || farmLevel < 13}
                       className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
-                      {farmLevel < 18 ? 'Nível 18+' : 'Comprar + 1 🌾'}
+                      {farmLevel < 13 ? 'Nível 13+' : 'Comprar + 1 🌾'}
                     </button>
                   </div>
 

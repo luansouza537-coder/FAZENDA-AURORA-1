@@ -1202,9 +1202,9 @@ export function useAnimals({
     if (type === 'caracol' && farmLevel < 7) { addLog('🔒 Criatório de Caracóis requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'coelho_angora' && farmLevel < 8) { addLog('🔒 Coelho Angorá requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'bicho_seda' && farmLevel < 10) { addLog('🔒 Bicho-da-Seda requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'ra' && farmLevel < 12) { addLog('🔒 Rã requer Nível 12!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'avestruz' && farmLevel < 15) { addLog('🔒 Avestruz requer Nível 15!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'jacare' && farmLevel < 18) { addLog('🔒 Jacaré requer Nível 18!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'ra' && farmLevel < 8) { addLog('🔒 Rã requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'avestruz' && farmLevel < 10) { addLog('🔒 Avestruz requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'jacare' && farmLevel < 13) { addLog('🔒 Jacaré requer Nível 13!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'porco' && farmLevel < 4) { addLog('🔒 Porco requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'colmeia_abelhas' && farmLevel < 4) { addLog('🔒 Colmeia de Abelhas requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'ovelha_leiteira' && farmLevel < 5) { addLog('🔒 Ovelha Leiteira requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }

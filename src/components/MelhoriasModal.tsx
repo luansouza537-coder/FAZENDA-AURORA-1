@@ -479,12 +479,12 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             {/* Licença Exótica */}
             <div className="bg-white border-4 border-purple-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-purple-800 mb-1">🦎 Licença de Fauna Exótica</h4>
-              <p className="text-xs text-stone-500 font-mono mb-2">Autoriza criação de jacaré sem multas de fiscalização (5%/dia = -300💰). Requer Nível 18. {p.licencaExotica ? '✅ Obtida' : 'Não obtida'}</p>
-              <button disabled={p.licencaExotica || p.gold < 500 || p.farmLevel < 18}
-                onClick={() => { if (!p.licencaExotica && p.gold >= 500 && p.farmLevel >= 18) { p.setGold(prev => prev - 500); p.setLicencaExotica(true); p.addLog('🦎 Licença de Fauna Exótica obtida! Jacarés não serão multados.', 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }}
-                className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${p.licencaExotica ? 'bg-purple-100 border-purple-300 text-purple-700' : p.farmLevel >= 18 && p.gold >= 500 ? 'bg-purple-500 hover:bg-purple-400 text-white border-purple-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+              <p className="text-xs text-stone-500 font-mono mb-2">Autoriza criação de jacaré sem multas de fiscalização (5%/dia = -300💰). Requer Nível 13. {p.licencaExotica ? '✅ Obtida' : 'Não obtida'}</p>
+              <button disabled={p.licencaExotica || p.gold < 500 || p.farmLevel < 13}
+                onClick={() => { if (!p.licencaExotica && p.gold >= 500 && p.farmLevel >= 13) { p.setGold(prev => prev - 500); p.setLicencaExotica(true); p.addLog('🦎 Licença de Fauna Exótica obtida! Jacarés não serão multados.', 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); } }}
+                className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${p.licencaExotica ? 'bg-purple-100 border-purple-300 text-purple-700' : p.farmLevel >= 13 && p.gold >= 500 ? 'bg-purple-500 hover:bg-purple-400 text-white border-purple-700' : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
               >
-                {p.licencaExotica ? '✅ Licença Obtida' : p.farmLevel < 18 ? '🔒 Requer Nível 18 (500💰)' : 'Obter Licença (500💰)'}
+                {p.licencaExotica ? '✅ Licença Obtida' : p.farmLevel < 13 ? '🔒 Requer Nível 13 (500💰)' : 'Obter Licença (500💰)'}
               </button>
             </div>
 
