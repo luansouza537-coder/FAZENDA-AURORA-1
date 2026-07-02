@@ -5434,8 +5434,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setNextFeiraProdutosDay(nextDayValue + 30);
       }
 
-      // Fair 4: Feira de Animais Exóticos (every 60 days, Level 15+ AND licencaExotica)
-      if (farmLevel >= 15 && licencaExotica && nextDayValue >= nextFeiraExoticaDay) {
+      // Fair 4: Feira de Animais Exóticos (every 60 days, Level 10+ AND licencaExotica)
+      if (farmLevel >= 10 && licencaExotica && nextDayValue >= nextFeiraExoticaDay) {
         const exoticLog: { msg: string; type: LogMessage['type'] }[] = [];
         let exoticGold = 0;
         const exoticAnimals = finalAnimals.filter(a => ['avestruz','jacare','bicho_seda','caracol','ra'].includes(a.type));
