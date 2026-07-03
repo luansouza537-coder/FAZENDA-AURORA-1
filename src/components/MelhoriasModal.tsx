@@ -83,7 +83,7 @@ const VEHICLE_CATEGORIES = [
   { key: 'laticinios', label: '🧀 Laticínios (Refrigerado)', desc: 'Leite, queijos, manteiga e derivados',            penalty: [10, 5, 0], winterExtra: [8, 4, 0], vehicles: ['Caixote de Gelo', 'Baú Refrigerado', 'Câmara Frigorífica'],   prices: [0, 600, 2500] },
   { key: 'ovos',      label: '🥚 Ovos e Derivados',         desc: 'Ovos, maionese, patê e conservas de ovo',          penalty: [8,  4, 0], winterExtra: [6, 3, 0], vehicles: ['Cesto de Palha', 'Caixote Acolchoado', 'Van de Ovos'],        prices: [0, 300, 1200] },
   { key: 'texteis',   label: '🧶 Têxteis e Fios',           desc: 'Lãs, cachecóis, tapetes e tecidos',               penalty: [7,  3, 0], winterExtra: [4, 2, 0], vehicles: ['Mochila de Fazenda', 'Furgão Coberto', 'Trailer Têxtil'],     prices: [0, 300, 1200] },
-  { key: 'carnes',    label: '🥩 Carnes e Proteínas',       desc: 'Carne de avestruz, jacaré, rã e peixe',           penalty: [10, 5, 0], winterExtra: [8, 4, 0], vehicles: ['Caminhão Simples', 'Baú Frigorífico', 'Carreta Frigorífica'], prices: [0, 600, 2500] },
+  { key: 'carnes',    label: '🥩 Carnes e Proteínas',       desc: 'Carne de jacaré, peixe e proteínas especiais',     penalty: [10, 5, 0], winterExtra: [8, 4, 0], vehicles: ['Caminhão Simples', 'Baú Frigorífico', 'Carreta Frigorífica'], prices: [0, 600, 2500] },
   { key: 'organicos', label: '🌿 Orgânicos e Naturais',     desc: 'Mel, cogumelo, húmus, muco e seda bruta',         penalty: [5,  2, 0], winterExtra: [3, 1, 0], vehicles: ['Carroça de Mão', 'Carrinho Motorizado', 'Furgão Verde'],      prices: [0, 200, 800]  },
   { key: 'luxo',      label: '💎 Luxo, Exóticos e Gourmet', desc: 'Penas, couros, cosméticos e kits premium',        penalty: [8,  4, 0], winterExtra: [6, 3, 0], vehicles: ['Caixinha de Papelão', 'Maleta Segura', 'Transportadora Premium'], prices: [0, 500, 2000] },
 ];
@@ -190,7 +190,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 <div className="space-y-2">
                   {([
                     { biome: 'pasto' as BiomeType, emoji: '🌾', label: 'Pasto', price: 50, desc: 'Padrão', minLevel: 1 },
-                    { biome: 'lago' as BiomeType, emoji: '🌊', label: 'Lago', price: 120, desc: 'Rã 2x, Pato/Ganso +20%', minLevel: 8 },
+                    { biome: 'lago' as BiomeType, emoji: '🌊', label: 'Lago', price: 120, desc: 'Pato/Ganso +20%, animais aquáticos +felicidade', minLevel: 8 },
                     { biome: 'floresta' as BiomeType, emoji: '🌲', label: 'Floresta', price: 150, desc: 'Minhocário/Criatório +50%', minLevel: 5 },
                     { biome: 'pomar' as BiomeType, emoji: '🍎', label: 'Pomar', price: 200, desc: 'Todos +2 felicidade/dia', minLevel: 12 },
                   ]).map(({ biome, emoji, label, price, desc, minLevel }) => {
@@ -251,7 +251,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             {/* Poço d'Água */}
             <div className="bg-white border-4 border-blue-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-blue-800 mb-1">💧 Poço d'Água</h4>
-              <p className="text-xs text-stone-500 font-mono mb-2">Reduz conta de água por nível (máx 75%). Nível 4: +3 felicidade/dia para rã e jacaré. Nível 5: -10% chance de seca. Atual: Nível {p.wellLevel}/5 (-{Math.round(Math.min(p.wellLevel * 15, 75))}% água) • 1 upgrade por dia</p>
+              <p className="text-xs text-stone-500 font-mono mb-2">Reduz conta de água por nível (máx 75%). Nível 4: +3 felicidade/dia para jacaré e animais aquáticos. Nível 5: -10% chance de seca. Atual: Nível {p.wellLevel}/5 (-{Math.round(Math.min(p.wellLevel * 15, 75))}% água) • 1 upgrade por dia</p>
               {p.lastUpgradeDay === p.currentDay && <p className="text-[10px] text-amber-600 font-mono mb-1">⏳ Já foi feito 1 upgrade hoje. Volte amanhã!</p>}
               <div className="grid grid-cols-5 gap-1">
                 {[{ lvl: 1, price: 700 }, { lvl: 2, price: 2000 }, { lvl: 3, price: 5500 }, { lvl: 4, price: 25000 }, { lvl: 5, price: 70000 }].map(({ lvl, price }) => {

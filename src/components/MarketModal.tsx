@@ -247,9 +247,7 @@ const MarketModal: React.FC<MarketModalProps> = ({
                     { key: 'mascara_facial', label: '🧖 Máscara Facial', base: 75 },
                     { key: 'angora_wool', label: '🐇 Lã Angorá', base: 90 },
                     { key: 'seda_bruta', label: '🪲 Seda Bruta', base: 80 },
-                    { key: 'coxa_ra', label: '🐸 Coxa de Rã', base: 70 },
-                    { key: 'carne_avestruz', label: '🦤 Carne de Avestruz', base: 200 },
-                    { key: 'couro_avestruz', label: '🦤 Couro de Avestruz', base: 300 },
+                    // coxa_ra, carne_avestruz, couro_avestruz — ocultos
                     { key: 'carne_jacare', label: '🐊 Carne de Jacaré', base: 250 },
                     { key: 'couro_jacare', label: '🐊 Couro de Jacaré', base: 400 },
                   ] as const).map(item => (

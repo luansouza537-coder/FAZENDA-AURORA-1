@@ -3789,9 +3789,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           7:  '🐌 Criatório de Caracóis desbloqueado!',
           8:  '🐰 Coelho Angorá desbloqueado!',
           10: '🐛 Bicho-da-Seda desbloqueado!',
-          12: '🐸 Rã desbloqueada!',
-          15: '🦤 Avestruz desbloqueada!',
-          18: '🐊 Jacaré desbloqueado!',
+          13: '🐊 Jacaré desbloqueado!',
         };
         if (UNLOCK_FANFARE[newLevel]) {
           setTimeout(() => addNotification(`🔓 ${UNLOCK_FANFARE[newLevel]} Vá à loja comprar!`, 'event', nextDayValue), 600);
@@ -5460,7 +5458,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             exoticLog.push({ msg: `🦎 Feira Exótica: Não foi desta vez. NPC teve ${npcExoticScore} pontos.`, type: 'info' });
           }
         } else {
-          exoticLog.push({ msg: `🦎 Feira Exótica: Sem animais exóticos para competir! (Avestruz, Jacaré, etc.)`, type: 'event' });
+          exoticLog.push({ msg: `🦎 Feira Exótica: Sem animais exóticos para competir! (Jacaré, Bicho-da-Seda, etc.)`, type: 'event' });
         }
 
         if (exoticGold > 0) {
@@ -5986,7 +5984,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           { id: 'guerra', title: '⚔️ Conflito Regional', desc: 'Crise aumenta demanda por alimentos! Preços sobem.', daysLeft: 5, priceMult: 1.4, items: ['milk','wool','egg','cheese','meat'] },
           { id: 'festival', title: '🎉 Festival Nacional', desc: 'Festival aumenta consumo de produtos locais!', daysLeft: 4, priceMult: 1.3, items: ['egg','mayo','cheese','honey','butter'] },
           { id: 'seca_global', title: '🏜️ Seca Global', desc: 'Escassez mundial valoriza alimentos básicos.', daysLeft: 6, priceMult: 1.5, items: ['milk','goat_milk','buffalo_milk','butter'] },
-          { id: 'exportacao', title: '🚢 Abertura de Exportações', desc: 'Novos mercados abertos! Produtos exóticos valorizados.', daysLeft: 5, priceMult: 1.6, items: ['carne_jacare','couro_jacare','couro_avestruz'] },
+          { id: 'exportacao', title: '🚢 Abertura de Exportações', desc: 'Novos mercados abertos! Produtos exóticos valorizados.', daysLeft: 5, priceMult: 1.6, items: ['carne_jacare','couro_jacare'] },
           { id: 'feria_gourmet', title: '🍽️ Feira Gourmet Internacional', desc: 'Queijos e derivados premium em alta demanda!', daysLeft: 4, priceMult: 1.45, items: ['queijoBrie','queijoMucarela','queijoCoalho','queijo_cabra'] },
           { id: 'boom_textil', title: '🧶 Boom Têxtil', desc: 'Indústria de moda em expansão! Lã e fibras valorizadas.', daysLeft: 5, priceMult: 1.35, items: ['wool','alpaca_wool','angora_wool','seda_bruta','fio_seda'] },
           { id: 'crise_economica', title: '📉 Crise Econômica', desc: 'Recessão reduz preços em 20% por 5 dias.', daysLeft: 5, priceMult: 0.8, items: ['milk','wool','egg','cheese','butter','mayo'] },
@@ -7338,7 +7336,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                   { key: 'avicultura' as FarmSpecialization, emoji: '🥚', title: 'AVICULTURA', desc: 'Foco em galinhas, patos e gansos', bonuses: '+20% produção de ovos\n-10% ração de aves\n+10% custo de outros animais', minLevel: 1 },
                   { key: 'diversificada' as FarmSpecialization, emoji: '🌿', title: 'DIVERSIFICADA', desc: 'Sem bônus nem penalidades', bonuses: 'Jogo no modo padrão\nSem modificadores especiais\nLiberdade total de escolha', minLevel: 1 },
                   { key: 'organica' as FarmSpecialization, emoji: '🌱', title: 'ORGÂNICA', desc: 'Foco em Minhocário e Criatório de Caracóis (Nv5+)', bonuses: '+20% produção de húmus/muco\nMinhocário e Criatório nunca morrem\nEspecial: animais da terra', minLevel: 5 },
-                  { key: 'exotica' as FarmSpecialization, emoji: '🦎', title: 'EXÓTICA', desc: 'Foco em animais raros (Nv8+)', bonuses: '+25% preços de couro/carne rara\nJacaré sem incidentes\nCouro de avestruz garantido na morte', minLevel: 8 },
+                  { key: 'exotica' as FarmSpecialization, emoji: '🦎', title: 'EXÓTICA', desc: 'Foco em animais raros (Nv10+)', bonuses: '+25% preços de couro/carne rara\nJacaré sem incidentes\nCouro de jacaré garantido na morte', minLevel: 10 },
                 ].filter(opt => farmLevel >= opt.minLevel).map(opt => (
                   <button
                     key={String(opt.key)}

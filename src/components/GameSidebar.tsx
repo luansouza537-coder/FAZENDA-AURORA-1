@@ -340,12 +340,7 @@ export default function GameSidebar({
                     ✨ Ov.Fértil · {inventory.fertile_egg ?? 0}u ({getActualSellPrice('fertile_egg')}💰)
                   </button>
                   )}
-                  {(inventory.couro_avestruz ?? 0) > 0 && (
-                  <button type="button" onClick={(e) => sellProduct('couro_avestruz', 1, e)}
-                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
-                    🦤 Couro Avestruz · {inventory.couro_avestruz ?? 0}u ({getActualSellPrice('couro_avestruz')}💰)
-                  </button>
-                  )}
+                  {/* couro_avestruz — oculto */}
                   {(inventory.couro_jacare ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('couro_jacare', 1, e)}
                     className="bg-green-50 hover:bg-green-100 border border-green-300 text-green-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
@@ -674,18 +669,7 @@ export default function GameSidebar({
                     🐌 Muco · {inventory.muco ?? 0}u ({getActualSellPrice('muco' as any)}💰)
                   </button>
                   )}
-                  {(inventory.coxa_ra ?? 0) > 0 && (
-                  <button type="button" onClick={(e) => sellProduct('coxa_ra' as any, 1, e)} disabled={(inventory.coxa_ra ?? 0) < 1}
-                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 disabled:opacity-40 text-emerald-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-emerald-300">
-                    🐸 Coxa Rã · {inventory.coxa_ra ?? 0}u ({getActualSellPrice('coxa_ra' as any)}💰)
-                  </button>
-                  )}
-                  {(inventory.carne_avestruz ?? 0) > 0 && (
-                  <button type="button" onClick={(e) => sellProduct('carne_avestruz' as any, 1, e)} disabled={(inventory.carne_avestruz ?? 0) < 1}
-                    className="bg-stone-50 hover:bg-stone-100 border border-stone-300 disabled:opacity-40 text-stone-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
-                    🦤 Carne Avestruz · {inventory.carne_avestruz ?? 0}u ({getActualSellPrice('carne_avestruz' as any)}💰)
-                  </button>
-                  )}
+                  {/* coxa_ra e carne_avestruz — ocultos */}
                   {(inventory.carne_jacare ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('carne_jacare' as any, 1, e)} disabled={(inventory.carne_jacare ?? 0) < 1}
                     className="bg-green-50 hover:bg-green-100 border border-green-300 disabled:opacity-40 text-green-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 transition-all cursor-pointer shadow-sm">
@@ -721,7 +705,7 @@ export default function GameSidebar({
                   { key: 'racaoAves', label: '🐔 Ração de Aves', desc: 'Para Galinha, Codorna e Pavão. 3💰/dia.' },
                   { key: 'racaoAquatica', label: '🦆 Ração Aquática', desc: 'Para Pato e Ganso. 4💰/dia.' },
                   { key: 'racaoCoelho', label: '🐰 Ração de Coelhos', desc: 'Para Coelho Angorá. 2💰/dia.' },
-                  { key: 'racaoCarnivora', label: '🍖 Ração Carnívora', desc: 'Para Rã, Avestruz e Jacaré. 6💰/dia.' }
+                  { key: 'racaoCarnivora', label: '🍖 Ração Carnívora', desc: 'Para Jacaré e animais exóticos. 6💰/dia.' }
                 ] as const).map((feed) => {
                   const currentStock = inventory[feed.key] ?? 0;
                   const unitPrice = getFeedPriceWithModifiers(feed.key);
