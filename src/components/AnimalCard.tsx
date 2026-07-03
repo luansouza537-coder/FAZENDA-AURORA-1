@@ -428,7 +428,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
           {/* Animal Badge */}
           <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'peru' ? '🦃 Peru de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
+            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'peru' ? '🦃 Peru' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
           {animal.trait && !['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda'].includes(animal.type) && (() => {
@@ -603,20 +603,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               <span className="select-none">{getBoiEmoji(animal.weightGain || 0.15)}</span>
             )}
             {animal.type === 'peru' && (
-              <div className="flex flex-col gap-1 w-full uppercase">
-                <div className="flex justify-between items-center w-full">
-                  <span className="flex items-center gap-1 text-[11px]">
-                    📈 Peso: <span className="font-mono font-black ml-1 text-xs">{Math.floor((animal.weightGain || 0) * 100)}%</span>
-                  </span>
-                  {renderGrowthBadge(animal.weightGain || 0)}
-                </div>
-                <div className="w-full bg-[#e5e7eb] h-2.5 rounded-full overflow-hidden mt-1 border border-stone-300 relative">
-                  <div
-                    className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.floor((animal.weightGain || 0) * 100)}%` }}
-                  />
-                </div>
-              </div>
+              <span className="select-none">🦃</span>
             )}
             {animal.type === 'porco' && (
               <div className="flex flex-col gap-1 w-full uppercase">
@@ -885,6 +872,25 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 </div>
                 <div className="text-[10px] text-[#78350f]/80 font-mono text-left border-t border-[#fbbf24]/50 pt-1 mt-1.5 leading-none self-start w-full">
                   Valor atual na Feira: 💰 ~{valueOfOx} moedas
+                </div>
+              </div>
+            )}
+            {animal.type === 'peru' && (
+              <div className="flex flex-col gap-1 w-full uppercase">
+                <div className="flex justify-between items-center w-full">
+                  <span className="flex items-center gap-1 text-[11px]">
+                    📈 Peso: <span className="font-mono font-black ml-1 text-xs">{Math.floor((animal.weightGain || 0.05) * 100)}%</span>
+                  </span>
+                  {renderGrowthBadge(animal.weightGain || 0.05)}
+                </div>
+                <div className="w-full bg-[#e5e7eb] h-2.5 rounded-full overflow-hidden mt-1 border border-stone-300 relative">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.floor((animal.weightGain || 0.05) * 100)}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-[#78350f]/80 font-mono text-left border-t border-[#fbbf24]/50 pt-1 mt-1.5 leading-none self-start w-full">
+                  Valor atual na Feira: 💰 ~{valueOfPeru} moedas
                 </div>
               </div>
             )}
