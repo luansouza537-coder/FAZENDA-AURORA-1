@@ -649,7 +649,35 @@ export default function AnimalGrid({
                   {/* Cabra Angorá (Nível 9+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 9 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv9+</span>}
-                    <span className="text-4xl">🐐</span>
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="24" cy="30" rx="15" ry="11" fill="#f5f0e8"/>
+                      <circle cx="11" cy="30" r="4.5" fill="#ede8dc"/>
+                      <circle cx="13" cy="24" r="4" fill="#ede8dc"/>
+                      <circle cx="19" cy="21" r="4.5" fill="#ede8dc"/>
+                      <circle cx="26" cy="20" r="4.5" fill="#ede8dc"/>
+                      <circle cx="33" cy="22" r="4" fill="#ede8dc"/>
+                      <circle cx="36" cy="29" r="4.5" fill="#ede8dc"/>
+                      <circle cx="34" cy="36" r="4" fill="#ede8dc"/>
+                      <circle cx="14" cy="36" r="4" fill="#ede8dc"/>
+                      <ellipse cx="24" cy="29" rx="11" ry="8" fill="#faf8f2"/>
+                      <rect x="16" y="38" width="3.5" height="7" rx="1.5" fill="#d4c9b0"/>
+                      <rect x="21" y="39" width="3.5" height="7" rx="1.5" fill="#d4c9b0"/>
+                      <rect x="27" y="39" width="3.5" height="7" rx="1.5" fill="#d4c9b0"/>
+                      <rect x="32" y="38" width="3.5" height="7" rx="1.5" fill="#d4c9b0"/>
+                      <ellipse cx="24" cy="15" rx="6" ry="6.5" fill="#f0ebe0"/>
+                      <path d="M19 10 C15 6 13 3 16 1 C19 -1 21 2 20 5 C19 7 18 8 19 10" stroke="#b5a07a" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+                      <path d="M29 10 C33 6 35 3 32 1 C29 -1 27 2 28 5 C29 7 30 8 29 10" stroke="#b5a07a" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+                      <ellipse cx="18.5" cy="13" rx="2.5" ry="1.5" fill="#e8d5c4" transform="rotate(-30 18.5 13)"/>
+                      <ellipse cx="29.5" cy="13" rx="2.5" ry="1.5" fill="#e8d5c4" transform="rotate(30 29.5 13)"/>
+                      <ellipse cx="21.5" cy="14.5" rx="1.2" ry="1" fill="#4a3728"/>
+                      <ellipse cx="26.5" cy="14.5" rx="1.2" ry="1" fill="#4a3728"/>
+                      <circle cx="22" cy="14" r="0.4" fill="white"/>
+                      <circle cx="27" cy="14" r="0.4" fill="white"/>
+                      <ellipse cx="24" cy="18" rx="2.8" ry="2" fill="#e8c4b8"/>
+                      <circle cx="22.8" cy="17.8" r="0.6" fill="#c4957a"/>
+                      <circle cx="25.2" cy="17.8" r="0.6" fill="#c4957a"/>
+                      <path d="M23 20 Q24 22 25 20" stroke="#d4c9b0" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+                    </svg>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Cabra Angorá</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Produz mohair a cada 25 dias — a fibra mais valiosa da fazenda! Tosquie para coletar 1 mohair (120💰) e transforme em cachecol de luxo (280💰). Usa Ração Ovinos.</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('cabra_angora')}</span>

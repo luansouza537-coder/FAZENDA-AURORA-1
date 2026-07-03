@@ -696,7 +696,49 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             )}
             {animal.type === 'cabra_angora' && (
               <>
-                <span className="select-none">🐐</span>
+                {/* Cabra Angorá — SVG ilustrado: corpo felpudo cacheado, chifres em espiral */}
+                <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="select-none">
+                  {/* Corpo principal — felpudo, oval */}
+                  <ellipse cx="24" cy="30" rx="15" ry="11" fill="#f5f0e8"/>
+                  {/* Cachos de lã ao redor do corpo */}
+                  <circle cx="11" cy="30" r="4.5" fill="#ede8dc"/>
+                  <circle cx="13" cy="24" r="4" fill="#ede8dc"/>
+                  <circle cx="19" cy="21" r="4.5" fill="#ede8dc"/>
+                  <circle cx="26" cy="20" r="4.5" fill="#ede8dc"/>
+                  <circle cx="33" cy="22" r="4" fill="#ede8dc"/>
+                  <circle cx="36" cy="29" r="4.5" fill="#ede8dc"/>
+                  <circle cx="34" cy="36" r="4" fill="#ede8dc"/>
+                  <circle cx="14" cy="36" r="4" fill="#ede8dc"/>
+                  {/* Corpo branco por cima (centro) */}
+                  <ellipse cx="24" cy="29" rx="11" ry="8" fill="#faf8f2"/>
+                  {/* Pernas */}
+                  <rect x="16" y="38" width="3.5" height="7" rx="1.5" fill="#d4c9b0"/>
+                  <rect x="21" y="39" width="3.5" height="7" rx="1.5" fill="#d4c9b0"/>
+                  <rect x="27" y="39" width="3.5" height="7" rx="1.5" fill="#d4c9b0"/>
+                  <rect x="32" y="38" width="3.5" height="7" rx="1.5" fill="#d4c9b0"/>
+                  {/* Cabeça */}
+                  <ellipse cx="24" cy="15" rx="6" ry="6.5" fill="#f0ebe0"/>
+                  {/* Chifre esquerdo — espiral */}
+                  <path d="M19 10 C15 6 13 3 16 1 C19 -1 21 2 20 5 C19 7 18 8 19 10" stroke="#b5a07a" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+                  {/* Chifre direito — espiral */}
+                  <path d="M29 10 C33 6 35 3 32 1 C29 -1 27 2 28 5 C29 7 30 8 29 10" stroke="#b5a07a" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+                  {/* Orelhas */}
+                  <ellipse cx="18.5" cy="13" rx="2.5" ry="1.5" fill="#e8d5c4" transform="rotate(-30 18.5 13)"/>
+                  <ellipse cx="29.5" cy="13" rx="2.5" ry="1.5" fill="#e8d5c4" transform="rotate(30 29.5 13)"/>
+                  {/* Olhos */}
+                  <ellipse cx="21.5" cy="14.5" rx="1.2" ry="1" fill="#4a3728"/>
+                  <ellipse cx="26.5" cy="14.5" rx="1.2" ry="1" fill="#4a3728"/>
+                  <circle cx="22" cy="14" r="0.4" fill="white"/>
+                  <circle cx="27" cy="14" r="0.4" fill="white"/>
+                  {/* Focinho */}
+                  <ellipse cx="24" cy="18" rx="2.8" ry="2" fill="#e8c4b8"/>
+                  <circle cx="22.8" cy="17.8" r="0.6" fill="#c4957a"/>
+                  <circle cx="25.2" cy="17.8" r="0.6" fill="#c4957a"/>
+                  {/* Barba */}
+                  <path d="M23 20 Q24 22 25 20" stroke="#d4c9b0" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+                  {/* Brilho no corpo — sinaliza lã de qualidade */}
+                  {animal.woolReady && <ellipse cx="24" cy="27" rx="7" ry="5" fill="#fef3c7" opacity="0.5"/>}
+                </svg>
                 {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
               </>
             )}
@@ -1082,6 +1124,27 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'ovelha_leiteira' || animal.type === 'cabra' || animal.type === 'cabra_angora' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
           const feedQty = inventory[feedType] ?? 0;
           const label = feedType === 'racaoBovina' ? 'Ração Bovina' : feedType === 'racaoSuina' ? 'Ração Suína' : feedType === 'racaoOvinos' ? 'Ração de Ovinos' : feedType === 'racaoAves' ? 'Ração de Aves' : feedType === 'racaoAquatica' ? 'Ração Aquática' : feedType === 'racaoCoelho' ? 'Ração de Coelhos' : 'Ração Carnívora';
+          if (animal.type === 'cabra_angora') {
+            return (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); onFeed(animal.id, e); }}
+                  className="bg-[#10b981] hover:bg-[#059669] active:translate-y-0.5 border-b-4 border-[#065f46] shadow-md rounded-[16px] px-4 py-2.5 font-display text-[10px] sm:text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1 flex-1 select-none transition-all hover:scale-[1.02]"
+                  title={`Alimentar: Consome 1un de ${label}. Estoque atual: ${feedQty}.`}
+                >
+                  <Utensils className="w-3.5 h-3.5" /> Alimentar ({feedQty} unidades)
+                </button>
+                {onCollectCabraAngoraMohair && (
+                  <button type="button" onClick={(e) => { e.preventDefault(); onCollectCabraAngoraMohair(animal.id, e); }} disabled={!animal.woolReady}
+                    className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+                    title={animal.woolReady ? 'Tosquiar Cabra Angorá — coletar mohair' : `Mohair cresce em ${Math.max(0, 25 - (animal.daysSinceLastWool || 0))} dias`}>
+                    <Scissors className="w-3.5 h-3.5" /> Tosquiar
+                  </button>
+                )}
+              </>
+            );
+          }
           return (
             <button
               type="button"
@@ -1546,15 +1609,6 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title={animal.woolReady ? 'Tosquiar coelho angorá' : 'Aguarde'}>
             <Scissors className="w-3.5 h-3.5" /> Tosquiar Coelho
-          </button>
-        )}
-
-        {/* Cabra Angorá: coletar mohair */}
-        {animal.type === 'cabra_angora' && onCollectCabraAngoraMohair && (
-          <button type="button" onClick={(e) => { e.preventDefault(); onCollectCabraAngoraMohair(animal.id, e); }} disabled={!animal.woolReady}
-            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
-            title={animal.woolReady ? 'Tosquiar Cabra Angorá — coletar mohair' : `Mohair cresce em ${Math.max(0, 25 - (animal.daysSinceLastWool || 0))} dias`}>
-            <Scissors className="w-3.5 h-3.5" /> Tosquiar Cabra
           </button>
         )}
 
