@@ -2431,8 +2431,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (animals.length >= 15) checkAndUnlockAchievement('milestone_14');
     if (animals.length >= 20) checkAndUnlockAchievement('milestone_16');
 
-    const avestruzes = animals.filter(a => a.type === 'avestruz').length;
-    if (avestruzes >= 3) checkAndUnlockAchievement('milestone_18');
+    const jacares = animals.filter(a => a.type === 'jacare').length;
+    if (jacares >= 3) checkAndUnlockAchievement('milestone_18');
 
     const hasJacare = animals.some(a => a.type === 'jacare');
     if (hasJacare) checkAndUnlockAchievement('milestone_12');
@@ -3367,13 +3367,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     // --- Nível 10 ---
     { catalogId: 'lc_19', client: 'Instituto Gastronômico São Paulo', product: 'queijoBrie' as const, description: 'Escola de gastronomia de prestígio nacional, com cursos frequentados por chefs de todo o Brasil. O queijo brie é usado em aulas de técnicas francesas, degustação e harmonização. A exigência é alta: consistência de textura e sabor a cada lote. Ser fornecedor do Instituto é uma referência que abre portas.', baseMarket: 90, pricePerUnit: 130, weeklyGoal: 3, durationDays: 150, minLevel: 10, completionBonus: 1250, completionXP: 160 },
     { catalogId: 'lc_20', client: 'Distribuidora Colmeia Real', product: 'mel_envasado' as const, description: 'Distribuidora que abastece bares, restaurantes e cafeterias com mel envasado em embalagens personalizadas. Trabalham com mais de 300 pontos de venda na região e precisam de volume constante para não furar o estoque dos clientes. Pagam na entrega e renovam automaticamente se as metas forem cumpridas.', baseMarket: 230, pricePerUnit: 300, weeklyGoal: 4, durationDays: 150, minLevel: 10, completionBonus: 1480, completionXP: 180 },
-    { catalogId: 'lc_34', client: 'Restaurante Flor da Serra', product: 'coxa_ra' as const, description: 'Restaurante de culinária regional premiado pelo guia gastronômico estadual. A coxa de rã grelhada com manteiga de ervas é o prato mais pedido do cardápio de degustação. O chef fez questão de incluir proteína exótica local como diferencial competitivo — e os clientes adoraram. O volume é pequeno, mas o preço pago por unidade está entre os mais altos que você vai encontrar.', baseMarket: 110, pricePerUnit: 158, weeklyGoal: 3, durationDays: 120, minLevel: 10, completionBonus: 1200, completionXP: 110 },
+    // lc_34 (coxa_ra) — oculto
     // --- Nível 11 ---
     // --- Nível 12 ---
     // --- Nível 13 ---
     { catalogId: 'lc_22', client: 'Spa Monte Alegre', product: 'buffalo_mozzarella' as const, description: 'Spa e retiro de bem-estar que serve gastronomia funcional aos hóspedes. A mozzarella de búfala fresca é peça central do menu mediterrâneo — rica em proteína, leve e com sabor inconfundível. O spa tem lista de espera de três meses e não pode comprometer a qualidade do que serve.', baseMarket: 120, pricePerUnit: 170, weeklyGoal: 3, durationDays: 180, minLevel: 13, completionBonus: 2000, completionXP: 230 },
-    { catalogId: 'lc_36', client: 'Restaurante Alto Pantanal', product: 'carne_avestruz' as const, description: 'Restaurante temático de culinária pantaneira que serve proteínas incomuns como diferencial gastronômico. A carne de avestruz entra no cardápio como filé magro, steak e carpaccio — vermelha como a bovina, mas muito mais saudável. O chef faz questão de explicar a origem de cada ingrediente para os clientes. Eles procuram fornecedor certificado que entregue animais com peso e qualidade constantes.', baseMarket: 220, pricePerUnit: 310, weeklyGoal: 2, durationDays: 150, minLevel: 13, completionBonus: 2000, completionXP: 165 },
-    { catalogId: 'lc_37', client: 'Grife Savana Couros', product: 'couro_avestruz' as const, description: 'Grife brasileira de bolsas e acessórios de luxo que usa couros exóticos certificados. O couro de avestruz tem textura inconfundível — os folículos visíveis são a assinatura do material — e é extremamente resistente para o peso que tem. Cada peça da coleção é numerada e vendida em lojas próprias em São Paulo e no Rio. O volume é baixo, mas o valor por unidade é um dos mais altos do mercado nacional de couro.', baseMarket: 300, pricePerUnit: 425, weeklyGoal: 2, durationDays: 150, minLevel: 13, completionBonus: 2730, completionXP: 225 },
+    // lc_36 (carne_avestruz) — oculto
+    // lc_37 (couro_avestruz) — oculto
     // --- Nível 14 ---
     // --- Nível 15 ---
     { catalogId: 'lc_24', client: 'Frigorífico Vale Verde', product: 'boi' as const, description: 'O maior frigorífico da região, com capacidade de processar centenas de cabeças por mês e clientes em redes de supermercados de cinco estados. Eles exigem regularidade absoluta: seis bois por mês, sem exceções. Cada trimestre cumprido gera bônus de fidelidade crescente. Quem entra nesse contrato entra no mercado de verdade.', baseMarket: 300, pricePerUnit: 420, weeklyGoal: 6, durationDays: 210, minLevel: 15, completionBonus: 3000, completionXP: 250, cycleType: 'monthly' as const, cycleLengthDays: 28 },

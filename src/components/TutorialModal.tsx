@@ -38,7 +38,7 @@ const SECTIONS = [
         <li><strong className="text-[#b45309]">🐔 Galinha / 🦆 Pato / 🪿 Ganso / 🐦 Codorna / 🦚 Pavão:</strong> Produzem ovos diariamente. Ovos de raças especiais valem muito mais.</li>
         <li><strong className="text-[#b45309]">🐂 Boi:</strong> Animal de corte — ganha peso com o tempo. Venda no <strong>Abatedouro</strong> por alto retorno.</li>
         <li><strong className="text-[#b45309]">🐛 Bicho-da-Seda:</strong> Produz seda bruta — rara e valiosa para crafting de tecidos premium.</li>
-        <li><strong className="text-[#b45309]">🐊 Jacaré / 🦤 Avestruz:</strong> Animais exóticos de nível alto. Geram couro e carne de altíssimo valor.</li>
+        <li><strong className="text-[#b45309]">🐊 Jacaré:</strong> Animal exótico de nível alto. Gera couro e carne de altíssimo valor. Requer Licença Exótica.</li>
         <li><strong className="text-[#b45309]">🐟 Peixe / 🍄 Cogumelo / 🐝 Abelha:</strong> Cultivados em áreas especiais. Colha periodicamente para estoque.</li>
       </ul>
     ),
@@ -52,7 +52,7 @@ const SECTIONS = [
         <li><strong className="text-[#b45309]">Laticínios:</strong> Leite → Queijo, Manteiga, Iogurte, Leite Condensado, Queijo Coalho, Muçarela, Brie, Parmesão, Serra.</li>
         <li><strong className="text-[#b45309]">Têxteis:</strong> Lã → Cachecol · Pelo de Lhama → Tapete · Angorá → Cachecol Angorá · Alpaca → Tecido · Seda → Fio de Seda → Manta Premium.</li>
         <li><strong className="text-[#b45309]">Aves & Exóticos:</strong> Ovo de Pato → Panquecinhas Douradas · Ovo de Ganso → Ovo Defumado · Ovos de Codorna → Conserva.</li>
-        <li><strong className="text-[#b45309]">Couro:</strong> Couro de Avestruz → Colete · Couro de Jacaré → Bolsa Exótica.</li>
+        <li><strong className="text-[#b45309]">Couro:</strong> Couro de Jacaré → Bolsa Exótica.</li>
         <li><strong className="text-[#b45309]">Especiais:</strong> Mel → Mel Envasado / Hidromel · Cogumelo → Risoto / Sopa · Peixe → Conserva.</li>
         <li><strong className="text-rose-700">Kit Gourmet</strong> (item máximo): 2 Queijo Brie + 1 Manta Premium + 2 Mel = vende por <strong>2.000+ moedas</strong>!</li>
         <li>Itens processados valem muito mais que a matéria-prima bruta. Sempre que puder, fabrique antes de vender!</li>

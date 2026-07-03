@@ -113,7 +113,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
   { id: 'milestone_15', title: 'Eterno', emoji: '♾️', description: 'Chegou ao Dia 400' },
   { id: 'milestone_16', title: 'Senhor dos Animais', emoji: '🦁', description: 'Teve 20 animais ao mesmo tempo' },
   { id: 'milestone_17', title: 'Transcendente', emoji: '🌟', description: 'Chegou ao Dia 500' },
-  { id: 'milestone_18', title: 'Criador de Avestruzes', emoji: '🦤', description: 'Teve 3 avestruzes ao mesmo tempo' },
+  { id: 'milestone_18', title: 'Fazendeiro Exótico', emoji: '🦎', description: 'Teve 3 jacarés ao mesmo tempo' },
   { id: 'milestone_19', title: 'Além do Tempo', emoji: '🌌', description: 'Chegou ao Dia 600' },
   { id: 'milestone_20', title: 'Aurora Eterna', emoji: '🌅', description: 'Chegou ao Dia 750' },
 

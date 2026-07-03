@@ -184,7 +184,7 @@ export const getLevelUpDetails = (level: number): { title: string; perks: string
         perks: [
           `Bônus permanente de +${25 + 12}% em todos os produtos da Aurora!`,
           "Feiras nacionais com prêmios especiais!",
-          "Avestruz chegando no próximo nível — prepare espaço e recursos!"
+          "Jacaré chegando em breve — prepare espaço e recursos!"
         ]
       };
     case 15:
@@ -192,8 +192,8 @@ export const getLevelUpDetails = (level: number): { title: string; perks: string
         title: "🌟 Fazenda Famosa: Animais de Grande Porte!",
         perks: [
           `Bônus permanente de +${25 + 15}% em todos os produtos da Aurora!`,
-          "🦅 Avestruz desbloqueada: penas grandes (60💰) + couro nobre (300💰) ao morrer!",
-          "Avestruz come ração de boi — planeje bem o estoque!"
+          "🦎 Novos animais exóticos disponíveis — explore as possibilidades!",
+          "Animais exóticos consomem ração especial — planeje bem o estoque!"
         ]
       };
     case 16:
