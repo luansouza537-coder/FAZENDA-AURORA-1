@@ -47,6 +47,7 @@ export interface AnimalListRowProps {
   onSellPorco: (id: number, e: React.MouseEvent) => void;
   onSellPeru?: (id: number, e: React.MouseEvent) => void;
   calculatePeruValue?: (animal: Animal) => number;
+  onCollectCabraAngoraMohair?: (id: number, e: React.MouseEvent) => void;
 }
 
 export const AnimalListRow: React.FC<AnimalListRowProps> = ({
@@ -77,9 +78,10 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
     (animal.type === 'porco' && (animal.weightGain || 0) >= 0.8) ||
     (animal.type === 'cabra' && animal.isLactating && animal.hasProducedToday) ||
     (animal.type === 'pato' && animal.hasProducedToday) ||
-    (animal.type === 'bufalo' && animal.hasProducedToday && animal.isLactating !== false);
+    (animal.type === 'bufalo' && animal.hasProducedToday && animal.isLactating !== false) ||
+    (animal.type === 'cabra_angora' && animal.woolReady);
   const typeLabel: Record<string, string> = {
-    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐', peru: '🦃',
+    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐', peru: '🦃', cabra_angora: '🐐',
     lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
     codorna: '🐦', alpaca: '🦙', minhoca: '🪱', caracol: '🐌',
     coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊', porco: '🐷',
@@ -137,6 +139,9 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
         {animal.type === 'peru' && onSellPeru && calculatePeruValue && (
           <button onClick={e => onSellPeru(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 cursor-pointer">💰{calculatePeruValue(animal)}</button>
         )}
+        {animal.type === 'cabra_angora' && onCollectCabraAngoraMohair && animal.woolReady && (
+          <button onClick={e => onCollectCabraAngoraMohair(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-purple-100 border border-purple-300 text-purple-800 hover:bg-purple-200 cursor-pointer">🧶 Mohair</button>
+        )}
       </div>
     </div>
   );
@@ -185,6 +190,7 @@ export interface AnimalCardProps {
   onSellPorco: (id: number, e: React.MouseEvent) => void;
   onSellPeru?: (id: number, e: React.MouseEvent) => void;
   calculatePeruValue?: (animal: Animal) => number;
+  onCollectCabraAngoraMohair?: (id: number, e: React.MouseEvent) => void;
   getAnimalDailyProfit: (type: AnimalType) => DailyProfit;
   getTraitInfo: (trait: AnimalTrait) => TraitInfo;
   getLifePhase: (animal: { age?: number; maxAge?: number; isAdult?: boolean; adulthoodDay?: number }) => LifePhase;
@@ -242,6 +248,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onSellPorco,
   onSellPeru,
   calculatePeruValue,
+  onCollectCabraAngoraMohair,
   getAnimalDailyProfit,
   getTraitInfo,
   getLifePhase,
@@ -285,7 +292,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
     (animal.type === 'ovelha' && animal.woolReady) ||
     (animal.type === 'lhama' && (animal.woolAccumulated ?? 0) > 0) ||
     (animal.type === 'alpaca' && animal.woolReady) ||
-    (animal.type === 'coelho_angora' && animal.woolReady)
+    (animal.type === 'coelho_angora' && animal.woolReady) ||
+    (animal.type === 'cabra_angora' && animal.woolReady)
   );
 
   return (
@@ -428,7 +436,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
           {/* Animal Badge */}
           <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'peru' ? '🦃 Peru' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
+            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'peru' ? '🦃 Peru' : animal.type === 'cabra_angora' ? '🐐 Cabra Angorá' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
           {animal.trait && !['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda'].includes(animal.type) && (() => {
@@ -686,6 +694,12 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
               </>
             )}
+            {animal.type === 'cabra_angora' && (
+              <>
+                <span className="select-none">🐐</span>
+                {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
+              </>
+            )}
             {animal.type === 'bicho_seda' && (() => {
               const phase = animal.age <= 2 ? 'ovo' : animal.age <= 12 ? 'lagarta' : animal.age <= 16 ? 'casulo' : 'mariposa';
               const phaseEmoji = phase === 'ovo' ? '🥚' : phase === 'lagarta' ? '🐛' : phase === 'casulo' ? '🫙' : '🦋';
@@ -807,7 +821,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
       </div>}
 
       {!collapsed && (() => {
-        const isReady = (animal.type === 'vaca' && animal.hasProducedToday) || (animal.type === 'ovelha' && animal.woolReady) || (animal.type === 'boi' && (animal.weightGain || 0) >= 0.8) || (animal.type === 'galinha' && animal.hasProducedToday) || (animal.type === 'cabra' && animal.isLactating && animal.hasProducedToday) || (animal.type === 'lhama' && (animal.woolAccumulated ?? 0) >= 3) || (animal.type === 'pato' && animal.hasProducedToday) || (animal.type === 'bufalo' && animal.hasProducedToday);
+        const isReady = (animal.type === 'vaca' && animal.hasProducedToday) || (animal.type === 'ovelha' && animal.woolReady) || (animal.type === 'boi' && (animal.weightGain || 0) >= 0.8) || (animal.type === 'galinha' && animal.hasProducedToday) || (animal.type === 'cabra' && animal.isLactating && animal.hasProducedToday) || (animal.type === 'lhama' && (animal.woolAccumulated ?? 0) >= 3) || (animal.type === 'pato' && animal.hasProducedToday) || (animal.type === 'bufalo' && animal.hasProducedToday) || (animal.type === 'cabra_angora' && animal.woolReady);
         return (
           <div className={`border rounded-[18px] p-3 text-center mb-4 text-xs font-extrabold flex flex-col items-center justify-center gap-1.5 uppercase tracking-wide shadow-sm min-h-[58px] ${
             isReady
@@ -893,6 +907,19 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                   Valor atual na Feira: 💰 ~{valueOfPeru} moedas
                 </div>
               </div>
+            )}
+            {animal.type === 'cabra_angora' && (
+              <>
+                {animal.woolReady ? (
+                  <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">
+                    🧶 Mohair pronto para tosquia!
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">
+                    ⏳ Mohair cresce em {Math.max(0, 25 - (animal.daysSinceLastWool || 0))} dias
+                  </span>
+                )}
+              </>
             )}
             {animal.type === 'cabra' && (
               <>
@@ -1052,7 +1079,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           }
           if (animal.type === 'bicho_seda') return null;
           // BUG FIX: novos animais usam a ração correta na UI
-          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'ovelha_leiteira' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
+          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'ovelha_leiteira' || animal.type === 'cabra' || animal.type === 'cabra_angora' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
           const feedQty = inventory[feedType] ?? 0;
           const label = feedType === 'racaoBovina' ? 'Ração Bovina' : feedType === 'racaoSuina' ? 'Ração Suína' : feedType === 'racaoOvinos' ? 'Ração de Ovinos' : feedType === 'racaoAves' ? 'Ração de Aves' : feedType === 'racaoAquatica' ? 'Ração Aquática' : feedType === 'racaoCoelho' ? 'Ração de Coelhos' : 'Ração Carnívora';
           return (
@@ -1519,6 +1546,15 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title={animal.woolReady ? 'Tosquiar coelho angorá' : 'Aguarde'}>
             <Scissors className="w-3.5 h-3.5" /> Tosquiar Coelho
+          </button>
+        )}
+
+        {/* Cabra Angorá: coletar mohair */}
+        {animal.type === 'cabra_angora' && onCollectCabraAngoraMohair && (
+          <button type="button" onClick={(e) => { e.preventDefault(); onCollectCabraAngoraMohair(animal.id, e); }} disabled={!animal.woolReady}
+            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+            title={animal.woolReady ? 'Tosquiar Cabra Angorá — coletar mohair' : `Mohair cresce em ${Math.max(0, 25 - (animal.daysSinceLastWool || 0))} dias`}>
+            <Scissors className="w-3.5 h-3.5" /> Tosquiar Cabra
           </button>
         )}
 

@@ -141,6 +141,7 @@ export function useInventory({
     egg: 'ovos', duck_egg: 'ovos', goose_egg: 'ovos', quail_egg: 'ovos',
     fertile_egg: 'ovos', mayo: 'ovos', pate_pato: 'ovos', ovo_defumado: 'ovos', conserva_codorna: 'ovos',
     wool: 'texteis', llama_wool: 'texteis', alpaca_wool: 'texteis', angora_wool: 'texteis',
+    mohair: 'texteis', cachecol_mohair: 'texteis',
     scarf: 'texteis', tapete_lhama: 'texteis', cachecol_angora: 'texteis',
     tecido_alpaca: 'texteis', fio_seda: 'texteis', manta_premium: 'texteis',
     coxa_ra: 'carnes', carne_avestruz: 'carnes', carne_jacare: 'carnes', peixe: 'carnes',
@@ -689,6 +690,18 @@ export function useInventory({
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧣', '+1 Cachecol Angorá', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+  };
+
+  const craftCachecolMohair = (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (farmLevel < 9) { addLog('🧣 Cachecol Mohair requer Nível 9!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if ((inventory.mohair ?? 0) < 2) { addLog('🐐 Falta Mohair! Precisa de 2.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Mohair!', event); return; }
+    setInventory(prev => ({ ...prev, mohair: (prev.mohair ?? 0) - 2, cachecol_mohair: (prev.cachecol_mohair ?? 0) + 1 }));
+    applyCraftCost('cachecol_mohair');
+    addLog('🧣 Você confeccionou 1 Cachecol Mohair com 2 mohairs!', 'success');
+    setFarmXp(prev => prev + 3);
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧣', '+1 Cachecol Mohair', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   const craftTecidoAlpaca = (event?: React.MouseEvent) => {
@@ -2000,6 +2013,7 @@ export function useInventory({
     craftLeiteCondensado,
     craftTapeteLhama,
     craftCachecolAngora,
+    craftCachecolMohair,
     craftTecidoAlpaca,
     craftFioSeda,
     craftMantaPremium,

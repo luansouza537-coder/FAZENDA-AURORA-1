@@ -64,6 +64,7 @@ interface AnimalGridProps {
   collectBuffaloMilk: (id: number, e?: React.MouseEvent) => void;
   collectAlpacaWool: (id: number, e?: React.MouseEvent) => void;
   collectCoelhoWool: (id: number, e?: React.MouseEvent) => void;
+  collectCabraAngoraMohair: (id: number, e?: React.MouseEvent) => void;
   collectBichoSeda: (id: number, e?: React.MouseEvent) => void;
   feedBichoSeda: (id: number, e?: React.MouseEvent) => void;
   collectRa: (id: number, e?: React.MouseEvent) => void;
@@ -148,6 +149,7 @@ export default function AnimalGrid({
   collectBuffaloMilk,
   collectAlpacaWool,
   collectCoelhoWool,
+  collectCabraAngoraMohair,
   collectBichoSeda,
   feedBichoSeda,
   collectRa,
@@ -644,6 +646,19 @@ export default function AnimalGrid({
                     </button>
                   </div>
 
+                  {/* Cabra Angorá (Nível 9+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 9 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv9+</span>}
+                    <span className="text-4xl">🐐</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Cabra Angorá</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Produz mohair a cada 25 dias — a fibra mais valiosa da fazenda! Tosquie para coletar 1 mohair (120💰) e transforme em cachecol de luxo (280💰). Usa Ração Ovinos.</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('cabra_angora')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('cabra_angora', e)} disabled={gold < getAnimalPurchasePrice('cabra_angora') || farmLevel < 9}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 9 ? 'Nível 9+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
                   {/* Jacaré (Nível 13+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 13 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv13+</span>}
@@ -779,10 +794,10 @@ export default function AnimalGrid({
                     <span className="text-[10px] text-[#fef3c7]/60 font-mono">
                       Mostrando {animals.filter(a => {
                         if (animalFilter === 'all') return true;
-                        if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday);
+                        if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday) || (a.type === 'cabra_angora' && a.woolReady);
                         if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo'].includes(a.type);
                         if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru'].includes(a.type);
-                        if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra','bicho_seda'].includes(a.type);
+                        if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra_angora','cabra','bicho_seda'].includes(a.type);
                         if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
                         return a.type === animalFilter;
                       }).length} de {animals.length} animais
@@ -888,10 +903,10 @@ export default function AnimalGrid({
                       .filter(a => a.type !== 'porco')
                       .filter(a => {
                         if (animalFilter === 'all') return true;
-                        if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday);
+                        if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday) || (a.type === 'cabra_angora' && a.woolReady);
                         if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo'].includes(a.type);
                         if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru'].includes(a.type);
-                        if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra','bicho_seda'].includes(a.type);
+                        if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra_angora','cabra','bicho_seda'].includes(a.type);
                         if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
                         return a.type === animalFilter;
                       })
@@ -925,6 +940,7 @@ export default function AnimalGrid({
                               onSellPorco={sellPorco}
                               onSellPeru={sellPeru}
                               calculatePeruValue={calculatePeruValue}
+                              onCollectCabraAngoraMohair={collectCabraAngoraMohair}
                             />
                           ))}
                         </div>
@@ -987,6 +1003,7 @@ export default function AnimalGrid({
                         onCollectMel={collectMel}
                         onCollectHumus={collectHumus}
                         onCollectMuco={collectMuco}
+                        onCollectCabraAngoraMohair={collectCabraAngoraMohair}
                       />
                     ));
                   })()}

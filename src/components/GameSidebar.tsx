@@ -144,6 +144,8 @@ export default function GameSidebar({
                       { key: 'mayo', label: '🥣 Maionese', qty: inventory.mayo ?? 0, priceKey: 'mayo' },
                       { key: 'tapete_lhama', label: '🪢 Tapete Lhama', qty: (inventory as any).tapete_lhama ?? 0, priceKey: 'tapete_lhama' as any },
                       { key: 'cachecol_angora', label: '🧣 Cachecol Angorá', qty: (inventory as any).cachecol_angora ?? 0, priceKey: 'cachecol_angora' as any },
+                      { key: 'mohair', label: '🧶 Mohair', qty: (inventory as any).mohair ?? 0, priceKey: 'mohair' as any },
+                      { key: 'cachecol_mohair', label: '🧣 Cachecol Mohair', qty: (inventory as any).cachecol_mohair ?? 0, priceKey: 'cachecol_mohair' as any },
                       { key: 'tecido_alpaca', label: '🧶 Tecido Alpaca', qty: (inventory as any).tecido_alpaca ?? 0, priceKey: 'tecido_alpaca' as any },
                       { key: 'fio_seda', label: '🪡 Fio de Seda', qty: (inventory as any).fio_seda ?? 0, priceKey: 'fio_seda' as any },
                       { key: 'manta_premium', label: '✨ Manta Premium', qty: (inventory as any).manta_premium ?? 0, priceKey: 'manta_premium' as any },
@@ -406,6 +408,18 @@ export default function GameSidebar({
                   <button type="button" onClick={(e) => sellProduct('cachecol_angora', 1, e)} disabled={(inventory.cachecol_angora ?? 0) < 1}
                     className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 disabled:opacity-40 disabled:cursor-not-allowed text-indigo-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-indigo-300">
                     🧣 Cachecol Angorá · {inventory.cachecol_angora ?? 0}u ({getActualSellPrice('cachecol_angora')}💰)
+                  </button>
+                  )}
+                  {((inventory as any).mohair ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('mohair', 1, e)} disabled={((inventory as any).mohair ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🧶 Mohair · {(inventory as any).mohair ?? 0}u ({getActualSellPrice('mohair' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).cachecol_mohair ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('cachecol_mohair', 1, e)} disabled={((inventory as any).cachecol_mohair ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-400">
+                    🧣 Cachecol Mohair · {(inventory as any).cachecol_mohair ?? 0}u ({getActualSellPrice('cachecol_mohair' as any)}💰)
                   </button>
                   )}
                   {(inventory.tecido_alpaca ?? 0) > 0 && (

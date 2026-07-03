@@ -115,6 +115,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
   { id: 'milestone_17', title: 'Transcendente', emoji: '🌟', description: 'Chegou ao Dia 500' },
   { id: 'milestone_18', title: 'Fazendeiro Exótico', emoji: '🦎', description: 'Teve 3 jacarés ao mesmo tempo' },
   { id: 'peru_seller', title: 'Criador de Perus', emoji: '🦃', description: 'Vendeu seu primeiro peru na feira' },
+  { id: 'mohair_collector', title: 'Tecelão de Luxo', emoji: '🧶', description: 'Coletou seu primeiro mohair de Cabra Angorá' },
   { id: 'milestone_19', title: 'Além do Tempo', emoji: '🌌', description: 'Chegou ao Dia 600' },
   { id: 'milestone_20', title: 'Aurora Eterna', emoji: '🌅', description: 'Chegou ao Dia 750' },
 

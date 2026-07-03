@@ -46,6 +46,7 @@ export function getRandomName(type: string): string {
     jacare: ['Amazonas','Araguaia','Pantanal','Tapajós','Tocantins','Xingu','Madeira','Purus','Juruá','Negro'],
     peru: ['Farofa','Noel','Gobble','Natalino','Gordo','Festão','Bolão','Papo','Barba','Farto'],
     ovelha_leiteira: ['Lactícia','Cremosa','Queijinha','Nata','Manteiga','Ricota','Requeijão','Coalhada','Iogurte','Mousse'],
+    cabra_angora: ['Serena','Brisa','Veluda','Dourada','Finaça','Seda','Angora','Mohair','Suave','Felpuda'],
   };
   const list = names[type] ?? ['Animal','Bichinho','Fazendeiro','Campeiro','Caipira'];
   return list[Math.floor(Math.random() * list.length)];

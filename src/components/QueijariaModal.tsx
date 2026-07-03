@@ -51,6 +51,7 @@ export interface CraftActions {
   craftScarf: (e?: React.MouseEvent) => void;
   craftTapeteLhama: (e?: React.MouseEvent) => void;
   craftCachecolAngora: (e?: React.MouseEvent) => void;
+  craftCachecolMohair: (e?: React.MouseEvent) => void;
   craftTecidoAlpaca: (e?: React.MouseEvent) => void;
   craftFioSeda: (e?: React.MouseEvent) => void;
   craftMantaPremium: (e?: React.MouseEvent) => void;
@@ -288,6 +289,7 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                   { label: 'Manta de Lhama', emoji: '🛏️', req: `🦙 1 Poncho Lhama (${(inventory as any).poncho_lhama ?? 0}/1) + 🧶 1 Fio Lhama (${(inventory as any).fio_lhama ?? 0}/1) • Nv6`, canCraft: farmLevel >= 6 && ((inventory as any).poncho_lhama ?? 0) >= 1 && ((inventory as any).fio_lhama ?? 0) >= 1, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftMantaLhama(e) },
                   { label: 'Tapete de Lhama', emoji: '🪢', req: `🦙 3 Lã Lhama (${inventory.llama_wool ?? 0}/3) • Nv4`, canCraft: farmLevel >= 4 && (inventory.llama_wool ?? 0) >= 3, reqLevel: 4, onClick: (e: React.MouseEvent) => c.craftTapeteLhama(e) },
                   { label: 'Cachecol Angorá', emoji: '🧣', req: `🐇 2 Lã Angorá (${inventory.angora_wool ?? 0}/2) • Nv8`, canCraft: farmLevel >= 8 && (inventory.angora_wool ?? 0) >= 2, reqLevel: 8, onClick: (e: React.MouseEvent) => c.craftCachecolAngora(e) },
+                  { label: 'Cachecol Mohair', emoji: '🧣', req: `🐐 2 Mohair (${(inventory as any).mohair ?? 0}/2) • Nv9`, canCraft: farmLevel >= 9 && ((inventory as any).mohair ?? 0) >= 2, reqLevel: 9, onClick: (e: React.MouseEvent) => c.craftCachecolMohair(e) },
                   { label: 'Tecido de Alpaca', emoji: '🧶', req: `🦙 3 Lã Alpaca (${inventory.alpaca_wool ?? 0}/3) • Nv5`, canCraft: farmLevel >= 5 && (inventory.alpaca_wool ?? 0) >= 3, reqLevel: 5, onClick: (e: React.MouseEvent) => c.craftTecidoAlpaca(e) },
                   { label: 'Fio de Seda', emoji: '🪡', req: `🪲 2 Seda Bruta (${inventory.seda_bruta ?? 0}/2) • Nv10`, canCraft: farmLevel >= 10 && (inventory.seda_bruta ?? 0) >= 2, reqLevel: 10, onClick: (e: React.MouseEvent) => c.craftFioSeda(e) },
                   { label: 'Manta Premium', emoji: '✨', req: `🪡 1 Fio Seda (${inventory.fio_seda ?? 0}/1) + 🧣 1 Cachecol Angorá (${inventory.cachecol_angora ?? 0}/1) + 🧶 1 Tecido Alpaca (${inventory.tecido_alpaca ?? 0}/1) • Nv13`, canCraft: farmLevel >= 13 && (inventory.fio_seda ?? 0) >= 1 && (inventory.cachecol_angora ?? 0) >= 1 && (inventory.tecido_alpaca ?? 0) >= 1, reqLevel: 13, onClick: (e: React.MouseEvent) => c.craftMantaPremium(e) },

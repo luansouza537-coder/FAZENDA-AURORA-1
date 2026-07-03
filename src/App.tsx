@@ -804,6 +804,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       humus: 0,
       muco: 0,
       angora_wool: 0,
+      mohair: 0,
+      cachecol_mohair: 0,
       seda_bruta: 0,
       coxa_ra: 0,
       carne_avestruz: 0,
@@ -896,6 +898,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       serum_facial: [95, 95, 95, 95, 95, 95, 95],
       mascara_facial: [75, 75, 75, 75, 75, 75, 75],
       angora_wool: [90, 90, 90, 90, 90, 90, 90],
+      mohair: [120, 120, 120, 120, 120, 120, 120],
+      cachecol_mohair: [280, 280, 280, 280, 280, 280, 280],
       seda_bruta: [100, 100, 100, 100, 100, 100, 100],
       coxa_ra: [110, 110, 110, 110, 110, 110, 110],
       carne_avestruz: [220, 220, 220, 220, 220, 220, 220],
@@ -1656,7 +1660,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       return 1.0;
     }
     // --- LÃS E FIBRAS (ovelha, lhama, alpaca, angorá, seda) ---
-    const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','fio_seda','tecido_alpaca','cachecol_angora','tapete_lhama','manta_premium']);
+    const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair','cachecol_mohair','seda_bruta','fio_seda','tecido_alpaca','cachecol_angora','tapete_lhama','manta_premium']);
     if (las.has(itemType)) {
       if (estacao === 'outono') return 1.15;
       if (estacao === 'inverno') return 1.35;
@@ -1712,7 +1716,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (currentW === 'chuva') {
       const laticinios = new Set(['milk','goat_milk','buffalo_milk','butter','yogurt','iogurte_cabra','leite_condensado']);
       if (laticinios.has(itemType)) return 0.9;
-      const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool']);
+      const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair']);
       if (las.has(itemType)) return 0.8;
       const ovos = new Set(['egg','duck_egg','goose_egg','quail_egg','fertile_egg']);
       if (ovos.has(itemType)) return 0.9;
@@ -1730,7 +1734,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Storage limits for Celeiro and Câmara Fria
-  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','sabonete_natural','minhoca_viva','biofertilizante']);
+  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair','cachecol_mohair','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','sabonete_natural','minhoca_viva','biofertilizante']);
   const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','muco','creme_cosmetico','sabonete_natural','serum_facial','mascara_facial']);
 
   const getCeleiroLimit = () => ([30, 60, 120, 250, 999][celeiroLevel] ?? 30);
@@ -1744,7 +1748,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Base raw item prices (increases with levels)
-  const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'colete_couro' | 'bolsa_exotica'): number => {
+  const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'colete_couro' | 'bolsa_exotica' | 'mohair' | 'cachecol_mohair'): number => {
     // --- PREÇOS BASE BALANCEADOS ---
     // Grupo A: early game mais tenso — leite mais lucrativo, ovo mais barato
     if (itemType === 'milk') {
@@ -1799,6 +1803,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'serum_facial') return 95;
     if (itemType === 'mascara_facial') return 75;
     if (itemType === 'angora_wool') return 90;
+    if (itemType === 'mohair') return 120;
+    if (itemType === 'cachecol_mohair') return 280;
     if (itemType === 'seda_bruta') return 100;
     if (itemType === 'coxa_ra') return 110;
     if (itemType === 'carne_avestruz') return 220;
@@ -1933,8 +1939,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Final processed sell prices including dynamic pricing equations
-  const COMERCIANTE_BONUS_ITEMS = new Set(['milk','wool','egg','goat_milk','llama_wool','duck_egg','goose_egg','buffalo_milk','quail_egg','alpaca_wool','humus','minhoca_viva','muco','angora_wool','seda_bruta','coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare']);
-  const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'colete_couro' | 'bolsa_exotica'): number => {
+  const COMERCIANTE_BONUS_ITEMS = new Set(['milk','wool','egg','goat_milk','llama_wool','duck_egg','goose_egg','buffalo_milk','quail_egg','alpaca_wool','humus','minhoca_viva','muco','angora_wool','mohair','seda_bruta','coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare']);
+  const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'colete_couro' | 'bolsa_exotica' | 'mohair' | 'cachecol_mohair'): number => {
     const base = getDynamicTransactionPrice(itemType);
     const hasComercianteBonus = workers.some(w => w.role === 'comerciante_residente') && COMERCIANTE_BONUS_ITEMS.has(itemType);
     return hasComercianteBonus ? Math.round(base * 1.08) : base;
@@ -1998,6 +2004,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     craftLeiteCondensado,
     craftTapeteLhama,
     craftCachecolAngora,
+    craftCachecolMohair,
     craftTecidoAlpaca,
     craftFioSeda,
     craftMantaPremium,
@@ -2102,6 +2109,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     collectWool,
     collectAlpacaWool,
     collectCoelhoWool,
+    collectCabraAngoraMohair,
     collectBichoSeda,
     feedBichoSeda,
     collectRa,
@@ -2760,7 +2768,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         let feedLabel = 'Ração Bovina';
         if (a.type === 'vaca' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
         else if (a.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
-        else if (a.type === 'ovelha' || a.type === 'ovelha_leiteira' || a.type === 'cabra' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
+        else if (a.type === 'ovelha' || a.type === 'ovelha_leiteira' || a.type === 'cabra' || a.type === 'cabra_angora' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
         else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
         else if (a.type === 'pato' || a.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
         else if (a.type === 'coelho_angora') { feedType = 'racaoCoelho'; feedLabel = 'Ração de Coelhos'; }
@@ -3165,6 +3173,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (copy.hunger > 20 && copy.happiness > 25) {
               copy.woolReady = true;
               logs.push({ msg: `🐰 ${copy.name} (coelho angorá) está pronto para tosquia!`, type: 'success' });
+            }
+          }
+        }
+      }
+      else if (copy.type === 'cabra_angora') {
+        if (copy.isAdult !== false) {
+          copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
+          if ((copy.daysSinceLastWool || 0) >= 25 && !copy.woolReady) {
+            if (copy.hunger > 20 && copy.happiness > 25) {
+              copy.woolReady = true;
+              logs.push({ msg: `🐐 ${copy.name} (Cabra Angorá) está pronta para tosquia! Mohair disponível.`, type: 'success' });
             }
           }
         }
@@ -3807,6 +3826,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           6:  '🪱 Minhocário desbloqueado!',
           7:  '🐌 Criatório de Caracóis desbloqueado!',
           8:  '🐰 Coelho Angorá e 🦃 Peru desbloqueados!',
+          9:  '🐐 Cabra Angorá desbloqueada! Produza mohair de alto valor.',
           10: '🐛 Bicho-da-Seda desbloqueado!',
           13: '🐊 Jacaré desbloqueado!',
         };
@@ -4092,7 +4112,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       {
         const catDef: Record<string, string[]> = {
           bovinos:  ['vaca', 'boi', 'bufalo'],
-          fibras:   ['ovelha', 'lhama', 'alpaca', 'coelho_angora', 'cabra'],
+          fibras:   ['ovelha', 'lhama', 'alpaca', 'coelho_angora', 'cabra_angora', 'cabra'],
           aves:     ['galinha', 'codorna', 'pato', 'ganso', 'pavao'],
           exoticos: ['ra', 'avestruz', 'jacare', 'bicho_seda', 'caracol', 'minhoca', 'colmeia_abelhas'],
         };
@@ -5285,7 +5305,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
         }
 
-        const fibras = finalAnimals.filter(a => ['ovelha','lhama','alpaca','coelho_angora'].includes(a.type));
+        const fibras = finalAnimals.filter(a => ['ovelha','lhama','alpaca','coelho_angora','cabra_angora'].includes(a.type));
         if (fibras.length > 0) {
           const best = fibras.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
           if (calcFairScore(best) > npcScore()) {
@@ -5655,17 +5675,19 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (workers.some(w => w.role === 'tosquiador')) {
           const woolCollected = finalAnimals.filter(a => a.type === 'ovelha' && a.isAdult !== false && a.woolReady && !(machines.shearerPurchased && machines.shearerActive)).length;
           const angoraCollected = finalAnimals.filter(a => a.type === 'coelho_angora' && a.isAdult !== false && a.woolReady).length;
+          const mohairCollected = finalAnimals.filter(a => a.type === 'cabra_angora' && a.isAdult !== false && a.woolReady).length;
           const llamaCollected = finalAnimals.filter(a => a.type === 'lhama' && a.isAdult !== false && a.woolReady).length;
           const tosquiadorIds = new Set(finalAnimals.filter(a => {
             if (a.type === 'ovelha' && a.isAdult !== false && a.woolReady && !(machines.shearerPurchased && machines.shearerActive)) return true;
             if (a.type === 'coelho_angora' && a.isAdult !== false && a.woolReady) return true;
+            if (a.type === 'cabra_angora' && a.isAdult !== false && a.woolReady) return true;
             if (a.type === 'lhama' && a.isAdult !== false && a.woolReady) return true;
             return false;
           }).map(a => a.id));
           if (tosquiadorIds.size > 0) {
             setAnimals(prev => prev.map(a => {
               if (!tosquiadorIds.has(a.id)) return a;
-              const daysUntilWool = a.type === 'coelho_angora' ? 5 : a.type === 'lhama' ? 10 : 7;
+              const daysUntilWool = a.type === 'coelho_angora' ? 5 : a.type === 'cabra_angora' ? 25 : a.type === 'lhama' ? 10 : 7;
               return { ...a, woolReady: false, daysUntilWool, daysSinceLastWool: 0 };
             }));
           }
@@ -5678,6 +5700,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             const angoraQty = angoraCollected * (specialization === 'fibras' ? 2 : 1);
             setInventory(prev => ({ ...prev, angora_wool: (prev.angora_wool ?? 0) + angoraQty }));
             logsToAdd.push({ msg: `🐇 Tosquiador coletou +${angoraQty} lã angorá automaticamente!`, type: 'success' });
+          }
+          if (mohairCollected > 0) {
+            const mohairQty = mohairCollected * (specialization === 'fibras' ? 2 : 1);
+            setInventory(prev => ({ ...prev, mohair: (prev.mohair ?? 0) + mohairQty }));
+            logsToAdd.push({ msg: `🐐 Tosquiador coletou +${mohairQty} mohair de cabra angorá automaticamente!`, type: 'success' });
           }
           if (llamaCollected > 0) {
             setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) + llamaCollected }));
@@ -5860,7 +5887,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (w.role === 'tratador_exotico') action = `Dia ${nextDayValue}: cuidou de animais exóticos`;
           if (w.role === 'veterinario') action = `Dia ${nextDayValue}: curou e inspecionou animais`;
           if (w.role === 'ordenhador') action = `Dia ${nextDayValue}: ordenhou vacas, cabras e búfalas`;
-          if (w.role === 'tosquiador') action = `Dia ${nextDayValue}: tosquiou ovelhas e coelhos angorá`;
+          if (w.role === 'tosquiador') action = `Dia ${nextDayValue}: tosquiou ovelhas, coelhos e cabras angorá`;
           if (w.role === 'avicultor') action = `Dia ${nextDayValue}: coletou ovos`;
           if (w.role === 'composteiro') action = `Dia ${nextDayValue}: supervisionou compostagem`;
           if (w.role === 'queijeiro') action = queijeiroAction;
@@ -6131,6 +6158,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       galinha: 3, codorna: 3, pavao: 3,
       pato: 4, ganso: 4,
       coelho_angora: 3,
+      cabra_angora: 3,
       ra: 6, avestruz: 6, jacare: 6,
       minhoca: 0, caracol: 0, bicho_seda: 0,
     };
@@ -6153,6 +6181,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     else if (type === 'caracol') revenue = getItemBaseSellPrice('muco') / 3;
     else if (type === 'colmeia_abelhas') revenue = getItemBaseSellPrice('mel') / 3; // avg cycle ~3 days
     else if (type === 'coelho_angora') revenue = getItemBaseSellPrice('angora_wool') / 5;
+    else if (type === 'cabra_angora') revenue = getItemBaseSellPrice('mohair') / 25;
     else if (type === 'bicho_seda') revenue = getItemBaseSellPrice('seda_bruta') * 5 / 20;
     else if (type === 'ra') revenue = getItemBaseSellPrice('coxa_ra') / 7;
     else if (type === 'avestruz') revenue = getItemBaseSellPrice('carne_avestruz') / 30;
@@ -6868,6 +6897,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             collectBuffaloMilk={collectBuffaloMilk}
             collectAlpacaWool={collectAlpacaWool}
             collectCoelhoWool={collectCoelhoWool}
+            collectCabraAngoraMohair={collectCabraAngoraMohair}
             collectBichoSeda={collectBichoSeda}
             feedBichoSeda={feedBichoSeda}
             collectRa={collectRa}
@@ -7042,7 +7072,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             craftCheese, craftQueijo, craftBuffaloMozzarella, craftButter, craftYogurt,
             craftQueijoCabra, craftIogurteCabra, craftLeiteCondensado,
             craftQueijoParmesao, craftQueijoSerra,
-            craftScarf, craftTapeteLhama, craftCachecolAngora, craftTecidoAlpaca,
+            craftScarf, craftTapeteLhama, craftCachecolAngora, craftCachecolMohair, craftTecidoAlpaca,
             craftFioSeda, craftMantaPremium,
             craftMayonese, craftPatePato, craftOvoDefumado, craftConservaCodorna,
             craftIncubarOvos, craftHidromel, craftRisotoCogumelo, craftConservaPeixe,
