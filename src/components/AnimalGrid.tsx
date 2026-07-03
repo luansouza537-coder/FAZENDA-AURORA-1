@@ -38,6 +38,8 @@ interface AnimalGridProps {
   calculateBoiValue: (animal: Animal) => number;
   calculatePorcoValue: (animal: Animal) => number;
   sellPorco: (id: number, e?: React.MouseEvent) => void;
+  sellPeru: (id: number, e?: React.MouseEvent) => void;
+  calculatePeruValue: (animal: Animal) => number;
   animalFilter: string;
   setAnimalFilter: (v: string) => void;
   animalSort: 'happiness' | 'production' | 'age' | 'name' | 'ready';
@@ -120,6 +122,8 @@ export default function AnimalGrid({
   calculateBoiValue,
   calculatePorcoValue,
   sellPorco,
+  sellPeru,
+  calculatePeruValue,
   animalFilter,
   setAnimalFilter,
   animalSort,
@@ -627,6 +631,19 @@ export default function AnimalGrid({
                     </button>
                   </div>
 
+                  {/* Peru (Nível 8+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 8 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv8+</span>}
+                    <span className="text-4xl">🦃</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Peru</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Engorda em ~30 dias e vai direto à feira por até 550💰. Usa Ração de Aves. Quanto mais feliz, mais vale!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('peru')}</span>
+                    <button type="button" onClick={(e) => buyAnimal('peru', e)} disabled={gold < getAnimalPurchasePrice('peru') || farmLevel < 8}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer">
+                      {farmLevel < 8 ? 'Nível 8+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
                   {/* Jacaré (Nível 13+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 13 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv13+</span>}
@@ -764,7 +781,7 @@ export default function AnimalGrid({
                         if (animalFilter === 'all') return true;
                         if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday);
                         if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo'].includes(a.type);
-                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz'].includes(a.type);
+                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru'].includes(a.type);
                         if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra','bicho_seda'].includes(a.type);
                         if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
                         return a.type === animalFilter;
@@ -873,7 +890,7 @@ export default function AnimalGrid({
                         if (animalFilter === 'all') return true;
                         if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday);
                         if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo'].includes(a.type);
-                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz'].includes(a.type);
+                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru'].includes(a.type);
                         if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra','bicho_seda'].includes(a.type);
                         if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
                         return a.type === animalFilter;
@@ -906,6 +923,8 @@ export default function AnimalGrid({
                               calculateBoiValue={calculateBoiValue}
                               calculatePorcoValue={calculatePorcoValue}
                               onSellPorco={sellPorco}
+                              onSellPeru={sellPeru}
+                              calculatePeruValue={calculatePeruValue}
                             />
                           ))}
                         </div>
@@ -949,6 +968,8 @@ export default function AnimalGrid({
                         calculateBoiValue={calculateBoiValue}
                         calculatePorcoValue={calculatePorcoValue}
                         onSellPorco={sellPorco}
+                        onSellPeru={sellPeru}
+                        calculatePeruValue={calculatePeruValue}
                         getAnimalDailyProfit={getAnimalDailyProfit}
                         getTraitInfo={getTraitInfo}
                         getLifePhase={getLifePhase}

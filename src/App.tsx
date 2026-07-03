@@ -2109,6 +2109,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     sellAvestruz,
     sellJacare,
     sellOx,
+    sellPeru,
+    calculatePeruValue,
     sellPorco,
     calculatePorcoValue,
     sellAnimal,
@@ -2934,6 +2936,23 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.15) + gain));
         if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
           logs.push({ msg: `🏆 ${copy.name} (Boi) atingiu o peso ideal! Você obterá valor máximo na venda!`, type: 'success' });
+        }
+      }
+      else if (copy.type === 'peru') {
+        // Perus engordam em ~30 dias (gain ~0.033/dia)
+        let gain = 0.033;
+        if (copy.hunger > 65) gain += 0.015;
+        if (copy.happiness > 70) gain += 0.01;
+        if (copy.hunger < 20) gain -= 0.02;
+        if (copy.isBestFriend) gain += 0.02;
+        if (copy.hunger < 12) {
+          gain = -0.01;
+        } else {
+          gain = Math.min(0.06, Math.max(0, gain));
+        }
+        copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.05) + gain));
+        if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
+          logs.push({ msg: `🦃 ${copy.name} (Peru) atingiu o peso ideal! Pronto para a feira!`, type: 'success' });
         }
       }
       else if (copy.type === 'porco') {
@@ -3787,7 +3806,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           5:  '🦙 Alpaca desbloqueada!',
           6:  '🪱 Minhocário desbloqueado!',
           7:  '🐌 Criatório de Caracóis desbloqueado!',
-          8:  '🐰 Coelho Angorá desbloqueado!',
+          8:  '🐰 Coelho Angorá e 🦃 Peru desbloqueados!',
           10: '🐛 Bicho-da-Seda desbloqueado!',
           13: '🐊 Jacaré desbloqueado!',
         };
@@ -6823,6 +6842,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             calculateBoiValue={calculateBoiValue}
             calculatePorcoValue={calculatePorcoValue}
             sellPorco={sellPorco}
+            sellPeru={sellPeru}
+            calculatePeruValue={calculatePeruValue}
             animalFilter={animalFilter}
             setAnimalFilter={setAnimalFilter}
             animalSort={animalSort}

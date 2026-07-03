@@ -165,8 +165,8 @@ export const getLevelUpDetails = (level: number): { title: string; perks: string
         title: "💎 Fazenda Premium: Produtos Raros!",
         perks: [
           `Bônus permanente de +${25 + 6}% em todos os produtos da Aurora!`,
-          "🦎 Animais exóticos chegando nos próximos níveis — prepare espaço e recursos!",
-          "Licença Exótica disponível nas melhorias para criar Jacarés!"
+          "🦃 Peru desbloqueado! Compre na loja, alimente com ração de aves e venda na feira em ~30 dias.",
+          "🐰 Coelho Angorá também desbloqueado — produz lã angorá de alto valor!"
         ]
       };
     case 13:

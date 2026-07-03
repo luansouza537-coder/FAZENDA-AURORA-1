@@ -58,7 +58,7 @@ const ANIMAL_EMOJI: Record<string, string> = {
   vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐',
   lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
   codorna: '🐦', alpaca: '🦙', minhoca: '🪱', caracol: '🐌',
-  coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊',
+  coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊', peru: '🦃',
 };
 
 interface RankingModalProps {

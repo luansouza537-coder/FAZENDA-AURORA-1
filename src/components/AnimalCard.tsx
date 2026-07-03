@@ -45,6 +45,8 @@ export interface AnimalListRowProps {
   calculateBoiValue: (animal: Animal) => number;
   calculatePorcoValue: (animal: Animal) => number;
   onSellPorco: (id: number, e: React.MouseEvent) => void;
+  onSellPeru?: (id: number, e: React.MouseEvent) => void;
+  calculatePeruValue?: (animal: Animal) => number;
 }
 
 export const AnimalListRow: React.FC<AnimalListRowProps> = ({
@@ -77,7 +79,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
     (animal.type === 'pato' && animal.hasProducedToday) ||
     (animal.type === 'bufalo' && animal.hasProducedToday && animal.isLactating !== false);
   const typeLabel: Record<string, string> = {
-    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐',
+    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐', peru: '🦃',
     lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
     codorna: '🐦', alpaca: '🦙', minhoca: '🪱', caracol: '🐌',
     coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊', porco: '🐷',
@@ -103,7 +105,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
       <div className="flex items-center gap-1 ml-auto">
         {!['bicho_seda', 'minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>}
         {!noHungerAnimal && <span className="text-[10px] font-mono text-stone-500">🍽️{animal.hunger}%</span>}
-        {(animal.type === 'boi' || animal.type === 'porco') && <span className="text-[10px] font-mono text-stone-500">🔥{Math.floor((animal.weightGain||0)*100)}%</span>}
+        {(animal.type === 'boi' || animal.type === 'porco' || animal.type === 'peru') && <span className="text-[10px] font-mono text-stone-500">🔥{Math.floor((animal.weightGain||0)*100)}%</span>}
         {isCritical && <span className="text-[9px] bg-red-500 text-white font-black px-1.5 py-0.5 rounded-full animate-pulse">⚠️</span>}
         {isReady && <span className="text-[9px] bg-green-500 text-white font-black px-1.5 py-0.5 rounded-full">✅ Pronto</span>}
       </div>
@@ -131,6 +133,9 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
         )}
         {animal.type === 'porco' && animal.isAdult !== false && (
           <button onClick={e => onSellPorco(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-red-100 border border-red-300 text-red-800 hover:bg-red-200 cursor-pointer">💰{valueOfPorcoRow}</button>
+        )}
+        {animal.type === 'peru' && onSellPeru && calculatePeruValue && (
+          <button onClick={e => onSellPeru(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 cursor-pointer">💰{calculatePeruValue(animal)}</button>
         )}
       </div>
     </div>
@@ -178,6 +183,8 @@ export interface AnimalCardProps {
   calculateBoiValue: (animal: Animal) => number;
   calculatePorcoValue: (animal: Animal) => number;
   onSellPorco: (id: number, e: React.MouseEvent) => void;
+  onSellPeru?: (id: number, e: React.MouseEvent) => void;
+  calculatePeruValue?: (animal: Animal) => number;
   getAnimalDailyProfit: (type: AnimalType) => DailyProfit;
   getTraitInfo: (trait: AnimalTrait) => TraitInfo;
   getLifePhase: (animal: { age?: number; maxAge?: number; isAdult?: boolean; adulthoodDay?: number }) => LifePhase;
@@ -233,6 +240,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   calculateBoiValue,
   calculatePorcoValue,
   onSellPorco,
+  onSellPeru,
+  calculatePeruValue,
   getAnimalDailyProfit,
   getTraitInfo,
   getLifePhase,
@@ -251,6 +260,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const [pendingSell, setPendingSell] = useState(false);
   const [pendingSellOx, setPendingSellOx] = useState(false);
   const [pendingSellAvestruz, setPendingSellAvestruz] = useState(false);
+  const [pendingSellPeru, setPendingSellPeru] = useState(false);
   const [pendingSellJacare, setPendingSellJacare] = useState(false);
   const [pendingSellPorco, setPendingSellPorco] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -258,6 +268,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const isEditing = editingId === animal.id;
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
   const valueOfPorco = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
+  const valueOfPeru = animal.type === 'peru' && calculatePeruValue ? calculatePeruValue(animal) : 0;
 
   const noHungerAnimal = ['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type);
   const noHappinessAnimal = ['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda'].includes(animal.type);
@@ -417,7 +428,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
           {/* Animal Badge */}
           <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
+            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'peru' ? '🦃 Peru de Engorda' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
           {animal.trait && !['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda'].includes(animal.type) && (() => {
@@ -590,6 +601,22 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             )}
             {animal.type === 'boi' && (
               <span className="select-none">{getBoiEmoji(animal.weightGain || 0.15)}</span>
+            )}
+            {animal.type === 'peru' && (
+              <div className="flex flex-col gap-1 w-full uppercase">
+                <div className="flex justify-between items-center w-full">
+                  <span className="flex items-center gap-1 text-[11px]">
+                    📈 Peso: <span className="font-mono font-black ml-1 text-xs">{Math.floor((animal.weightGain || 0) * 100)}%</span>
+                  </span>
+                  {renderGrowthBadge(animal.weightGain || 0)}
+                </div>
+                <div className="w-full bg-[#e5e7eb] h-2.5 rounded-full overflow-hidden mt-1 border border-stone-300 relative">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.floor((animal.weightGain || 0) * 100)}%` }}
+                  />
+                </div>
+              </div>
             )}
             {animal.type === 'porco' && (
               <div className="flex flex-col gap-1 w-full uppercase">
@@ -1019,7 +1046,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           }
           if (animal.type === 'bicho_seda') return null;
           // BUG FIX: novos animais usam a ração correta na UI
-          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'ovelha_leiteira' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
+          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'ovelha_leiteira' || animal.type === 'cabra' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
           const feedQty = inventory[feedType] ?? 0;
           const label = feedType === 'racaoBovina' ? 'Ração Bovina' : feedType === 'racaoSuina' ? 'Ração Suína' : feedType === 'racaoOvinos' ? 'Ração de Ovinos' : feedType === 'racaoAves' ? 'Ração de Aves' : feedType === 'racaoAquatica' ? 'Ração Aquática' : feedType === 'racaoCoelho' ? 'Ração de Coelhos' : 'Ração Carnívora';
           return (
@@ -1122,6 +1149,28 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               onClick={(e) => { e.preventDefault(); setPendingSellOx(true); }}
               className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
               title={`Vender Boi: venda imediata na Feira. Retorna moedas baseadas no peso (%): 💰 ~${valueOfOx}`}
+            >
+              💰 Vender
+            </button>
+          )
+        )}
+
+        {/* Sell Peru */}
+        {animal.type === 'peru' && onSellPeru && (
+          pendingSellPeru ? (
+            <div className="flex items-center gap-1.5 bg-amber-50 border-2 border-amber-300 rounded-xl px-2 py-1.5 w-full">
+              <span className="text-[9px] font-mono font-black text-amber-700 leading-tight flex-1">Vender {animal.name}?<br/><span className="text-amber-500">~{valueOfPeru}💰</span></span>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellPeru(false); onSellPeru(animal.id, e); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellPeru(false); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); setPendingSellPeru(true); }}
+              className="bg-amber-500 hover:bg-amber-600 border-b-4 border-amber-800 shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+              title={`Vender Peru na Feira. Retorna moedas baseadas no peso (%): 💰 ~${valueOfPeru}`}
             >
               💰 Vender
             </button>

@@ -38,6 +38,7 @@ const SECTIONS = [
         <li><strong className="text-[#b45309]">🐔 Galinha / 🦆 Pato / 🪿 Ganso / 🐦 Codorna / 🦚 Pavão:</strong> Produzem ovos diariamente. Ovos de raças especiais valem muito mais.</li>
         <li><strong className="text-[#b45309]">🐂 Boi:</strong> Animal de corte — ganha peso com o tempo. Venda no <strong>Abatedouro</strong> por alto retorno.</li>
         <li><strong className="text-[#b45309]">🐛 Bicho-da-Seda:</strong> Produz seda bruta — rara e valiosa para crafting de tecidos premium.</li>
+        <li><strong className="text-[#b45309]">🦃 Peru:</strong> Ave de engorda. Compre jovem, alimente com Ração de Aves por ~30 dias e venda na feira por até 550💰. Quanto mais feliz, mais vale!</li>
         <li><strong className="text-[#b45309]">🐊 Jacaré:</strong> Animal exótico de nível alto. Gera couro e carne de altíssimo valor. Requer Licença Exótica.</li>
         <li><strong className="text-[#b45309]">🐟 Peixe / 🍄 Cogumelo / 🐝 Abelha:</strong> Cultivados em áreas especiais. Colha periodicamente para estoque.</li>
       </ul>
