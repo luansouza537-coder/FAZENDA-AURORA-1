@@ -12,41 +12,81 @@ export interface ChatMessage {
 const MAX_MESSAGES = 50;
 const COOLDOWN_MS = 3000;
 
+// Tenta carregar histórico do banco — falha silenciosamente
+async function loadHistory(): Promise<ChatMessage[]> {
+  try {
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .select('id, nick, message, created_at')
+      .order('created_at', { ascending: false })
+      .limit(30);
+    if (error || !data) return [];
+    return data.reverse();
+  } catch {
+    return [];
+  }
+}
+
+// Tenta salvar no banco — falha silenciosamente
+async function persistMessage(msg: ChatMessage): Promise<void> {
+  try {
+    await supabase.from('chat_messages').insert({
+      id: msg.id,
+      nick: msg.nick,
+      message: msg.message,
+      created_at: msg.created_at,
+    });
+  } catch {
+    // ignora — broadcast já entregou a mensagem
+  }
+}
+
 export function useChat(isOpen: boolean) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const lastSentAt = useRef<number>(0);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const seenIds = useRef<Set<string>>(new Set());
+
+  const addMessage = useCallback((msg: ChatMessage) => {
+    if (seenIds.current.has(msg.id)) return;
+    seenIds.current.add(msg.id);
+    setMessages(prev => {
+      const next = [...prev, msg];
+      return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
+    });
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
 
     setLoading(true);
+    seenIds.current = new Set();
+
+    // Carrega histórico do banco (silencioso se falhar)
+    loadHistory().then(history => {
+      history.forEach(m => seenIds.current.add(m.id));
+      setMessages(history);
+      setLoading(false);
+    });
 
     const channel = supabase.channel('chat-broadcast', {
       config: { broadcast: { self: true } },
     });
-
     channelRef.current = channel;
 
     channel
       .on('broadcast', { event: 'message' }, ({ payload }) => {
-        const msg = payload as ChatMessage;
-        setMessages(prev => {
-          const next = [...prev, msg];
-          return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
-        });
+        addMessage(payload as ChatMessage);
       })
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') setLoading(false);
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
       channelRef.current = null;
     };
-  }, [isOpen]);
+  }, [isOpen, addMessage]);
 
   const sendMessage = useCallback(async (nick: string, message: string): Promise<boolean> => {
     const now = Date.now();
@@ -59,7 +99,7 @@ export function useChat(isOpen: boolean) {
 
     setError('');
     const msg: ChatMessage = {
-      id: `${Date.now()}-${Math.random()}`,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       nick,
       message: trimmed,
       created_at: new Date().toISOString(),
@@ -77,6 +117,10 @@ export function useChat(isOpen: boolean) {
     }
 
     lastSentAt.current = Date.now();
+
+    // Persiste no banco em segundo plano (silencioso se falhar)
+    persistMessage(msg);
+
     return true;
   }, []);
 
