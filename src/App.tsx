@@ -455,6 +455,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showOnlineRanking, setShowOnlineRanking] = useState(false);
 
+  useEffect(() => {
+    if (auth.user) setShowAuthModal(false);
+  }, [auth.user]);
+
   // Improvement 5: Big Notification
   const [bigNotification, setBigNotification] = useState<{title: string, body: string, emoji: string, color: string} | null>(null);
 
