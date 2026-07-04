@@ -108,6 +108,7 @@ import { useAuth } from './hooks/useAuth';
 import AuthModal from './components/AuthModal';
 import FarmNameModal from './components/FarmNameModal';
 import OnlineRankingModal from './components/RankingModal';
+import AnnouncementBanner from './components/AnnouncementBanner';
 
 
 interface FloatingText {
@@ -6356,6 +6357,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       <div className={`max-w-6xl w-full bg-[#064e3b] border-8 border-[#78350f] rounded-[32px] sm:rounded-[48px] shadow-[0_24px_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between ${currentScreen !== 'game' ? 'hidden' : ''}`}>
         
+        {/* --- ANNOUNCEMENT BANNER --- */}
+        <AnnouncementBanner />
+
         {/* --- RESOURCE HEADER BAR (WOOD HUD DESIGN) --- */}
         <div className="bg-[#78350f] border-4 border-[#92400e] rounded-[32px] sm:rounded-full p-4 sm:p-5 m-4 sm:m-6 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-[0_8px_0_#451a03]">
           

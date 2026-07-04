@@ -21,6 +21,9 @@ export default function RankingModal({ onClose, currentUserId }: RankingModalPro
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [offline, setOffline] = useState(false);
+  const [totalPlayers, setTotalPlayers] = useState<number | null>(null);
+  const [myPosition, setMyPosition] = useState<number | null>(null);
+  const [myEntry, setMyEntry] = useState<RankingEntry | null>(null);
 
   useEffect(() => {
     fetchRanking();
@@ -30,15 +33,45 @@ export default function RankingModal({ onClose, currentUserId }: RankingModalPro
     setLoading(true);
     setOffline(false);
     try {
-      const { data, error } = await supabase
-        .from('farm_rankings')
-        .select('*')
-        .order('farm_level', { ascending: false })
-        .order('total_earned', { ascending: false })
-        .limit(50);
+      const [rankResult, countResult] = await Promise.all([
+        supabase
+          .from('farm_rankings')
+          .select('*')
+          .order('farm_level', { ascending: false })
+          .order('total_earned', { ascending: false })
+          .limit(50),
+        supabase
+          .from('farm_rankings')
+          .select('*', { count: 'exact', head: true }),
+      ]);
 
-      if (error) throw error;
-      setRanking(data ?? []);
+      if (rankResult.error) throw rankResult.error;
+      const data = rankResult.data ?? [];
+      setRanking(data);
+      setTotalPlayers(countResult.count ?? null);
+
+      if (currentUserId) {
+        const posInTop50 = data.findIndex(e => e.id === currentUserId);
+        if (posInTop50 >= 0) {
+          setMyPosition(posInTop50 + 1);
+          setMyEntry(null);
+        } else {
+          // busca posição real fora do top 50
+          const { data: allAbove } = await supabase
+            .from('farm_rankings')
+            .select('id, farm_name, farm_level, total_earned, animal_count, weekly_production, updated_at')
+            .order('farm_level', { ascending: false })
+            .order('total_earned', { ascending: false });
+
+          if (allAbove) {
+            const idx = allAbove.findIndex(e => e.id === currentUserId);
+            if (idx >= 0) {
+              setMyPosition(idx + 1);
+              setMyEntry(allAbove[idx]);
+            }
+          }
+        }
+      }
     } catch {
       setOffline(true);
     } finally {
@@ -56,6 +89,8 @@ export default function RankingModal({ onClose, currentUserId }: RankingModalPro
   const formatNumber = (n: number) =>
     n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 
+  const isInTop50 = currentUserId ? ranking.some(e => e.id === currentUserId) : false;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/50 backdrop-blur-sm">
       <motion.div
@@ -66,12 +101,19 @@ export default function RankingModal({ onClose, currentUserId }: RankingModalPro
         style={{ maxHeight: '88vh' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
+        <div className="flex items-center justify-between px-5 pt-5 pb-2 shrink-0">
           <div>
             <h2 className="font-display font-black text-[#78350f] text-lg uppercase tracking-wide">
               🏆 Ranking Global
             </h2>
-            <p className="text-[10px] font-mono text-stone-400 mt-0.5">Top 50 fazendas</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-[10px] font-mono text-stone-400">Top 50 fazendas</p>
+              {totalPlayers !== null && (
+                <span className="text-[9px] font-mono bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full">
+                  👥 {totalPlayers} jogadores
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -89,6 +131,18 @@ export default function RankingModal({ onClose, currentUserId }: RankingModalPro
             >✕</button>
           </div>
         </div>
+
+        {/* Minha posição (fora do top 50) */}
+        {!loading && !offline && currentUserId && myPosition !== null && !isInTop50 && myEntry && (
+          <div className="mx-4 mb-2 shrink-0">
+            <div className="bg-amber-100 border-2 border-[#fbbf24] rounded-2xl px-3 py-2 flex items-center gap-2">
+              <span className="text-[11px] font-black text-amber-800">Sua posição:</span>
+              <span className="text-[11px] font-mono font-bold text-amber-900">#{myPosition}</span>
+              <span className="text-[10px] font-display font-black text-stone-700 truncate flex-1">{myEntry.farm_name}</span>
+              <span className="text-[9px] bg-amber-400 text-white font-black px-1.5 py-0.5 rounded-full shrink-0">Você</span>
+            </div>
+          </div>
+        )}
 
         {/* Cabeçalho da tabela */}
         <div className="grid grid-cols-[36px_1fr_48px_56px_56px] gap-1 px-4 pb-2 shrink-0">
@@ -155,14 +209,12 @@ export default function RankingModal({ onClose, currentUserId }: RankingModalPro
                           : 'bg-white/60 border-amber-100'
                       }`}
                     >
-                      {/* Posição */}
                       <span className={`text-center font-black text-sm ${
                         pos === 1 ? 'text-xl' : pos === 2 ? 'text-lg' : pos === 3 ? 'text-base' : 'text-[11px] text-stone-500'
                       }`}>
                         {medalEmoji(pos)}
                       </span>
 
-                      {/* Nome */}
                       <div className="min-w-0">
                         <div className="flex items-center gap-1">
                           <span className={`font-display font-black text-xs uppercase truncate ${isMe ? 'text-[#92400e]' : 'text-stone-700'}`}>
@@ -172,19 +224,16 @@ export default function RankingModal({ onClose, currentUserId }: RankingModalPro
                         </div>
                       </div>
 
-                      {/* Nível */}
                       <div className="text-center">
                         <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-lg">
                           Nv{entry.farm_level}
                         </span>
                       </div>
 
-                      {/* Total ganho */}
                       <span className="text-center text-[10px] font-mono font-bold text-stone-600">
                         💰{formatNumber(entry.total_earned)}
                       </span>
 
-                      {/* Animais */}
                       <span className="text-center text-[10px] font-mono font-bold text-stone-600">
                         🐾{entry.animal_count}
                       </span>
