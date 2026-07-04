@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
+
 export interface ChatMessage {
   id: string;
   nick: string;
@@ -12,32 +13,26 @@ export interface ChatMessage {
 const MAX_MESSAGES = 50;
 const COOLDOWN_MS = 3000;
 
-// Tenta carregar histórico do banco — falha silenciosamente
-async function loadHistory(): Promise<ChatMessage[]> {
+const LS_KEY = 'fazenda_chat_history';
+const HISTORY_LIMIT = 30;
+
+function loadHistory(): ChatMessage[] {
   try {
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .select('id, nick, message, created_at')
-      .order('created_at', { ascending: false })
-      .limit(30);
-    if (error || !data) return [];
-    return data.reverse();
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as ChatMessage[];
   } catch {
     return [];
   }
 }
 
-// Tenta salvar no banco — falha silenciosamente
-async function persistMessage(msg: ChatMessage): Promise<void> {
+function saveToHistory(msg: ChatMessage): void {
   try {
-    await supabase.from('chat_messages').insert({
-      id: msg.id,
-      nick: msg.nick,
-      message: msg.message,
-      created_at: msg.created_at,
-    });
+    const current = loadHistory();
+    const next = [...current, msg].slice(-HISTORY_LIMIT);
+    localStorage.setItem(LS_KEY, JSON.stringify(next));
   } catch {
-    // ignora — broadcast já entregou a mensagem
+    // ignora erros de storage cheio
   }
 }
 
@@ -52,6 +47,7 @@ export function useChat(isOpen: boolean) {
   const addMessage = useCallback((msg: ChatMessage) => {
     if (seenIds.current.has(msg.id)) return;
     seenIds.current.add(msg.id);
+    saveToHistory(msg);
     setMessages(prev => {
       const next = [...prev, msg];
       return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
@@ -64,12 +60,11 @@ export function useChat(isOpen: boolean) {
     setLoading(true);
     seenIds.current = new Set();
 
-    // Carrega histórico do banco (silencioso se falhar)
-    loadHistory().then(history => {
-      history.forEach(m => seenIds.current.add(m.id));
-      setMessages(history);
-      setLoading(false);
-    });
+    // Carrega histórico do localStorage
+    const history = loadHistory();
+    history.forEach(m => seenIds.current.add(m.id));
+    setMessages(history);
+    setLoading(false);
 
     const channel = supabase.channel('chat-broadcast', {
       config: { broadcast: { self: true } },
@@ -117,9 +112,7 @@ export function useChat(isOpen: boolean) {
     }
 
     lastSentAt.current = Date.now();
-
-    // Persiste no banco em segundo plano (silencioso se falhar)
-    persistMessage(msg);
+    saveToHistory(msg);
 
     return true;
   }, []);
