@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface ChatMessage {
   id: string;
@@ -16,38 +17,34 @@ export function useChat(isOpen: boolean) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const lastSentAt = useRef<number>(0);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
 
     setLoading(true);
-    supabase
-      .from('chat_messages')
-      .select('id, nick, message, created_at')
-      .order('created_at', { ascending: false })
-      .limit(MAX_MESSAGES)
-      .then(({ data }) => {
-        if (data) setMessages(data.reverse());
-      })
-      .finally(() => setLoading(false));
 
-    const channel = supabase
-      .channel('chat-realtime')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'chat_messages' },
-        (payload) => {
-          const msg = payload.new as ChatMessage;
-          setMessages(prev => {
-            const next = [...prev, msg];
-            return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
-          });
-        }
-      )
-      .subscribe();
+    const channel = supabase.channel('chat-broadcast', {
+      config: { broadcast: { self: true } },
+    });
+
+    channelRef.current = channel;
+
+    channel
+      .on('broadcast', { event: 'message' }, ({ payload }) => {
+        const msg = payload as ChatMessage;
+        setMessages(prev => {
+          const next = [...prev, msg];
+          return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
+        });
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') setLoading(false);
+      });
 
     return () => {
       supabase.removeChannel(channel);
+      channelRef.current = null;
     };
   }, [isOpen]);
 
@@ -58,17 +55,27 @@ export function useChat(isOpen: boolean) {
       return false;
     }
     const trimmed = message.trim().slice(0, 200);
-    if (!trimmed) return false;
+    if (!trimmed || !channelRef.current) return false;
 
     setError('');
-    const { error: err } = await supabase
-      .from('chat_messages')
-      .insert({ nick, message: trimmed });
+    const msg: ChatMessage = {
+      id: `${Date.now()}-${Math.random()}`,
+      nick,
+      message: trimmed,
+      created_at: new Date().toISOString(),
+    };
 
-    if (err) {
-      setError(`Erro: ${err.message} (${err.code})`);
+    const status = await channelRef.current.send({
+      type: 'broadcast',
+      event: 'message',
+      payload: msg,
+    });
+
+    if (status !== 'ok') {
+      setError('Erro ao enviar. Tente novamente.');
       return false;
     }
+
     lastSentAt.current = Date.now();
     return true;
   }, []);
