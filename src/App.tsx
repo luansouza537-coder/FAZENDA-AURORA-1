@@ -104,6 +104,10 @@ import GameSidebar from './components/GameSidebar';
 import AnimalGrid from './components/AnimalGrid';
 import { ToastNotification, Toast } from './components/ToastNotification';
 import { DaySummaryModal, DaySummary } from './components/DaySummaryModal';
+import { useAuth } from './hooks/useAuth';
+import AuthModal from './components/AuthModal';
+import FarmNameModal from './components/FarmNameModal';
+import OnlineRankingModal from './components/RankingModal';
 
 
 interface FloatingText {
@@ -445,6 +449,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   // Improvement 4: Ranking Modal
   const [showRankingModal, setShowRankingModal] = useState<boolean>(false);
+
+  // Online: autenticação e ranking global
+  const auth = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showOnlineRanking, setShowOnlineRanking] = useState(false);
 
   // Improvement 5: Big Notification
   const [bigNotification, setBigNotification] = useState<{title: string, body: string, emoji: string, color: string} | null>(null);
@@ -6059,6 +6068,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // Próximo dia
       setCurrentDay(prev => prev + 1);
 
+      // Sincronizar ranking online (fire-and-forget)
+      auth.syncRanking({
+        farmLevel,
+        totalCollected: stats.totalCollected,
+        totalEarned: stats.totalEarned,
+        animalCount: finalAnimals.filter((a: any) => a.type !== 'porco').length,
+      });
+
       setLogs(prev => {
         const dayLabel = currentDay + 1;
         // Limpar diário a cada 7 dias para evitar acúmulo
@@ -6410,6 +6427,41 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 <span className="text-lg">📅</span>
                 <span>Dia {currentDay}</span>
               </div>
+            </div>
+
+            {/* 🌐 Login / Ranking Online */}
+            <div className="flex items-center gap-1.5">
+              {auth.user ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowOnlineRanking(true)}
+                    className="bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
+                    title={`Fazenda: ${auth.farmName}`}
+                  >
+                    <span>🏆</span>
+                    <span className="max-w-[80px] truncate">{auth.farmName}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => auth.signOut()}
+                    className="bg-stone-600 border-3 border-stone-400 hover:bg-stone-500 text-white font-mono font-black text-[10px] px-2 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#292524] cursor-pointer transition-all"
+                    title="Sair da conta"
+                  >
+                    ↩
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowAuthModal(true)}
+                  className="bg-[#78350f] border-3 border-amber-400 hover:bg-[#92400e] text-amber-200 font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
+                  title="Entrar para aparecer no ranking global"
+                >
+                  <span>🌐</span>
+                  <span>Entrar</span>
+                </button>
+              )}
             </div>
 
             {/* 💹 Economia + 📋 Contratos — par */}
@@ -7417,6 +7469,30 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         <RankingModal
           animals={animals}
           onClose={() => setShowRankingModal(false)}
+        />
+      )}
+
+      {/* 🌐 AUTH MODAL */}
+      {showAuthModal && (
+        <AuthModal
+          onSignUp={auth.signUp}
+          onSignIn={auth.signIn}
+          authError={auth.authError}
+          clearAuthError={auth.clearAuthError}
+          onClose={() => { setShowAuthModal(false); auth.clearAuthError(); }}
+        />
+      )}
+
+      {/* 🌾 FARM NAME MODAL — primeiro login */}
+      {auth.user && auth.isNewUser && (
+        <FarmNameModal onSave={auth.saveFarmName} />
+      )}
+
+      {/* 🏆 RANKING ONLINE */}
+      {showOnlineRanking && (
+        <OnlineRankingModal
+          onClose={() => setShowOnlineRanking(false)}
+          currentUserId={auth.user?.id}
         />
       )}
 
