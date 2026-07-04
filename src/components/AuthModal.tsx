@@ -10,13 +10,11 @@ interface AuthModalProps {
 }
 
 const nickRegex = /^[a-zA-Z0-9_-]{3,20}$/;
-const farmNameRegex = /^[a-zA-Z0-9À-ú\s\-]{3,24}$/;
 
 export default function AuthModal({ onSignUp, onSignIn, authError, clearAuthError, onClose }: AuthModalProps) {
   const [tab, setTab] = useState<'entrar' | 'criar'>('entrar');
   const [nick, setNick] = useState('');
   const [password, setPassword] = useState('');
-  const [farmName, setFarmName] = useState('');
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState('');
 
@@ -26,13 +24,11 @@ export default function AuthModal({ onSignUp, onSignIn, authError, clearAuthErro
     setTab(t);
     setNick('');
     setPassword('');
-    setFarmName('');
     setLocalError('');
     clearAuthError();
   };
 
   const validateSignUp = () => {
-    if (!farmNameRegex.test(farmName)) return 'Nome da fazenda: 3–24 caracteres, sem símbolos especiais.';
     if (!nickRegex.test(nick)) return 'Nick: 3–20 caracteres, sem espaços. Use letras, números, _ ou -.';
     if (password.length < 6) return 'Senha deve ter pelo menos 6 caracteres.';
     return '';
@@ -65,7 +61,7 @@ export default function AuthModal({ onSignUp, onSignIn, authError, clearAuthErro
   };
 
   const canSubmit = tab === 'criar'
-    ? farmNameRegex.test(farmName) && nickRegex.test(nick) && password.length >= 6 && !loading
+    ? nickRegex.test(nick) && password.length >= 6 && !loading
     : nick.trim().length > 0 && password.trim().length > 0 && !loading;
 
   return (
@@ -107,31 +103,6 @@ export default function AuthModal({ onSignUp, onSignIn, authError, clearAuthErro
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          <AnimatePresence mode="wait">
-            {tab === 'criar' && (
-              <motion.div
-                key="farm-name"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <label className="block text-[10px] font-black uppercase text-[#92400e] mb-1 tracking-wider">
-                  🏡 Nome da Fazenda
-                </label>
-                <input
-                  type="text"
-                  value={farmName}
-                  onChange={e => { setFarmName(e.target.value); setLocalError(''); clearAuthError(); }}
-                  placeholder="Ex: Fazenda Esperança"
-                  maxLength={24}
-                  className="w-full bg-white border-2 border-amber-300 rounded-xl px-3 py-2.5 font-mono text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-amber-500 transition-colors"
-                />
-                <p className="text-[9px] text-stone-400 font-mono mt-0.5">{farmName.length}/24 caracteres</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           <div>
             <label className="block text-[10px] font-black uppercase text-[#92400e] mb-1 tracking-wider">
               👤 Nick
