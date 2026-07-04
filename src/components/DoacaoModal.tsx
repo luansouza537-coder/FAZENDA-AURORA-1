@@ -24,8 +24,12 @@ export default function DoacaoModal({ onClose }: Props) {
           <button onClick={onClose} className="text-amber-700 hover:text-amber-900 text-2xl leading-none">✕</button>
         </div>
 
-        <p className="text-sm text-amber-800 text-center">
-          Se você curtiu o jogo, considere fazer uma doação via PIX. Cada contribuição ajuda a manter o servidor e adicionar novos conteúdos!
+        <p className="text-sm text-amber-800 text-center leading-relaxed">
+          A Fazenda Aurora é totalmente gratuita e se mantém graças ao apoio da comunidade. ❤️
+          <br /><br />
+          Se você está curtindo a experiência, considere fazer uma doação. Cada contribuição via PIX é investida diretamente em melhorias, novos conteúdos e na manutenção do servidor, garantindo que ele continue online para todos.
+          <br /><br />
+          Seu apoio faz toda a diferença. Obrigado por fazer parte da Fazenda Aurora!
         </p>
 
         <img
