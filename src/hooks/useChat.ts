@@ -66,7 +66,7 @@ export function useChat(isOpen: boolean) {
       .insert({ nick, message: trimmed });
 
     if (err) {
-      setError('Erro ao enviar. Tente novamente.');
+      setError(`Erro: ${err.message} (${err.code})`);
       return false;
     }
     lastSentAt.current = Date.now();
