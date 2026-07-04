@@ -1660,21 +1660,21 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const getSeasonalityMultiplier = (itemType: string, day: number): number => {
     const estacao = getEstacaoKey(day);
     // --- LATICÍNIOS (leite, manteiga, iogurte, leite condensado) ---
-    const laticinios = new Set(['milk','goat_milk','sheep_milk','buffalo_milk','butter','yogurt','iogurte_cabra','leite_condensado','iogurte_ovelha','ricota_ovelha','doce_leite_ovelha']);
+    const laticinios = new Set(['milk','goat_milk','sheep_milk','buffalo_milk','butter','yogurt','iogurte_cabra','leite_condensado','iogurte_ovelha','ricota_ovelha','doce_leite_ovelha','iogurte_bufala','manteiga_bufala','doce_leite_bufala','burrata']);
     if (laticinios.has(itemType)) {
       if (estacao === 'primavera') return 1.1;
       if (estacao === 'verao') return 1.2;
       return 1.0;
     }
     // --- QUEIJOS ---
-    const queijos = new Set(['cheese','queijoCoalho','queijoMucarela','queijoBrie','queijo_cabra','buffalo_mozzarella','queijo_pecorino']);
+    const queijos = new Set(['cheese','queijoCoalho','queijoMucarela','queijoBrie','queijo_cabra','buffalo_mozzarella','queijo_pecorino','queijo_parmesao','queijo_serra']);
     if (queijos.has(itemType)) {
       if (estacao === 'verao') return 1.1;
       if (estacao === 'outono') return 1.2;
       return 1.0;
     }
     // --- LÃS E FIBRAS (ovelha, lhama, alpaca, angorá, seda) ---
-    const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair','cachecol_mohair','seda_bruta','fio_seda','tecido_alpaca','cachecol_angora','tapete_lhama','manta_premium']);
+    const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair','cachecol_mohair','seda_bruta','fio_seda','tecido_alpaca','cachecol_angora','tapete_lhama','manta_premium','fio_lhama','cachecol_lhama','gorro_lhama','luvas_lhama','poncho_lhama','manta_lhama']);
     if (las.has(itemType)) {
       if (estacao === 'outono') return 1.15;
       if (estacao === 'inverno') return 1.35;
@@ -1728,16 +1728,16 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   const getWeatherMultiplier = (itemType: string, currentW: 'chuva' | 'sol' | 'nublado'): number => {
     if (currentW === 'chuva') {
-      const laticinios = new Set(['milk','goat_milk','buffalo_milk','sheep_milk','butter','yogurt','iogurte_cabra','leite_condensado']);
+      const laticinios = new Set(['milk','goat_milk','buffalo_milk','sheep_milk','butter','yogurt','iogurte_cabra','leite_condensado','iogurte_bufala','manteiga_bufala','doce_leite_bufala','burrata']);
       if (laticinios.has(itemType)) return 0.9;
-      const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair']);
+      const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair','fio_lhama','cachecol_lhama','gorro_lhama','luvas_lhama','poncho_lhama','manta_lhama']);
       if (las.has(itemType)) return 0.8;
       const ovos = new Set(['egg','duck_egg','goose_egg','quail_egg','fertile_egg']);
       if (ovos.has(itemType)) return 0.9;
       if (itemType === 'mel' || itemType === 'mel_envasado') return 0.85;
       if (itemType === 'cogumelo') return 1.2; // cogumelo cresce na chuva
     } else if (currentW === 'sol') {
-      const laticinios = new Set(['milk','goat_milk','buffalo_milk','sheep_milk']);
+      const laticinios = new Set(['milk','goat_milk','buffalo_milk','sheep_milk','iogurte_bufala','manteiga_bufala','doce_leite_bufala','burrata']);
       if (laticinios.has(itemType)) return 1.1;
       const ovos = new Set(['egg','duck_egg','quail_egg']);
       if (ovos.has(itemType)) return 1.1;
@@ -1812,10 +1812,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'alpaca_wool') return farmLevel >= 6 ? 75 : 65;
     if (itemType === 'humus') return 22;    // rebalanceado — sem custo de ração
     if (itemType === 'minhoca_viva') return 18;
-    if (itemType === 'biofertilizante') return 55;
+    if (itemType === 'biofertilizante') return 90;
     if (itemType === 'muco') return 48;
-    if (itemType === 'serum_facial') return 95;
-    if (itemType === 'mascara_facial') return 75;
+    if (itemType === 'serum_facial') return 220;
+    if (itemType === 'mascara_facial') return 180;
     if (itemType === 'angora_wool') return 90;
     if (itemType === 'mohair') return 120;
     if (itemType === 'cachecol_mohair') return 280;
@@ -1837,7 +1837,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'ovo_defumado') return 120;
     if (itemType === 'conserva_codorna') return 160;
     if (itemType === 'creme_cosmetico') return 220;
-    if (itemType === 'sabonete_natural') return 140;
+    if (itemType === 'sabonete_natural') return 180;
     if (itemType === 'colete_couro') return 550;
     if (itemType === 'bolsa_exotica') return 820;
     if ((itemType as string) === 'peixe') return 45;
@@ -1846,7 +1846,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if ((itemType as string) === 'hidromel') return 260;
     if ((itemType as string) === 'risoto_cogumelo') return 150;
     if ((itemType as string) === 'conserva_peixe') return 140;
-    if ((itemType as string) === 'mel_envasado') return 230;
+    if ((itemType as string) === 'mel_envasado') return 320;
     if ((itemType as string) === 'sopa_cogumelo') return 100;
     if ((itemType as string) === 'queijo_parmesao') return 200;
     if ((itemType as string) === 'queijo_serra') return 280;
@@ -1857,10 +1857,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if ((itemType as string) === 'luvas_lhama') return 70;
     if ((itemType as string) === 'poncho_lhama') return 140;
     if ((itemType as string) === 'manta_lhama') return 200;
-    if ((itemType as string) === 'iogurte_bufala') return 55;
-    if ((itemType as string) === 'manteiga_bufala') return 70;
-    if ((itemType as string) === 'doce_leite_bufala') return 95;
-    if ((itemType as string) === 'burrata') return 220;
+    if ((itemType as string) === 'iogurte_bufala') return 90;
+    if ((itemType as string) === 'manteiga_bufala') return 110;
+    if ((itemType as string) === 'doce_leite_bufala') return 250;
+    if ((itemType as string) === 'burrata') return 380;
     if ((itemType as string) === 'massa_fresca') return 78;
     if ((itemType as string) === 'crepe_rustico') return 35;
     if ((itemType as string) === 'pao_rustico') return 30;

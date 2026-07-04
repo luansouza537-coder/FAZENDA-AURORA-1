@@ -583,7 +583,7 @@ export function useInventory({
     addLog('🧀 Queijo de Cabra em maturação! Pronto em 5 dias.', 'success');
     setFarmXp(prev => prev + 3);
     triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🧀', 'Maturando... 2d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
+    spawnFeedback('🧀', 'Maturando... 5d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
 
   const craftIogurteCabra = (event?: React.MouseEvent) => {

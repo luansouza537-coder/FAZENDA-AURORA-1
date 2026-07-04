@@ -398,6 +398,24 @@ export default function GameSidebar({
                     🥛 L.Condensado · {inventory.leite_condensado ?? 0}u ({getActualSellPrice('leite_condensado')}💰)
                   </button>
                   )}
+                  {((inventory as any).queijo_parmesao ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('queijo_parmesao' as any, 1, e)} disabled={((inventory as any).queijo_parmesao ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🧀 Q.Parmesão · {(inventory as any).queijo_parmesao ?? 0}u ({getActualSellPrice('queijo_parmesao' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).queijo_serra ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('queijo_serra' as any, 1, e)} disabled={((inventory as any).queijo_serra ?? 0) < 1}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-amber-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🧀 Q.Serra · {(inventory as any).queijo_serra ?? 0}u ({getActualSellPrice('queijo_serra' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).kit_gourmet ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('kit_gourmet' as any, 1, e)} disabled={((inventory as any).kit_gourmet ?? 0) < 1}
+                    className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300 col-span-2">
+                    🎁 Kit Gourmet · {(inventory as any).kit_gourmet ?? 0}u ({getActualSellPrice('kit_gourmet' as any)}💰)
+                  </button>
+                  )}
                   {(inventory.tapete_lhama ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('tapete_lhama', 1, e)} disabled={(inventory.tapete_lhama ?? 0) < 1}
                     className="bg-purple-50 hover:bg-purple-100 border border-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-purple-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-purple-300">
