@@ -109,6 +109,7 @@ import { useAuth } from './hooks/useAuth';
 import AuthModal from './components/AuthModal';
 import FarmNameModal from './components/FarmNameModal';
 import OnlineRankingModal from './components/RankingModal';
+import DoacaoModal from './components/DoacaoModal';
 import AnnouncementBanner from './components/AnnouncementBanner';
 
 
@@ -457,6 +458,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const onlineCount = useOnlinePresence(auth.farmName || undefined);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showOnlineRanking, setShowOnlineRanking] = useState(false);
+  const [showDoacao, setShowDoacao] = useState(false);
 
   useEffect(() => {
     if (auth.user) setShowAuthModal(false);
@@ -7027,8 +7029,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         </div>
 
         {/* --- FARM REGULATORY FOOTER --- */}
-        <footer className="bg-[#78350f] border-t-8 border-[#451a03] text-center p-3 text-[9px] font-mono text-[#fcd57e]/60 select-none uppercase font-black">
-          Fazenda Aurora © 2026 - Cuide com carinho!
+        <footer className="bg-[#78350f] border-t-8 border-[#451a03] text-center p-3 text-[9px] font-mono text-[#fcd57e]/60 select-none uppercase font-black flex flex-col items-center gap-2">
+          <span>Fazenda Aurora © 2026 - Cuide com carinho!</span>
+          <button
+            onClick={() => setShowDoacao(true)}
+            className="text-[#fcd57e]/70 hover:text-[#fcd57e] transition-colors text-[9px] font-mono uppercase font-black"
+          >
+            ☕ Apoiar o Jogo
+          </button>
         </footer>
 
       </div>
@@ -7518,6 +7526,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           onSignOut={() => auth.signOut()}
         />
       )}
+
+      {/* ☕ MODAL DE DOAÇÃO PIX */}
+      {showDoacao && <DoacaoModal onClose={() => setShowDoacao(false)} />}
 
       {/* 🤝 MODAL DE CRUZAMENTO */}
       {cruzarModal && (
