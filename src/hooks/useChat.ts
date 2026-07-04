@@ -112,7 +112,6 @@ export function useChat(isOpen: boolean) {
     }
 
     lastSentAt.current = Date.now();
-    saveToHistory(msg);
 
     return true;
   }, []);
