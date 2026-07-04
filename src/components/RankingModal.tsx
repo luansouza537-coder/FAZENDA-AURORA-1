@@ -19,12 +19,13 @@ interface RankingModalProps {
   currentNick?: string;
   isLoggedIn: boolean;
   onlineCount: number;
+  onSignOut?: () => void;
 }
 
 const TIME_FORMAT = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
 function formatTime(iso: string) { return TIME_FORMAT.format(new Date(iso)); }
 
-export default function RankingModal({ onClose, currentUserId, currentNick, isLoggedIn, onlineCount }: RankingModalProps) {
+export default function RankingModal({ onClose, currentUserId, currentNick, isLoggedIn, onlineCount, onSignOut }: RankingModalProps) {
   const [tab, setTab] = useState<'ranking' | 'chat'>('ranking');
 
   // --- RANKING STATE ---
@@ -135,11 +136,23 @@ export default function RankingModal({ onClose, currentUserId, currentNick, isLo
               </span>
             )}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-stone-400 hover:text-stone-600 text-xl font-black cursor-pointer transition-colors"
-          >✕</button>
+          <div className="flex items-center gap-2">
+            {isLoggedIn && onSignOut && (
+              <button
+                type="button"
+                onClick={() => { onSignOut(); onClose(); }}
+                className="text-[10px] font-black uppercase px-2.5 py-1.5 rounded-xl border-2 border-stone-300 text-stone-400 hover:text-red-500 hover:border-red-300 bg-white cursor-pointer transition-all"
+                title="Sair da conta"
+              >
+                ↩ Sair
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-stone-400 hover:text-stone-600 text-xl font-black cursor-pointer transition-colors"
+            >✕</button>
+          </div>
         </div>
 
         {/* Abas */}

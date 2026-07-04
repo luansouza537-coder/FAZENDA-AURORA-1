@@ -6465,30 +6465,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </div>
             </div>
 
-            {/* 🔑 Login (só visitantes não logados) */}
-            {!auth.user && (
-              <button
-                type="button"
-                onClick={() => setShowAuthModal(true)}
-                className="bg-[#78350f] border-3 border-amber-400 hover:bg-[#92400e] text-amber-200 font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
-                title="Entrar para aparecer no ranking global"
-              >
-                <span>🌐</span>
-                <span>Entrar</span>
-              </button>
-            )}
-            {/* Botão Sair (só logados) */}
-            {auth.user && (
-              <button
-                type="button"
-                onClick={() => auth.signOut()}
-                className="bg-stone-600 border-3 border-stone-400 hover:bg-stone-500 text-white font-mono font-black text-[10px] px-2 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#292524] cursor-pointer transition-all"
-                title={`Sair da conta (${auth.farmName})`}
-              >
-                ↩
-              </button>
-            )}
-
             {/* 💹 Economia + 📋 Contratos — par */}
             <div className="flex items-center gap-1.5">
               <button
@@ -6689,12 +6665,16 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               🏆
             </button>
 
-            {/* 🌐 Ranking & Chat Online */}
+            {/* 🌐 Ranking & Chat Online (ou Login se não logado) */}
             <div className="relative">
               <button
-                onClick={() => { setShowOnlineRanking(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                onClick={() => {
+                  triggerAudioResult(() => sfx.playSound('click'));
+                  if (auth.user) setShowOnlineRanking(true);
+                  else setShowAuthModal(true);
+                }}
                 className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-                title="Ranking & Chat Global"
+                title={auth.user ? 'Ranking & Chat Global' : 'Entrar para aparecer no ranking'}
               >
                 🌐
               </button>
@@ -7535,6 +7515,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           currentNick={auth.farmName || undefined}
           isLoggedIn={!!auth.user}
           onlineCount={onlineCount}
+          onSignOut={() => auth.signOut()}
         />
       )}
 
