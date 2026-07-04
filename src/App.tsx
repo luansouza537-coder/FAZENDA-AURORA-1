@@ -110,7 +110,6 @@ import AuthModal from './components/AuthModal';
 import FarmNameModal from './components/FarmNameModal';
 import OnlineRankingModal from './components/RankingModal';
 import AnnouncementBanner from './components/AnnouncementBanner';
-import ChatModal from './components/ChatModal';
 
 
 interface FloatingText {
@@ -458,7 +457,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const onlineCount = useOnlinePresence(auth.farmName || undefined);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showOnlineRanking, setShowOnlineRanking] = useState(false);
-  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     if (auth.user) setShowAuthModal(false);
@@ -6467,24 +6465,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </div>
             </div>
 
-            {/* 🟢 Contador online + 💬 Chat */}
-            <div className="flex items-center gap-1.5">
-              {onlineCount > 0 && (
-                <div className="bg-emerald-900/80 border-2 border-emerald-500 rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-[0_3px_0_#064e3b]" title="Jogadores online agora">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                  <span className="text-emerald-300 font-mono font-black text-[11px]">{onlineCount} online</span>
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={() => setShowChat(true)}
-                className="bg-sky-700 border-2 border-sky-400 hover:bg-sky-600 text-white font-mono font-black text-[11px] px-3 py-1.5 rounded-full active:translate-y-0.5 shadow-[0_3px_0_#0c4a6e] cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
-                title="Chat global"
-              >
-                💬 Chat
-              </button>
-            </div>
-
             {/* 🌐 Login / Ranking Online */}
             <div className="flex items-center gap-1.5">
               {auth.user ? (
@@ -6492,11 +6472,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                   <button
                     type="button"
                     onClick={() => setShowOnlineRanking(true)}
-                    className="bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
-                    title={`Fazenda: ${auth.farmName}`}
+                    className="relative bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
+                    title={`Fazenda: ${auth.farmName} • ${onlineCount} online`}
                   >
-                    <span>🏆</span>
+                    <span>🌐</span>
                     <span className="max-w-[80px] truncate">{auth.farmName}</span>
+                    {onlineCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-amber-600 animate-pulse" />
+                    )}
                   </button>
                   <button
                     type="button"
@@ -7549,14 +7532,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         <OnlineRankingModal
           onClose={() => setShowOnlineRanking(false)}
           currentUserId={auth.user?.id}
-        />
-      )}
-
-      {showChat && (
-        <ChatModal
-          onClose={() => setShowChat(false)}
-          nick={auth.farmName || undefined}
+          currentNick={auth.farmName || undefined}
           isLoggedIn={!!auth.user}
+          onlineCount={onlineCount}
         />
       )}
 
