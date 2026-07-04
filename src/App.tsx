@@ -1728,7 +1728,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   const getWeatherMultiplier = (itemType: string, currentW: 'chuva' | 'sol' | 'nublado'): number => {
     if (currentW === 'chuva') {
-      const laticinios = new Set(['milk','goat_milk','buffalo_milk','butter','yogurt','iogurte_cabra','leite_condensado']);
+      const laticinios = new Set(['milk','goat_milk','buffalo_milk','sheep_milk','butter','yogurt','iogurte_cabra','leite_condensado']);
       if (laticinios.has(itemType)) return 0.9;
       const las = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair']);
       if (las.has(itemType)) return 0.8;
@@ -1737,7 +1737,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (itemType === 'mel' || itemType === 'mel_envasado') return 0.85;
       if (itemType === 'cogumelo') return 1.2; // cogumelo cresce na chuva
     } else if (currentW === 'sol') {
-      const laticinios = new Set(['milk','goat_milk','buffalo_milk']);
+      const laticinios = new Set(['milk','goat_milk','buffalo_milk','sheep_milk']);
       if (laticinios.has(itemType)) return 1.1;
       const ovos = new Set(['egg','duck_egg','quail_egg']);
       if (ovos.has(itemType)) return 1.1;
@@ -3163,8 +3163,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
         if ((copy.daysSinceLastWool || 0) >= 4 && !copy.woolReady) {
           if (copy.hunger > 20 && copy.happiness > 25) {
-            copy.woolReady = true;
-            logs.push({ msg: `🦙 ${copy.name} (alpaca) está pronta para tosquia!`, type: 'success' });
+            if (currentW === 'chuva' && Math.random() < 0.20) {
+              logs.push({ msg: `🌧️ A lã de ${copy.name} (alpaca) ficou úmida e não pôde se firmar hoje!`, type: 'error' });
+            } else {
+              copy.woolReady = true;
+              logs.push({ msg: `🦙 ${copy.name} (alpaca) está pronta para tosquia!`, type: 'success' });
+            }
           }
         }
       }
@@ -3185,8 +3189,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
           if ((copy.daysSinceLastWool || 0) >= 5 && !copy.woolReady) {
             if (copy.hunger > 20 && copy.happiness > 25) {
-              copy.woolReady = true;
-              logs.push({ msg: `🐰 ${copy.name} (coelho angorá) está pronto para tosquia!`, type: 'success' });
+              if (currentW === 'chuva' && Math.random() < 0.20) {
+                logs.push({ msg: `🌧️ O pelo de ${copy.name} (coelho angorá) ficou úmido e não pôde se firmar hoje!`, type: 'error' });
+              } else {
+                copy.woolReady = true;
+                logs.push({ msg: `🐰 ${copy.name} (coelho angorá) está pronto para tosquia!`, type: 'success' });
+              }
             }
           }
         }
@@ -3196,8 +3204,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           copy.daysSinceLastWool = (copy.daysSinceLastWool || 0) + 1;
           if ((copy.daysSinceLastWool || 0) >= 25 && !copy.woolReady) {
             if (copy.hunger > 20 && copy.happiness > 25) {
-              copy.woolReady = true;
-              logs.push({ msg: `🐐 ${copy.name} (Cabra Angorá) está pronta para tosquia! Mohair disponível.`, type: 'success' });
+              if (currentW === 'chuva' && Math.random() < 0.15) {
+                logs.push({ msg: `🌧️ O mohair de ${copy.name} ficou úmido e não pôde se firmar hoje!`, type: 'error' });
+              } else {
+                copy.woolReady = true;
+                logs.push({ msg: `🐐 ${copy.name} (Cabra Angorá) está pronta para tosquia! Mohair disponível.`, type: 'success' });
+              }
             }
           }
         }
@@ -4705,6 +4717,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (a.type === 'minhoca' || a.type === 'caracol') happyDelta += 10;
           if (a.type === 'galinha' || a.type === 'codorna') happyDelta -= 3;
           if (a.type === 'avestruz') happyDelta -= 5;
+          if (a.type === 'vaca') happyDelta -= 3;
+          if (a.type === 'ovelha' || a.type === 'ovelha_leiteira') happyDelta -= 3;
+          if (a.type === 'cabra') happyDelta -= 2;
+          if (a.type === 'ra') happyDelta += 5;
         }
 
         if (currentW2 === 'sol') {
@@ -4713,6 +4729,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (a.type === 'pato' || a.type === 'ganso') happyDelta -= 5;
           if (a.type === 'minhoca') happyDelta -= 5;
           if (a.type === 'caracol') happyDelta -= (helicicultor ? 2 : 5);
+          if (a.type === 'vaca') happyDelta += 3;
+          if (a.type === 'ovelha' || a.type === 'ovelha_leiteira') happyDelta += 2;
+          if (a.type === 'cabra') happyDelta += 2;
         }
 
         if (currentSeasonIdx === 1) { // verão

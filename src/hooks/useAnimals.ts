@@ -507,6 +507,8 @@ export function useAnimals({
     if (animal.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
     if (animal.trait === 'preguicosa') qty = Math.max(1, qty - 1);
     qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
+    if (weather === 'sol') qty += 1;
+    if (weather === 'chuva') qty = Math.max(1, Math.round(qty * 0.8));
 
     if (canAddToInventory && !canAddToInventory('goat_milk', 1)) {
       addLog('🥛 Câmara Fria cheia! Libere leite de cabra antes de coletar.', 'error');
@@ -553,6 +555,8 @@ export function useAnimals({
     let qty = 1;
     if (animal.trait === 'trabalhadora') qty = Math.max(1, qty + 1);
     qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
+    if (weather === 'sol') qty += 1;
+    if (weather === 'chuva') qty = Math.max(1, Math.round(qty * 0.8));
 
     if (canAddToInventory && !canAddToInventory('sheep_milk', 1)) {
       addLog('🥛 Câmara Fria cheia! Libere leite de ovelha antes de coletar.', 'error');
@@ -914,7 +918,10 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'bicho_seda') return;
     if (!animal.woolReady) { addLog(`🫙 ${animal.name} ainda não formou casulo!`, 'error'); spawnFeedback('⏳', 'Aguarde', event); return; }
-    const qty = specialization === 'fibras' ? 6 : 5;
+    let qty = specialization === 'fibras' ? 6 : 5;
+    const currentSeason = Math.floor(((currentDay - 1) % 120) / 30);
+    if (currentSeason === 0) qty += 1; // primavera favorece formação do casulo
+    if (currentSeason === 3) qty = Math.max(3, Math.round(qty * 0.8)); // inverno retarda
     setInventory(prev => {
       const newTotal = (prev.seda_bruta ?? 0) + qty;
       if (newTotal >= 10) checkAndUnlockAchievement?.('silk_producer');
