@@ -6465,43 +6465,29 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </div>
             </div>
 
-            {/* 🌐 Login / Ranking Online */}
-            <div className="flex items-center gap-1.5">
-              {auth.user ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setShowOnlineRanking(true)}
-                    className="relative bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
-                    title={`Fazenda: ${auth.farmName} • ${onlineCount} online`}
-                  >
-                    <span>🌐</span>
-                    <span className="max-w-[80px] truncate">{auth.farmName}</span>
-                    {onlineCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-amber-600 animate-pulse" />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => auth.signOut()}
-                    className="bg-stone-600 border-3 border-stone-400 hover:bg-stone-500 text-white font-mono font-black text-[10px] px-2 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#292524] cursor-pointer transition-all"
-                    title="Sair da conta"
-                  >
-                    ↩
-                  </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowAuthModal(true)}
-                  className="bg-[#78350f] border-3 border-amber-400 hover:bg-[#92400e] text-amber-200 font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
-                  title="Entrar para aparecer no ranking global"
-                >
-                  <span>🌐</span>
-                  <span>Entrar</span>
-                </button>
-              )}
-            </div>
+            {/* 🔑 Login (só visitantes não logados) */}
+            {!auth.user && (
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(true)}
+                className="bg-[#78350f] border-3 border-amber-400 hover:bg-[#92400e] text-amber-200 font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
+                title="Entrar para aparecer no ranking global"
+              >
+                <span>🌐</span>
+                <span>Entrar</span>
+              </button>
+            )}
+            {/* Botão Sair (só logados) */}
+            {auth.user && (
+              <button
+                type="button"
+                onClick={() => auth.signOut()}
+                className="bg-stone-600 border-3 border-stone-400 hover:bg-stone-500 text-white font-mono font-black text-[10px] px-2 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#292524] cursor-pointer transition-all"
+                title={`Sair da conta (${auth.farmName})`}
+              >
+                ↩
+              </button>
+            )}
 
             {/* 💹 Economia + 📋 Contratos — par */}
             <div className="flex items-center gap-1.5">
@@ -6702,6 +6688,20 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             >
               🏆
             </button>
+
+            {/* 🌐 Ranking & Chat Online */}
+            <div className="relative">
+              <button
+                onClick={() => { setShowOnlineRanking(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
+                title="Ranking & Chat Global"
+              >
+                🌐
+              </button>
+              {onlineCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#fbbf24] animate-pulse pointer-events-none" />
+              )}
+            </div>
 
             {/* 🔊 Som & Música */}
             <button
