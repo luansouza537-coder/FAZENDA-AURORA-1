@@ -2868,7 +2868,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       copy.happiness = Math.max(0, copy.happiness - 2);
 
       // Penalidade extra de fome extrema (BUG 6 FIX)
-      if (!skipHunger && copy.hunger <= 0) {
+      if (!skipHunger && copy.hunger <= 0 && copy.type !== 'bicho_seda') {
         // Incrementa dias consecutivos sem comida
         copy.daysWithoutFood = (copy.daysWithoutFood ?? 0) + 1;
         // Penalidade de felicidade: -25/dia após 3 dias consecutivos, senão -15/dia
@@ -4036,6 +4036,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (nextWeather === 'chuva') totalLeite = Math.max(1, Math.round(totalLeite * 0.8));
             if (a.trait === 'trabalhadora') totalLeite = Math.max(1, Math.round(totalLeite * 1.15));
             else if (a.trait === 'preguicosa') totalLeite = Math.max(1, Math.round(totalLeite * 0.85));
+            totalLeite = Math.round(totalLeite * (specialization === 'leiteira' ? 1.2 : 1.0));
             totalLeite = Math.round(totalLeite * milkerBonus * productionMult);
             milkCollected += totalLeite;
             milkedCows++;
@@ -4056,6 +4057,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             let qty = 1;
             if (a.trait === 'trabalhadora') qty = 2;
             else if (a.trait === 'preguicosa') qty = 1;
+            qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
+            if (nextWeather === 'sol') qty += 1;
+            if (nextWeather === 'chuva') qty = Math.max(1, Math.round(qty * 0.8));
             qty = Math.round(qty * milkerBonus * productionMult);
             goatMilkCollected += qty;
             milkedGoats++;
@@ -4093,6 +4097,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (a.type !== 'ovelha_leiteira' || a.isAdult === false || !a.hasProducedToday || !a.isLactating) return a;
             let qty = 1;
             if (a.trait === 'trabalhadora') qty = 2;
+            qty = Math.round(qty * (specialization === 'leiteira' ? 1.2 : 1.0));
+            if (nextWeather === 'sol') qty += 1;
+            if (nextWeather === 'chuva') qty = Math.max(1, Math.round(qty * 0.8));
             qty = Math.round(qty * milkerBonus * productionMult);
             sheepMilkCollected += qty;
             milkedSheep++;
