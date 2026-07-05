@@ -1178,7 +1178,10 @@ export function useInventory({
             if (c.contractType === 'long') {
               const bonus = c.completionBonus ?? 0;
               const xp = c.completionXP ?? 0;
-              if (bonus > 0) setGold(prev => prev + bonus);
+              if (bonus > 0) {
+                setGold(prev => prev + bonus);
+                addFinancialEntry?.({ day: currentDay ?? 0, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
+              }
               setFarmXp(prev => prev + xp);
               setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
               setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
