@@ -3420,7 +3420,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     { catalogId: 'lc_bee1', client: 'Confeitaria Artesanal Dulce', product: 'mel_envasado' as const, description: 'Confeitaria artesanal especializada em doces finos com ingredientes naturais. O mel envasado da fazenda seria o ingrediente-estrela de toda a linha de bolos, tortas e geleias. Eles vendem para lojas gourmet e feiras gastronômicas — precisam de regularidade e qualidade garantida.', baseMarket: 230, pricePerUnit: 285, weeklyGoal: 2, durationDays: 120, minLevel: 6, completionBonus: 700, completionXP: 90 },
     { catalogId: 'lc_11', client: 'Empório Colonial Serra', product: 'yogurt' as const, description: 'Loja especializada em produtos artesanais da roça — mel, conservas, defumados e laticínios. O iogurte natural da fazenda seria o novo destaque da prateleira refrigerada. Eles vendem experiência, não só produto: o nome da sua fazenda vai aparecer no rótulo.', baseMarket: 35, pricePerUnit: 50, weeklyGoal: 4, durationDays: 120, minLevel: 6, completionBonus: 510, completionXP: 85 },
     { catalogId: 'lc_12', client: 'Pousada Cantareira', product: 'goose_egg' as const, description: 'Pousada à beira de lagoa que serve café da manhã diferenciado como atrativo principal. Ovos de ganso aparecem no buffet como iguaria — maiores, mais ricos, raros de encontrar. Os hóspedes fotografam, comentam nas redes. A pousada quer garantir fornecimento antes que a concorrência feche primeiro.', baseMarket: 50, pricePerUnit: 72, weeklyGoal: 3, durationDays: 120, minLevel: 6, completionBonus: 555, completionXP: 90 },
-    { catalogId: 'lc_32', client: 'Casa de Tecidos Meridional', product: 'tecido_alpaca' as const, description: 'Loja tradicional de tecidos finos que abastece costureiras, estilistas e pequenas confecções da região Sul. O tecido de alpaca é o mais procurado pelos clientes que fazem casacos, blazers e peças de alfaiataria — cai bem, não amassa, e tem uma aparência premium inegável. A casa existe há quarenta anos e sabe reconhecer qualidade. Eles querem parceiro de longa data, não fornecedor de oportunidade.', baseMarket: 180, pricePerUnit: 255, weeklyGoal: 3, durationDays: 120, minLevel: 6, completionBonus: 1950, completionXP: 165 },
+    { catalogId: 'lc_32', client: 'Casa de Tecidos Meridional', product: 'tecido_alpaca' as const, description: 'Loja tradicional de tecidos finos que abastece costureiras, estilistas e pequenas confecções da região Sul. O tecido de alpaca é o mais procurado pelos clientes que fazem casacos, blazers e peças de alfaiataria — cai bem, não amassa, e tem uma aparência premium inegável. A casa existe há quarenta anos e sabe reconhecer qualidade. Eles querem parceiro de longa data, não fornecedor de oportunidade.', baseMarket: 180, pricePerUnit: 255, weeklyGoal: 3, durationDays: 120, minLevel: 6, completionBonus: 900, completionXP: 165 },
     // --- Nível 7 ---
     { catalogId: 'lc_13', client: 'Pizzaria Napolitana Vesúvio', product: 'queijoMucarela' as const, description: 'Pizzaria artesanal com forno a lenha que faz questão de usar ingredientes locais e frescos. A muçarela industrializada foi banida da cozinha deles há dois anos. Agora precisam de um fornecedor fixo que garanta consistência toda semana — a fila de espera no restaurante não permite improviso.', baseMarket: 55, pricePerUnit: 78, weeklyGoal: 4, durationDays: 120, minLevel: 7, completionBonus: 800, completionXP: 110 },
     { catalogId: 'lc_14', client: 'Tecelagem do Vale Encantado', product: 'llama_wool' as const, description: 'Cooperativa de artesãos que produz mantas, tapetes e peças decorativas vendidas para lojas de design e decoração do Sudeste. A lã de lhama é mais macia e mais leve que a ovina — ideal para peças de alto valor agregado. Eles precisam de regularidade para manter o ritmo de produção.', baseMarket: 45, pricePerUnit: 65, weeklyGoal: 4, durationDays: 120, minLevel: 7, completionBonus: 670, completionXP: 100 },
@@ -4286,11 +4286,18 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       let isencaoUsadas = 0;
       contracts.forEach(c => {
         if (c.active && nextDayValue > c.deadline && c.delivered < c.quantity) {
+          // Para contratos longos (penalty=0), aplica multa proporcional ao que faltou entregar
+          const effectivePenalty = c.contractType === 'long' && c.penalty === 0
+            ? Math.floor((c.quantity - c.delivered) * c.pricePerUnit * 0.05)
+            : c.penalty;
           if (isencaoMultaCount - isencaoUsadas > 0) {
             isencaoUsadas++;
-            logsToAdd.push({ msg: `🚚 Contrato vencido — Contrato de Transporte isentou a multa de ${c.penalty}💰!`, type: 'success' });
+            logsToAdd.push({ msg: `🚚 Contrato vencido — Contrato de Transporte isentou a multa de ${effectivePenalty}💰!`, type: 'success' });
           } else {
-            contractPenaltyForGold += c.penalty;
+            contractPenaltyForGold += effectivePenalty;
+            if (effectivePenalty > 0 && c.contractType === 'long') {
+              logsToAdd.push({ msg: `📜 Contrato com "${c.client}" expirou sem cumprir a meta. -${effectivePenalty}💰 multa.`, type: 'error' });
+            }
           }
         }
       });
@@ -4385,7 +4392,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             logsToAdd.push({ msg: `🥩 "${c.client}": meta mensal cumprida (${deliveredThisCycle}/${goal})! +${loyaltyBonus}💰 bônus fidelidade.`, type: 'success' });
             return { ...c, ...cycleReset };
           } else {
-            const penalty = 300;
+            // Multa escalonada: 15% do valor esperado no ciclo
+            const expectedCycleValue = goal * c.pricePerUnit;
+            const penalty = Math.max(300, Math.floor(expectedCycleValue * 0.15));
             longContractBonusForGold -= penalty;
             const detail = c.catalogId === 'lc_26'
               ? `bois: ${deliveredBoiThisCycle}/${c.monthlyGoalBoi ?? 0}, porcos: ${deliveredPorcoThisCycle}/${c.monthlyGoalPorco ?? 0}`
