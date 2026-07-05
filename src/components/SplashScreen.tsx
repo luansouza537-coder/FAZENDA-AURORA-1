@@ -130,12 +130,17 @@ export default function SplashScreen({ onStart, hasSave, savePreview }: SplashSc
           </div>
         )}
 
-        <button
-          onClick={handleNewGame}
-          className="py-3 bg-[#2d5a27] hover:bg-[#3d7a35] border border-[#4a8a3a] text-[#f5e6a3] font-bold text-lg rounded-2xl shadow transition-all active:scale-95 hover:scale-105"
-        >
-          + Novo Jogo
-        </button>
+        <div className="flex flex-col items-center gap-1">
+          <button
+            onClick={handleNewGame}
+            className="w-full py-3 bg-[#2d5a27] hover:bg-[#3d7a35] border border-[#4a8a3a] text-[#f5e6a3] font-bold text-lg rounded-2xl shadow transition-all active:scale-95 hover:scale-105"
+          >
+            + Novo Jogo
+          </button>
+          {hasSave && (
+            <span className="text-[10px] text-[#f87171]/70 font-mono">⚠️ apagará o save atual</span>
+          )}
+        </div>
 
         <button
           onClick={() => fileRef.current?.click()}
