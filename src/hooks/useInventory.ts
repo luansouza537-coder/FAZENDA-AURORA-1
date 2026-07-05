@@ -1163,30 +1163,38 @@ export function useInventory({
     };
     const contractProduct = contractProductMap[itemType as string];
     if (contractProduct) {
-      setContracts(prev => prev.map(c => {
-        if (!c.active || c.product !== contractProduct) return c;
-        const remaining = c.quantity - c.delivered;
-        if (remaining <= 0) return c;
-        const toDeliver = Math.min(qty, remaining);
-        const newDelivered = c.delivered + toDeliver;
-        if (newDelivered >= c.quantity) {
-          if (c.contractType === 'long') {
-            const bonus = c.completionBonus ?? 0;
-            const xp = c.completionXP ?? 0;
-            if (bonus > 0) setGold(prev => prev + bonus);
-            setFarmXp(prev => prev + xp);
-            setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
-            addLog(`🏆 Contrato com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
-          } else {
-            setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
-            addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
-            setFarmXp(prev => prev + 20);
+      // Processa contratos sequencialmente para evitar crédito duplicado
+      // quando dois contratos exigem o mesmo produto
+      setContracts(prev => {
+        let qtyLeft = qty;
+        return prev.map(c => {
+          if (!c.active || c.product !== contractProduct || qtyLeft <= 0) return c;
+          const remaining = c.quantity - c.delivered;
+          if (remaining <= 0) return c;
+          const toDeliver = Math.min(qtyLeft, remaining);
+          qtyLeft -= toDeliver;
+          const newDelivered = c.delivered + toDeliver;
+          if (newDelivered >= c.quantity) {
+            if (c.contractType === 'long') {
+              const bonus = c.completionBonus ?? 0;
+              const xp = c.completionXP ?? 0;
+              if (bonus > 0) setGold(prev => prev + bonus);
+              setFarmXp(prev => prev + xp);
+              setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
+              setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
+              addLog(`🏆 Contrato com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
+            } else {
+              setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
+              addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
+              setFarmXp(prev => prev + 20);
+              setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
+            }
+            setTimeout(() => onContractDelivered?.(), 0);
+            return { ...c, delivered: newDelivered, active: false };
           }
-          setTimeout(() => onContractDelivered?.(), 0);
-          return { ...c, delivered: newDelivered, active: false };
-        }
-        return { ...c, delivered: newDelivered };
-      }));
+          return { ...c, delivered: newDelivered };
+        });
+      });
     }
 
     let label = '';

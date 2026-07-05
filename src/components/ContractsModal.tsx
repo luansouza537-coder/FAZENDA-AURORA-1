@@ -34,7 +34,7 @@ const PRODUCT_LABELS: Record<string, string> = {
   duck_egg: '🦆 Ovo de Pato', quail_egg: '🐦 Ovo de Codorna', goose_egg: '🪿 Ovo de Ganso',
   angora_wool: '🐇 Lã Angorá', alpaca_wool: '🦙 Lã de Alpaca', llama_wool: '🦙 Lã de Lhama',
   muco: '🐌 Muco de Caracol', seda_bruta: '🐛 Seda Bruta', mel_envasado: '🍯 Mel Envasado',
-  boi: '🐂 Boi (Carne)', porco: '🐷 Porco (Carne — em breve)', boi_porco: '🥩 Boi + Porco (Misto — em breve)',
+  boi: '🐂 Boi (Carne)', porco: '🐷 Porco (Carne)', boi_porco: '🥩 Boi + Porco (Misto)',
   mayo: '🥚 Maionese Artesanal', queijo_cabra: '🐐 Queijo de Cabra', iogurte_cabra: '🐐 Iogurte de Cabra',
   sheep_milk: '🐑 Leite de Ovelha', queijo_pecorino: '🧀 Queijo Pecorino', iogurte_ovelha: '🐑 Iogurte de Ovelha',
   ricota_ovelha: '🧀 Ricota de Ovelha', doce_leite_ovelha: '🍯 Doce de Leite Ovelha',
@@ -96,10 +96,13 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                   <h4 className="font-display font-black text-xs uppercase text-violet-700">✅ Contratos Ativos</h4>
                   {longContracts.map(c => {
                     const weeks = Math.round((c.deadline - currentDay) / 7);
-                    const thisWeek = c.delivered - (c.weekStartDelivered ?? 0);
+                    const isMonthly = (c as any).cycleType === 'monthly';
+                    const thisCycle = isMonthly
+                      ? c.delivered - ((c as any).cycleDeliveredStart ?? 0)
+                      : c.delivered - (c.weekStartDelivered ?? 0);
                     const goal = c.weeklyGoal ?? 0;
                     const overallPct = c.quantity > 0 ? Math.round((c.delivered / c.quantity) * 100) : 0;
-                    const weekPct = goal > 0 ? Math.min(100, Math.round((thisWeek / goal) * 100)) : 0;
+                    const weekPct = goal > 0 ? Math.min(100, Math.round((thisCycle / goal) * 100)) : 0;
                     return (
                       <div key={c.id} className="bg-white border-4 border-violet-300 rounded-2xl p-4">
                         <div className="flex justify-between items-start mb-1">
@@ -109,7 +112,7 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                         <div className="text-[10px] text-stone-500 font-mono mb-2">{PRODUCT_LABELS[c.product] ?? c.product} • {c.pricePerUnit}💰/un garantido</div>
                         <div className="space-y-1.5">
                           <div>
-                            <div className="flex justify-between text-[10px] font-mono text-stone-500 mb-0.5"><span>Esta semana</span><span>{thisWeek}/{goal} un</span></div>
+                            <div className="flex justify-between text-[10px] font-mono text-stone-500 mb-0.5"><span>{isMonthly ? 'Este mês' : 'Esta semana'}</span><span>{thisCycle}/{goal} un</span></div>
                             <div className="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
                               <div className={`h-full rounded-full transition-all ${weekPct >= 100 ? 'bg-green-400' : weekPct >= 50 ? 'bg-yellow-400' : 'bg-red-300'}`} style={{ width: `${weekPct}%` }} />
                             </div>
