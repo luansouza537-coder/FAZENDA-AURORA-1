@@ -1573,9 +1573,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       (specialization === 'avicultura' && (type === 'racaoAves' || type === 'racaoAquatica')) ? 0.9 : 1.0;
     base = Math.max(1, Math.round(base * specFeedDiscount));
 
-    // F8: desconto do poço d'água (10% por nível)
+    // F8: desconto do poço d'água (15% por nível)
     if (wellLevel > 0) {
-      base = Math.max(1, Math.round(base * (1 - wellLevel * 0.1)));
+      base = Math.max(1, Math.round(base * (1 - wellLevel * 0.15)));
     }
 
     const estacao = getEstacaoKey(day);
@@ -1756,7 +1756,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','muco','creme_cosmetico','sabonete_natural','serum_facial','mascara_facial']);
 
   const getCeleiroLimit = () => ([30, 60, 120, 250, 999][celeiroLevel] ?? 30);
-  const getCamaraFriaLimit = () => ([50, 120, 250, 500][camaraFriaLevel] ?? 50);
+  const getCamaraFriaLimit = () => ([15, 40, 80, 180][camaraFriaLevel] ?? 15);
 
   const canAddToInventory = (itemKey: string, qty: number = 1): boolean => {
     const current = (inventory as Record<string, number>)[itemKey] ?? 0;
@@ -4649,6 +4649,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         // Pastagem Ampliada: +3 felicidade para bovinos e ovinos
         if (hasPastagem && ['vaca', 'boi', 'bufalo', 'ovelha', 'cabra', 'lhama', 'alpaca'].includes(copy.type)) {
           copy.happiness = Math.min(100, copy.happiness + 3);
+        }
+
+        // Gerador Solar Nv4: +10% felicidade de todos os animais (bônus de energia limpa)
+        if (solarLevel >= 4) {
+          copy.happiness = Math.min(100, copy.happiness + Math.round(copy.happiness * 0.10));
         }
 
         // Lhama: não perde felicidade no inverno
