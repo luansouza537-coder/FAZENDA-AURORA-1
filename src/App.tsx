@@ -7037,6 +7037,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           >
             ☕ Apoiar o Jogo
           </button>
+          <a
+            href="mailto:fazendaaurora4@gmail.com?subject=%5BBug%5D%20Fazenda%20Aurora&body=Descreva%20o%20bug%20aqui%3A%0A%0AO%20que%20voc%C3%AA%20estava%20fazendo%3A%0A%0ADia%20no%20jogo%3A"
+            className="text-[#fcd57e]/70 hover:text-[#fcd57e] transition-colors text-[9px] font-mono uppercase font-black"
+          >
+            🐛 Reportar Bug
+          </a>
         </footer>
 
       </div>
