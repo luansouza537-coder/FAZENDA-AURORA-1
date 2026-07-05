@@ -1270,11 +1270,19 @@ export function useInventory({
     triggerAudioResult(() => sfx.playSound('sell'));
     spawnFeedback('💰', `+${profit} 💰`, event);
     // Missões: vender leite, vender qualquer coisa, ganhar ouro
-    if (itemType === 'milk') updateMissionProgress('sell_milk', qty);
+    if (['milk', 'goat_milk', 'buffalo_milk', 'sheep_milk'].includes(itemType as string)) updateMissionProgress('sell_milk', qty);
     updateMissionProgress('sell_any', qty);
     updateMissionProgress('earn_gold', profit);
+    // Missão de queijo
+    if (['cheese', 'queijoCoalho', 'queijoMucarela', 'queijoBrie', 'queijo_cabra', 'buffalo_mozzarella', 'queijo_pecorino', 'queijo_parmesao', 'queijo_serra'].includes(itemType as string)) {
+      updateMissionProgress('sell_cheese', qty);
+    }
+    // Missão de lã
+    if (['wool', 'alpaca_wool', 'angora_wool', 'llama_wool'].includes(itemType as string)) {
+      updateMissionProgress('sell_wool', qty);
+    }
     // Missão de produto exótico
-    if (['muco', 'seda_bruta', 'couro_avestruz', 'couro_jacare', 'carne_jacare', 'carne_avestruz'].includes(itemType as string)) {
+    if (['muco', 'seda_bruta', 'couro_jacare', 'carne_jacare', 'coxa_ra', 'mel', 'mel_envasado', 'creme_cosmetico', 'sabonete_natural', 'serum_facial', 'mascara_facial'].includes(itemType as string)) {
       updateMissionProgress('sell_exotic', qty);
     }
   };
@@ -1672,6 +1680,23 @@ export function useInventory({
     if (waffelMelQty > 0) messageParts.push(`${waffelMelQty} waffles de mel`);
     if (minhocaVivaQty > 0) messageParts.push(`${minhocaVivaQty} minhocas vivas`);
     if (biofertilizanteQty > 0) messageParts.push(`${biofertilizanteQty} biofertilizantes`);
+
+    // Rastreamento de missões para "Vender Tudo"
+    const totalMilkQty = milkQty + goatMilkQty + buffaloMilkQty + (inventory.sheep_milk || 0);
+    if (totalMilkQty > 0) updateMissionProgress('sell_milk', totalMilkQty);
+    const totalCheeseQty = cheeseQty + coalhoQty + mucarelaQty + brieQty + queijoCabraQty + buffaloMozzQty +
+      (inventory.queijo_pecorino || 0) + queijoParmesaoQty + queijoSerraQty;
+    if (totalCheeseQty > 0) updateMissionProgress('sell_cheese', totalCheeseQty);
+    const totalWoolQty = woolQty + alpacaWoolQty + angoraWoolQty + llamaWoolQty;
+    if (totalWoolQty > 0) updateMissionProgress('sell_wool', totalWoolQty);
+    const totalExoticQty = mucoQty + sedaBrutaQty + couroJacareQty + carneJacareQty + coxaRaQty +
+      melQty + melEnvasadoQty + cremeCosmeticoQty + saboneteNaturalQty + serumFacialQty + mascaraFacialQty;
+    if (totalExoticQty > 0) updateMissionProgress('sell_exotic', totalExoticQty);
+    const totalAllSold = milkQty + woolQty + cheeseQty + scarfQty + eggQty + mayoQty + coalhoQty +
+      mucarelaQty + brieQty + goatMilkQty + llamaWoolQty + duckEggQty + gooseEggQty +
+      buffaloMilkQty + buffaloMozzQty + butterQty + yogurtQty + fertileEggQty + allExtras;
+    if (totalAllSold > 0) updateMissionProgress('sell_any', totalAllSold);
+    if (totalEarningCalculated > 0) updateMissionProgress('earn_gold', totalEarningCalculated);
 
     addLog(`💰 Você vendeu tudo: ${messageParts.join(', ')} por ${totalEarningCalculated} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));

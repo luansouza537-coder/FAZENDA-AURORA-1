@@ -4261,6 +4261,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         updateMissionProgress('happy_animals', 1);
         setStats(prev => ({ ...prev, happyDays: (prev.happyDays || 0) + 1 }));
       }
+      if (updatedAnimalsList.length > 0) {
+        updateMissionProgress('have_animals', updatedAnimalsList.length);
+      }
 
       // --- SUBFUNÇÃO 8: Verificação de Mortes Secundárias ---
       const { survivors, deceasedCount } = verificarMortesAnimais(updatedAnimalsList, logsToAdd);
