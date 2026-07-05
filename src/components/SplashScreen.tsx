@@ -9,11 +9,12 @@ import { motion, AnimatePresence } from 'motion/react';
 interface SplashScreenProps {
   onStart: () => void;
   hasSave: boolean;
+  savePreview?: { day: number; level: number } | null;
 }
 
 const ANIMALS = ['🐄', '🐑', '🐔', '🦙', '🦆', '🐐', '🦚', '🐊'];
 
-export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
+export default function SplashScreen({ onStart, hasSave, savePreview }: SplashScreenProps) {
   const [floatIndex, setFloatIndex] = useState(0);
   const [confirmNew, setConfirmNew] = useState(false);
   const [importError, setImportError] = useState('');
@@ -114,9 +115,14 @@ export default function SplashScreen({ onStart, hasSave }: SplashScreenProps) {
         {hasSave ? (
           <button
             onClick={onStart}
-            className="py-4 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1a3a1a] font-extrabold text-xl rounded-2xl shadow-lg shadow-black/40 transition-all active:scale-95 hover:scale-105"
+            className="py-3 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1a3a1a] font-extrabold text-xl rounded-2xl shadow-lg shadow-black/40 transition-all active:scale-95 hover:scale-105 flex flex-col items-center leading-tight"
           >
-            ▶ Continuar
+            <span>▶ Continuar</span>
+            {savePreview && (
+              <span className="text-[11px] font-normal text-[#1a3a1a]/70 mt-0.5">
+                Dia {savePreview.day} • Nível {savePreview.level}
+              </span>
+            )}
           </button>
         ) : (
           <div className="py-4 bg-[#3a5a3a] text-[#6a8a6a] font-extrabold text-xl rounded-2xl text-center opacity-40 cursor-not-allowed">

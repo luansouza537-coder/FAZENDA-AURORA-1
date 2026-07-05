@@ -167,10 +167,19 @@ function migrateSave() {
 
 export default function App() {
   const hasSave = !!localStorage.getItem('aurora_farm_save');
+  const savePreview = (() => {
+    try {
+      const s = JSON.parse(localStorage.getItem('aurora_farm_save') || '{}');
+      const day = s.currentDay ?? s.day ?? null;
+      const level = s.farmLevel ?? null;
+      if (day && level) return { day, level };
+    } catch { /* ignore */ }
+    return null;
+  })();
   const [gameStarted, setGameStarted] = useState<boolean>(false);
 
   if (!gameStarted) {
-    return <SplashScreen onStart={() => { migrateSave(); setGameStarted(true); }} hasSave={hasSave} />;
+    return <SplashScreen onStart={() => { migrateSave(); setGameStarted(true); }} hasSave={hasSave} savePreview={savePreview} />;
   }
 
   return <ErrorBoundary><GameApp /></ErrorBoundary>;
@@ -6375,14 +6384,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           >
             {/* Ambient retro glowing farm scene */}
             <div className="text-6xl sm:text-8xl drop-shadow-[0_4px_0_#451a03] mb-6 animate-bounce" style={{ animationDuration: '3s' }}>
-              🌾🌻🏡
+              🐄🐑🐔
             </div>
-            
+
             <h1 className="text-white text-4xl sm:text-6xl font-display font-black uppercase tracking-wider mb-2 animate-pulse" style={{ textShadow: '3.5px 3.5px 0px #451a03', animationDuration: '2s' }}>
               Fazenda Aurora
             </h1>
             <p className="text-[#fcd57e] text-xs sm:text-sm font-mono tracking-widest uppercase mb-8">
-              🚜 Simulador de Animais Retro
+              🌿 Cuide, Crie, Prospere
             </p>
 
             {/* Simulated wooden loader container */}
