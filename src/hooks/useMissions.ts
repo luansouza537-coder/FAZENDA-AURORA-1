@@ -3,22 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Animal } from '../types';
+import { Animal, Mission } from '../types';
 import { InventoryState } from './useAnimals';
 
-export interface Mission {
-  id: string;
-  title: string;
-  description: string;
-  type: 'daily' | 'weekly' | 'epic';
-  goal: number;
-  current: number;
-  reward: number;
-  expiresOnDay: number;
-  completed: boolean;
-  claimed: boolean;
-  missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items' | 'collect_silk' | 'sell_exotic' | 'organic_day' | 'sell_cheese' | 'have_animals' | 'sell_wool';
-}
+export type { Mission };
 
 export interface UseMissionsProps {
   animals: Animal[];
@@ -87,7 +75,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       description: 'O mercado de primavera está em alta. Acumule 300 moedas nesta semana — combine vendas, contratos e negociações para bater a meta. Cada decisão importa!',
       missionKey: 'earn_gold',
       goal: 300,
-      reward: 120,
+      reward: 60,
       minLevel: 2,
       sentiment: '😤',
     },
@@ -220,7 +208,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       description: 'Naquele verão de 1987, Aurora fez sua primeira grande venda e comprou mais três vacas. Acumule 400 moedas nesta semana e repita o feito histórico que fundou o legado da fazenda.',
       missionKey: 'earn_gold',
       goal: 400,
-      reward: 160,
+      reward: 80,
       minLevel: 3,
       sentiment: '📖',
     },
@@ -293,7 +281,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       description: 'As feiras de outono movimentam muito dinheiro! Acumule 350 moedas nesta semana combinando vendas, contratos e produtos de alto valor. É agora ou nunca antes do inverno!',
       missionKey: 'earn_gold',
       goal: 350,
-      reward: 160,
+      reward: 70,
       minLevel: 2,
       sentiment: '😤',
     },
@@ -386,7 +374,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       description: 'O inverno é duro, mas os preços estão em alta! Acumule 500 moedas nesta semana — use contratos premium, venda itens raros e maximize cada oportunidade. Só os fortes chegam ao topo!',
       missionKey: 'earn_gold',
       goal: 500,
-      reward: 220,
+      reward: 100,
       minLevel: 4,
       sentiment: '😤',
     },
@@ -482,7 +470,11 @@ export function useMissions({ animals: _animals, farmLevel, inventory: _inventor
     const weekNumber = Math.floor((day - 1) / 7);
     const rand = seededRandom(weekNumber * 31 + ['primavera', 'verao', 'outono', 'inverno'].indexOf(season));
 
-    const shuffled = [...pool].sort(() => rand() - 0.5);
+    const shuffled = [...pool];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     const picked = shuffled.slice(0, Math.min(3, shuffled.length));
 
     const expiresOnDay = day + (7 - ((day - 1) % 7));

@@ -1,19 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import type { Mission } from '../types';
 
-export interface Mission {
-  id: string;
-  title: string;
-  description: string;
-  type: 'daily' | 'weekly' | 'epic';
-  goal: number;
-  current: number;
-  reward: number;
-  expiresOnDay: number;
-  completed: boolean;
-  claimed: boolean;
-  missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items' | 'collect_silk' | 'sell_exotic' | 'organic_day' | 'sell_cheese' | 'have_animals' | 'sell_wool';
-}
+export type { Mission };
 
 interface MissionsModalProps {
   missions: Mission[];
@@ -21,7 +10,15 @@ interface MissionsModalProps {
   onClaimMission: (mission: Mission) => void;
 }
 
-export const MissionsModal: React.FC<MissionsModalProps> = ({ missions, onClose, onClaimMission }) => {
+function ExpiryBadge({ expiresOnDay, currentDay }: { expiresOnDay: number; currentDay?: number }) {
+  const daysLeft = currentDay != null ? expiresOnDay - currentDay : null;
+  if (daysLeft != null && daysLeft <= 2 && daysLeft > 0) {
+    return <span className="text-[9px] font-mono font-bold text-red-600 bg-red-100 border border-red-300 px-1.5 py-0.5 rounded-full">⚠️ {daysLeft}d</span>;
+  }
+  return <span className="text-[9px] text-stone-400 font-mono">Expira no Dia {expiresOnDay}</span>;
+}
+
+export const MissionsModal: React.FC<MissionsModalProps & { currentDay?: number }> = ({ missions, onClose, onClaimMission, currentDay }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -59,8 +56,8 @@ export const MissionsModal: React.FC<MissionsModalProps> = ({ missions, onClose,
               {missions.filter(m => m.type === 'daily').length === 0 && (
                 <p className="text-stone-500 text-xs italic text-center py-4">Nenhuma missão diária ativa. Avance o dia para gerar novas missões!</p>
               )}
-              {missions.filter(m => m.type === 'daily').map(m => (
-                <div key={m.id} className={`border-4 rounded-3xl p-4 flex flex-col gap-2 ${m.claimed ? 'bg-stone-100 border-stone-200 opacity-60' : m.completed ? 'bg-emerald-50 border-emerald-400' : 'bg-white border-purple-200'}`}>
+              {[...missions.filter(m => m.type === 'daily')].sort((a, b) => Number(a.claimed) - Number(b.claimed)).map(m => (
+                <div key={m.id} className={`border-4 rounded-3xl p-4 flex flex-col gap-2 ${m.claimed ? 'bg-stone-100 border-stone-200 opacity-50' : m.completed ? 'bg-emerald-50 border-emerald-400' : 'bg-white border-purple-200'}`}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <h5 className="font-display font-black text-sm uppercase text-[#78350f]">{m.title}</h5>
@@ -88,7 +85,7 @@ export const MissionsModal: React.FC<MissionsModalProps> = ({ missions, onClose,
                     )}
                     {m.claimed && <span className="text-[10px] font-mono text-stone-400 shrink-0">✓ Resgatado</span>}
                   </div>
-                  <div className="text-[9px] text-stone-400 font-mono">Expira no Dia {m.expiresOnDay}</div>
+                  <ExpiryBadge expiresOnDay={m.expiresOnDay} currentDay={currentDay} />
                 </div>
               ))}
             </div>
@@ -100,8 +97,8 @@ export const MissionsModal: React.FC<MissionsModalProps> = ({ missions, onClose,
               {missions.filter(m => m.type === 'weekly').length === 0 && (
                 <p className="text-stone-500 text-xs italic text-center py-4">Nenhuma missão semanal ativa. Avance o dia para gerar novas missões!</p>
               )}
-              {missions.filter(m => m.type === 'weekly').map(m => (
-                <div key={m.id} className={`border-4 rounded-3xl p-4 flex flex-col gap-2 ${m.claimed ? 'bg-stone-100 border-stone-200 opacity-60' : m.completed ? 'bg-emerald-50 border-emerald-400' : 'bg-white border-indigo-200'}`}>
+              {[...missions.filter(m => m.type === 'weekly')].sort((a, b) => Number(a.claimed) - Number(b.claimed)).map(m => (
+                <div key={m.id} className={`border-4 rounded-3xl p-4 flex flex-col gap-2 ${m.claimed ? 'bg-stone-100 border-stone-200 opacity-50' : m.completed ? 'bg-emerald-50 border-emerald-400' : 'bg-white border-indigo-200'}`}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <h5 className="font-display font-black text-sm uppercase text-[#78350f]">{m.title}</h5>
@@ -129,7 +126,7 @@ export const MissionsModal: React.FC<MissionsModalProps> = ({ missions, onClose,
                     )}
                     {m.claimed && <span className="text-[10px] font-mono text-stone-400 shrink-0">✓ Resgatado</span>}
                   </div>
-                  <div className="text-[9px] text-stone-400 font-mono">Expira no Dia {m.expiresOnDay}</div>
+                  <ExpiryBadge expiresOnDay={m.expiresOnDay} currentDay={currentDay} />
                 </div>
               ))}
             </div>

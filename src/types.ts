@@ -220,3 +220,18 @@ export interface WeeklyReportData {
   waterCost: number;
   energyCost: number;
 }
+
+
+export interface Mission {
+  id: string;
+  title: string;
+  description: string;
+  type: 'daily' | 'weekly' | 'epic';
+  goal: number;
+  current: number;
+  reward: number;
+  expiresOnDay: number;
+  completed: boolean;
+  claimed: boolean;
+  missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items' | 'collect_silk' | 'sell_exotic' | 'organic_day' | 'sell_cheese' | 'have_animals' | 'sell_wool';
+}

@@ -7432,7 +7432,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       {/* 🎯 MISSÕES MODAL */}
       <AnimatePresence>
         {showMissionsModal && (
-          <MissionsModal missions={missions} onClose={() => setShowMissionsModal(false)} onClaimMission={handleClaimMission} />
+          <MissionsModal missions={missions} onClose={() => setShowMissionsModal(false)} onClaimMission={handleClaimMission} currentDay={currentDay} />
         )}
       </AnimatePresence>
 
