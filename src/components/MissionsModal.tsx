@@ -34,7 +34,7 @@ export const MissionsModal: React.FC<MissionsModalProps & { currentDay?: number 
         onClick={(e) => e.stopPropagation()}
         className="bg-[#fffbeb] border-8 border-purple-800 rounded-[36px] max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative"
       >
-        <div className="bg-gradient-to-r from-purple-800 to-indigo-900 p-5 border-b-4 border-purple-950 text-center shrink-0">
+        <div className="bg-gradient-to-r from-purple-800 to-indigo-900 p-5 pr-14 border-b-4 border-purple-950 text-center shrink-0">
           <h3 className="text-white text-xl sm:text-2xl font-display font-black uppercase tracking-wider flex items-center justify-center gap-2">
             🎯 Missões &amp; Objetivos
           </h3>

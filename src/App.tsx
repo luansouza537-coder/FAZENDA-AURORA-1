@@ -4615,6 +4615,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       const helicicultor = workers.some(w => w.role === 'helicicultor');
       const caracolCycle = helicicultor ? 2 : 3;
+      let organicDayTracked = false;
 
       const finalAnimals = survivorsAfterAge.map(a => {
         const copy = { ...a };
@@ -4660,7 +4661,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (a.type === 'minhoca' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
           copy.humusReady = true;
           logsToAdd.push({ msg: `🪱 ${a.name} produziu húmus — pronto para coletar!`, type: 'success' });
-          updateMissionProgress('organic_day', 1, nextDayValue);
+          organicDayTracked = true;
         }
         if (a.type === 'minhoca' && a.isAdult !== false && (a.age || 0) > 0 && (a.age || 0) % 5 === 0) {
           setTimeout(() => {
@@ -4673,7 +4674,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (a.type === 'caracol' && (a.age || 0) > 0 && (a.age || 0) % caracolCycle === 0) {
           if (!copy.mucoReady) {
             logsToAdd.push({ msg: `🐌 ${a.name} produziu muco — pronto para coletar!`, type: 'success' });
-            updateMissionProgress('organic_day', 1, nextDayValue);
+            organicDayTracked = true;
           }
           copy.mucoReady = true;
         }
@@ -4698,6 +4699,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
         return copy;
       });
+      if (organicDayTracked) updateMissionProgress('organic_day', 1, nextDayValue);
 
       // Apply climate event mutations directly into finalAnimals array
       // (must happen here so they're included in the final setAnimals call)
