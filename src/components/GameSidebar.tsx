@@ -179,7 +179,7 @@ export default function GameSidebar({
                               const isEmpty = item.qty === 0;
                               const isCraftable = ALWAYS_SHOW.has(item.key) && isEmpty;
                               return (
-                                <div key={item.key} title={(item as any).tooltip ?? (price !== null ? `${item.label}: ${price}💰/unidade${trend && trend.pct !== 0 ? ` (${trend.pct > 0 ? '+' : ''}${trend.pct}% vs ontem)` : ''}` : undefined)} className={`bg-white/80 p-2 rounded-xl border flex flex-col gap-0.5 shadow-inner transition-all ${isCraftable ? 'border-emerald-300 bg-emerald-50/40' : isEmpty ? 'border-[#fbbf24] opacity-40' : 'border-[#fbbf24]'}`}>
+                                <div key={item.key} title={(item as any).tooltip ?? (price !== null ? `${item.label}: ${price}💰/unidade${trend && trend.pct !== 0 ? ` (${trend.pct > 0 ? '+' : ''}${trend.pct}% vs ontem)` : ''}` : undefined)} onClick={isCraftable ? onOpenAtelier : undefined} className={`bg-white/80 p-2 rounded-xl border flex flex-col gap-0.5 shadow-inner transition-all ${isCraftable ? 'border-emerald-300 bg-emerald-50/40 cursor-pointer hover:bg-emerald-100/60 active:scale-95' : isEmpty ? 'border-[#fbbf24] opacity-40' : 'border-[#fbbf24]'}`}>
                                   <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-[#78350f] uppercase tracking-tight leading-none flex items-center">
                                       {item.label}
