@@ -1,4 +1,4 @@
-const CACHE = 'fazenda-aurora-v1';
+const CACHE = 'fazenda-aurora-v2';
 const PRECACHE = ['/', '/index.html'];
 
 self.addEventListener('install', e => {

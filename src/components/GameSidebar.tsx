@@ -178,15 +178,16 @@ export default function GameSidebar({
                               const price = item.priceKey ? getActualSellPrice(item.priceKey) : null;
                               const isEmpty = item.qty === 0;
                               const isCraftable = ALWAYS_SHOW.has(item.key) && isEmpty;
+                              const CardTag = isCraftable ? 'button' : 'div';
                               return (
-                                <div key={item.key} title={(item as any).tooltip ?? (price !== null ? `${item.label}: ${price}💰/unidade${trend && trend.pct !== 0 ? ` (${trend.pct > 0 ? '+' : ''}${trend.pct}% vs ontem)` : ''}` : undefined)} onClick={isCraftable ? onOpenAtelier : undefined} className={`bg-white/80 p-2 rounded-xl border flex flex-col gap-0.5 shadow-inner transition-all ${isCraftable ? 'border-emerald-300 bg-emerald-50/40 cursor-pointer hover:bg-emerald-100/60 active:scale-95' : isEmpty ? 'border-[#fbbf24] opacity-40' : 'border-[#fbbf24]'}`}>
+                                <CardTag key={item.key} type={isCraftable ? 'button' : undefined} title={(item as any).tooltip ?? (price !== null ? `${item.label}: ${price}💰/unidade${trend && trend.pct !== 0 ? ` (${trend.pct > 0 ? '+' : ''}${trend.pct}% vs ontem)` : ''}` : undefined)} onClick={isCraftable ? onOpenAtelier : undefined} className={`bg-white/80 p-2 rounded-xl border flex flex-col gap-0.5 shadow-inner transition-all text-left w-full ${isCraftable ? 'border-emerald-300 bg-emerald-50/40 cursor-pointer hover:bg-emerald-100/60 active:scale-95' : isEmpty ? 'border-[#fbbf24] opacity-40' : 'border-[#fbbf24]'}`}>
                                   <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-[#78350f] uppercase tracking-tight leading-none flex items-center">
                                       {item.label}
                                       {item.freshKey && item.qty > 0 && getFreshnessIndicator(item.freshKey)}
                                     </span>
                                     {isCraftable
-                                      ? <span className="text-[8px] font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded leading-none">✦ Fabricar ↓</span>
+                                      ? <span className="text-[8px] font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded leading-none">✦ Fabricar</span>
                                       : <span className="font-mono font-black text-blue-700 text-xs bg-blue-50/60 px-1.5 py-0.5 rounded border border-blue-100">{item.qty}u</span>
                                     }
                                   </div>
@@ -218,7 +219,7 @@ export default function GameSidebar({
                                       )}
                                     </div>
                                   )}
-                                </div>
+                                </CardTag>
                               );
                             })}
                           </div>
