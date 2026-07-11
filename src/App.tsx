@@ -689,6 +689,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
   const [showAllTimeStats, setShowAllTimeStats] = useState(false);
   const [showMorePanel, setShowMorePanel] = useState<boolean>(false);
+  const [showMoreMenu, setShowMoreMenu] = useState<boolean>(false);
   const [productionByAnimal, setProductionByAnimal] = useState<Record<number, { name: string; type: string; produced: number }>>({});
   const [allTimeStats, setAllTimeStats] = useState<{ totalSpentFeed: number; bestDay: number; worstDay: number }>(() => {
     try {
@@ -6495,7 +6496,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </div>
             </div>
 
-            {/* 💹 Economia + 📋 Contratos — par */}
+            {/* Primários: Finanças + Loja */}
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => { setShowFinancasModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
@@ -6503,30 +6504,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 title="Economia: Mercado de preços e histórico financeiro"
               >
                 <span>💹</span>
-                <span>Economia</span>
+                <span>Finanças</span>
                 {merchantActive && (
                   <span className="bg-yellow-400 text-[#451a03] text-[10px] h-5 w-5 rounded-full flex items-center justify-center font-bold">🛒</span>
                 )}
               </button>
-              <div className="relative">
-                <button
-                  onClick={() => { setShowContractsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                  className="relative bg-violet-600 border-3 border-violet-400 hover:bg-violet-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#4c1d95] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
-                  title="Contratos de fornecimento"
-                >
-                  <span>📋</span>
-                  <span>Contratos</span>
-                  {contracts.filter(c => c.active).length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                      {contracts.filter(c => c.active).length}
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* 🏪 Loja + 👷 Funcionários — par */}
-            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => { setShowUpgradesModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
                 className="bg-orange-600 border-3 border-orange-400 hover:bg-orange-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#7c2d12] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
@@ -6534,14 +6516,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               >
                 <span>🏪</span>
                 <span>Loja</span>
-              </button>
-              <button
-                onClick={() => { setShowWorkersModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                className="bg-[#064e3b] border-3 border-[#fbbf24] hover:bg-[#065f46] text-[#fef3c7] font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#022c22] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
-                title="Contratar Funcionários: trabalhadores que automatizam tarefas diárias"
-              >
-                <span>👷</span>
-                <span>Func. {workers.length > 0 ? `(${workers.length})` : ''}</span>
               </button>
             </div>
 
@@ -6642,58 +6616,71 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 )}
               </div>
 
-            {/* 🔔 Notificações Button */}
-            <button
-              onClick={() => {
-                setShowNotifications(prev => !prev);
-                triggerAudioResult(() => sfx.playSound('click'));
-              }}
-              className="relative bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Notificações persistentes"
-            >
-              <Bell className="w-5 h-5" />
-              {notifications.filter(n => !n.read).length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                  {notifications.filter(n => !n.read).length}
-                </span>
+            {/* ⋯ Mais — menu secundário */}
+            <div className="relative">
+              {showMoreMenu && (
+                <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
               )}
-            </button>
-
-            {/* 📖 Tutorial */}
-            <button
-              onClick={() => { setShowTutorialModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Ajuda & Tutorial"
-            >
-              📖
-            </button>
-
-            {/* 💾 Salvar */}
-            <button
-              onClick={exportSave}
-              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Exportar Save — baixa seu progresso como arquivo .json"
-            >
-              💾
-            </button>
-
-            {/* 📂 Carregar */}
-            <button
-              onClick={importSave}
-              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Importar Save — carrega um arquivo .json de backup"
-            >
-              📂
-            </button>
-
-            {/* 🏆 Conquistas */}
-            <button
-              onClick={() => { setShowAchievementsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-              className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
-              title="Sala de Troféus & Conquistas"
-            >
-              🏆
-            </button>
+              <button
+                onClick={() => { setShowMoreMenu(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
+                className={`border-3 border-[#fbbf24] text-[#78350f] px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-xs font-black leading-none flex items-center gap-1 focus:outline-none ${showMoreMenu ? 'bg-[#fbbf24]' : 'bg-[#ffcd7e] hover:bg-[#fbc550]'}`}
+                title="Mais opções"
+              >
+                <span>⋯</span>
+                <span>Mais</span>
+                {(contracts.filter(c => c.active).length > 0 || notifications.filter(n => !n.read).length > 0) && (
+                  <span className="bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">!</span>
+                )}
+              </button>
+              {showMoreMenu && (
+                <div className="absolute bottom-full right-0 mb-2 bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl p-3 flex flex-col gap-1.5 z-50 shadow-2xl min-w-[180px]">
+                  <div className="relative">
+                    <button onClick={() => { setShowContractsModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                      className="flex items-center gap-2 w-full text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                      📋 Contratos
+                      {contracts.filter(c => c.active).length > 0 && (
+                        <span className="ml-auto bg-yellow-400 text-[#451a03] text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">{contracts.filter(c => c.active).length}</span>
+                      )}
+                    </button>
+                  </div>
+                  <button onClick={() => { setShowWorkersModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                    👷 Funcionários {workers.length > 0 ? `(${workers.length})` : ''}
+                  </button>
+                  <button onClick={() => { setShowAchievementsModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                    🏆 Conquistas
+                  </button>
+                  <button onClick={() => { setShowStatsModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                    📊 Estatísticas
+                  </button>
+                  <button onClick={() => { setShowNotifications(prev => !prev); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                    <span className="relative inline-flex items-center">
+                      <Bell className="w-4 h-4" />
+                      {notifications.filter(n => !n.read).length > 0 && (
+                        <span className="ml-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">{notifications.filter(n => !n.read).length}</span>
+                      )}
+                    </span>
+                    <span>Notificações</span>
+                  </button>
+                  <button onClick={() => { setShowTutorialModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                    📖 Tutorial
+                  </button>
+                  <div className="h-px bg-[#fbbf24]/30 my-0.5" />
+                  <button onClick={() => { exportSave(); setShowMoreMenu(false); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                    💾 Salvar
+                  </button>
+                  <button onClick={() => { importSave(); setShowMoreMenu(false); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                    📂 Carregar
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* 🌐 Ranking & Chat Online (ou Login se não logado) */}
             <div className="relative">

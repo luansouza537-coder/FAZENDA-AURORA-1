@@ -14,14 +14,45 @@ interface SplashScreenProps {
 
 const ANIMALS = ['🐄', '🐑', '🐔', '🦙', '🦆', '🐐', '🦚', '🐊'];
 
+const TIPS = [
+  '💡 Ovelhas produzem lã a cada 3 dias. Na chuva, há 30% de chance de falhar!',
+  '💡 Galinhas com felicidade 95+ podem botar ovos férteis — que viram novas galinhas!',
+  '💡 No inverno a ração custa 50% mais. Estoque antes do outono acabar.',
+  '💡 O Silo de Grãos dá 15% de desconto em toda ração. Vale a pena comprar cedo.',
+  '💡 Queijo Brie leva 4 dias para maturar. Comece a fabricar antes de precisar vender.',
+  '💡 A chuva dobra a produção de muco de caracol e coxa de rã.',
+  '💡 Contratos garantem preço fixo acima do mercado. Assine com o que você já produz.',
+  '💡 Animais com fome abaixo de 25 não produzem nada no dia.',
+  '💡 Lhama só produz lã na Primavera — aproveite a estação!',
+  '💡 Pavões geram renda de turismo toda semana, sem precisar de coleta manual.',
+  '💡 Tornando um animal seu Melhor Amigo você ganha bônus permanentes de produção.',
+  '💡 O Mercador Viajante aparece ocasionalmente com preços especiais. Fique atento!',
+  '💡 Bufalo produz 3 leites por dia, mas sofre estresse de calor no verão.',
+  '💡 Vender tudo de uma vez pode derrubar os preços do mercado. Venda aos poucos!',
+  '💡 Jacarés exigem Licença de Fauna Exótica — sem ela você paga multa diária.',
+];
+
 export default function SplashScreen({ onStart, hasSave, savePreview }: SplashScreenProps) {
   const [floatIndex, setFloatIndex] = useState(0);
+  const [tipIndex, setTipIndex] = useState(0);
+  const [tipVisible, setTipVisible] = useState(true);
   const [confirmNew, setConfirmNew] = useState(false);
   const [importError, setImportError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const id = setInterval(() => setFloatIndex(i => (i + 1) % ANIMALS.length), 800);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTipVisible(false);
+      setTimeout(() => {
+        setTipIndex(i => (i + 1) % TIPS.length);
+        setTipVisible(true);
+      }, 400);
+    }, 4000);
     return () => clearInterval(id);
   }, []);
 
@@ -202,6 +233,21 @@ export default function SplashScreen({ onStart, hasSave, savePreview }: SplashSc
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Tip rotativa */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1, duration: 0.5 }}
+        className="z-10 mt-6 w-72 text-center"
+      >
+        <p
+          className="text-[11px] text-[#a3c48a] font-mono leading-relaxed px-2 transition-opacity duration-400"
+          style={{ opacity: tipVisible ? 1 : 0 }}
+        >
+          {TIPS[tipIndex]}
+        </p>
+      </motion.div>
 
       <div className="absolute bottom-4 text-[10px] text-[#4a6a4a] z-10">v1.0.0</div>
     </div>

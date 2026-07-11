@@ -73,6 +73,54 @@ export default function GameSidebar({
   return (
           <div className="lg:col-span-4 flex flex-col gap-6">
 
+            {/* --- DIÁRIO DA FAZENDA (topo) --- */}
+            <div className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-4 shadow-[0_12px_0_#d97706] flex flex-col h-[180px]">
+              <div className="flex items-center justify-between border-b-2 border-[#fbbf24] pb-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <History className="w-4 h-4 text-[#78350f]" />
+                  <h3 className="text-sm font-display font-black text-[#78350f] uppercase tracking-wider">Diário da Fazenda</h3>
+                </div>
+                <button
+                  onClick={() => { setLogs([]); triggerAudioResult(() => sfx.playSound('click')); }}
+                  className="text-[9px] font-mono font-black text-red-700 cursor-pointer flex items-center gap-1 px-2 py-0.5 bg-red-50 hover:bg-red-100 rounded-lg border border-b-2 border-red-300 transition-all uppercase"
+                >
+                  <Trash2 className="w-3 h-3 stroke-[2.5]" /> Limpar
+                </button>
+              </div>
+              <div ref={logsContainerRef} className="flex-1 overflow-y-auto pr-1 text-xs space-y-1 font-mono divide-y divide-[#fbbf24]/30" style={{ scrollbarWidth: 'thin' }}>
+                {logs.length === 0 ? (
+                  <div className="text-center text-[#92400e]/50 italic pt-6 font-bold uppercase tracking-wider text-[10px]">Nenhum registro ainda hoje.</div>
+                ) : (() => {
+                  let lastDay: number | null = null;
+                  return logs.map((log) => {
+                    let textClass = 'text-[#78350f] font-bold';
+                    let bgClass = '';
+                    if (log.type === 'error') { textClass = 'text-[#991b1b] font-black uppercase'; bgClass = 'bg-[#fee2e2] p-1.5 rounded-xl border border-[#fecaca]'; }
+                    else if (log.type === 'success') { textClass = 'text-[#166534] font-black uppercase'; bgClass = 'bg-[#dcfce7] p-1.5 rounded-xl border border-[#bbf7d0]'; }
+                    else if (log.type === 'system') { textClass = 'text-[#1e3a8a] font-black italic uppercase'; bgClass = 'bg-[#dbeafe] p-1.5 rounded-xl border border-[#bfdbfe]'; }
+                    else if (log.type === 'event') { textClass = 'text-[#854d0e] font-black uppercase'; bgClass = 'bg-[#fef9c3] p-1.5 rounded-xl border border-[#fef08a]'; }
+                    const showDaySep = log.day !== lastDay;
+                    lastDay = log.day;
+                    return (
+                      <div key={log.id}>
+                        {showDaySep && (
+                          <div className="flex items-center gap-2 my-1">
+                            <div className="flex-1 border-t border-[#fbbf24]/50" />
+                            <span className="text-[8px] font-black text-[#92400e] bg-[#fef3c7] border border-[#fbbf24] px-1.5 py-0.5 rounded-full uppercase tracking-wider">— Dia {log.day} —</span>
+                            <div className="flex-1 border-t border-[#fbbf24]/50" />
+                          </div>
+                        )}
+                        <div className={`${bgClass} flex items-start gap-1 pb-1 pt-0.5`}>
+                          <span className={`${textClass} leading-tight text-[10px]`}>{log.message}</span>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+                <div ref={logsEndRef} />
+              </div>
+            </div>
+
             {/* --- ATELIÊ & ARMAZÉM DE PROCESSAMENTO --- */}
             <div className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-5 shadow-[0_12px_0_#d97706] flex flex-col">
               <div className="flex items-center gap-2 border-b-2 border-[#fbbf24] pb-2 mb-4 cursor-pointer group" onClick={onOpenAtelier}>
@@ -854,74 +902,6 @@ export default function GameSidebar({
                 )}
             </div>
 
-            {/* --- DIÁRIO DA FAZENDA (ACTION LOGS) --- */}
-            <div className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-5 shadow-[0_12px_0_#d97706] flex flex-col flex-1 h-[280px] lg:h-[350px]">
-
-              <div className="flex items-center justify-between border-b-2 border-[#fbbf24] pb-2 mb-3">
-                <div className="flex items-center gap-2">
-                  <History className="w-5 h-5 text-[#78350f]" />
-                  <h3 className="text-lg font-display font-black text-[#78350f] uppercase tracking-wider">
-                    Diário da Fazenda
-                  </h3>
-                </div>
-                <button
-                  onClick={() => {
-                    setLogs([]);
-                    triggerAudioResult(() => sfx.playSound('click'));
-                  }}
-                  className="text-[10px] font-mono font-black text-red-700 cursor-pointer flex items-center gap-1 px-2.5 py-1 bg-red-50 hover:bg-red-100 rounded-lg border-2 border-b-4 border-red-300 transition-all hover:scale-105 active:translate-y-0.5 shadow-sm uppercase"
-                >
-                  <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" /> Limpar
-                </button>
-              </div>
-
-              <div ref={logsContainerRef} className="flex-1 overflow-y-auto pr-1 text-xs space-y-2 font-mono divide-y divide-[#fbbf24]/30" style={{ scrollbarWidth: 'thin' }}>
-                {logs.length === 0 ? (
-                  <div className="text-center text-[#92400e]/50 italic pt-16 font-bold uppercase tracking-wider">
-                    Nenhum registro ainda hoje.
-                  </div>
-                ) : (() => {
-                  let lastDay: number | null = null;
-                  return logs.map((log) => {
-                    let textClass = 'text-[#78350f] font-bold';
-                    let bgClass = '';
-                    if (log.type === 'error') {
-                      textClass = 'text-[#991b1b] font-black uppercase';
-                      bgClass = 'bg-[#fee2e2] p-2 rounded-xl border-2 border-[#fecaca]';
-                    } else if (log.type === 'success') {
-                      textClass = 'text-[#166534] font-black uppercase';
-                      bgClass = 'bg-[#dcfce7] p-2 rounded-xl border-2 border-[#bbf7d0]';
-                    } else if (log.type === 'system') {
-                      textClass = 'text-[#1e3a8a] font-black italic uppercase';
-                      bgClass = 'bg-[#dbeafe] p-2 rounded-xl border-2 border-[#bfdbfe]';
-                    } else if (log.type === 'event') {
-                      textClass = 'text-[#854d0e] font-black uppercase';
-                      bgClass = 'bg-[#fef9c3] p-2 rounded-xl border-2 border-[#fef08a]';
-                    }
-                    const showDaySep = log.day !== lastDay;
-                    lastDay = log.day;
-                    return (
-                      <div key={log.id}>
-                        {showDaySep && (
-                          <div className="flex items-center gap-2 my-1.5">
-                            <div className="flex-1 border-t border-[#fbbf24]/50" />
-                            <span className="text-[9px] font-black text-[#92400e] bg-[#fef3c7] border border-[#fbbf24] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                              — Dia {log.day} —
-                            </span>
-                            <div className="flex-1 border-t border-[#fbbf24]/50" />
-                          </div>
-                        )}
-                        <div className={`${bgClass} transition-all flex items-start gap-1 pb-1.5 pt-1`}>
-                          <span className={`${textClass} leading-tight`}>{log.message}</span>
-                        </div>
-                      </div>
-                    );
-                  });
-                })()}
-                <div ref={logsEndRef} />
-              </div>
-
-            </div>
 
           </div>
   );

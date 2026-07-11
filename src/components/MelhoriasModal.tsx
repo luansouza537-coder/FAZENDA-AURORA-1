@@ -459,22 +459,26 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
 
             {/* Estruturas de nível alto */}
             {[
-              { key: 'lab', label: '🔬 Laboratório de Laticínios', color: 'rose', price: 8000, state: p.hasLaboratorio, setState: p.setHasLaboratorio, desc: `Todos os queijos maturam 1 dia mais rápido. Requer Nível 6. ${p.hasLaboratorio ? '✅ Instalado' : 'Não instalado'}`, log: '🔬 Laboratório de Laticínios construído! Queijos maturam 1 dia mais rápido.', reqLevel: 6 },
-              { key: 'past', label: '🌿 Pastagem Ampliada', color: 'green', price: 15000, state: p.hasPastagem, setState: p.setHasPastagem, desc: `+3 felicidade/dia para bovinos e ovinos. Requer Nível 8. ${p.hasPastagem ? '✅ Instalada' : 'Não instalada'}`, log: '🌿 Pastagem Ampliada construída! Bovinos e ovinos ficam mais felizes.', reqLevel: 8 },
-              { key: 'export', label: '🚢 Centro de Exportação', color: 'indigo', price: 50000, state: p.hasExportCenter, setState: p.setHasExportCenter, desc: `+20% preço de venda em TODOS os produtos. Requer Nível 12. ${p.hasExportCenter ? '✅ Instalado' : 'Não instalado'}`, log: '🚢 Centro de Exportação construído! Todos os produtos valem +20%.', reqLevel: 12, achievement: 'export_center' },
-              { key: 'acad', label: '🎓 Academia de Criadores', color: 'violet', price: 120000, state: p.hasAcademia, setState: p.setHasAcademia, desc: `+15% XP por dia + animais jovens crescem 20% mais rápido. Requer Nível 16. ${p.hasAcademia ? '✅ Instalada' : 'Não instalada'}`, log: '🎓 Academia de Criadores construída! +15% XP/dia e filhotes crescem mais rápido.', reqLevel: 16, achievement: 'academia' },
-            ].map(({ key, label, color, price, state, setState, desc, log, reqLevel, achievement }) => (
-              <div key={key} className={`bg-white border-4 border-${color}-300 rounded-3xl p-4`}>
-                <h4 className={`font-display font-black text-sm uppercase text-${color}-800 mb-1`}>{label}</h4>
-                <p className="text-xs text-stone-500 font-mono mb-2">{desc}</p>
-                <button disabled={state || p.gold < price || p.farmLevel < reqLevel}
+              { key: 'lab', label: '🔬 Laboratório de Laticínios', color: 'rose', price: 8000, state: p.hasLaboratorio, setState: p.setHasLaboratorio, desc: `Todos os queijos maturam 1 dia mais rápido. Requer Nível 6.`, log: '🔬 Laboratório de Laticínios construído! Queijos maturam 1 dia mais rápido.', reqLevel: 6 },
+              { key: 'past', label: '🌿 Pastagem Ampliada', color: 'green', price: 15000, state: p.hasPastagem, setState: p.setHasPastagem, desc: `+3 felicidade/dia para bovinos e ovinos. Requer Nível 8.`, log: '🌿 Pastagem Ampliada construída! Bovinos e ovinos ficam mais felizes.', reqLevel: 8 },
+              { key: 'export', label: '🚢 Centro de Exportação', color: 'indigo', price: 50000, state: p.hasExportCenter, setState: p.setHasExportCenter, desc: `+20% preço de venda em TODOS os produtos. Requer Nível 12.`, log: '🚢 Centro de Exportação construído! Todos os produtos valem +20%.', reqLevel: 12, achievement: 'export_center' },
+              { key: 'acad', label: '🎓 Academia de Criadores', color: 'violet', price: 120000, state: p.hasAcademia, setState: p.setHasAcademia, desc: `+15% XP por dia + animais jovens crescem 20% mais rápido. Requer Nível 16.`, log: '🎓 Academia de Criadores construída! +15% XP/dia e filhotes crescem mais rápido.', reqLevel: 16, achievement: 'academia' },
+            ].map(({ key, label, color, price, state, setState, desc, log, reqLevel, achievement }) => {
+              if (!state && p.farmLevel + 2 < reqLevel) return null;
+              const isLockedPreview = !state && p.farmLevel < reqLevel;
+              return (
+              <div key={key} className={`${isLockedPreview ? 'bg-stone-50 border-4 border-dashed border-stone-300' : `bg-white border-4 border-${color}-300`} rounded-3xl p-4`}>
+                <h4 className={`font-display font-black text-sm uppercase ${isLockedPreview ? 'text-stone-400' : `text-${color}-800`} mb-1`}>{label}</h4>
+                <p className="text-xs text-stone-500 font-mono mb-2">{desc}{state ? ` ${['lab','past'].includes(key) ? '✅ Instalado(a)' : '✅ Instalado'}` : ''}</p>
+                <button disabled={isLockedPreview || state || p.gold < price}
                   onClick={() => { if (!state && p.gold >= price && p.farmLevel >= reqLevel) { p.setGold(prev => prev - price); setState(true); p.addLog(log, 'success'); p.triggerAudioResult(() => p.sfx.playSound('levelup')); if (achievement) p.checkAndUnlockAchievement(achievement); } }}
-                  className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${state ? `bg-${color}-100 border-${color}-300 text-${color}-700` : p.farmLevel >= reqLevel && p.gold >= price ? `bg-${color}-500 hover:bg-${color}-400 text-white border-${color}-700` : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
+                  className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${state ? `bg-${color}-100 border-${color}-300 text-${color}-700` : isLockedPreview ? 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed' : p.gold >= price ? `bg-${color}-500 hover:bg-${color}-400 text-white border-${color}-700` : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                 >
-                  {state ? `✅ Construído(a)` : p.farmLevel < reqLevel ? `🔒 Requer Nível ${reqLevel} (${price.toLocaleString()}💰)` : `Construir (${price.toLocaleString()}💰)`}
+                  {state ? `✅ Construído(a)` : isLockedPreview ? `🔒 Disponível no Nível ${reqLevel}` : `Construir (${price.toLocaleString()}💰)`}
                 </button>
               </div>
-            ))}
+              );
+            })}
 
             {/* Licença Exótica */}
             <div className="bg-white border-4 border-purple-300 rounded-3xl p-4">
@@ -489,11 +493,13 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             </div>
 
             {/* 🏭 ABATEDOURO */}
-            {p.farmLevel >= 10 && (
-              <div className="bg-white border-4 border-red-300 rounded-3xl p-4">
-                <h4 className="font-display font-black text-sm uppercase text-red-800 mb-1">🏭 Abatedouro Parceiro</h4>
+            {p.farmLevel + 2 >= 10 && (
+              <div className={`${p.farmLevel < 10 ? 'bg-stone-50 border-4 border-dashed border-stone-300' : 'bg-white border-4 border-red-300'} rounded-3xl p-4`}>
+                <h4 className={`font-display font-black text-sm uppercase ${p.farmLevel < 10 ? 'text-stone-400' : 'text-red-800'} mb-1`}>🏭 Abatedouro Parceiro</h4>
                 <p className="text-xs text-stone-500 font-mono mb-3">Frigorífico externo que processa bois engordados. Desbloqueia os contratos de abate — os mais lucrativos do jogo. Requer Certificado Sanitário. Custo fixo: +38⚡/dia de energia.</p>
-                {!p.ownedOneTimeEffects.includes('cert_sanitario') ? (
+                {p.farmLevel < 10 ? (
+                  <div className="text-xs text-stone-400 font-mono bg-stone-100 border border-stone-200 rounded-xl p-3">🔒 Disponível no Nível 10</div>
+                ) : !p.ownedOneTimeEffects.includes('cert_sanitario') ? (
                   <div className="text-xs text-amber-700 font-mono bg-amber-50 border border-amber-200 rounded-xl p-3">⚠️ Requer Certificado Sanitário (disponível em Consumíveis)</div>
                 ) : p.abatedouroUnlocked ? (
                   <div className="text-xs text-green-700 font-mono bg-green-50 border border-green-200 rounded-xl p-3">✅ Abatedouro ativo — contratos disponíveis na aba Contratos</div>
