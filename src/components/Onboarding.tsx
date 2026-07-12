@@ -135,8 +135,8 @@ export default function Onboarding({ step, onSkip }: Props) {
     if (!def) { setRect(null); setVisible(false); return; }
 
     const el = document.querySelector<HTMLElement>(def.selector);
-    if (!el) {
-      // Element not in DOM on this screen — skip this step
+    if (!el || (el as HTMLButtonElement).disabled) {
+      // Element not in DOM or disabled (e.g. collect button before animal produces)
       onSkipRef.current();
       return;
     }
