@@ -6,7 +6,6 @@ export interface OnboardingStep {
   title: string;
   text: string;
   side: 'top' | 'bottom';
-  minDay: number;
 }
 
 export const ONBOARDING_STEPS: OnboardingStep[] = [
@@ -14,58 +13,51 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     id: 'feed',
     selector: '[data-onboarding="feed-btn"]',
     title: '🌾 Alimente seus animais!',
-    text: 'Toque no botão verde de alimentar em qualquer animal. Animais com fome baixa não produzem nada no dia.',
+    text: 'Toque no botão verde para alimentar um animal. Animais com fome baixa não produzem nada.',
     side: 'bottom',
-    minDay: 1,
   },
   {
     id: 'advance-day',
     selector: '[data-onboarding="advance-day"]',
     title: '☀️ Avance o Dia',
-    text: 'Toque em AVANÇAR DIA. Seus animais vão produzir, o tempo vai passar e a fazenda vai funcionar!',
+    text: 'Toque em AVANÇAR DIA para o tempo passar. Seus animais vão produzir e a fazenda vai funcionar!',
     side: 'top',
-    minDay: 1,
   },
   {
     id: 'missions',
     selector: '[data-onboarding="missions-btn"]',
-    title: '🎯 Missões',
-    text: 'Complete missões diárias para ganhar XP e recompensas. São suas metas de crescimento!',
+    title: '🎯 Confira suas Missões',
+    text: 'Toque aqui para ver seus objetivos do dia. Complete missões para ganhar XP e recompensas!',
     side: 'bottom',
-    minDay: 2,
   },
   {
     id: 'loja',
     selector: '[data-onboarding="loja-btn"]',
-    title: '🏪 Loja da Fazenda',
-    text: 'Invista em melhorias permanentes: celeiro, câmara fria, gerador solar e muito mais!',
+    title: '🏪 Visite a Loja',
+    text: 'Toque para abrir a loja. Compre melhorias permanentes: celeiro, câmara fria, gerador solar e mais!',
     side: 'bottom',
-    minDay: 2,
   },
   {
     id: 'buy-animal',
     selector: '[data-onboarding="buy-animal-btn"]',
-    title: '🛒 Expanda o rebanho!',
-    text: 'Compre novos animais para diversificar a produção. Cada espécie tem produtos e mecânicas únicas.',
+    title: '🛒 Compre um novo animal!',
+    text: 'Toque para expandir seu rebanho. Cada espécie produz itens únicos e tem mecânicas diferentes!',
     side: 'bottom',
-    minDay: 3,
   },
 ];
 
 interface Props {
-  step: number; // 1-based index into ONBOARDING_STEPS; 0 = inactive
-  currentDay: number;
-  onNext: () => void;
+  step: number; // 1-based; 0 = inactive
   onSkip: () => void;
 }
 
 interface Rect { top: number; left: number; width: number; height: number; }
 
-export default function Onboarding({ step, currentDay, onNext, onSkip }: Props) {
+export default function Onboarding({ step, onSkip }: Props) {
   const [rect, setRect] = useState<Rect | null>(null);
   const [visible, setVisible] = useState(false);
-  const skipRef = useRef(onNext);
-  skipRef.current = onNext;
+  const onSkipRef = useRef(onSkip);
+  onSkipRef.current = onSkip;
 
   const def = step >= 1 && step <= ONBOARDING_STEPS.length ? ONBOARDING_STEPS[step - 1] : null;
 
@@ -74,18 +66,16 @@ export default function Onboarding({ step, currentDay, onNext, onSkip }: Props) 
 
     const el = document.querySelector<HTMLElement>(def.selector);
     if (!el) {
-      // Element not in DOM (e.g. sidebar hidden on mobile) — auto-skip this step
-      skipRef.current();
+      // Element not in DOM on this screen — skip this step
+      onSkipRef.current();
       return;
     }
 
     const r = el.getBoundingClientRect();
-
-    // Element exists but is out of viewport — scroll it into view first
     const inView = r.top >= 0 && r.bottom <= window.innerHeight && r.width > 0 && r.height > 0;
+
     if (!inView) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Re-measure after scroll settles
       setTimeout(() => {
         const r2 = el.getBoundingClientRect();
         if (r2.width > 0 && r2.height > 0) {
@@ -103,20 +93,18 @@ export default function Onboarding({ step, currentDay, onNext, onSkip }: Props) 
   useEffect(() => {
     setVisible(false);
     setRect(null);
-    const t = setTimeout(measureTarget, 150);
+    const t = setTimeout(measureTarget, 180);
     return () => clearTimeout(t);
   }, [step, measureTarget]);
 
   useEffect(() => {
     const onResize = () => measureTarget();
     const onScroll = () => {
-      if (rect) {
-        // Re-measure on scroll to keep spotlight on element
-        const el = def && document.querySelector<HTMLElement>(def.selector);
-        if (el) {
-          const r = el.getBoundingClientRect();
-          setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-        }
+      if (!def) return;
+      const el = document.querySelector<HTMLElement>(def.selector);
+      if (el) {
+        const r = el.getBoundingClientRect();
+        setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
       }
     };
     window.addEventListener('resize', onResize);
@@ -125,7 +113,7 @@ export default function Onboarding({ step, currentDay, onNext, onSkip }: Props) 
       window.removeEventListener('resize', onResize);
       window.removeEventListener('scroll', onScroll, true);
     };
-  }, [measureTarget, def, rect]);
+  }, [measureTarget, def]);
 
   if (!def || step === 0 || !rect || !visible) return null;
 
@@ -139,32 +127,28 @@ export default function Onboarding({ step, currentDay, onNext, onSkip }: Props) 
   const viewH = window.innerHeight;
 
   const tipW = Math.min(288, viewW - 32);
-  const tipH = 148;
+  const tipH = 130;
 
-  // Position tooltip — always clamp inside viewport
   let tipTop: number;
   if (def.side === 'bottom') {
-    tipTop = spotTop + spotH + 12;
-    if (tipTop + tipH > viewH - 12) tipTop = spotTop - tipH - 12;
+    tipTop = spotTop + spotH + 14;
+    if (tipTop + tipH > viewH - 12) tipTop = spotTop - tipH - 14;
   } else {
-    tipTop = spotTop - tipH - 12;
-    if (tipTop < 12) tipTop = spotTop + spotH + 12;
+    tipTop = spotTop - tipH - 14;
+    if (tipTop < 12) tipTop = spotTop + spotH + 14;
   }
-  // Final clamp
   tipTop = Math.max(12, Math.min(tipTop, viewH - tipH - 12));
 
   let tipLeft = rect.left + rect.width / 2 - tipW / 2;
   tipLeft = Math.max(16, Math.min(tipLeft, viewW - tipW - 16));
 
   const arrowOnTop = tipTop > spotTop + spotH / 2;
-
-  // Clamp arrow position inside tooltip
   const rawArrowLeft = rect.left + rect.width / 2 - tipLeft - 8;
   const arrowLeft = Math.max(12, Math.min(rawArrowLeft, tipW - 28));
 
   return (
     <>
-      {/* Full-screen overlay with spotlight cutout via box-shadow */}
+      {/* Spotlight overlay */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 9000, pointerEvents: 'none' }}>
         <div
           style={{
@@ -174,7 +158,7 @@ export default function Onboarding({ step, currentDay, onNext, onSkip }: Props) 
             width: spotW,
             height: spotH,
             borderRadius: 14,
-            boxShadow: '0 0 0 9999px rgba(0,0,0,0.70)',
+            boxShadow: '0 0 0 9999px rgba(0,0,0,0.72)',
             outline: '3px solid #fbbf24',
             outlineOffset: 2,
             pointerEvents: 'none',
@@ -182,10 +166,10 @@ export default function Onboarding({ step, currentDay, onNext, onSkip }: Props) 
         />
       </div>
 
-      {/* Backdrop — tap to skip */}
+      {/* Tap-to-skip backdrop */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 9001 }} onClick={onSkip} />
 
-      {/* Tooltip card */}
+      {/* Tooltip */}
       <div
         style={{ position: 'fixed', top: tipTop, left: tipLeft, width: tipW, zIndex: 9002 }}
         className="bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl p-4 shadow-2xl"
@@ -208,21 +192,16 @@ export default function Onboarding({ step, currentDay, onNext, onSkip }: Props) 
           }} />
         )}
 
-        <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-start justify-between gap-2 mb-1.5">
           <h3 className="text-[#fbbf24] font-black text-sm leading-tight">{def.title}</h3>
-          <button onClick={onSkip} className="text-[#a3c48a] text-[11px] font-mono hover:text-white shrink-0 cursor-pointer leading-none mt-0.5">
+          <button onClick={onSkip} className="text-[#6a8a6a] text-[10px] font-mono hover:text-[#a3c48a] shrink-0 cursor-pointer leading-none mt-0.5">
             pular
           </button>
         </div>
-        <p className="text-[#d4edda] text-xs font-mono leading-relaxed mb-3">{def.text}</p>
+        <p className="text-[#d4edda] text-xs font-mono leading-relaxed mb-2">{def.text}</p>
         <div className="flex items-center justify-between">
-          <span className="text-[10px] text-[#6a8a6a] font-mono">{step}/{ONBOARDING_STEPS.length}</span>
-          <button
-            onClick={onNext}
-            className="bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1a3a1a] font-black text-xs px-4 py-1.5 rounded-xl cursor-pointer transition-all active:scale-95"
-          >
-            {step === ONBOARDING_STEPS.length ? 'Concluir ✓' : 'Próximo →'}
-          </button>
+          <span className="text-[10px] text-[#4a6a4a] font-mono">{step}/{ONBOARDING_STEPS.length}</span>
+          <span className="text-[#fbbf24] text-xs font-black animate-bounce">👆 Toque no botão acima</span>
         </div>
       </div>
     </>

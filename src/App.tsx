@@ -2224,7 +2224,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     pendingAdvanceDayRef.current = e;
     setPendingDaySummary(summary);
     setShowDaySummary(true);
-  }, [currentDay, dailyEarning, gold, dayAnimalsFedfed, dayItemsCollected, dayContractDeliveries]);
+    if (onboardingStep === 2) setOnboardingStep(3);
+  }, [currentDay, dailyEarning, gold, dayAnimalsFedfed, dayItemsCollected, dayContractDeliveries, onboardingStep]);
 
   const handleDaySummaryClose = useCallback(() => {
     setShowDaySummary(false);
@@ -2245,7 +2246,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     const animal = animals.find(a => a.id === id);
     feedAnimal(id, event);
     if (animal) addToast(`${animal.name} alimentado!`, 'info', '🍽️');
-  }, [animals, feedAnimal, addToast]);
+    if (onboardingStep === 1) setOnboardingStep(2);
+  }, [animals, feedAnimal, addToast, onboardingStep]);
 
   const collectMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
     collectMilk(id, event);
@@ -6182,13 +6184,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   // BUG 1 FIX: mantém o ref sempre apontando para a versão mais recente de advanceDay
   advanceDayRef.current = advanceDay;
 
-  // Onboarding: avança para etapas do dia seguinte quando o dia muda
-  // Passos: 1=feed, 2=advance-day, 3=missions, 4=loja, 5=buy-animal
+  // Onboarding: encerra automaticamente se o jogador passar do dia 5 sem completar
   useEffect(() => {
-    if (onboardingStep <= 0) return;
-    if (currentDay >= 2 && onboardingStep <= 2) setOnboardingStep(3);
-    else if (currentDay >= 3 && onboardingStep >= 3 && onboardingStep <= 4) setOnboardingStep(5);
-    else if (currentDay > 3 && onboardingStep > 0) setOnboardingStep(0);
+    if (onboardingStep > 0 && currentDay > 5) setOnboardingStep(0);
   }, [currentDay]);
 
   // --- RENDERING HANDLERS & BADGES ---
@@ -6530,7 +6528,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </button>
               <button
                 data-onboarding="loja-btn"
-                onClick={() => { setShowUpgradesModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                onClick={() => { setShowUpgradesModal(true); if (onboardingStep === 4) setOnboardingStep(5); triggerAudioResult(() => sfx.playSound('click')); }}
                 className="bg-orange-600 border-3 border-orange-400 hover:bg-orange-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#7c2d12] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
                 title="Loja da Fazenda: infraestrutura, consumíveis e upgrades"
               >
@@ -6609,6 +6607,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               <button
                 onClick={() => {
                   setShowBuyMenu(prev => !prev);
+                  if (onboardingStep === 5) setOnboardingStep(0);
                   triggerAudioResult(() => sfx.playSound('click'));
                   setTimeout(() => {
                     document.querySelector('[data-buy-menu]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -6625,7 +6624,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
               {/* 🎯 Missões */}
               <div className="relative">
-                <button data-onboarding="missions-btn" onClick={() => { setShowMissionsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                <button data-onboarding="missions-btn" onClick={() => { setShowMissionsModal(true); if (onboardingStep === 3) setOnboardingStep(4); triggerAudioResult(() => sfx.playSound('click')); }}
                   className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
                   title="Missões">
                   🎯
@@ -6770,11 +6769,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         {/* Onboarding tutorial */}
         <Onboarding
           step={onboardingStep}
-          currentDay={currentDay}
-          onNext={() => setOnboardingStep(s => {
-            const next = s + 1;
-            return next > 6 ? 0 : next;
-          })}
           onSkip={() => setOnboardingStep(0)}
         />
 
