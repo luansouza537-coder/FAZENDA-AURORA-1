@@ -166,9 +166,6 @@ export default function Onboarding({ step, onSkip }: Props) {
         />
       </div>
 
-      {/* Tap-to-skip backdrop */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 9001 }} onClick={onSkip} />
-
       {/* Tooltip */}
       <div
         style={{ position: 'fixed', top: tipTop, left: tipLeft, width: tipW, zIndex: 9002 }}
