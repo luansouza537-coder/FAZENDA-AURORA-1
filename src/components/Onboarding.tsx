@@ -12,36 +12,106 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'feed',
     selector: '[data-onboarding="feed-btn"]',
-    title: '🌾 Alimente seus animais!',
-    text: 'Toque no botão verde para alimentar um animal. Animais com fome baixa não produzem nada.',
+    title: '🌾 Alimente seu animal!',
+    text: 'Toque no botão verde para alimentar. Animais com fome baixa não produzem nada!',
     side: 'bottom',
   },
   {
     id: 'advance-day',
     selector: '[data-onboarding="advance-day"]',
-    title: '☀️ Avance o Dia',
-    text: 'Toque em AVANÇAR DIA para o tempo passar. Seus animais vão produzir e a fazenda vai funcionar!',
+    title: '☀️ Avance o Dia!',
+    text: 'Toque em AVANÇAR DIA para o tempo passar. Seus animais vão produzir depois disso!',
     side: 'top',
+  },
+  {
+    id: 'collect-milk',
+    selector: '[data-onboarding="collect-milk-btn"]',
+    title: '🥛 Colete o leite!',
+    text: 'Sua vaca produziu leite! Toque para coletar e guardar no estoque.',
+    side: 'bottom',
+  },
+  {
+    id: 'silo-racoes',
+    selector: '[data-onboarding="silo-racoes-btn"]',
+    title: '🛒 Compre ração!',
+    text: 'Sem ração os animais ficam com fome. Toque no +1u para comprar ração bovina.',
+    side: 'bottom',
+  },
+  {
+    id: 'financas',
+    selector: '[data-onboarding="financas-btn"]',
+    title: '💹 Veja suas Finanças!',
+    text: 'Acompanhe receitas, despesas e preços de mercado. Essencial para lucrar mais!',
+    side: 'bottom',
   },
   {
     id: 'missions',
     selector: '[data-onboarding="missions-btn"]',
-    title: '🎯 Confira suas Missões',
-    text: 'Toque aqui para ver seus objetivos do dia. Complete missões para ganhar XP e recompensas!',
+    title: '🎯 Confira as Missões!',
+    text: 'Missões do dia te dão XP e recompensas. Complete para evoluir sua fazenda mais rápido!',
     side: 'bottom',
+  },
+  {
+    id: 'producao',
+    selector: '[data-onboarding="producao-btn"]',
+    title: '🏭 Queijaria e Produção!',
+    text: 'Transforme leite em queijo artesanal. Produtos processados valem muito mais!',
+    side: 'bottom',
+  },
+  {
+    id: 'mais-btn',
+    selector: '[data-onboarding="mais-btn"]',
+    title: '⋯ Menu de Opções!',
+    text: 'Aqui ficam Contratos, Funcionários, Conquistas e mais recursos avançados!',
+    side: 'bottom',
+  },
+  {
+    id: 'contratos',
+    selector: '[data-onboarding="contratos-btn"]',
+    title: '📋 Contratos!',
+    text: 'Contratos garantem preço fixo acima do mercado. Assine com o que já produz!',
+    side: 'top',
   },
   {
     id: 'loja',
     selector: '[data-onboarding="loja-btn"]',
-    title: '🏪 Visite a Loja',
-    text: 'Toque para abrir a loja. Compre melhorias permanentes: celeiro, câmara fria, gerador solar e mais!',
+    title: '🏪 Loja da Fazenda!',
+    text: 'Compre melhorias permanentes: Silo, Celeiro, Câmara Fria, Gerador Solar e muito mais!',
     side: 'bottom',
   },
   {
     id: 'buy-animal',
     selector: '[data-onboarding="buy-animal-btn"]',
-    title: '🛒 Compre um novo animal!',
-    text: 'Toque para expandir seu rebanho. Cada espécie produz itens únicos e tem mecânicas diferentes!',
+    title: '🛒 Expanda o Rebanho!',
+    text: 'Compre novos animais para diversificar sua produção. Cada espécie tem itens únicos!',
+    side: 'bottom',
+  },
+  {
+    id: 'feed2',
+    selector: '[data-onboarding="feed-btn"]',
+    title: '🌾 Alimente de novo!',
+    text: 'Mantenha a fome dos animais alta todo dia. Este é o coração do seu negócio!',
+    side: 'bottom',
+  },
+  {
+    id: 'advance-day2',
+    selector: '[data-onboarding="advance-day"]',
+    title: '☀️ Avance mais um dia!',
+    text: 'Cada dia é um ciclo completo: alimentar → avançar → coletar → vender. Repita!',
+    side: 'top',
+  },
+  {
+    id: 'collect-milk2',
+    selector: '[data-onboarding="collect-milk-btn"]',
+    title: '🥛 Colete o leite de novo!',
+    text: 'Perfeito! Você dominou o ciclo básico da fazenda. Agora vá além!',
+    side: 'bottom',
+  },
+  {
+    id: 'diary',
+    selector: '[data-onboarding="diary"]',
+    title: '🎉 Tutorial Concluído!',
+    text: 'Você aprendeu o essencial! Leia o Diário da Fazenda para dicas diárias e boas colheitas!',
     side: 'bottom',
   },
 ];
@@ -192,7 +262,7 @@ export default function Onboarding({ step, onSkip }: Props) {
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <h3 className="text-[#fbbf24] font-black text-sm leading-tight">{def.title}</h3>
           <button onClick={onSkip} className="text-[#6a8a6a] text-[10px] font-mono hover:text-[#a3c48a] shrink-0 cursor-pointer leading-none mt-0.5">
-            pular
+            {step === ONBOARDING_STEPS.length ? '✅ Concluir' : 'pular'}
           </button>
         </div>
         <p className="text-[#d4edda] text-xs font-mono leading-relaxed mb-2">{def.text}</p>

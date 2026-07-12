@@ -1168,6 +1168,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {animal.type === 'vaca' && (
           <button
             type="button"
+            data-onboarding="collect-milk-btn"
             onClick={(e) => {
               e.preventDefault();
               onCollectMilk(animal.id, e);

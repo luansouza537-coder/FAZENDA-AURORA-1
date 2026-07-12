@@ -806,6 +806,7 @@ export default function GameSidebar({
                       <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-[#fbbf25]/25">
                         <button
                           type="button"
+                          {...(feed.key === 'racaoBovina' ? { 'data-onboarding': 'silo-racoes-btn' } : {})}
                           onClick={(e) => buyFeed(feed.key, 1, e)}
                           disabled={gold < unitPrice}
                           className="bg-stone-100 hover:bg-stone-200 text-[#78350f] text-[9px] font-mono font-bold py-1 px-0.5 rounded-lg border border-stone-300 disabled:opacity-40 transition-all cursor-pointer text-center leading-none"
