@@ -102,7 +102,6 @@ import FinancasModal from './components/FinancasModal';
 import SellAllModal from './components/SellAllModal';
 import { ReproducoesModal, RankingModal, FairResultModal, AllTimeStatsModal, CruzamentoModal } from './components/SmallModals';
 import GameSidebar from './components/GameSidebar';
-import Onboarding from './components/Onboarding';
 import AnimalGrid from './components/AnimalGrid';
 import { ToastNotification, Toast } from './components/ToastNotification';
 import { DaySummaryModal, DaySummary } from './components/DaySummaryModal';
@@ -691,14 +690,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [showAllTimeStats, setShowAllTimeStats] = useState(false);
   const [showMorePanel, setShowMorePanel] = useState<boolean>(false);
   const [showMoreMenu, setShowMoreMenu] = useState<boolean>(false);
-  const [onboardingStep, setOnboardingStep] = useState<number>(() => {
-    try {
-      const s = localStorage.getItem('aurora_farm_save');
-      if (!s) return 1; // novo jogo → inicia tutorial
-      const parsed = JSON.parse(s);
-      return parsed.onboardingStep ?? 0; // save existente → sem tutorial
-    } catch { return 0; }
-  });
   const [productionByAnimal, setProductionByAnimal] = useState<Record<number, { name: string; type: string; produced: number }>>({});
   const [allTimeStats, setAllTimeStats] = useState<{ totalSpentFeed: number; bestDay: number; worstDay: number }>(() => {
     try {
@@ -1645,7 +1636,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     addLog(`🛍️ Compra realizada: +${quantity}u de ${feedLabel} por ${totalCost} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🌽', `-${totalCost}💰`, event);
-    if (onboardingStep === 4) setOnboardingStep(5);
   };
 
 
@@ -2225,9 +2215,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     pendingAdvanceDayRef.current = e;
     setPendingDaySummary(summary);
     setShowDaySummary(true);
-    if (onboardingStep === 2) setOnboardingStep(3);
-    else if (onboardingStep === 13) setOnboardingStep(14);
-  }, [currentDay, dailyEarning, gold, dayAnimalsFedfed, dayItemsCollected, dayContractDeliveries, onboardingStep]);
+  }, [currentDay, dailyEarning, gold, dayAnimalsFedfed, dayItemsCollected, dayContractDeliveries]);
 
   const handleDaySummaryClose = useCallback(() => {
     setShowDaySummary(false);
@@ -2248,65 +2236,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     const animal = animals.find(a => a.id === id);
     feedAnimal(id, event);
     if (animal) addToast(`${animal.name} alimentado!`, 'info', '🍽️');
-    if (onboardingStep === 1) setOnboardingStep(2);
-    else if (onboardingStep === 12) setOnboardingStep(13);
-  }, [animals, feedAnimal, addToast, onboardingStep]);
+  }, [animals, feedAnimal, addToast]);
 
   const collectMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
     collectMilk(id, event);
     addToast('+Leite coletado!', 'success', '🥛');
-    if (onboardingStep === 3) setOnboardingStep(4);
-    else if (onboardingStep === 14) setOnboardingStep(15);
-  }, [collectMilk, addToast, onboardingStep]);
+  }, [collectMilk, addToast]);
 
-  const collectWoolWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectWool(id, event);
-    if (onboardingStep === 3) setOnboardingStep(4);
-    else if (onboardingStep === 14) setOnboardingStep(15);
-  }, [collectWool, onboardingStep]);
-
-  const collectEggWithOnboarding = useCallback((id: number, event: React.MouseEvent) => {
+  const collectEggWithToast = useCallback((id: number, event: React.MouseEvent) => {
     collectEgg(id, event);
     addToast('+Ovo coletado!', 'success', '🥚');
-    if (onboardingStep === 3) setOnboardingStep(4);
-    else if (onboardingStep === 14) setOnboardingStep(15);
-  }, [collectEgg, addToast, onboardingStep]);
-
-  const collectGoatMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectGoatMilk(id, event);
-    if (onboardingStep === 3) setOnboardingStep(4);
-    else if (onboardingStep === 14) setOnboardingStep(15);
-  }, [collectGoatMilk, onboardingStep]);
-
-  const collectSheepMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectSheepMilk(id, event);
-    if (onboardingStep === 3) setOnboardingStep(4);
-    else if (onboardingStep === 14) setOnboardingStep(15);
-  }, [collectSheepMilk, onboardingStep]);
-
-  const collectDuckEggWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectDuckEgg(id, event);
-    if (onboardingStep === 3) setOnboardingStep(4);
-    else if (onboardingStep === 14) setOnboardingStep(15);
-  }, [collectDuckEgg, onboardingStep]);
-
-  const collectBuffaloMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectBuffaloMilk(id, event);
-    if (onboardingStep === 3) setOnboardingStep(4);
-    else if (onboardingStep === 14) setOnboardingStep(15);
-  }, [collectBuffaloMilk, onboardingStep]);
-
-  const collectAlpacaWoolWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectAlpacaWool(id, event);
-    if (onboardingStep === 3) setOnboardingStep(4);
-    else if (onboardingStep === 14) setOnboardingStep(15);
-  }, [collectAlpacaWool, onboardingStep]);
-
-  const collectCoelhoWoolWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectCoelhoWool(id, event);
-    if (onboardingStep === 3) setOnboardingStep(4);
-    else if (onboardingStep === 14) setOnboardingStep(15);
-  }, [collectCoelhoWool, onboardingStep]);
+  }, [collectEgg, addToast]);
 
 
   // --- useWorkers hook ---
@@ -2726,7 +2666,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         shownMilestones,
         vehicleTiers,
         lastUpgradeDay,
-        onboardingStep,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
       setShowSavedToast(true);
@@ -6234,10 +6173,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   // BUG 1 FIX: mantém o ref sempre apontando para a versão mais recente de advanceDay
   advanceDayRef.current = advanceDay;
 
-  // Onboarding: encerra automaticamente se o jogador passar do dia 15 sem completar
-  useEffect(() => {
-    if (onboardingStep > 0 && currentDay > 15) setOnboardingStep(0);
-  }, [currentDay]);
 
 
   // --- RENDERING HANDLERS & BADGES ---
@@ -6567,8 +6502,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             {/* Primários: Finanças + Loja */}
             <div className="flex items-center gap-1.5">
               <button
-                data-onboarding="financas-btn"
-                onClick={() => { setShowFinancasModal(true); if (onboardingStep === 5) setOnboardingStep(6); triggerAudioResult(() => sfx.playSound('click')); }}
+                onClick={() => { setShowFinancasModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
                 className="bg-emerald-700 border-3 border-emerald-400 hover:bg-emerald-600 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#064e3b] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
                 title="Economia: Mercado de preços e histórico financeiro"
               >
@@ -6579,8 +6513,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 )}
               </button>
               <button
-                data-onboarding="loja-btn"
-                onClick={() => { setShowUpgradesModal(true); if (onboardingStep === 10) setOnboardingStep(11); triggerAudioResult(() => sfx.playSound('click')); }}
+                onClick={() => { setShowUpgradesModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
                 className="bg-orange-600 border-3 border-orange-400 hover:bg-orange-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#7c2d12] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
                 title="Loja da Fazenda: infraestrutura, consumíveis e upgrades"
               >
@@ -6643,8 +6576,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               <div className="relative">
                 <button
                   type="button"
-                  data-onboarding="producao-btn"
-                  onClick={(e) => { e.preventDefault(); setShowQueijariaModal(true); if (onboardingStep === 7) setOnboardingStep(8); triggerAudioResult(() => sfx.playSound('click')); }}
+                  onClick={(e) => { e.preventDefault(); setShowQueijariaModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
                   className="bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
                   title="Acesse a Queijaria para maturação de queijos artesanais e ampliação"
                 >
@@ -6660,13 +6592,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               <button
                 onClick={() => {
                   setShowBuyMenu(prev => !prev);
-                  if (onboardingStep === 11) setOnboardingStep(12);
                   triggerAudioResult(() => sfx.playSound('click'));
                   setTimeout(() => {
                     document.querySelector('[data-buy-menu]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }, 80);
                 }}
-                data-onboarding="buy-animal-btn"
                 className={`border-3 border-[#1d4ed8] text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#1e3a8a] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none ${showBuyMenu ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                 title="Comprar Animais: abre o catálogo para expandir seu rebanho"
               >
@@ -6677,7 +6607,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
               {/* 🎯 Missões */}
               <div className="relative">
-                <button data-onboarding="missions-btn" onClick={() => { setShowMissionsModal(true); if (onboardingStep === 6) setOnboardingStep(7); triggerAudioResult(() => sfx.playSound('click')); }}
+                <button onClick={() => { setShowMissionsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
                   className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
                   title="Missões">
                   🎯
@@ -6695,8 +6625,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
               )}
               <button
-                data-onboarding="mais-btn"
-                onClick={() => { setShowMoreMenu(prev => !prev); if (onboardingStep === 8) setOnboardingStep(9); triggerAudioResult(() => sfx.playSound('click')); }}
+                onClick={() => { setShowMoreMenu(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
                 className={`border-3 border-[#fbbf24] text-[#78350f] px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-xs font-black leading-none flex items-center gap-1 focus:outline-none ${showMoreMenu ? 'bg-[#fbbf24]' : 'bg-[#ffcd7e] hover:bg-[#fbc550]'}`}
                 title="Mais opções"
               >
@@ -6709,7 +6638,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               {showMoreMenu && (
                 <div className="absolute bottom-full right-0 mb-2 bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl p-3 flex flex-col gap-1.5 z-50 shadow-2xl min-w-[180px]">
                   <div className="relative">
-                    <button data-onboarding="contratos-btn" onClick={() => { setShowContractsModal(true); if (onboardingStep === 9) setOnboardingStep(10); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    <button onClick={() => { setShowContractsModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
                       className="flex items-center gap-2 w-full text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                       📋 Contratos
                       {contracts.filter(c => c.active).length > 0 && (
@@ -6820,12 +6749,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
         </div>
 
-        {/* Onboarding tutorial */}
-        <Onboarding
-          step={onboardingStep}
-          paused={showDaySummary || showMissionsModal || showUpgradesModal || showFinancasModal || showQueijariaModal || showContractsModal}
-          onSkip={() => setOnboardingStep(0)}
-        />
 
         {/* Melhoria 6: Toast de autosave */}
         {showSavedToast && (
@@ -7012,8 +6935,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             inventory={inventory}
             feedAnimal={feedAnimalWithToast}
             collectMilk={collectMilkWithToast}
-            collectWool={collectWoolWithToast}
-            collectEgg={collectEggWithOnboarding}
+            collectWool={collectWool}
+            collectEgg={collectEggWithToast}
             collectMel={collectMelWithToast}
             collectHumus={collectHumus}
             collectMuco={collectMuco}
@@ -7039,14 +6962,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             licencaExotica={licencaExotica}
             reproducaoAtiva={reproducaoAtiva}
             REPRODUCAO_CONFIG={REPRODUCAO_CONFIG}
-            collectGoatMilk={collectGoatMilkWithToast}
-            collectSheepMilk={collectSheepMilkWithToast}
+            collectGoatMilk={collectGoatMilk}
+            collectSheepMilk={collectSheepMilk}
             collectLlamaWool={collectLlamaWool}
-            collectDuckEgg={collectDuckEggWithToast}
+            collectDuckEgg={collectDuckEgg}
             collectGooseProduct={collectGooseProduct}
-            collectBuffaloMilk={collectBuffaloMilkWithToast}
-            collectAlpacaWool={collectAlpacaWoolWithToast}
-            collectCoelhoWool={collectCoelhoWoolWithToast}
+            collectBuffaloMilk={collectBuffaloMilk}
+            collectAlpacaWool={collectAlpacaWool}
+            collectCoelhoWool={collectCoelhoWool}
             collectCabraAngoraMohair={collectCabraAngoraMohair}
             collectBichoSeda={collectBichoSeda}
             feedBichoSeda={feedBichoSeda}
