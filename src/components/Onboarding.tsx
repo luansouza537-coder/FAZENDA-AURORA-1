@@ -118,12 +118,13 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
 
 interface Props {
   step: number; // 1-based; 0 = inactive
+  paused?: boolean; // modal aberto → esconde spotlight/tooltip sem pular o passo
   onSkip: () => void;
 }
 
 interface Rect { top: number; left: number; width: number; height: number; }
 
-export default function Onboarding({ step, onSkip }: Props) {
+export default function Onboarding({ step, paused = false, onSkip }: Props) {
   const [rect, setRect] = useState<Rect | null>(null);
   const [visible, setVisible] = useState(false);
   const onSkipRef = useRef(onSkip);
@@ -163,19 +164,20 @@ export default function Onboarding({ step, onSkip }: Props) {
   useEffect(() => {
     setVisible(false);
     setRect(null);
-    const t = setTimeout(measureTarget, 180);
+    if (paused) return; // modal aberto — re-mede quando despausar
+    const t = setTimeout(measureTarget, 250);
     return () => clearTimeout(t);
-  }, [step, measureTarget]);
+  }, [step, paused, measureTarget]);
 
   // Auto-skip se o alvo sumir ou ficar desativado enquanto o passo está ativo
   useEffect(() => {
-    if (!def) return;
+    if (!def || paused) return;
     const check = setInterval(() => {
       const el = document.querySelector<HTMLElement>(def.selector);
       if (!el || (el as HTMLButtonElement).disabled) onSkipRef.current();
     }, 800);
     return () => clearInterval(check);
-  }, [def]);
+  }, [def, paused]);
 
   useEffect(() => {
     const onResize = () => measureTarget();
@@ -195,7 +197,7 @@ export default function Onboarding({ step, onSkip }: Props) {
     };
   }, [measureTarget, def]);
 
-  if (!def || step === 0 || !rect || !visible) return null;
+  if (!def || step === 0 || paused || !rect || !visible) return null;
 
   const PAD = 10;
   const spotTop = rect.top - PAD;

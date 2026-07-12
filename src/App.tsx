@@ -6823,6 +6823,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         {/* Onboarding tutorial */}
         <Onboarding
           step={onboardingStep}
+          paused={showDaySummary || showMissionsModal || showUpgradesModal || showFinancasModal || showQueijariaModal || showContractsModal}
           onSkip={() => setOnboardingStep(0)}
         />
 
