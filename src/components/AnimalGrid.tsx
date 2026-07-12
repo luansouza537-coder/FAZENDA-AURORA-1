@@ -211,6 +211,7 @@ export default function AnimalGrid({
                 {/* ADVANCE DAY */}
                 <button
                   type="button"
+                  data-onboarding="advance-day"
                   onClick={(e) => {
                     e.preventDefault();
                     advanceDay(e);

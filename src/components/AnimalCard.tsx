@@ -1151,6 +1151,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           return (
             <button
               type="button"
+              data-onboarding="feed-btn"
               onClick={(e) => {
                 e.preventDefault();
                 onFeed(animal.id, e);

@@ -78,7 +78,7 @@ export default function GameSidebar({
               <div className="flex items-center justify-between border-b-2 border-[#fbbf24] pb-2 mb-2">
                 <div className="flex items-center gap-2">
                   <History className="w-4 h-4 text-[#78350f]" />
-                  <h3 className="text-sm font-display font-black text-[#78350f] uppercase tracking-wider">Diário da Fazenda</h3>
+                  <h3 data-onboarding="diary" className="text-sm font-display font-black text-[#78350f] uppercase tracking-wider">Diário da Fazenda</h3>
                 </div>
                 <button
                   onClick={() => { setLogs([]); triggerAudioResult(() => sfx.playSound('click')); }}
