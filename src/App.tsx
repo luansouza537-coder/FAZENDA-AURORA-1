@@ -6183,10 +6183,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   advanceDayRef.current = advanceDay;
 
   // Onboarding: avança para etapas do dia seguinte quando o dia muda
+  // Passos: 1=feed, 2=advance-day, 3=missions, 4=loja, 5=buy-animal
   useEffect(() => {
     if (onboardingStep <= 0) return;
     if (currentDay >= 2 && onboardingStep <= 2) setOnboardingStep(3);
-    else if (currentDay >= 3 && onboardingStep >= 3 && onboardingStep <= 5) setOnboardingStep(6);
+    else if (currentDay >= 3 && onboardingStep >= 3 && onboardingStep <= 4) setOnboardingStep(5);
     else if (currentDay > 3 && onboardingStep > 0) setOnboardingStep(0);
   }, [currentDay]);
 
