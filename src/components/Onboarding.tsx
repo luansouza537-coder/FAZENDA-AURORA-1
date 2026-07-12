@@ -12,8 +12,8 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'feed',
     selector: '[data-onboarding="feed-btn"]',
-    title: '🌾 Alimente TODOS os animais!',
-    text: 'Toque no botão verde para alimentar cada animal. Alimente todos — o tutorial avança quando todos estiverem saciados!',
+    title: '🌾 Alimente seu animal!',
+    text: 'Toque no botão verde para alimentar. Depois alimente os outros do mesmo jeito — fome alta = produção!',
     side: 'bottom',
   },
   {
@@ -89,8 +89,8 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'feed2',
     selector: '[data-onboarding="feed-btn"]',
-    title: '🌾 Alimente todos de novo!',
-    text: 'Alimente TODOS os animais diariamente! Fome alta = produção garantida.',
+    title: '🌾 Alimente de novo!',
+    text: 'Lembre: todo dia, todos os animais. Fome alta garante produção!',
     side: 'bottom',
   },
   {
@@ -166,6 +166,16 @@ export default function Onboarding({ step, onSkip }: Props) {
     const t = setTimeout(measureTarget, 180);
     return () => clearTimeout(t);
   }, [step, measureTarget]);
+
+  // Auto-skip se o alvo sumir ou ficar desativado enquanto o passo está ativo
+  useEffect(() => {
+    if (!def) return;
+    const check = setInterval(() => {
+      const el = document.querySelector<HTMLElement>(def.selector);
+      if (!el || (el as HTMLButtonElement).disabled) onSkipRef.current();
+    }, 800);
+    return () => clearInterval(check);
+  }, [def]);
 
   useEffect(() => {
     const onResize = () => measureTarget();

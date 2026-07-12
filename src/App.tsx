@@ -699,7 +699,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       return parsed.onboardingStep ?? 0; // save existente → sem tutorial
     } catch { return 0; }
   });
-  const onboardingFedRef = useRef(new Set<number>());
   const [productionByAnimal, setProductionByAnimal] = useState<Record<number, { name: string; type: string; produced: number }>>({});
   const [allTimeStats, setAllTimeStats] = useState<{ totalSpentFeed: number; bestDay: number; worstDay: number }>(() => {
     try {
@@ -2249,13 +2248,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     const animal = animals.find(a => a.id === id);
     feedAnimal(id, event);
     if (animal) addToast(`${animal.name} alimentado!`, 'info', '🍽️');
-    if (onboardingStep === 1 || onboardingStep === 12) {
-      onboardingFedRef.current.add(id);
-      if (onboardingFedRef.current.size >= animals.length) {
-        onboardingFedRef.current.clear();
-        setOnboardingStep(onboardingStep === 1 ? 2 : 13);
-      }
-    }
+    if (onboardingStep === 1) setOnboardingStep(2);
+    else if (onboardingStep === 12) setOnboardingStep(13);
   }, [animals, feedAnimal, addToast, onboardingStep]);
 
   const collectMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
