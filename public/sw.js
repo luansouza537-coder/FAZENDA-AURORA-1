@@ -1,4 +1,4 @@
-const CACHE = 'fazenda-aurora-v2';
+const CACHE = 'fazenda-aurora-v3';
 const PRECACHE = ['/', '/index.html'];
 
 self.addEventListener('install', e => {
@@ -21,8 +21,11 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        const clone = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
+        // só cacheia respostas válidas — nunca 404/erros (envenenam o cache)
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
         return res;
       })
       .catch(() => caches.match(e.request))

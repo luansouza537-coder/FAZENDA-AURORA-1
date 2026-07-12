@@ -806,6 +806,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   // --- INITIALIZE GAME ---
   const initGame = () => {
     localStorage.removeItem('aurora_farm_save');
+    setOnboardingStep(1); // novo jogo sempre reinicia o tutorial
     setGold(80);
     setCurrentDay(1);
     setFarmLevel(1);
