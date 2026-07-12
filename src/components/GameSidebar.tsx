@@ -770,7 +770,7 @@ export default function GameSidebar({
             <div className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-5 shadow-[0_12px_0_#d97706] flex flex-col">
               <div className="flex items-center gap-2 border-b-2 border-[#fbbf24] pb-2 mb-4">
                 <span className="text-xl">🌾</span>
-                <h3 className="text-base sm:text-lg font-display font-black text-[#78350f] uppercase tracking-wider">
+                <h3 data-onboarding="silo-racoes" className="text-base sm:text-lg font-display font-black text-[#78350f] uppercase tracking-wider">
                   Silo de Rações
                 </h3>
               </div>
@@ -806,7 +806,6 @@ export default function GameSidebar({
                       <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-[#fbbf25]/25">
                         <button
                           type="button"
-                          {...(feed.key === 'racaoBovina' ? { 'data-onboarding': 'silo-racoes-btn' } : {})}
                           onClick={(e) => buyFeed(feed.key, 1, e)}
                           disabled={gold < unitPrice}
                           className="bg-stone-100 hover:bg-stone-200 text-[#78350f] text-[9px] font-mono font-bold py-1 px-0.5 rounded-lg border border-stone-300 disabled:opacity-40 transition-all cursor-pointer text-center leading-none"

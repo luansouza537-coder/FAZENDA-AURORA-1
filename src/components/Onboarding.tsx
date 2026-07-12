@@ -12,8 +12,8 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'feed',
     selector: '[data-onboarding="feed-btn"]',
-    title: '🌾 Alimente seu animal!',
-    text: 'Toque no botão verde para alimentar. Animais com fome baixa não produzem nada!',
+    title: '🌾 Alimente TODOS os animais!',
+    text: 'Toque no botão verde para alimentar cada animal. Alimente todos — o tutorial avança quando todos estiverem saciados!',
     side: 'bottom',
   },
   {
@@ -25,16 +25,16 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: 'collect-milk',
-    selector: '[data-onboarding="collect-milk-btn"]',
-    title: '🥛 Colete o leite!',
-    text: 'Sua vaca produziu leite! Toque para coletar e guardar no estoque.',
+    selector: '[data-onboarding="collect-product-btn"]',
+    title: '🧺 Colete a produção!',
+    text: 'Seu animal produziu! Toque no botão de coleta para guardar no estoque.',
     side: 'bottom',
   },
   {
     id: 'silo-racoes',
-    selector: '[data-onboarding="silo-racoes-btn"]',
-    title: '🛒 Compre ração!',
-    text: 'Sem ração os animais ficam com fome. Toque no +1u para comprar ração bovina.',
+    selector: '[data-onboarding="silo-racoes"]',
+    title: '🛒 Compre ração para seus animais!',
+    text: 'Cada espécie tem seu tipo de ração. Escolha a certa para seu rebanho e compre antes de acabar!',
     side: 'bottom',
   },
   {
@@ -89,22 +89,22 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'feed2',
     selector: '[data-onboarding="feed-btn"]',
-    title: '🌾 Alimente de novo!',
-    text: 'Mantenha a fome dos animais alta todo dia. Este é o coração do seu negócio!',
+    title: '🌾 Alimente todos de novo!',
+    text: 'Alimente TODOS os animais diariamente! Fome alta = produção garantida.',
     side: 'bottom',
   },
   {
     id: 'advance-day2',
     selector: '[data-onboarding="advance-day"]',
     title: '☀️ Avance mais um dia!',
-    text: 'Cada dia é um ciclo completo: alimentar → avançar → coletar → vender. Repita!',
+    text: 'Ciclo completo: alimentar todos → avançar dia → coletar produção → repetir!',
     side: 'top',
   },
   {
     id: 'collect-milk2',
-    selector: '[data-onboarding="collect-milk-btn"]',
-    title: '🥛 Colete o leite de novo!',
-    text: 'Perfeito! Você dominou o ciclo básico da fazenda. Agora vá além!',
+    selector: '[data-onboarding="collect-product-btn"]',
+    title: '🧺 Colete a produção!',
+    text: 'Perfeito! Você dominou o ciclo básico da fazenda. Continue assim e prospere!',
     side: 'bottom',
   },
   {

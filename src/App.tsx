@@ -2248,9 +2248,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     const animal = animals.find(a => a.id === id);
     feedAnimal(id, event);
     if (animal) addToast(`${animal.name} alimentado!`, 'info', '🍽️');
-    if (onboardingStep === 1) setOnboardingStep(2);
-    else if (onboardingStep === 12) setOnboardingStep(13);
-  }, [animals, feedAnimal, addToast, onboardingStep]);
+  }, [animals, feedAnimal, addToast]);
 
   const collectMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
     collectMilk(id, event);
@@ -2259,10 +2257,55 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     else if (onboardingStep === 14) setOnboardingStep(15);
   }, [collectMilk, addToast, onboardingStep]);
 
-  const collectEggWithToast = useCallback((id: number, event: React.MouseEvent) => {
+  const collectWoolWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectWool(id, event);
+    if (onboardingStep === 3) setOnboardingStep(4);
+    else if (onboardingStep === 14) setOnboardingStep(15);
+  }, [collectWool, onboardingStep]);
+
+  const collectEggWithOnboarding = useCallback((id: number, event: React.MouseEvent) => {
     collectEgg(id, event);
     addToast('+Ovo coletado!', 'success', '🥚');
-  }, [collectEgg, addToast]);
+    if (onboardingStep === 3) setOnboardingStep(4);
+    else if (onboardingStep === 14) setOnboardingStep(15);
+  }, [collectEgg, addToast, onboardingStep]);
+
+  const collectGoatMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectGoatMilk(id, event);
+    if (onboardingStep === 3) setOnboardingStep(4);
+    else if (onboardingStep === 14) setOnboardingStep(15);
+  }, [collectGoatMilk, onboardingStep]);
+
+  const collectSheepMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectSheepMilk(id, event);
+    if (onboardingStep === 3) setOnboardingStep(4);
+    else if (onboardingStep === 14) setOnboardingStep(15);
+  }, [collectSheepMilk, onboardingStep]);
+
+  const collectDuckEggWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectDuckEgg(id, event);
+    if (onboardingStep === 3) setOnboardingStep(4);
+    else if (onboardingStep === 14) setOnboardingStep(15);
+  }, [collectDuckEgg, onboardingStep]);
+
+  const collectBuffaloMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectBuffaloMilk(id, event);
+    if (onboardingStep === 3) setOnboardingStep(4);
+    else if (onboardingStep === 14) setOnboardingStep(15);
+  }, [collectBuffaloMilk, onboardingStep]);
+
+  const collectAlpacaWoolWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectAlpacaWool(id, event);
+    if (onboardingStep === 3) setOnboardingStep(4);
+    else if (onboardingStep === 14) setOnboardingStep(15);
+  }, [collectAlpacaWool, onboardingStep]);
+
+  const collectCoelhoWoolWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    collectCoelhoWool(id, event);
+    if (onboardingStep === 3) setOnboardingStep(4);
+    else if (onboardingStep === 14) setOnboardingStep(15);
+  }, [collectCoelhoWool, onboardingStep]);
+
 
   // --- useWorkers hook ---
   const {
@@ -6189,10 +6232,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   // BUG 1 FIX: mantém o ref sempre apontando para a versão mais recente de advanceDay
   advanceDayRef.current = advanceDay;
 
-  // Onboarding: encerra automaticamente se o jogador passar do dia 5 sem completar
+  // Onboarding: encerra automaticamente se o jogador passar do dia 15 sem completar
   useEffect(() => {
     if (onboardingStep > 0 && currentDay > 15) setOnboardingStep(0);
   }, [currentDay]);
+
+  // Onboarding: avança passos de "alimentar todos" quando todos os animais têm fome >= 70
+  useEffect(() => {
+    if (animals.length === 0) return;
+    if (onboardingStep === 1 && animals.every(a => a.hunger >= 70)) setOnboardingStep(2);
+    else if (onboardingStep === 12 && animals.every(a => a.hunger >= 70)) setOnboardingStep(13);
+  }, [animals, onboardingStep]);
 
   // --- RENDERING HANDLERS & BADGES ---
   const renderGrowthBadge = (weight: number) => {
@@ -6965,8 +7015,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             inventory={inventory}
             feedAnimal={feedAnimalWithToast}
             collectMilk={collectMilkWithToast}
-            collectWool={collectWool}
-            collectEgg={collectEggWithToast}
+            collectWool={collectWoolWithToast}
+            collectEgg={collectEggWithOnboarding}
             collectMel={collectMelWithToast}
             collectHumus={collectHumus}
             collectMuco={collectMuco}
@@ -6992,14 +7042,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             licencaExotica={licencaExotica}
             reproducaoAtiva={reproducaoAtiva}
             REPRODUCAO_CONFIG={REPRODUCAO_CONFIG}
-            collectGoatMilk={collectGoatMilk}
-            collectSheepMilk={collectSheepMilk}
+            collectGoatMilk={collectGoatMilkWithToast}
+            collectSheepMilk={collectSheepMilkWithToast}
             collectLlamaWool={collectLlamaWool}
-            collectDuckEgg={collectDuckEgg}
+            collectDuckEgg={collectDuckEggWithToast}
             collectGooseProduct={collectGooseProduct}
-            collectBuffaloMilk={collectBuffaloMilk}
-            collectAlpacaWool={collectAlpacaWool}
-            collectCoelhoWool={collectCoelhoWool}
+            collectBuffaloMilk={collectBuffaloMilkWithToast}
+            collectAlpacaWool={collectAlpacaWoolWithToast}
+            collectCoelhoWool={collectCoelhoWoolWithToast}
             collectCabraAngoraMohair={collectCabraAngoraMohair}
             collectBichoSeda={collectBichoSeda}
             feedBichoSeda={feedBichoSeda}
