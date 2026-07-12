@@ -6669,6 +6669,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                     📖 Tutorial
                   </button>
+                  <button onClick={() => { setShowAllTimeStats(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                    🏅 Recordes
+                  </button>
+                  <button onClick={() => { setShowReproModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
+                    🐣 Reproduções
+                  </button>
                   <div className="h-px bg-[#fbbf24]/30 my-0.5" />
                   <button onClick={() => { exportSave(); setShowMoreMenu(false); }}
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
@@ -6677,6 +6685,19 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                   <button onClick={() => { importSave(); setShowMoreMenu(false); }}
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                     📂 Carregar
+                  </button>
+                  {(insurance.active || insuranceClimate.active || insuranceTheft.active) && (
+                    <>
+                      <div className="h-px bg-[#fbbf24]/30 my-0.5" />
+                      {insurance.active && <div className="flex items-center gap-2 text-[11px] text-green-300 font-mono py-0.5">🛡️ Seguro Básico ativo</div>}
+                      {insuranceClimate.active && <div className="flex items-center gap-2 text-[11px] text-sky-300 font-mono py-0.5">🌦️ Seguro Clima ativo</div>}
+                      {insuranceTheft.active && <div className="flex items-center gap-2 text-[11px] text-orange-300 font-mono py-0.5">🔒 Seguro Premium ativo</div>}
+                    </>
+                  )}
+                  <div className="h-px bg-[#fbbf24]/30 my-0.5" />
+                  <button onClick={() => { if (window.confirm('Tem certeza? Todo o progresso será perdido!')) { initGame(); setShowMoreMenu(false); } }}
+                    className="flex items-center gap-2 text-[12px] font-black text-red-400 hover:text-red-300 transition-colors text-left py-1">
+                    🔄 Resetar Jogo
                   </button>
                 </div>
               )}
@@ -6720,46 +6741,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             >
               {(soundEnabled || musicEnabled) ? '🔊' : '🔇'}
             </button>
-
-            {/* ⚙️ Mais — Stats, Recordes, Reproduções, Reset */}
-            <div className="relative">
-              <button
-                onClick={() => setShowMorePanel(prev => !prev)}
-                className={`border-3 border-[#fbbf24] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none ${showMorePanel ? 'bg-[#fbbf24]' : 'bg-[#ffcd7e] hover:bg-[#fbc550]'}`}
-                title="Mais opções"
-              >
-                ⚙️
-              </button>
-              {showMorePanel && (
-                <div className="absolute bottom-full right-0 mb-2 bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl p-3 flex flex-col gap-2 z-50 shadow-2xl min-w-[170px]">
-                  <button onClick={() => { setShowStatsModal(true); setShowMorePanel(false); triggerAudioResult(() => sfx.playSound('click')); }}
-                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
-                    📊 Estatísticas
-                  </button>
-                  <button onClick={() => { setShowAllTimeStats(true); setShowMorePanel(false); triggerAudioResult(() => sfx.playSound('click')); }}
-                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
-                    🏅 Recordes
-                  </button>
-                  <button onClick={() => { setShowReproModal(true); setShowMorePanel(false); triggerAudioResult(() => sfx.playSound('click')); }}
-                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-0.5">
-                    🐣 Reproduções
-                  </button>
-                  {(insurance.active || insuranceClimate.active || insuranceTheft.active) && (
-                    <>
-                      <div className="h-px bg-[#fbbf24]/30 my-0.5" />
-                      {insurance.active && <div className="flex items-center gap-2 text-[11px] text-green-300 font-mono py-0.5">🛡️ Seguro Básico ativo</div>}
-                      {insuranceClimate.active && <div className="flex items-center gap-2 text-[11px] text-sky-300 font-mono py-0.5">🌦️ Seguro Clima ativo</div>}
-                      {insuranceTheft.active && <div className="flex items-center gap-2 text-[11px] text-orange-300 font-mono py-0.5">🔒 Seguro Premium ativo</div>}
-                    </>
-                  )}
-                  <div className="h-px bg-[#fbbf24]/30 my-0.5" />
-                  <button onClick={() => { if (window.confirm('Tem certeza? Todo o progresso será perdido!')) { initGame(); setShowMorePanel(false); } }}
-                    className="flex items-center gap-2 text-[12px] font-black text-red-400 hover:text-red-300 transition-colors text-left py-0.5">
-                    🔄 Resetar Jogo
-                  </button>
-                </div>
-              )}
-            </div>
 
           </div>
 
