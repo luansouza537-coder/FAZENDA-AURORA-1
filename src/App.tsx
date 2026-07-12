@@ -102,6 +102,7 @@ import FinancasModal from './components/FinancasModal';
 import SellAllModal from './components/SellAllModal';
 import { ReproducoesModal, RankingModal, FairResultModal, AllTimeStatsModal, CruzamentoModal } from './components/SmallModals';
 import GameSidebar from './components/GameSidebar';
+import Onboarding from './components/Onboarding';
 import AnimalGrid from './components/AnimalGrid';
 import { ToastNotification, Toast } from './components/ToastNotification';
 import { DaySummaryModal, DaySummary } from './components/DaySummaryModal';
@@ -690,6 +691,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [showAllTimeStats, setShowAllTimeStats] = useState(false);
   const [showMorePanel, setShowMorePanel] = useState<boolean>(false);
   const [showMoreMenu, setShowMoreMenu] = useState<boolean>(false);
+  const [onboardingStep, setOnboardingStep] = useState<number>(() => {
+    try {
+      const s = localStorage.getItem('aurora_farm_save');
+      if (!s) return 1; // novo jogo → inicia tutorial
+      const parsed = JSON.parse(s);
+      return parsed.onboardingStep ?? 0; // save existente → sem tutorial
+    } catch { return 0; }
+  });
   const [productionByAnimal, setProductionByAnimal] = useState<Record<number, { name: string; type: string; produced: number }>>({});
   const [allTimeStats, setAllTimeStats] = useState<{ totalSpentFeed: number; bestDay: number; worstDay: number }>(() => {
     try {
@@ -2666,6 +2675,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         shownMilestones,
         vehicleTiers,
         lastUpgradeDay,
+        onboardingStep,
       };
       localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
       setShowSavedToast(true);
@@ -6175,6 +6185,39 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
 
 
+  // Onboarding: listener global — avança o tutorial quando o jogador clica no alvo do passo
+  useEffect(() => {
+    if (onboardingStep === 0) return;
+    const TRANSITIONS: Record<string, Record<number, number>> = {
+      'feed-btn': { 1: 2, 12: 13 },
+      'advance-day': { 2: 3, 13: 14 },
+      'collect-product-btn': { 3: 4, 14: 15 },
+      'silo-racoes': { 4: 5 },
+      'financas-btn': { 5: 6 },
+      'missions-btn': { 6: 7 },
+      'producao-btn': { 7: 8 },
+      'mais-btn': { 8: 9 },
+      'contratos-btn': { 9: 10 },
+      'loja-btn': { 10: 11 },
+      'buy-animal-btn': { 11: 12 },
+      'diary': { 15: 0 },
+    };
+    const handler = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement)?.closest?.('[data-onboarding]') as HTMLElement | null;
+      const key = el?.getAttribute('data-onboarding');
+      if (!key) return;
+      const next = TRANSITIONS[key]?.[onboardingStep];
+      if (next !== undefined) setOnboardingStep(next);
+    };
+    document.addEventListener('click', handler, true);
+    return () => document.removeEventListener('click', handler, true);
+  }, [onboardingStep]);
+
+  // Onboarding: encerra automaticamente se passar do dia 15 sem completar
+  useEffect(() => {
+    if (onboardingStep > 0 && currentDay > 15) setOnboardingStep(0);
+  }, [currentDay]);
+
   // --- RENDERING HANDLERS & BADGES ---
   const renderGrowthBadge = (weight: number) => {
     let text = 'Magro';
@@ -6502,6 +6545,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             {/* Primários: Finanças + Loja */}
             <div className="flex items-center gap-1.5">
               <button
+                data-onboarding="financas-btn"
                 onClick={() => { setShowFinancasModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
                 className="bg-emerald-700 border-3 border-emerald-400 hover:bg-emerald-600 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#064e3b] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
                 title="Economia: Mercado de preços e histórico financeiro"
@@ -6513,6 +6557,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 )}
               </button>
               <button
+                data-onboarding="loja-btn"
                 onClick={() => { setShowUpgradesModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
                 className="bg-orange-600 border-3 border-orange-400 hover:bg-orange-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#7c2d12] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
                 title="Loja da Fazenda: infraestrutura, consumíveis e upgrades"
@@ -6576,6 +6621,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               <div className="relative">
                 <button
                   type="button"
+                  data-onboarding="producao-btn"
                   onClick={(e) => { e.preventDefault(); setShowQueijariaModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
                   className="bg-amber-600 border-3 border-amber-400 hover:bg-amber-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#451a03] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
                   title="Acesse a Queijaria para maturação de queijos artesanais e ampliação"
@@ -6597,6 +6643,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                     document.querySelector('[data-buy-menu]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }, 80);
                 }}
+                data-onboarding="buy-animal-btn"
                 className={`border-3 border-[#1d4ed8] text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#1e3a8a] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none ${showBuyMenu ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                 title="Comprar Animais: abre o catálogo para expandir seu rebanho"
               >
@@ -6607,7 +6654,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
               {/* 🎯 Missões */}
               <div className="relative">
-                <button onClick={() => { setShowMissionsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
+                <button data-onboarding="missions-btn" onClick={() => { setShowMissionsModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
                   className="bg-[#ffcd7e] border-3 border-[#fbbf24] hover:bg-[#fbc550] text-[#78350f] p-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 text-lg font-black leading-none flex items-center justify-center w-[46px] h-[46px] focus:outline-none"
                   title="Missões">
                   🎯
@@ -6625,6 +6672,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
               )}
               <button
+                data-onboarding="mais-btn"
                 onClick={() => { setShowMoreMenu(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
                 className={`border-3 border-[#fbbf24] text-[#78350f] px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-xs font-black leading-none flex items-center gap-1 focus:outline-none ${showMoreMenu ? 'bg-[#fbbf24]' : 'bg-[#ffcd7e] hover:bg-[#fbc550]'}`}
                 title="Mais opções"
@@ -6638,7 +6686,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               {showMoreMenu && (
                 <div className="absolute bottom-full right-0 mb-2 bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl p-3 flex flex-col gap-1.5 z-50 shadow-2xl min-w-[180px]">
                   <div className="relative">
-                    <button onClick={() => { setShowContractsModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                    <button data-onboarding="contratos-btn" onClick={() => { setShowContractsModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
                       className="flex items-center gap-2 w-full text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                       📋 Contratos
                       {contracts.filter(c => c.active).length > 0 && (
@@ -6749,6 +6797,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
         </div>
 
+
+        {/* Onboarding tutorial */}
+        <Onboarding
+          step={onboardingStep}
+          paused={currentScreen !== 'game' || showDaySummary || showMissionsModal || showUpgradesModal || showFinancasModal || showQueijariaModal || showContractsModal}
+          onSkip={() => setOnboardingStep(0)}
+          onAutoAdvance={() => setOnboardingStep(s => (s >= 15 ? 0 : s + 1))}
+        />
 
         {/* Melhoria 6: Toast de autosave */}
         {showSavedToast && (

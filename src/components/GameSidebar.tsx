@@ -74,7 +74,7 @@ export default function GameSidebar({
           <div className="lg:col-span-4 flex flex-col gap-6">
 
             {/* --- DIÁRIO DA FAZENDA (topo) --- */}
-            <div className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-4 shadow-[0_12px_0_#d97706] flex flex-col h-[180px]">
+            <div data-onboarding="diary" className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-4 shadow-[0_12px_0_#d97706] flex flex-col h-[180px]">
               <div className="flex items-center justify-between border-b-2 border-[#fbbf24] pb-2 mb-2">
                 <div className="flex items-center gap-2">
                   <History className="w-4 h-4 text-[#78350f]" />
@@ -767,7 +767,7 @@ export default function GameSidebar({
             </div>
 
             {/* --- SILO DE RAÇÕES SEGMENTADAS --- */}
-            <div className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-5 shadow-[0_12px_0_#d97706] flex flex-col">
+            <div data-onboarding="silo-racoes" className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-5 shadow-[0_12px_0_#d97706] flex flex-col">
               <div className="flex items-center gap-2 border-b-2 border-[#fbbf24] pb-2 mb-4">
                 <span className="text-xl">🌾</span>
                 <h3 className="text-base sm:text-lg font-display font-black text-[#78350f] uppercase tracking-wider">

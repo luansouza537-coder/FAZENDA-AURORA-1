@@ -1151,6 +1151,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           return (
             <button
               type="button"
+              data-onboarding="feed-btn"
               onClick={(e) => {
                 e.preventDefault();
                 onFeed(animal.id, e);
@@ -1167,6 +1168,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {animal.type === 'vaca' && (
           <button
             type="button"
+            data-onboarding="collect-product-btn"
             onClick={(e) => {
               e.preventDefault();
               onCollectMilk(animal.id, e);
@@ -1187,6 +1189,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {animal.type === 'ovelha' && (
           <button
             type="button"
+            data-onboarding="collect-product-btn"
             onClick={(e) => {
               e.preventDefault();
               onCollectWool(animal.id, e);
@@ -1205,7 +1208,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
         {/* Alpaca: coletar lã */}
         {animal.type === 'alpaca' && (
-          <button type="button" onClick={(e) => { e.preventDefault(); onCollectAlpacaWool(animal.id, e); }} disabled={!animal.woolReady}
+          <button type="button" data-onboarding="collect-product-btn" onClick={(e) => { e.preventDefault(); onCollectAlpacaWool(animal.id, e); }} disabled={!animal.woolReady}
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title={animal.woolReady ? 'Tosquiar alpaca' : `Aguarde ${4 - (animal.daysSinceLastWool ?? 0)} dia(s)`}>
             <Scissors className="w-3.5 h-3.5" /> Tosquiar Alpaca
@@ -1216,6 +1219,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {animal.type === 'galinha' && (
           <button
             type="button"
+            data-onboarding="collect-product-btn"
             onClick={(e) => {
               e.preventDefault();
               onCollectEgg(animal.id, e);
@@ -1326,7 +1330,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {animal.type === 'pato' && (
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); onCollectDuckEgg(animal.id, e); }}
+            data-onboarding="collect-product-btn" onClick={(e) => { e.preventDefault(); onCollectDuckEgg(animal.id, e); }}
             disabled={!animal.hasProducedToday}
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.hasProducedToday ? 'bg-amber-500 hover:bg-amber-400 border-b-4 border-amber-700 text-white shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title="Coletar ovo de pato"
@@ -1395,7 +1399,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {animal.type === 'ovelha_leiteira' && animal.isAdult !== false && (
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); onCollectSheepMilk(animal.id, e); }}
+            data-onboarding="collect-product-btn" onClick={(e) => { e.preventDefault(); onCollectSheepMilk(animal.id, e); }}
             disabled={!animal.isLactating || !animal.hasProducedToday}
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.isLactating && animal.hasProducedToday ? 'bg-[#3b82f6] hover:bg-[#2563eb] border-b-4 border-[#1d4ed8] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title={!animal.isLactating ? `Em período de secagem — ${animal.lactationCycle ?? 0} dias restantes` : !animal.hasProducedToday ? 'Leite já coletado hoje' : 'Coletar leite de ovelha'}
@@ -1437,7 +1441,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {animal.type === 'cabra' && animal.isAdult !== false && (
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); onCollectGoatMilk(animal.id, e); }}
+            data-onboarding="collect-product-btn" onClick={(e) => { e.preventDefault(); onCollectGoatMilk(animal.id, e); }}
             disabled={!animal.isLactating || !animal.hasProducedToday}
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.isLactating && animal.hasProducedToday ? 'bg-[#3b82f6] hover:bg-[#2563eb] border-b-4 border-[#1d4ed8] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title={!animal.isLactating ? `Em período de secagem — ${animal.lactationCycle ?? 0} dias restantes` : !animal.hasProducedToday ? 'Leite já coletado hoje' : 'Coletar leite de cabra'}
@@ -1568,7 +1572,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {animal.type === 'bufalo' && animal.isAdult !== false && (
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); onCollectBuffaloMilk(animal.id, e); }}
+            data-onboarding="collect-product-btn" onClick={(e) => { e.preventDefault(); onCollectBuffaloMilk(animal.id, e); }}
             disabled={!animal.hasProducedToday}
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.hasProducedToday ? 'bg-[#3b82f6] hover:bg-[#2563eb] border-b-4 border-[#1d4ed8] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title="Coletar leite de búfala"
@@ -1608,7 +1612,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
         {/* Coelho Angorá: coletar lã */}
         {animal.type === 'coelho_angora' && (
-          <button type="button" onClick={(e) => { e.preventDefault(); onCollectCoelhoWool(animal.id, e); }} disabled={!animal.woolReady}
+          <button type="button" data-onboarding="collect-product-btn" onClick={(e) => { e.preventDefault(); onCollectCoelhoWool(animal.id, e); }} disabled={!animal.woolReady}
             className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.woolReady ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] border-b-4 border-[#5b21b6] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
             title={animal.woolReady ? 'Tosquiar coelho angorá' : 'Aguarde'}>
             <Scissors className="w-3.5 h-3.5" /> Tosquiar Coelho
