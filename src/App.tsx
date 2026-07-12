@@ -6188,8 +6188,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   // Onboarding: listener global — avança o tutorial quando o jogador clica no alvo do passo
   useEffect(() => {
     if (onboardingStep === 0) return;
+    // 'feed-btn' não está aqui: os passos 1 e 12 avançam via auto-advance do
+    // Onboarding quando não resta nenhum animal com fome (< 90) e ração disponível
     const TRANSITIONS: Record<string, Record<number, number>> = {
-      'feed-btn': { 1: 2, 12: 13 },
       'advance-day': { 2: 3, 13: 14 },
       'collect-product-btn': { 3: 4, 14: 15 },
       'silo-racoes': { 4: 5 },

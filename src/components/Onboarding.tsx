@@ -12,8 +12,8 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'feed',
     selector: '[data-onboarding="feed-btn"]',
-    title: '🌾 Alimente seu animal!',
-    text: 'Toque no botão verde para alimentar. Fome alta = produção! Depois alimente os outros do mesmo jeito.',
+    title: '🌾 Alimente TODOS os animais!',
+    text: 'Toque no botão verde. O destaque pula para o próximo animal com fome até todos estarem alimentados. Fome alta = produção!',
     side: 'bottom',
   },
   {
@@ -89,8 +89,8 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'feed2',
     selector: '[data-onboarding="feed-btn"]',
-    title: '🌾 Alimente de novo!',
-    text: 'Lembre: todo dia, todos os animais. Este é o coração do seu negócio!',
+    title: '🌾 Alimente todos de novo!',
+    text: 'Todo dia, todos os animais! O destaque pula de um para o outro. Este é o coração do seu negócio!',
     side: 'bottom',
   },
   {
@@ -142,6 +142,7 @@ export default function Onboarding({ step, paused = false, onSkip, onAutoAdvance
   const onAutoAdvanceRef = useRef(onAutoAdvance);
   onAutoAdvanceRef.current = onAutoAdvance;
   const missStrikesRef = useRef(0);
+  const lastElRef = useRef<HTMLElement | null>(null);
 
   const def = step >= 1 && step <= ONBOARDING_STEPS.length ? ONBOARDING_STEPS[step - 1] : null;
 
@@ -175,6 +176,7 @@ export default function Onboarding({ step, paused = false, onSkip, onAutoAdvance
     setVisible(false);
     setRect(null);
     missStrikesRef.current = 0;
+    lastElRef.current = null;
     if (paused || !def) return;
     const t = setTimeout(measureTarget, 300);
     return () => clearTimeout(t);
@@ -187,6 +189,14 @@ export default function Onboarding({ step, paused = false, onSkip, onAutoAdvance
       const el = isTargetUsable(def.selector);
       if (el) {
         missStrikesRef.current = 0;
+        // alvo mudou de elemento (ex: próximo animal com fome) → rola até ele
+        if (lastElRef.current && lastElRef.current !== el) {
+          const rv = el.getBoundingClientRect();
+          if (rv.top < 0 || rv.bottom > window.innerHeight) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+        lastElRef.current = el;
         // acompanha o alvo (layout mudou, scroll, etc.)
         const r = el.getBoundingClientRect();
         setRect(prev => {
