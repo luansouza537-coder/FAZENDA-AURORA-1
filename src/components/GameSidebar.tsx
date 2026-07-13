@@ -812,7 +812,7 @@ export default function GameSidebar({
                   { key: 'racaoOvinos', label: '🐐 Ração de Ovinos', desc: 'Para Ovelha, Cabra, Lhama e Alpaca. 3💰/dia.' },
                   { key: 'racaoAves', label: '🐔 Ração de Aves', desc: 'Para Galinha, Codorna e Pavão. 3💰/dia.' },
                   { key: 'racaoAquatica', label: '🦆 Ração Aquática', desc: 'Para Pato e Ganso. 4💰/dia.' },
-                  { key: 'racaoCoelho', label: '🐰 Ração de Coelhos', desc: 'Para Coelho Angorá. 2💰/dia.' },
+                  { key: 'racaoCoelho', label: '🐰 Ração de Coelhos', desc: 'Para Coelho Angorá. 3💰/dia.' },
                   { key: 'racaoCarnivora', label: '🍖 Ração Carnívora', desc: 'Para Jacaré e animais exóticos. 6💰/dia.' }
                 ] as const).map((feed) => {
                   const currentStock = inventory[feed.key] ?? 0;

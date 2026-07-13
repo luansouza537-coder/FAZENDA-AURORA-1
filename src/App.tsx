@@ -691,6 +691,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [showAllTimeStats, setShowAllTimeStats] = useState(false);
   const [showMorePanel, setShowMorePanel] = useState<boolean>(false);
   const [showMoreMenu, setShowMoreMenu] = useState<boolean>(false);
+  const saveFailWarnedRef = useRef<boolean>(false);
   const [moreMenuSide, setMoreMenuSide] = useState<'up' | 'down'>('up');
   const [onboardingStep, setOnboardingStep] = useState<number>(() => {
     try {
@@ -2679,9 +2680,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         lastUpgradeDay,
         onboardingStep,
       };
-      localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
-      setShowSavedToast(true);
-      setTimeout(() => setShowSavedToast(false), 2000);
+      try {
+        localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
+        setShowSavedToast(true);
+        setTimeout(() => setShowSavedToast(false), 2000);
+      } catch (e) {
+        // armazenamento cheio/indisponível — avisa uma única vez
+        if (!saveFailWarnedRef.current) {
+          saveFailWarnedRef.current = true;
+          addNotification('⚠️ Falha ao salvar o jogo (armazenamento cheio). Exporte seu save!', 'error', currentDay);
+        }
+      }
     }
   }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
@@ -5437,7 +5446,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           setGold(prev => prev + fairGold);
           logsToAdd.push(...fairLog);
           const newResult: FairResult = { day: nextDayValue, category: `Agropecuária - ${fairWins} cats`, winner: 'Fazenda Aurora', earned: fairGold };
-          setFairResults(prev => [...prev, newResult]);
+          setFairResults(prev => [...prev, newResult].slice(-30));
           setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🎪 Feira Agropecuária: ${fairWins} vitórias, +${fairGold}💰!`, 'event', nextDayValue); }, 500);
         } else {
           logsToAdd.push(...fairLog);
@@ -5498,7 +5507,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           logsToAdd.push(...expLog);
           logsToAdd.push({ msg: `⭐ +${expPrestige} Pontos de Prestígio pela Exposição!`, type: 'system' });
           const newResult: FairResult = { day: nextDayValue, category: `Exposição de Raças - ${expWins} cats`, winner: 'Fazenda Aurora', earned: expGold };
-          setFairResults(prev => [...prev, newResult]);
+          setFairResults(prev => [...prev, newResult].slice(-30));
           setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🏆 Exposição de Raças: ${expWins} campeões, +${expGold}💰!`, 'event', nextDayValue); }, 600);
         } else {
           logsToAdd.push(...expLog);
@@ -5548,7 +5557,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           logsToAdd.push(...prodLog);
           if (prodPrestige > 0) logsToAdd.push({ msg: `⭐ +${prodPrestige} Pontos de Prestígio!`, type: 'system' });
           const newResult: FairResult = { day: nextDayValue, category: `Feira de Produtos - ${prodWins} cats`, winner: 'Fazenda Aurora', earned: prodGold };
-          setFairResults(prev => [...prev, newResult]);
+          setFairResults(prev => [...prev, newResult].slice(-30));
           setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🛒 Feira de Produtos: ${prodWins} vitórias, +${prodGold}💰!`, 'event', nextDayValue); }, 700);
         } else {
           logsToAdd.push(...prodLog);
@@ -5589,7 +5598,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (exoticGold > 0) {
           setGold(prev => prev + exoticGold);
           const newResult: FairResult = { day: nextDayValue, category: 'Feira Exótica', winner: 'Fazenda Aurora', earned: exoticGold };
-          setFairResults(prev => [...prev, newResult]);
+          setFairResults(prev => [...prev, newResult].slice(-30));
           setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🐍 Feira Exótica: +${exoticGold}💰!`, 'event', nextDayValue); }, 800);
         }
         logsToAdd.push(...exoticLog);
@@ -5622,7 +5631,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setGold(prev => prev + festGold);
         logsToAdd.push(...festLog);
         const newResult: FairResult = { day: nextDayValue, category: 'Festival Cultural', winner: farmScore > npcFarmScore ? 'Fazenda Aurora' : 'NPC', earned: festGold };
-        setFairResults(prev => [...prev, newResult]);
+        setFairResults(prev => [...prev, newResult].slice(-30));
         setTimeout(() => setShowFairResultModal(newResult), 1200);
         setNextFestivalDay(nextDayValue + 120);
       }

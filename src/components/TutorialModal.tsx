@@ -19,7 +19,7 @@ const SECTIONS = [
           <strong className="text-[#b45309]">Alimentador Automático:</strong> Consome ração do armazém automaticamente a cada dia — libera você de alimentar manualmente.
         </li>
         <li>
-          <strong className="text-[#b45309]">Atenção!</strong> Animais com fome extrema ou felicidade baixa começam a definhar e param de produzir. Mantenha fome acima de <strong>30%</strong> e felicidade acima de <strong>50%</strong>.
+          <strong className="text-[#b45309]">Atenção!</strong> Animais com fome extrema ou felicidade baixa começam a definhar e param de produzir. Mantenha fome acima de <strong>25%</strong> e felicidade acima de <strong>30%</strong>.
         </li>
         <li>
           <strong className="text-[#b45309]">Vacinas & Veterinário:</strong> Vacine os animais periodicamente para evitar doenças. O veterinário cura animais doentes por um custo em ouro.
@@ -68,7 +68,7 @@ const SECTIONS = [
       <ul className="text-stone-700 space-y-2 text-xs sm:text-sm list-disc pl-4">
         <li><strong className="text-[#b45309]">Vendas Diretas:</strong> Use o painel lateral para vender itens do inventário diretamente à feira. O preço varia por estação, clima e oferta/demanda.</li>
         <li><strong className="text-[#b45309]">Oferta & Demanda:</strong> Vender muito do mesmo item reduz o preço. Diversifique os produtos para manter os preços altos!</li>
-        <li><strong className="text-[#b45309]">🧙‍♂️ Mercador Viajante:</strong> Aparece aleatoriamente (a cada 3-7 dias) e paga <strong>+8% a mais</strong> em qualquer produto.</li>
+        <li><strong className="text-[#b45309]">🧙‍♂️ Mercador Viajante:</strong> Aparece a cada 7 dias (5 com Prestígio 150+) e paga <strong>1,5x o preço</strong> em qualquer produto.</li>
         <li><strong className="text-[#b45309]">Exposição de Raças:</strong> Evento de feira especial — inscreva seus melhores animais para ganhar prêmios de ouro e prestígio.</li>
         <li><strong className="text-[#b45309]">Contratos:</strong> Aceite contratos para entregar uma quantidade específica de produto em prazo determinado. Recompensas em ouro e XP. Não adie muito — contratos vencem!</li>
         <li><strong className="text-[#b45309]">Abatedouro:</strong> Venda animais de corte (boi) com base no peso acumulado. Quanto mais pesado, mais ouro.</li>
@@ -81,7 +81,7 @@ const SECTIONS = [
     title: 'Progressão & Nível',
     content: (
       <ul className="text-stone-700 space-y-2 text-xs sm:text-sm list-disc pl-4">
-        <li><strong className="text-[#b45309]">Nível da Fazenda:</strong> Sobe a cada 10 dias acumulados. Desbloqueia novos animais, preços melhores e funcionalidades.</li>
+        <li><strong className="text-[#b45309]">Nível da Fazenda:</strong> Sobe acumulando XP (produção, coletas e missões). Desbloqueia novos animais, preços melhores e funcionalidades.</li>
         <li><strong className="text-[#b45309]">💖 Melhor Amigo:</strong> Mantenha felicidade em <strong>100% por 3 dias seguidos</strong>. Bônus permanente: +1 leite (vaca), lã a cada 2 dias (ovelha), ganho de peso acelerado (boi). Perde-se se a felicidade cair abaixo de 80% por 2 dias.</li>
         <li><strong className="text-[#b45309]">Cruzamento:</strong> Animais adultos com Licença de Criadouro podem ser cruzados para gerar filhotes com <strong>raças especiais</strong> e bônus permanentes de produção.</li>
         <li><strong className="text-[#b45309]">Trabalhadores:</strong> Contrate funcionários para automatizar tarefas (alimentação, coleta, etc.). Reduz a necessidade de ação manual.</li>

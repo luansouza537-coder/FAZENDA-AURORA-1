@@ -1335,7 +1335,7 @@ export function useAnimals({
 
     // Deduzir ração do inventário (minhoca, caracol, bicho_seda não consomem)
     if (!noFeedAnimals.includes(type)) {
-      setInventory(prev => ({ ...prev, [feedType]: (prev[feedType] ?? 0) - 1 }));
+      setInventory(prev => ({ ...prev, [feedType]: Math.max(0, (prev[feedType] ?? 0) - 1) }));
     }
 
     setGold(prev => prev - price);
@@ -1456,7 +1456,7 @@ export function useAnimals({
     };
 
     if (!noFeedAnimals.includes(type)) {
-      setInventory(prev => ({ ...prev, [feedType]: (prev[feedType] ?? 0) - 1 }));
+      setInventory(prev => ({ ...prev, [feedType]: Math.max(0, (prev[feedType] ?? 0) - 1) }));
     }
 
     setGold(prev => prev - config.price);
