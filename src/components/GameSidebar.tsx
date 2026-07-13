@@ -279,7 +279,7 @@ export default function GameSidebar({
               })()}
 
               {/* Advanced Refining/Manufaturing recipes — removido: toda produção centralizada no Ateliê */}
-              <div className="space-y-3 border-t border-dashed border-[#fbbf24]/50 pt-3">
+              <div data-onboarding="feira" className="space-y-3 border-t border-dashed border-[#fbbf24]/50 pt-3">
                 <h4 className="text-xs font-sans font-black uppercase text-[#92400e] tracking-wider pt-2 mb-2">Vendas Diretas p/ a Feira:</h4>
 
                 <div className="grid grid-cols-2 gap-2">

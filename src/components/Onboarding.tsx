@@ -38,6 +38,13 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     side: 'top',
   },
   {
+    id: 'feira',
+    selector: '[data-onboarding="feira"]',
+    title: '🏷️ Venda na Feira!',
+    text: 'Venda o que você coletou! Toque num item das Vendas Diretas para ganhar moedas.',
+    side: 'top',
+  },
+  {
     id: 'financas',
     selector: '[data-onboarding="financas-btn"]',
     title: '💹 Veja suas Finanças!',
@@ -71,6 +78,20 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: '📋 Contratos!',
     text: 'Contratos garantem preço fixo acima do mercado. Assine com o que já produz!',
     side: 'top',
+  },
+  {
+    id: 'funcionarios',
+    selector: '[data-onboarding="funcionarios-btn"]',
+    title: '👷 Funcionários!',
+    text: 'Conheça a aba: aqui você contrata ajudantes que automatizam tarefas. Disponível em níveis mais altos — por enquanto, só dê uma olhada!',
+    side: 'top',
+  },
+  {
+    id: 'online',
+    selector: '[data-onboarding="online-btn"]',
+    title: '🌐 Jogue Online!',
+    text: 'Crie sua conta e dispute o ranking mundial de fazendeiros. Toque para conhecer!',
+    side: 'bottom',
   },
   {
     id: 'loja',
@@ -207,7 +228,7 @@ export default function Onboarding({ step, hidden = false, paused = false, onSki
         setVisible(true);
       } else {
         missStrikesRef.current += 1;
-        if (missStrikesRef.current >= 2) {
+        if (missStrikesRef.current >= 3) {
           missStrikesRef.current = 0;
           onAutoAdvanceRef.current();
         }

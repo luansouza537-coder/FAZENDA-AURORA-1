@@ -6193,24 +6193,27 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     // 'feed-btn' não está aqui: os passos 1 e 12 avançam via auto-advance do
     // Onboarding quando não resta nenhum animal com fome (< 90) e ração disponível
     const TRANSITIONS: Record<string, Record<number, number>> = {
-      'advance-day': { 2: 3, 13: 14 },
-      'collect-product-btn': { 3: 4, 14: 15 },
+      'advance-day': { 2: 3, 16: 17 },
+      'collect-product-btn': { 3: 4, 17: 18 },
       'silo-racoes': { 4: 5 },
-      'financas-btn': { 5: 6 },
-      'missions-btn': { 6: 7 },
-      'producao-btn': { 7: 8 },
-      'mais-btn': { 8: 9 },
-      'contratos-btn': { 9: 10 },
-      'loja-btn': { 10: 11 },
-      'diary': { 15: 0 },
+      'feira': { 5: 6 },
+      'financas-btn': { 6: 7 },
+      'missions-btn': { 7: 8 },
+      'producao-btn': { 8: 9 },
+      'mais-btn': { 9: 10 },
+      'contratos-btn': { 10: 11 },
+      'funcionarios-btn': { 11: 12 },
+      'online-btn': { 12: 13 },
+      'loja-btn': { 13: 14 },
+      'diary': { 18: 0 },
     };
     const handler = (e: MouseEvent) => {
       const el = (e.target as HTMLElement)?.closest?.('[data-onboarding]') as HTMLElement | null;
       const key = el?.getAttribute('data-onboarding');
       if (!key) return;
-      // passo 11: abre o catálogo no 1º toque; avança apenas no 2º (que fecha)
-      if (key === 'buy-animal-btn' && onboardingStep === 11) {
-        if (showBuyMenu) setOnboardingStep(12);
+      // passo 14: abre o catálogo no 1º toque; avança apenas no 2º (que fecha)
+      if (key === 'buy-animal-btn' && onboardingStep === 14) {
+        if (showBuyMenu) setOnboardingStep(15);
         return;
       }
       const next = TRANSITIONS[key]?.[onboardingStep];
@@ -6219,6 +6222,21 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     document.addEventListener('click', handler, true);
     return () => document.removeEventListener('click', handler, true);
   }, [onboardingStep, showBuyMenu]);
+
+  // Onboarding: passos 10 (Contratos) e 11 (Funcionários) vivem dentro do menu
+  // Mais — guarda periódica reabre o menu se algo o fechar (toggle do botão,
+  // clique no backdrop) enquanto um desses passos está ativo
+  useEffect(() => {
+    if (onboardingStep !== 10 && onboardingStep !== 11) return;
+    const keepOpen = setInterval(() => {
+      setShowMoreMenu(open => {
+        if (open) return open;
+        // não reabre por cima de um modal
+        return (showContractsModal || showWorkersModal) ? open : true;
+      });
+    }, 400);
+    return () => clearInterval(keepOpen);
+  }, [onboardingStep, showContractsModal, showWorkersModal]);
 
   // Onboarding: encerra automaticamente se passar do dia 15 sem completar
   useEffect(() => {
@@ -6701,7 +6719,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                       )}
                     </button>
                   </div>
-                  <button onClick={() => { setShowWorkersModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                  <button data-onboarding="funcionarios-btn" onClick={() => { setShowWorkersModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                     👷 Funcionários {workers.length > 0 ? `(${workers.length})` : ''}
                   </button>
@@ -6764,6 +6782,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             {/* 🌐 Ranking & Chat Online (ou Login se não logado) */}
             <div className="relative">
               <button
+                data-onboarding="online-btn"
                 onClick={() => {
                   triggerAudioResult(() => sfx.playSound('click'));
                   if (auth.user) setShowOnlineRanking(true);
@@ -6809,9 +6828,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         <Onboarding
           step={onboardingStep}
           hidden={currentScreen !== 'game'}
-          paused={showDaySummary || showMissionsModal || showUpgradesModal || showFinancasModal || showQueijariaModal || showContractsModal}
+          paused={showDaySummary || showMissionsModal || showUpgradesModal || showFinancasModal || showQueijariaModal || showContractsModal || showWorkersModal || showAuthModal || showOnlineRanking}
           onSkip={() => setOnboardingStep(0)}
-          onAutoAdvance={() => setOnboardingStep(s => (s >= 15 ? 0 : s + 1))}
+          onAutoAdvance={() => setOnboardingStep(s => (s >= 18 ? 0 : s + 1))}
         />
 
         {/* Melhoria 6: Toast de autosave */}
