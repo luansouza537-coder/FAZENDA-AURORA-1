@@ -691,6 +691,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [showAllTimeStats, setShowAllTimeStats] = useState(false);
   const [showMorePanel, setShowMorePanel] = useState<boolean>(false);
   const [showMoreMenu, setShowMoreMenu] = useState<boolean>(false);
+  const [moreMenuSide, setMoreMenuSide] = useState<'up' | 'down'>('up');
   const [onboardingStep, setOnboardingStep] = useState<number>(() => {
     try {
       const s = localStorage.getItem('aurora_farm_save');
@@ -6201,19 +6202,23 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       'mais-btn': { 8: 9 },
       'contratos-btn': { 9: 10 },
       'loja-btn': { 10: 11 },
-      'buy-animal-btn': { 11: 12 },
       'diary': { 15: 0 },
     };
     const handler = (e: MouseEvent) => {
       const el = (e.target as HTMLElement)?.closest?.('[data-onboarding]') as HTMLElement | null;
       const key = el?.getAttribute('data-onboarding');
       if (!key) return;
+      // passo 11: abre o catálogo no 1º toque; avança apenas no 2º (que fecha)
+      if (key === 'buy-animal-btn' && onboardingStep === 11) {
+        if (showBuyMenu) setOnboardingStep(12);
+        return;
+      }
       const next = TRANSITIONS[key]?.[onboardingStep];
       if (next !== undefined) setOnboardingStep(next);
     };
     document.addEventListener('click', handler, true);
     return () => document.removeEventListener('click', handler, true);
-  }, [onboardingStep]);
+  }, [onboardingStep, showBuyMenu]);
 
   // Onboarding: encerra automaticamente se passar do dia 15 sem completar
   useEffect(() => {
@@ -6675,7 +6680,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               )}
               <button
                 data-onboarding="mais-btn"
-                onClick={() => { setShowMoreMenu(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
+                onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); setMoreMenuSide(r.top < window.innerHeight / 2 ? 'down' : 'up'); setShowMoreMenu(prev => !prev); triggerAudioResult(() => sfx.playSound('click')); }}
                 className={`border-3 border-[#fbbf24] text-[#78350f] px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#92400e] cursor-pointer transition-all hover:scale-105 font-mono text-xs font-black leading-none flex items-center gap-1 focus:outline-none ${showMoreMenu ? 'bg-[#fbbf24]' : 'bg-[#ffcd7e] hover:bg-[#fbc550]'}`}
                 title="Mais opções"
               >
@@ -6686,7 +6691,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 )}
               </button>
               {showMoreMenu && (
-                <div className="absolute bottom-full right-0 mb-2 bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl p-3 flex flex-col gap-1.5 z-50 shadow-2xl min-w-[180px]">
+                <div className={`absolute right-0 bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl p-3 flex flex-col gap-1.5 z-50 shadow-2xl min-w-[180px] ${moreMenuSide === 'down' ? 'top-full mt-2' : 'bottom-full mb-2'}`}>
                   <div className="relative">
                     <button data-onboarding="contratos-btn" onClick={() => { setShowContractsModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
                       className="flex items-center gap-2 w-full text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
@@ -6803,7 +6808,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         {/* Onboarding tutorial */}
         <Onboarding
           step={onboardingStep}
-          paused={currentScreen !== 'game' || showDaySummary || showMissionsModal || showUpgradesModal || showFinancasModal || showQueijariaModal || showContractsModal}
+          hidden={currentScreen !== 'game'}
+          paused={showDaySummary || showMissionsModal || showUpgradesModal || showFinancasModal || showQueijariaModal || showContractsModal}
           onSkip={() => setOnboardingStep(0)}
           onAutoAdvance={() => setOnboardingStep(s => (s >= 15 ? 0 : s + 1))}
         />

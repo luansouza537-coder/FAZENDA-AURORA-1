@@ -83,7 +83,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     id: 'buy-animal',
     selector: '[data-onboarding="buy-animal-btn"]',
     title: '🛒 Expanda o Rebanho!',
-    text: 'Compre novos animais para diversificar. Cada espécie produz itens únicos!',
+    text: 'Toque para abrir o catálogo de animais e dê uma olhada. Depois toque de novo no botão para fechar e continuar!',
     side: 'bottom',
   },
   {
@@ -118,7 +118,8 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
 
 interface Props {
   step: number; // 1-based; 0 = inactive
-  paused?: boolean; // modal aberto → esconde sem perder o passo
+  hidden?: boolean; // fora da tela do jogo (splash/title) → nada é exibido
+  paused?: boolean; // modal aberto → mostra aviso para fechar, sem perder o passo
   onSkip: () => void; // encerra o tutorial inteiro (botão "pular")
   onAutoAdvance: () => void; // alvo indisponível → pula só este passo
 }
@@ -136,7 +137,7 @@ function isTargetUsable(selector: string): HTMLElement | null {
   return null;
 }
 
-export default function Onboarding({ step, paused = false, onSkip, onAutoAdvance }: Props) {
+export default function Onboarding({ step, hidden = false, paused = false, onSkip, onAutoAdvance }: Props) {
   const [rect, setRect] = useState<Rect | null>(null);
   const [visible, setVisible] = useState(false);
   const onAutoAdvanceRef = useRef(onAutoAdvance);
@@ -156,14 +157,14 @@ export default function Onboarding({ step, paused = false, onSkip, onAutoAdvance
     const inView = r.top >= 0 && r.bottom <= window.innerHeight;
 
     if (!inView) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.scrollIntoView({ behavior: 'auto', block: 'center' });
       setTimeout(() => {
         const el2 = isTargetUsable(def.selector);
         if (!el2) return;
         const r2 = el2.getBoundingClientRect();
         setRect({ top: r2.top, left: r2.left, width: r2.width, height: r2.height });
         setVisible(true);
-      }, 550);
+      }, 150);
       return;
     }
 
@@ -177,14 +178,14 @@ export default function Onboarding({ step, paused = false, onSkip, onAutoAdvance
     setRect(null);
     missStrikesRef.current = 0;
     lastElRef.current = null;
-    if (paused || !def) return;
+    if (hidden || paused || !def) return;
     const t = setTimeout(measureTarget, 300);
     return () => clearTimeout(t);
-  }, [step, paused, measureTarget, def]);
+  }, [step, hidden, paused, measureTarget, def]);
 
   // Vigia: alvo sumiu/desativado por 2 checagens seguidas → pula só este passo
   useEffect(() => {
-    if (!def || paused) return;
+    if (!def || hidden || paused) return;
     const check = setInterval(() => {
       const el = isTargetUsable(def.selector);
       if (el) {
@@ -193,7 +194,7 @@ export default function Onboarding({ step, paused = false, onSkip, onAutoAdvance
         if (lastElRef.current && lastElRef.current !== el) {
           const rv = el.getBoundingClientRect();
           if (rv.top < 0 || rv.bottom > window.innerHeight) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.scrollIntoView({ behavior: 'auto', block: 'center' });
           }
         }
         lastElRef.current = el;
@@ -213,9 +214,24 @@ export default function Onboarding({ step, paused = false, onSkip, onAutoAdvance
       }
     }, 700);
     return () => clearInterval(check);
-  }, [def, paused]);
+  }, [def, hidden, paused]);
 
-  if (!def || step === 0 || paused || !rect || !visible) return null;
+  if (!def || step === 0 || hidden) return null;
+
+  // Modal aberto: aviso fixo guiando o jogador a fechar para continuar
+  if (paused) {
+    return (
+      <div
+        style={{ position: 'fixed', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 99999, pointerEvents: 'none', maxWidth: 'calc(100vw - 24px)' }}
+        className="bg-[#1a3a1a] border-2 border-[#fbbf24] rounded-2xl px-4 py-2 shadow-2xl flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center"
+      >
+        <span className="text-[#fbbf24] text-xs font-black">👀 Explore à vontade!</span>
+        <span className="text-[#d4edda] text-[11px] font-mono">Feche esta janela para continuar ({step}/{ONBOARDING_STEPS.length})</span>
+      </div>
+    );
+  }
+
+  if (!rect || !visible) return null;
 
   const PAD = 8;
   const spotTop = rect.top - PAD;
