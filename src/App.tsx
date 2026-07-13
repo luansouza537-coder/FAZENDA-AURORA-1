@@ -365,7 +365,9 @@ function GameApp() {
     bufalo: { gestacao: 14, minAge: 30 },
   };
 
-  const [weather, setWeather] = useState<'chuva' | 'sol' | 'nublado'>('nublado');
+  const [weather, setWeather] = useState<'chuva' | 'sol' | 'nublado'>(() => {
+    try { const w = JSON.parse(localStorage.getItem('aurora_farm_save') || '{}').weather; return w === 'chuva' || w === 'sol' ? w : 'nublado'; } catch { return 'nublado'; }
+  });
   // dailyEarning moved to useEconomy
 
   // MECHANIC 2: Ganso alarm — pre-drawn event for next day
@@ -809,7 +811,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const initGame = () => {
     localStorage.removeItem('aurora_farm_save');
     setOnboardingStep(1); // novo jogo sempre reinicia o tutorial
-    setGold(80);
+    setGold(100);
     setCurrentDay(1);
     setFarmLevel(1);
     setFarmXp(0);
@@ -1039,7 +1041,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         name: getUniqueOxName([]),
         hunger: 75,
         happiness: 70,
-        weightGain: 0.15,
+        weightGain: 0.35,
         consecutiveHappyDays: 0,
         daysBelow80: 0,
         isBestFriend: false,
@@ -1827,7 +1829,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (itemType === 'ricota_ovelha') return 95;
     if (itemType === 'doce_leite_ovelha') return 160;
     if (itemType === 'llama_wool') return 28;
-    if (itemType === 'duck_egg') return 38;
+    if (itemType === 'duck_egg') return 12;
     if (itemType === 'goose_egg') return 50;
     if (itemType === 'buffalo_milk') return farmLevel >= 6 ? 35 : 28;
     if (itemType === 'buffalo_mozzarella') return 165;
@@ -2679,6 +2681,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         vehicleTiers,
         lastUpgradeDay,
         onboardingStep,
+        weather,
       };
       try {
         localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));

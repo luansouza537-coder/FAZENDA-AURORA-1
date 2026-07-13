@@ -14,9 +14,9 @@ export function useEconomy(_props: UseEconomyProps = {}) {
   const [gold, setGold] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) return JSON.parse(saved).gold ?? 60;
+      if (saved) return JSON.parse(saved).gold ?? 100;
     } catch (e) {}
-    return 60;
+    return 100;
   });
 
   const [debt, setDebt] = useState<number>(() => {
