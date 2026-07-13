@@ -70,23 +70,43 @@ export default function GameSidebar({
   sfx,
   onOpenAtelier,
 }: GameSidebarProps) {
+  const [collapsed, setCollapsed] = React.useState<Record<string, boolean>>(() => {
+    try { return JSON.parse(localStorage.getItem('aurora_ui_collapsed') || '{}'); } catch { return {}; }
+  });
+  const toggleSection = (key: string) => setCollapsed(prev => {
+    const next = { ...prev, [key]: !prev[key] };
+    try { localStorage.setItem('aurora_ui_collapsed', JSON.stringify(next)); } catch { /* ignore */ }
+    return next;
+  });
+  const chevron = (key: string) => (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); toggleSection(key); }}
+      className="text-[#92400e] hover:text-[#78350f] font-black text-sm px-2 py-0.5 rounded-lg hover:bg-amber-100 transition-all cursor-pointer leading-none shrink-0"
+      title={collapsed[key] ? 'Expandir seção' : 'Recolher seção'}
+    >{collapsed[key] ? '▼' : '▲'}</button>
+  );
   return (
           <div className="lg:col-span-4 flex flex-col gap-6">
 
             {/* --- DIÁRIO DA FAZENDA (topo) --- */}
-            <div data-onboarding="diary" className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-4 shadow-[0_12px_0_#d97706] flex flex-col h-[180px]">
+            <div data-onboarding="diary" className={`bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-4 shadow-[0_12px_0_#d97706] flex flex-col ${collapsed['diario'] ? '' : 'h-[180px]'}`}>
               <div className="flex items-center justify-between border-b-2 border-[#fbbf24] pb-2 mb-2">
                 <div className="flex items-center gap-2">
                   <History className="w-4 h-4 text-[#78350f]" />
                   <h3 className="text-sm font-display font-black text-[#78350f] uppercase tracking-wider">Diário da Fazenda</h3>
                 </div>
-                <button
-                  onClick={() => { setLogs([]); triggerAudioResult(() => sfx.playSound('click')); }}
-                  className="text-[9px] font-mono font-black text-red-700 cursor-pointer flex items-center gap-1 px-2 py-0.5 bg-red-50 hover:bg-red-100 rounded-lg border border-b-2 border-red-300 transition-all uppercase"
-                >
-                  <Trash2 className="w-3 h-3 stroke-[2.5]" /> Limpar
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => { setLogs([]); triggerAudioResult(() => sfx.playSound('click')); }}
+                    className="text-[9px] font-mono font-black text-red-700 cursor-pointer flex items-center gap-1 px-2 py-0.5 bg-red-50 hover:bg-red-100 rounded-lg border border-b-2 border-red-300 transition-all uppercase"
+                  >
+                    <Trash2 className="w-3 h-3 stroke-[2.5]" /> Limpar
+                  </button>
+                  {chevron('diario')}
+                </div>
               </div>
+              {!collapsed['diario'] && (
               <div ref={logsContainerRef} className="flex-1 overflow-y-auto pr-1 text-xs space-y-1 font-mono divide-y divide-[#fbbf24]/30" style={{ scrollbarWidth: 'thin' }}>
                 {logs.length === 0 ? (
                   <div className="text-center text-[#92400e]/50 italic pt-6 font-bold uppercase tracking-wider text-[10px]">Nenhum registro ainda hoje.</div>
@@ -119,6 +139,7 @@ export default function GameSidebar({
                 })()}
                 <div ref={logsEndRef} />
               </div>
+              )}
             </div>
 
             {/* --- ATELIÊ & ARMAZÉM DE PROCESSAMENTO --- */}
@@ -129,7 +150,9 @@ export default function GameSidebar({
                   Ateliê & Armazém
                 </h3>
                 <span className="ml-auto text-[10px] text-amber-600 font-mono font-bold opacity-0 group-hover:opacity-100 transition-opacity">↗ Abrir</span>
+                {chevron('atelier')}
               </div>
+              {!collapsed['atelier'] && (<>
 
               {/* Toggle mostrar vazios */}
               <div className="flex items-center justify-between mb-3">
@@ -764,6 +787,7 @@ export default function GameSidebar({
 
               </div>
 
+              </>)}
             </div>
 
             {/* --- SILO DE RAÇÕES SEGMENTADAS --- */}
@@ -773,8 +797,11 @@ export default function GameSidebar({
                 <h3 className="text-base sm:text-lg font-display font-black text-[#78350f] uppercase tracking-wider">
                   Silo de Rações
                 </h3>
+                <span className="ml-auto" />
+                {chevron('silo')}
               </div>
 
+              {!collapsed['silo'] && (<>
               <p className="text-[10px] text-[#92400e] font-sans font-extrabold uppercase tracking-wide mb-3 leading-tight">
                 Adquira pacotes com descontos progressivos (10% no Nível 4+). {getEstacaoKey(currentDay) === 'inverno' ? '❄️ PREÇOS DO INVERNO: +50% ENCARECIDOS!' : '☀️ Preços normais de entressafra.'}
               </p>
@@ -900,6 +927,7 @@ export default function GameSidebar({
                   </div>
                 </div>
                 )}
+              </>)}
             </div>
 
 

@@ -181,6 +181,9 @@ export default function AnimalGrid({
 }: AnimalGridProps) {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [workersExpanded, setWorkersExpanded] = useState(true);
+  const [lucrosCollapsed, setLucrosCollapsed] = useState<boolean>(() => {
+    try { return JSON.parse(localStorage.getItem('aurora_ui_lucros_collapsed') || 'false'); } catch { return false; }
+  });
   const [gridExpanded, setGridExpanded] = useState(true);
   return (
           <div className="lg:col-span-8 flex flex-col gap-6">
@@ -1042,9 +1045,16 @@ export default function AnimalGrid({
 
             {/* --- IN-APP MINI METRICS TRACKER --- */}
             <div className="bg-[#fffbeb] border-4 border-[#fbbf24] rounded-[32px] p-5 shadow-[0_8px_0_#d97706]">
-              <h3 className="font-display font-black text-sm uppercase tracking-wider text-[#78350f] mb-3.5 flex items-center gap-1.5">
+              <h3 className={`font-display font-black text-sm uppercase tracking-wider text-[#78350f] flex items-center gap-1.5 ${lucrosCollapsed ? '' : 'mb-3.5'}`}>
                 📈 Relatório Geral de Lucros
+                <button
+                  type="button"
+                  onClick={() => setLucrosCollapsed(prev => { const v = !prev; try { localStorage.setItem('aurora_ui_lucros_collapsed', JSON.stringify(v)); } catch { /* ignore */ } return v; })}
+                  className="ml-auto text-[#92400e] hover:text-[#78350f] font-black text-sm px-2 py-0.5 rounded-lg hover:bg-amber-100 transition-all cursor-pointer leading-none"
+                  title={lucrosCollapsed ? 'Expandir seção' : 'Recolher seção'}
+                >{lucrosCollapsed ? '▼' : '▲'}</button>
               </h3>
+              {!lucrosCollapsed && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center font-mono">
                 <div className="bg-[#fffbeb] p-3 rounded-2xl border-2 border-[#fbbf24] shadow-sm">
                   <div className="text-[10px] text-[#92400e] uppercase font-black leading-none">Total Faturado</div>
@@ -1063,6 +1073,7 @@ export default function AnimalGrid({
                   <div className="text-base font-black text-amber-700 mt-1">🐂 {stats.totalOxSold ?? 0}</div>
                 </div>
               </div>
+              )}
             </div>
 
           </div>
