@@ -6074,11 +6074,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           setLoanWeeksLeft(newWeeks);
           setLoanDaysUntilInterest(7);
           if (newWeeks <= 0) {
+            // vencimento: devolve o principal (faltante vira dívida, mesmo padrão dos juros)
+            const principal = loanAmount;
+            setGold(prev => {
+              if (prev < principal) { setDebt(d => d + (principal - prev)); return 0; }
+              return prev - principal;
+            });
             setLoanActive(false);
             setLoanAmount(0);
-            logsToAdd.push({ msg: `🏦 Empréstimo quitado! Último pagamento de juros: ${interest} moedas.`, type: 'success' });
+            logsToAdd.push({ msg: `🏦 Empréstimo quitado! Principal devolvido: -${principal} moedas (+ ${interest} de juros finais).`, type: 'success' });
             checkAndUnlockAchievement('secret_2');
-            setTimeout(() => addNotification(`🏦 Empréstimo quitado!`, 'success', nextDayValue), 0);
+            setTimeout(() => addNotification(`🏦 Empréstimo quitado: -${principal}💰 de principal`, 'success', nextDayValue), 0);
           } else {
             logsToAdd.push({ msg: `🏦 Juros semanais do empréstimo: -${interest} moedas. Ainda ${newWeeks} semana(s) restantes.`, type: 'event' });
             setTimeout(() => addNotification(`🏦 Juros do empréstimo: -${interest}💰`, 'warning', nextDayValue), 0);

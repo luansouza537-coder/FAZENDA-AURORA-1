@@ -134,7 +134,7 @@ const FinancasModal: React.FC<FinancasModalProps> = (p) => {
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-xs text-stone-400 font-mono">Receba ouro agora e pague juros semanais. Opções desbloqueadas por nível:</p>
+                <p className="text-xs text-stone-400 font-mono">Receba ouro agora, pague juros semanais e devolva o valor ao final do prazo. Opções desbloqueadas por nível:</p>
                 {availableTiers.length === 0 && (
                   <div className="text-center text-stone-500 text-xs font-mono py-3">Nenhum empréstimo disponível no nível {farmLevel}.</div>
                 )}
