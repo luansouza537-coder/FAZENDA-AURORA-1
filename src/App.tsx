@@ -1954,7 +1954,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     const marketBonus = activeMarketEvent && activeMarketEvent.items.includes(itemType) ? activeMarketEvent.mult : 1.0;
     // Evento mundial ativo
     const worldEventBonus = worldEvent && worldEvent.items.includes(itemType) ? worldEvent.priceMult : 1.0;
-    let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * marketBonus * worldEventBonus;
+    // Item em ambos os eventos com bônus (>1): aplica só o maior, não multiplica os dois
+    const eventBonus = (marketBonus > 1 && worldEventBonus > 1)
+      ? Math.max(marketBonus, worldEventBonus)
+      : marketBonus * worldEventBonus;
+    let finalPrice = base * offerMult * seasonMult * weatherMult * processedLinkMult * rarityMult * eventBonus;
     if (farmLevel > 5) {
       // Reputação: +5% por nível 6-10, +3% por nível 11-20
       const bonusPct = farmLevel <= 10
