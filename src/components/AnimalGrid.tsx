@@ -8,10 +8,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import { RotateCcw } from 'lucide-react';
 import { Animal, AnimalType, FarmStats, FarmWorker } from '../types';
 import { AnimalCard, AnimalListRow } from './AnimalCard';
+import PastureScene from './PastureScene';
 
 interface AnimalGridProps {
   animals: Animal[];
   landLots: number;
+  weather: 'sol' | 'chuva' | 'nublado';
+  season: 'primavera' | 'verao' | 'outono' | 'inverno';
+  stormComing?: boolean;
   showBuyMenu: boolean;
   setShowBuyMenu: (v: boolean) => void;
   showProfitPanel: boolean;
@@ -98,6 +102,9 @@ interface AnimalGridProps {
 export default function AnimalGrid({
   animals,
   landLots,
+  weather,
+  season,
+  stormComing,
   showBuyMenu,
   setShowBuyMenu,
   showProfitPanel,
@@ -228,6 +235,9 @@ export default function AnimalGrid({
 
               </div>
             </div>
+
+            {/* Cena 2D do pasto */}
+            <PastureScene animals={animals} weather={weather} season={season} stormComing={stormComing} />
 
             {/* Collapsible Purchasing Tray Drawer */}
             <AnimatePresence>

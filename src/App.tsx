@@ -6998,6 +6998,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           <AnimalGrid
             animals={animals}
             landLots={landLots}
+            weather={weather}
+            season={getEstacaoKey(currentDay)}
+            stormComing={nextDayEvent === 'tempestade'}
             showBuyMenu={showBuyMenu}
             setShowBuyMenu={setShowBuyMenu}
             showProfitPanel={showProfitPanel}

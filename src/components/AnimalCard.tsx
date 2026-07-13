@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Pencil, Scissors, Utensils } from 'lucide-react';
 import type { Animal, AnimalType, AnimalTrait } from '../types';
+import { VacaSprite, BoiSprite, BufaloSprite, OvelhaSprite, CabraSprite, GalinhaSprite, PatoSprite, LhamaSprite } from './sprites/AnimalSprites';
 
 // ─── Shared helper types ────────────────────────────────────────────────────
 
@@ -594,24 +595,24 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             {/* Visual Anim decorations on avatar icons */}
             {animal.type === 'vaca' && (
               <>
-                <span className="select-none">🐄</span>
+                <VacaSprite size={44} />
                 {animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-droplet-flow select-none">🥛</span>}
               </>
             )}
             {animal.type === 'ovelha' && (
               <>
-                <span className="select-none">🐑</span>
+                <OvelhaSprite size={44} />
                 {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
               </>
             )}
             {animal.type === 'galinha' && (
               <>
-                <span className="select-none">🐔</span>
+                <GalinhaSprite size={44} />
                 {animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🥚</span>}
               </>
             )}
             {animal.type === 'boi' && (
-              <span className="select-none">{getBoiEmoji(animal.weightGain || 0.15)}</span>
+              <BoiSprite size={46} />
             )}
             {animal.type === 'peru' && (
               <span className="select-none">🦃</span>
@@ -637,19 +638,19 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             )}
             {animal.type === 'cabra' && (
               <>
-                <span className="select-none">🐐</span>
+                <CabraSprite size={44} />
                 {animal.isLactating && animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🥛</span>}
               </>
             )}
             {animal.type === 'lhama' && (
               <>
-                <span className="select-none">🦙</span>
+                <LhamaSprite size={44} />
                 {(animal.woolAccumulated ?? 0) >= 3 && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
               </>
             )}
             {animal.type === 'pato' && (
               <>
-                <span className="select-none">🦆</span>
+                <PatoSprite size={44} />
                 {animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🥚</span>}
               </>
             )}
@@ -660,7 +661,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             )}
             {animal.type === 'bufalo' && (
               <>
-                <span className="select-none">🐃</span>
+                <BufaloSprite size={46} />
                 {animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-droplet-flow select-none">🥛</span>}
               </>
             )}

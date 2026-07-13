@@ -51,4 +51,96 @@
   animation: woolShine 2s infinite ease-in-out;
 }
 
+/* ===== Sprites de animais (AnimalSprites.tsx) ===== */
+@keyframes spriteBlink {
+  0%, 94%, 100% { transform: scaleY(1); }
+  96%, 98% { transform: scaleY(0.12); }
+}
+@keyframes tailWag {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(14deg); }
+}
+@keyframes legSwing {
+  from { transform: rotate(-16deg); }
+  to { transform: rotate(16deg); }
+}
+@keyframes grazeBob {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(10deg) translateY(3px); }
+}
+.sprite .sprite-eye {
+  animation: spriteBlink 4.2s infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.sprite .sprite-tail {
+  animation: tailWag 2.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: top right;
+}
+.sprite-walking .leg-a {
+  animation: legSwing 0.55s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: top center;
+}
+.sprite-walking .leg-b {
+  animation: legSwing 0.55s ease-in-out infinite alternate-reverse;
+  transform-box: fill-box;
+  transform-origin: top center;
+}
+.sprite-eating .sprite-head {
+  animation: grazeBob 1.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: bottom left;
+}
+
+/* ===== Cena do pasto (PastureScene.tsx) ===== */
+@keyframes cloudDrift {
+  from { transform: translateX(-20%); }
+  to { transform: translateX(120%); }
+}
+@keyframes sunRays {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes rainFall {
+  from { transform: translateY(-30px); opacity: 0.9; }
+  to { transform: translateY(150px); opacity: 0.4; }
+}
+@keyframes snowFall {
+  0% { transform: translateY(-20px) translateX(0); opacity: 0.95; }
+  50% { transform: translateY(60px) translateX(6px); opacity: 0.9; }
+  100% { transform: translateY(150px) translateX(-4px); opacity: 0.5; }
+}
+@keyframes lightningFlash {
+  0%, 92%, 96%, 100% { opacity: 0; }
+  93%, 95% { opacity: 0.85; }
+}
+/* caminhada vai-e-vem: posição em 0-50% ida, 50-100% volta */
+@keyframes pastureWalk {
+  0% { left: var(--walk-from); }
+  50% { left: var(--walk-to); }
+  100% { left: var(--walk-from); }
+}
+/* vira o sprite na metade do ciclo (sincronizado com pastureWalk) */
+@keyframes pastureFlip {
+  0%, 49.9% { transform: scaleX(1); }
+  50%, 100% { transform: scaleX(-1); }
+}
+.pasture-walker {
+  animation: pastureWalk var(--walk-dur) linear infinite;
+  animation-delay: var(--walk-delay);
+}
+.pasture-walker > .pasture-flip {
+  animation: pastureFlip var(--walk-dur) linear infinite;
+  animation-delay: var(--walk-delay);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sprite .sprite-eye, .sprite .sprite-tail, .sprite-walking .leg-a, .sprite-walking .leg-b,
+  .sprite-eating .sprite-head, .pasture-walker, .pasture-walker > .pasture-flip,
+  .pasture-cloud, .pasture-rain span, .pasture-snow span, .pasture-sunrays {
+    animation: none !important;
+  }
+}
+
 
