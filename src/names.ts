@@ -119,3 +119,26 @@ export function getUniqueFrangoName(currentAnimals: { type: string; name: string
   }
   return `Frango ${Date.now() % 1000}`;
 }
+
+
+export function getUniqueAngusName(currentAnimals: { type: string; name: string }[]): string {
+  const existingNumbers = new Set(
+    currentAnimals
+      .filter(a => a.type === 'boi_angus')
+      .map(a => {
+        const match = a.name.match(/Angus\s+(\d+)/i);
+        return match ? parseInt(match[1], 10) : null;
+      })
+      .filter((n): n is number => n !== null)
+  );
+
+  let attempts = 0;
+  while (attempts < 1000) {
+    const r = Math.floor(Math.random() * 300) + 1;
+    if (!existingNumbers.has(r)) {
+      return `Angus ${r}`;
+    }
+    attempts++;
+  }
+  return `Angus ${Date.now() % 1000}`;
+}

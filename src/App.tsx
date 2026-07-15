@@ -1005,6 +1005,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       totalWool: 0,
       totalOxSold: 0,
       totalFrangoSold: 0,
+      totalAngusSold: 0,
       totalCheese: 0,
       totalScarf: 0,
       totalEggs: 0,
@@ -2178,6 +2179,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     getCarneMultiplier,
     calculateBoiValue,
     calculateFrangoValue,
+    calculateAngusValue,
     calcFairScore,
     feedAnimal,
     collectEgg,
@@ -2202,6 +2204,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     sellJacare,
     sellOx,
     sellFrango,
+    sellAngus,
     sellPeru,
     calculatePeruValue,
     sellPorco,
@@ -2870,7 +2873,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (a.isAdult === false) return a; // filhotes não consomem ração industrial
         let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' = 'racaoBovina';
         let feedLabel = 'Ração Bovina';
-        if (a.type === 'vaca' || a.type === 'vaca_jersey' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+        if (a.type === 'vaca' || a.type === 'vaca_jersey' || a.type === 'boi' || a.type === 'boi_angus' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
         else if (a.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
         else if (a.type === 'ovelha' || a.type === 'ovelha_leiteira' || a.type === 'cabra' || a.type === 'cabra_angora' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
         else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao' || a.type === 'frango_corte' || a.type === 'galinha_caipira') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
@@ -2948,6 +2951,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       let hungerLoss = copy.trait === 'gulosa' ? Math.round(baseHungerLoss * 1.2) : baseHungerLoss;
       // Vaca Jersey: porte menor, consome ~25% menos (perde fome mais devagar)
       if (copy.type === 'vaca_jersey') hungerLoss = Math.round(hungerLoss * 0.75);
+      // Boi Angus: dieta rica de confinamento — consome 30% mais
+      if (copy.type === 'boi_angus') hungerLoss = Math.round(hungerLoss * 1.3);
       if (!skipHunger) copy.hunger = Math.max(0, copy.hunger - hungerLoss);
 
       // Regras de felicidade baseadas na fome:
@@ -3051,6 +3056,23 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.15) + gain));
         if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
           logs.push({ msg: `🏆 ${copy.name} (Boi) atingiu o peso ideal! Você obterá valor máximo na venda!`, type: 'success' });
+        }
+      }
+      else if (copy.type === 'boi_angus') {
+        // Angus: engorda ~25% mais lenta que o boi comum, marmoreio exige constância
+        let gain = 0.015;
+        if (copy.hunger > 65) gain += 0.02;
+        if (copy.happiness > 70) gain += 0.012;
+        if (copy.hunger < 20) gain -= 0.02;
+        if (copy.isBestFriend) gain += 0.05;
+        if (copy.hunger < 12) {
+          gain = -0.015;
+        } else {
+          gain = Math.min(0.055, Math.max(0, gain));
+        }
+        copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.05) + gain));
+        if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
+          logs.push({ msg: `💎 ${copy.name} (Angus) atingiu o marmoreio ideal! Carne premium no valor máximo!`, type: 'success' });
         }
       }
       else if (copy.type === 'frango_corte') {
@@ -3397,7 +3419,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           let benefitTxt = "";
           if (copy.type === 'vaca') benefitTxt = "+1 leite diário permanente!";
           if (copy.type === 'ovelha') benefitTxt = "lã a cada 2 dias em vez de 3!";
-          if (copy.type === 'boi' || copy.type === 'frango_corte') benefitTxt = "+0.05 de ganho de peso!";
+          if (copy.type === 'boi' || copy.type === 'boi_angus' || copy.type === 'frango_corte') benefitTxt = "+0.05 de ganho de peso!";
           if (copy.type === 'galinha') benefitTxt = "+1 ovo diário permanente!";
 
           logs.push({
@@ -5768,7 +5790,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         // --- Tratador: alimenta todos os animais consumindo ração correta do inventário ---
         if (workers.some(w => w.role === 'tratador')) {
           const getFeedKeyForType2 = (type: string): keyof typeof inventory => {
-            if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'bufalo') return 'racaoBovina';
+            if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'boi_angus' || type === 'bufalo') return 'racaoBovina';
             if (type === 'porco') return 'racaoSuina';
             if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
             if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'frango_corte' || type === 'galinha_caipira') return 'racaoAves';
@@ -7165,6 +7187,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             collectMuco={collectMuco}
             sellOx={sellOx}
             sellFrango={sellFrango}
+            sellAngus={sellAngus}
+            calculateAngusValue={calculateAngusValue}
             calculateBoiValue={calculateBoiValue}
             calculateFrangoValue={calculateFrangoValue}
             calculatePorcoValue={calculatePorcoValue}
