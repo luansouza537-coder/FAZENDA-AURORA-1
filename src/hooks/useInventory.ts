@@ -137,6 +137,8 @@ export function useInventory({
 }: UseInventoryProps) {
 
   const applyCraftCost = (product: string) => {
+    // Missões: qualquer fabricação no Ateliê/Cozinha conta para 'craft_items'
+    updateMissionProgress('craft_items', 1);
     const c = CRAFT_COSTS[product];
     if (c && addCraftCost) addCraftCost(c.energy, c.water);
   };
@@ -1357,6 +1359,8 @@ export function useInventory({
       sheep_milk: 'sheep_milk', queijo_pecorino: 'queijo_pecorino',
       iogurte_ovelha: 'iogurte_ovelha', ricota_ovelha: 'ricota_ovelha',
       doce_leite_ovelha: 'doce_leite_ovelha',
+      ovo_caipira: 'ovo_caipira', peixe: 'peixe',
+      bolo_caipira: 'bolo_caipira', queijo_minas_jersey: 'queijo_minas_jersey',
     };
     const contractProduct = contractProductMap[itemType as string];
     if (contractProduct) {

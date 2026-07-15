@@ -30,6 +30,16 @@ interface MissionTemplate {
 const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
   primavera: [
     {
+      id: 'p_craft',
+      title: '🍳 Cozinha de Primavera',
+      description: 'A estação pede sabores frescos! Fabrique 3 produtos no Ateliê ou na Cozinha nesta semana — queijos, bolos, defumados, o que sua fazenda produzir de melhor.',
+      missionKey: 'craft_items',
+      goal: 3,
+      reward: 110,
+      minLevel: 3,
+      sentiment: '🍳',
+    },
+    {
       id: 'p1',
       title: '😊 Colheita de Primavera',
       description: 'A primavera chegou e com ela a abundância! Colete 15 itens do celeiro nesta semana para aproveitar a safra da estação. Cada grama conta para o crescimento da sua fazenda.',
@@ -132,6 +142,16 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
   ],
 
   verao: [
+    {
+      id: 'v_craft',
+      title: '🍳 Sabores de Verão',
+      description: 'O calor traz visitantes famintos! Fabrique 3 produtos artesanais nesta semana e mostre o que a cozinha da fazenda sabe fazer.',
+      missionKey: 'craft_items',
+      goal: 3,
+      reward: 110,
+      minLevel: 3,
+      sentiment: '🍳',
+    },
     {
       id: 'v1',
       title: '😊 Sol e Seda',
@@ -236,6 +256,16 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
 
   outono: [
     {
+      id: 'o_craft',
+      title: '🍳 Fornadas de Outono',
+      description: 'Tempo de colheita é tempo de cozinha cheia. Fabrique 4 produtos no Ateliê nesta semana para estocar o inverno que vem.',
+      missionKey: 'craft_items',
+      goal: 4,
+      reward: 130,
+      minLevel: 3,
+      sentiment: '🍳',
+    },
+    {
       id: 'o1',
       title: '😊 Colheita de Outono',
       description: 'As folhas caem e os frutos amadurecem! Colete 20 itens nesta semana de outono. É a estação da fartura e da preparação — cada item recolhido é reserva para os dias frios que se aproximam.',
@@ -338,6 +368,16 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
   ],
 
   inverno: [
+    {
+      id: 'i_craft',
+      title: '🍳 Cozinha de Inverno',
+      description: 'Nada aquece como comida de fazenda! Fabrique 3 produtos artesanais nesta semana — o mercado paga bem no frio.',
+      missionKey: 'craft_items',
+      goal: 3,
+      reward: 120,
+      minLevel: 3,
+      sentiment: '🍳',
+    },
     {
       id: 'i1',
       title: '😊 Alimentação de Inverno',

@@ -99,7 +99,7 @@ export interface Animal {
 // Funcionalidade 4: Contratos de fornecimento
 export interface Contract {
   id: string;
-  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'buffalo_mozzarella' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'goose_egg' | 'angora_wool' | 'alpaca_wool' | 'llama_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'mel' | 'boi' | 'porco' | 'boi_porco' | 'mayo' | 'queijo_cabra' | 'iogurte_cabra' | 'tapete_lhama' | 'leite_condensado' | 'tecido_alpaca' | 'cachecol_angora' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'fio_seda' | 'carne_jacare' | 'couro_jacare' | 'sheep_milk' | 'queijo_pecorino' | 'iogurte_ovelha' | 'ricota_ovelha' | 'doce_leite_ovelha';
+  product: 'milk' | 'wool' | 'egg' | 'cheese' | 'goat_milk' | 'buffalo_milk' | 'buffalo_mozzarella' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'butter' | 'yogurt' | 'duck_egg' | 'quail_egg' | 'goose_egg' | 'angora_wool' | 'alpaca_wool' | 'llama_wool' | 'muco' | 'seda_bruta' | 'mel_envasado' | 'mel' | 'boi' | 'porco' | 'boi_porco' | 'mayo' | 'queijo_cabra' | 'iogurte_cabra' | 'tapete_lhama' | 'leite_condensado' | 'tecido_alpaca' | 'cachecol_angora' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'fio_seda' | 'carne_jacare' | 'couro_jacare' | 'sheep_milk' | 'queijo_pecorino' | 'iogurte_ovelha' | 'ricota_ovelha' | 'doce_leite_ovelha' | 'ovo_caipira' | 'peixe' | 'bolo_caipira' | 'queijo_minas_jersey';
   quantity: number;
   delivered: number;
   pricePerUnit: number;
@@ -238,5 +238,5 @@ export interface Mission {
   expiresOnDay: number;
   completed: boolean;
   claimed: boolean;
-  missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items' | 'collect_silk' | 'sell_exotic' | 'organic_day' | 'sell_cheese' | 'have_animals' | 'sell_wool';
+  missionKey: 'sell_milk' | 'sell_any' | 'happy_animals' | 'earn_gold' | 'feed_animals' | 'collect_items' | 'collect_silk' | 'sell_exotic' | 'organic_day' | 'sell_cheese' | 'have_animals' | 'sell_wool' | 'craft_items';
 }
