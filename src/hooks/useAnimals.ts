@@ -287,7 +287,7 @@ export function useAnimals({
     const purchasePenalty =
       (spec === 'leiteira' && ['galinha','pato','ganso','ovelha','lhama'].includes(type)) ? 1.1 :
       (spec === 'fibras' && !['ovelha','lhama'].includes(type)) ? 1.1 :
-      (spec === 'avicultura' && !['galinha','pato','ganso','pavao'].includes(type)) ? 1.1 : 1.0;
+      (spec === 'avicultura' && !['galinha','pato','ganso','pavao','frango_corte'].includes(type)) ? 1.1 : 1.0;
     basePrice = Math.round(basePrice * purchasePenalty);
 
     if (farmLevel >= 4) {
