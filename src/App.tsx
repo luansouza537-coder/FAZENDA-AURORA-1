@@ -2282,13 +2282,15 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   }, [animals, feedAnimal, addToast]);
 
   const collectMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectMilk(id, event);
-    addToast('+Leite coletado!', 'success', '🥛');
+    const result = collectMilk(id, event);
+    if (result === 'success') addToast('+Leite coletado!', 'success', '🥛');
+    else if (result === 'full') addToast('Câmara Fria cheia! Venda o leite primeiro.', 'error', '❄️');
   }, [collectMilk, addToast]);
 
   const collectEggWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectEgg(id, event);
-    addToast('+Ovo coletado!', 'success', '🥚');
+    const result = collectEgg(id, event);
+    if (result === 'success') addToast('+Ovo coletado!', 'success', '🥚');
+    else if (result === 'full') addToast('Câmara Fria cheia! Venda os ovos primeiro.', 'error', '❄️');
   }, [collectEgg, addToast]);
 
 
@@ -2303,7 +2305,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   const collectMel = useCallback((id: number, event: React.MouseEvent) => {
     const animal = animals.find(a => a.id === id);
-    if (!animal || animal.type !== 'colmeia_abelhas' || !animal.melReady) return;
+    if (!animal || animal.type !== 'colmeia_abelhas' || !animal.melReady) return undefined;
     const seasIdx = Math.floor(((currentDay - 1) % 120) / 30);
     const hasApicultor = workers.some(w => w.role === 'apicultor');
     const hasFlorestaBonus = landBiomes.some(b => b.biome === 'floresta');
@@ -2320,11 +2322,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     addLog(`🍯 Colheu ${melAmt} mel da Colmeia de Abelhas!`, 'success');
     sfx.playSound('colmeia_abelhas');
     spawnFeedback('🍯', `+${melAmt} Mel`, event);
+    return 'success';
   }, [animals, currentDay, workers, landBiomes, weather, setInventory, setAnimals, checkAndUnlockAchievement, addLog, spawnFeedback]);
 
   const collectMelWithToast = useCallback((id: number, event: React.MouseEvent) => {
-    collectMel(id, event);
-    addToast('+Mel colhido!', 'success', '🍯');
+    if (collectMel(id, event) === 'success') addToast('+Mel colhido!', 'success', '🍯');
   }, [collectMel, addToast]);
 
   const collectHumus = useCallback((id: number, event: React.MouseEvent) => {

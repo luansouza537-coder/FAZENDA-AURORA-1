@@ -402,12 +402,12 @@ export function useAnimals({
   const collectEgg = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
-    if (!animal || (animal.type !== 'galinha' && animal.type !== 'galinha_caipira')) return;
+    if (!animal || (animal.type !== 'galinha' && animal.type !== 'galinha_caipira')) return undefined;
 
     if (!animal.hasProducedToday) {
       addLog(`🥚 ${animal.name} já teve seu ovo coletado ou não produziu hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
-      return;
+      return undefined;
     }
 
     // Galinha Caipira: 1 ovo premium, reseta o ciclo de 2 dias
@@ -415,7 +415,7 @@ export function useAnimals({
       if (!canAddToInventory('ovo_caipira', 1)) {
         addLog('📦 Câmara fria cheia! Sem espaço para o ovo caipira.', 'error');
         spawnFeedback('❌', 'Cheio!', event);
-        return;
+        return 'full';
       }
       setInventory(prev => ({ ...prev, ovo_caipira: (prev.ovo_caipira ?? 0) + 1 }));
       setProductFreshness(prev => ({ ...prev, ovo_caipira: 3 }));
@@ -426,7 +426,7 @@ export function useAnimals({
       spawnFeedback('🥚', '+1 Caipira', event);
       updateMissionProgress('collect_items', 1);
       onItemCollected?.();
-      return;
+      return 'success';
     }
 
     const filhoteMultiplier = animal.isAdult === false ? 0.5 : 1.0;
@@ -471,7 +471,7 @@ export function useAnimals({
     if (canAddToInventory && !canAddToInventory('egg', totalOvos)) {
       addLog('❌ Câmara Fria cheia! Venda ovos ou expanda nas Melhorias.', 'error');
       spawnFeedback('❄️', 'Câmara Cheia!', event);
-      return;
+      return 'full';
     }
     setInventory(prev => ({
       ...prev,
@@ -508,6 +508,7 @@ export function useAnimals({
     // Missão: coletar itens
     updateMissionProgress('collect_items', totalOvos);
     onItemCollected?.(totalOvos);
+    return 'success';
   };
 
   // Collect Goat Milk (Cabra)
@@ -774,19 +775,19 @@ export function useAnimals({
   const collectMilk = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
-    if (!animal || animal.type !== 'vaca') return;
+    if (!animal || animal.type !== 'vaca') return undefined;
 
     if (!animal.hasProducedToday) {
       addLog(`🥛 ${animal.name} já foi ordenhada ou não produziu leite hoje!`, 'error');
       spawnFeedback('⏳', 'Vazia', event);
-      return;
+      return undefined;
     }
     if (canAddToInventory && !canAddToInventory('milk', 1)) {
       addLog('🥛 Câmara Fria cheia! Libere leite antes de coletar.', 'error');
       addNotification('❄️ Câmara Fria cheia! Venda o leite primeiro.', 'warning');
       triggerAudioResult(() => sfx.playSound('error'));
       spawnFeedback('❄️', 'Câmara Cheia!', event);
-      return;
+      return 'full';
     }
     // F12: som de animal
     if (soundEnabled) sfx.playAnimalSound('vaca');
@@ -843,6 +844,7 @@ export function useAnimals({
     // Missão: coletar itens
     updateMissionProgress('collect_items', totalLeite);
     onItemCollected?.(totalLeite);
+    return 'success';
   };
 
   // 4. Collect Wool (Ovelha)
