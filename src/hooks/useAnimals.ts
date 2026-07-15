@@ -434,6 +434,7 @@ export function useAnimals({
       triggerAudioResult(() => sfx.playSound('collect'));
       spawnFeedback('🥚', '+1 Caipira', event);
       updateMissionProgress('collect_items', 1);
+      updateMissionProgress('collect_caipira', 1);
       onItemCollected?.();
       return 'success';
     }
@@ -1139,6 +1140,7 @@ export function useAnimals({
 
     // Remove ox
     setAnimals(prev => prev.filter(a => a.id !== id));
+    updateMissionProgress('sell_livestock', 1);
     addLog(`💰 ${animal.name} (Boi) foi vendido na feira por ${value} moedas!`, 'success');
 
     triggerAudioResult(() => sfx.playSound('sell_animal'));
@@ -1175,6 +1177,7 @@ export function useAnimals({
     setWeeklySales((prev: any) => ({ ...prev, carne: (prev.carne || 0) + 1 }));
 
     setAnimals(prev => prev.filter(a => a.id !== id));
+    updateMissionProgress('sell_livestock', 1);
     addLog(`💰 ${animal.name} (Boi Angus) foi vendido na feira premium por ${value} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell_animal'));
     triggerConfetti(event);
@@ -1206,6 +1209,7 @@ export function useAnimals({
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥛', '+1 Jersey', event);
     updateMissionProgress('collect_items', 1);
+    updateMissionProgress('collect_jersey', 1);
     onItemCollected?.();
     return 'success';
   };
@@ -1241,6 +1245,7 @@ export function useAnimals({
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🐟', `+${qty} Peixe`, event);
     updateMissionProgress('collect_items', qty);
+    updateMissionProgress('collect_fish', qty);
     onItemCollected?.();
   };
 
@@ -1274,6 +1279,7 @@ export function useAnimals({
     setWeeklySales((prev: any) => ({ ...prev, carne: (prev.carne || 0) + 1 }));
 
     setAnimals(prev => prev.filter(a => a.id !== id));
+    updateMissionProgress('sell_livestock', 1);
     addLog(`💰 ${animal.name} (Frango de Corte) foi vendido na feira por ${value} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('sell_animal'));
     triggerConfetti(event);
