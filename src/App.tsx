@@ -4305,7 +4305,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       }
 
       // --- SUBFUNÇÃO 8: Verificação de Mortes Secundárias ---
+      // Ids removidos do rebanho neste tick (mortes/migrações) — usados na
+      // reconciliação final para NÃO ressuscitar animais via `newlyAdded`
+      const deadIdsThisTick = new Set<number>();
       const { survivors, deceasedCount } = verificarMortesAnimais(updatedAnimalsList, logsToAdd);
+      {
+        const survivorIds = new Set(survivors.map(a => a.id));
+        updatedAnimalsList.forEach(a => { if (!survivorIds.has(a.id)) deadIdsThisTick.add(a.id); });
+      }
       if (deceasedCount > 0) {
         triggerAudioResult(() => sfx.playSound('error'));
       }
@@ -4620,6 +4627,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setTimeout(() => setInventory(prev => ({ ...prev, couro_jacare: (prev.couro_jacare ?? 0) + 1 })), 0);
             logsToAdd.push({ msg: `🐊 ${a.name} legou 1 Couro de Jacaré ao morrer de velhice!`, type: 'success' });
           }
+          deadIdsThisTick.add(a.id);
           return false;
         }
         return true;
@@ -4950,7 +4958,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setInventory(prev => ({ ...prev, folha_amoreira: 0 }));
             // Seta hunger=0 nas lagartas sem folha (sinaliza penalidade de -30 felicidade no processarFomeFelicidade)
             const lagaraIds = new Set(lagartas.map(l => l.id));
-            setAnimals(prev => prev.map(a => lagaraIds.has(a.id) ? { ...a, hunger: 0 } : a));
+            finalAnimalsWithClimate.forEach(a => { if (lagaraIds.has(a.id)) a.hunger = 0; });
           }
         }
       }
@@ -4967,38 +4975,35 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       // Pato: auto-coleta duck_egg sem avicultor (com avicultor, o avicultor coleta abaixo)
       {
-        const producingPatos = finalAnimals.filter(a => a.type === 'pato' && a.isAdult !== false && a.hasProducedToday && !workers.some(w => w.role === 'avicultor'));
+        const producingPatos = finalAnimalsWithClimate.filter(a => a.type === 'pato' && a.isAdult !== false && a.hasProducedToday && !workers.some(w => w.role === 'avicultor'));
         if (producingPatos.length > 0) {
           setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) + producingPatos.length }));
           logsToAdd.push({ msg: `🦆 ${producingPatos.length} pato(s) botaram ${producingPatos.length} ovo(s) de pato!`, type: 'success' });
-          setAnimals(prev => prev.map(a => producingPatos.some(p => p.id === a.id) ? { ...a, hasProducedToday: false } : a));
+          // reset no pipeline: impede coleta manual em dobro do mesmo ovo
+          producingPatos.forEach(p => { p.hasProducedToday = false; });
         }
       }
 
       // Ganso: produz goose_egg a cada 3 dias (sem avicultor = coleta automática; avicultor coleta abaixo)
       {
-        const producingGansos = finalAnimals.filter(a => a.type === 'ganso' && a.isAdult !== false && a.hasProducedToday && !workers.some(w => w.role === 'avicultor'));
+        const producingGansos = finalAnimalsWithClimate.filter(a => a.type === 'ganso' && a.isAdult !== false && a.hasProducedToday && !workers.some(w => w.role === 'avicultor'));
         if (producingGansos.length > 0) {
           setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) + producingGansos.length }));
           logsToAdd.push({ msg: `🦢 ${producingGansos.length} ganso(s) botaram ${producingGansos.length} ovo(s) de ganso!`, type: 'success' });
-          setAnimals(prev => prev.map(a => producingGansos.some(g => g.id === a.id) ? { ...a, hasProducedToday: false } : a));
+          producingGansos.forEach(g => { g.hasProducedToday = false; });
         }
       }
 
       // Alpaca: auto-coleta alpaca_wool sem ordenhador (ordenhador coleta abaixo)
       {
-        const producingAlpacas = finalAnimals.filter(
+        const producingAlpacas = finalAnimalsWithClimate.filter(
           a => a.type === 'alpaca' && a.isAdult !== false && a.woolReady
             && !workers.some(w => w.role === 'ordenhador')
         );
         if (producingAlpacas.length > 0) {
           setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) + producingAlpacas.length }));
           logsToAdd.push({ msg: `🦙 ${producingAlpacas.length} alpaca(s) produziram ${producingAlpacas.length} lã de alpaca!`, type: 'success' });
-          setAnimals(prev => prev.map(a =>
-            producingAlpacas.some(p => p.id === a.id)
-              ? { ...a, woolReady: false, daysSinceLastWool: 0 }
-              : a
-          ));
+          producingAlpacas.forEach(a => { a.woolReady = false; a.daysSinceLastWool = 0; });
         }
       }
 
@@ -5094,9 +5099,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       // --- LAYER 0: Migração de nomes legados + limpeza de filhotes de reprodução removida ---
       const migratedAnimals = finalAnimalsWithClimate
-        .filter(a => !(a.type === 'minhoca' && a.isAdult === false))
-        // Remove bicho_seda imortais de saves antigos (maxAge base era 60, criando valores 48–72)
-        .filter(a => !(a.type === 'bicho_seda' && a.age > 20))
+        .filter(a => {
+          const drop = (a.type === 'minhoca' && a.isAdult === false)
+            // Remove bicho_seda imortais de saves antigos (maxAge base era 60, criando valores 48–72)
+            || (a.type === 'bicho_seda' && a.age > 20);
+          if (drop) deadIdsThisTick.add(a.id);
+          return !drop;
+        })
         .map(a => {
           if (a.type === 'minhoca' && a.name !== 'Minhocário') return { ...a, name: 'Minhocário' };
           if (a.type === 'caracol' && a.name !== 'Criatório de Caracóis') return { ...a, name: 'Criatório de Caracóis' };
@@ -5178,10 +5187,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         ? finalAnimalsWithAdulthood.map(a => ({ ...a, weeklyProduction: 0 }))
         : finalAnimalsWithAdulthood;
       // Remove animals that died from illness
+      animalsWithWeekly.forEach(a => { if (a.diedFromIllness) deadIdsThisTick.add(a.id); });
       const animalsAfterDeaths = animalsWithWeekly.filter(a => !a.diedFromIllness);
       setAnimals(prev => {
         const idsInComputed = new Set(animalsAfterDeaths.map(a => a.id));
-        const newlyAdded = prev.filter(a => !idsInComputed.has(a.id));
+        // reanexa apenas animais que entraram fora do pipeline (ex: compras
+        // no mesmo tick) — nunca os que o pipeline acabou de remover
+        const newlyAdded = prev.filter(a => !idsInComputed.has(a.id) && !deadIdsThisTick.has(a.id));
         return [...animalsAfterDeaths, ...newlyAdded];
       });
       // Apply accumulated wisdom bonuses
