@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { RotateCcw } from 'lucide-react';
 import { Animal, AnimalType, FarmStats, FarmWorker } from '../types';
 import { AnimalCard, AnimalListRow } from './AnimalCard';
+import CaipiraHen from './CaipiraHen';
 
 interface AnimalGridProps {
   animals: Animal[];
@@ -382,6 +383,24 @@ export default function AnimalGrid({
                     </button>
                   </div>
 
+                  {/* Galinha Caipira (Nível 4+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 4 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv4+</span>}
+                    <CaipiraHen size={46} />
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Galinha Caipira</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Ovo premium dia sim, dia não (felicidade 85+). Rende Bolo e Pudim no Ateliê!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('galinha_caipira')}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => buyAnimal('galinha_caipira', e)}
+                      disabled={gold < getAnimalPurchasePrice('galinha_caipira') || farmLevel < 4}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      title="Compra uma Galinha Caipira. Ovos premium em dias alternados, exige felicidade alta."
+                    >
+                      {farmLevel < 4 ? 'Nível 4+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
                   {/* Cabra (Nível 2+) */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 2 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv2+</span>}
@@ -403,27 +422,6 @@ export default function AnimalGrid({
                       </button>
                     </div>
 
-                  {/* Galinha Caipira */}
-                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
-                    <span className="text-4xl">🐔</span>
-                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Galinha Caipira</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Bota ovo premium dia sim, dia não — mas só com felicidade 85+! Rende Bolo e Pudim no Ateliê.</p>
-                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('galinha_caipira')}</span>
-                    <div className="relative w-full">
-                      {farmLevel >= 4 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white font-black text-[8px] px-1 py-0.5 rounded-full uppercase z-10">10% Off</span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={(e) => buyAnimal('galinha_caipira', e)}
-                        disabled={gold < getAnimalPurchasePrice('galinha_caipira') || farmLevel < 4}
-                        className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
-                        title="Compra uma Galinha Caipira. Ovos premium em dias alternados, exige felicidade alta."
-                      >
-                        {farmLevel < 4 ? '🔒 Nível 4' : 'Comprar + 1 🌾'}
-                      </button>
-                    </div>
-                  </div>
                     {farmLevel >= 2 && (
                       <button
                         type="button"

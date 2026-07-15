@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Pencil, Scissors, Utensils } from 'lucide-react';
 import type { Animal, AnimalType, AnimalTrait } from '../types';
+import CaipiraHen from './CaipiraHen';
 
 // ─── Shared helper types ────────────────────────────────────────────────────
 
@@ -623,7 +624,13 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
               </>
             )}
-            {(animal.type === 'galinha' || animal.type === 'galinha_caipira') && (
+            {animal.type === 'galinha_caipira' && (
+              <>
+                <CaipiraHen size={42} />
+                {animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🥚</span>}
+              </>
+            )}
+            {animal.type === 'galinha' && (
               <>
                 <span className="select-none">🐔</span>
                 {animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🥚</span>}
