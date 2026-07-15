@@ -39,6 +39,8 @@ interface AnimalGridProps {
   calculateBoiValue: (animal: Animal) => number;
   calculateFrangoValue?: (animal: Animal) => number;
   sellFrango?: (id: number, e: React.MouseEvent) => void;
+  collectPeixe?: (id: number, e: React.MouseEvent) => void;
+  feedTilapia?: (id: number, e: React.MouseEvent) => void;
   getFrangoEmoji?: (weight: number) => string;
   calculatePorcoValue: (animal: Animal) => number;
   sellPorco: (id: number, e?: React.MouseEvent) => void;
@@ -127,6 +129,8 @@ export default function AnimalGrid({
   calculateBoiValue,
   calculateFrangoValue,
   sellFrango,
+  collectPeixe,
+  feedTilapia,
   getFrangoEmoji,
   calculatePorcoValue,
   sellPorco,
@@ -398,6 +402,24 @@ export default function AnimalGrid({
                       title="Compra uma Galinha Caipira. Ovos premium em dias alternados, exige felicidade alta."
                     >
                       {farmLevel < 4 ? 'Nível 4+' : 'Comprar + 1 🌾'}
+                    </button>
+                  </div>
+
+                  {/* Tanque de Tilápia (Nível 5+) */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 5 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv5+</span>}
+                    <span className="text-4xl">🐟</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Tanque de Tilápia</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Pesca a cada 3-5 dias (verão acelera, inverno atrasa). Alimente com Ração de Peixes p/ colher 3x!</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('tanque_tilapia')}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => buyAnimal('tanque_tilapia', e)}
+                      disabled={gold < getAnimalPurchasePrice('tanque_tilapia') || farmLevel < 5}
+                      className="mt-2.5 bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      title="Instala um Tanque de Tilápia. Produz peixes em ciclos sazonais, sem fome nem felicidade."
+                    >
+                      {farmLevel < 5 ? 'Nível 5+' : 'Instalar 🐟'}
                     </button>
                   </div>
 
@@ -790,7 +812,7 @@ export default function AnimalGrid({
                       const lotIndex = Math.floor(i / 5);
                       const slotAnimal = animals[i];
                       const typeEmoji: Record<string, string> = {
-                        vaca:'🐄', ovelha:'🐑', boi:'🐂', galinha:'🐔', cabra:'🐐', frango_corte:'🐓', galinha_caipira:'🐔',
+                        vaca:'🐄', ovelha:'🐑', boi:'🐂', galinha:'🐔', cabra:'🐐', frango_corte:'🐓', galinha_caipira:'🐔', tanque_tilapia:'🐟',
                         lhama:'🦙', pato:'🦆', ganso:'🦢', bufalo:'🐃', pavao:'🦚',
                         codorna:'🐦', alpaca:'🦙', minhoca:'🪱', caracol:'🐌',
                         coelho_angora:'🐰', bicho_seda:'🐛', ra:'🐸', avestruz:'🦤', jacare:'🐊',
@@ -1016,6 +1038,8 @@ export default function AnimalGrid({
                               onCollectEgg={collectEgg}
                               onSellOx={sellOx}
                               onSellFrango={sellFrango}
+                              onCollectPeixe={collectPeixe}
+                              onFeedTilapia={feedTilapia}
                               calculateFrangoValue={calculateFrangoValue}
                               calculateBoiValue={calculateBoiValue}
                               calculatePorcoValue={calculatePorcoValue}
@@ -1048,6 +1072,8 @@ export default function AnimalGrid({
                         onCollectEgg={collectEgg}
                         onSellOx={sellOx}
                         onSellFrango={sellFrango}
+                        onCollectPeixe={collectPeixe}
+                        onFeedTilapia={feedTilapia}
                         calculateFrangoValue={calculateFrangoValue}
                         getFrangoEmoji={getFrangoEmoji}
                         onCollectGoatMilk={collectGoatMilk}

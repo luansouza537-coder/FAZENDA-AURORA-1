@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao' | 'codorna' | 'alpaca' | 'minhoca' | 'caracol' | 'coelho_angora' | 'bicho_seda' | 'ra' | 'avestruz' | 'jacare' | 'porco' | 'colmeia_abelhas' | 'ovelha_leiteira' | 'peru' | 'cabra_angora' | 'frango_corte' | 'galinha_caipira';
+export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao' | 'codorna' | 'alpaca' | 'minhoca' | 'caracol' | 'coelho_angora' | 'bicho_seda' | 'ra' | 'avestruz' | 'jacare' | 'porco' | 'colmeia_abelhas' | 'ovelha_leiteira' | 'peru' | 'cabra_angora' | 'frango_corte' | 'galinha_caipira' | 'tanque_tilapia';
 
 export type AnimalTrait = 'gulosa' | 'preguicosa' | 'feliz' | 'estressada' | 'saudavel' | 'trabalhadora';
 
@@ -66,6 +66,8 @@ export interface Animal {
   nextAlarmDay?: number;     // dia do próximo evento que o ganso vai alertar
   daysSinceLastGooseEgg?: number; // dias desde o último ovo de ganso
   daysSinceLastEgg?: number; // galinha_caipira: bota dia sim, dia não
+  fishReady?: boolean; // tanque_tilapia: colheita pronta
+  fishBoosted?: boolean; // tanque_tilapia: alimentado com ração de peixes (colheita 3x)
 
   // Búfalo
   heatStress?: boolean;      // se está sofrendo estresse térmico (verão)

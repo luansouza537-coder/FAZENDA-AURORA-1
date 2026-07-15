@@ -34,9 +34,10 @@ export interface GameSidebarProps {
   getActualSellPrice: (itemType: string) => number;
   getFreshnessIndicator: (key: 'milk' | 'egg' | 'goat_milk' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'fertile_egg') => React.ReactNode;
   getEstacaoKey: (day: number) => 'primavera' | 'verao' | 'outono' | 'inverno';
-  getFeedPriceWithModifiers: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina', day?: number) => number;
-  buyFeed: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina', qty: number, e: React.MouseEvent) => void;
+  getFeedPriceWithModifiers: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe', day?: number) => number;
+  buyFeed: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe', qty: number, e: React.MouseEvent) => void;
   buyFarinha: (qty: number, e: React.MouseEvent) => void;
+  buySal: (qty: number, e: React.MouseEvent) => void;
   buyFolhaAmoreira: (qty: number, e: React.MouseEvent) => void;
   sellProduct: (itemType: any, qty: number, e: React.MouseEvent) => void;
   triggerAudioResult: (action: () => void) => void;
@@ -64,6 +65,7 @@ export default function GameSidebar({
   getFeedPriceWithModifiers,
   buyFeed,
   buyFarinha,
+  buySal,
   buyFolhaAmoreira,
   sellProduct,
   triggerAudioResult,
@@ -226,6 +228,9 @@ export default function GameSidebar({
                       { key: 'conserva_codorna', label: '🥚 Conserva Codorna', qty: (inventory as any).conserva_codorna ?? 0, priceKey: 'conserva_codorna' as any },
                       { key: 'bolo_caipira', label: '🍰 Bolo Caipira', qty: (inventory as any).bolo_caipira ?? 0, priceKey: 'bolo_caipira' as any },
                       { key: 'pudim_caipira', label: '🍮 Pudim Caipira', qty: (inventory as any).pudim_caipira ?? 0, priceKey: 'pudim_caipira' as any },
+                      { key: 'peixe_defumado', label: '🐟 Peixe Defumado', qty: (inventory as any).peixe_defumado ?? 0, priceKey: 'peixe_defumado' as any },
+                      { key: 'bolinho_peixe', label: '🥟 Bolinho de Peixe', qty: (inventory as any).bolinho_peixe ?? 0, priceKey: 'bolinho_peixe' as any },
+                      { key: 'moqueca', label: '🍲 Moqueca da Fazenda', qty: (inventory as any).moqueca ?? 0, priceKey: 'moqueca' as any },
                     ]
                   }
                 ];
@@ -349,6 +354,24 @@ export default function GameSidebar({
                   <button type="button" onClick={(e) => sellProduct('pudim_caipira' as any, 1, e)}
                     className="bg-orange-50 hover:bg-orange-100 border border-orange-300 text-orange-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-orange-300">
                     🍮 Pudim Caipira · {(inventory as any).pudim_caipira ?? 0}u ({getActualSellPrice('pudim_caipira' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).peixe_defumado ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('peixe_defumado' as any, 1, e)}
+                    className="bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-sky-300">
+                    🐟 Defumado · {(inventory as any).peixe_defumado ?? 0}u ({getActualSellPrice('peixe_defumado' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).bolinho_peixe ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('bolinho_peixe' as any, 1, e)}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🥟 Bolinho · {(inventory as any).bolinho_peixe ?? 0}u ({getActualSellPrice('bolinho_peixe' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).moqueca ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('moqueca' as any, 1, e)}
+                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 text-orange-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-orange-300">
+                    🍲 Moqueca · {(inventory as any).moqueca ?? 0}u ({getActualSellPrice('moqueca' as any)}💰)
                   </button>
                   )}
                   {inventory.cheese > 0 && (
@@ -834,7 +857,8 @@ export default function GameSidebar({
                   { key: 'racaoAves', label: '🐔 Ração de Aves', desc: 'Para Galinha, Codorna e Pavão. 3💰/dia.' },
                   { key: 'racaoAquatica', label: '🦆 Ração Aquática', desc: 'Para Pato e Ganso. 4💰/dia.' },
                   { key: 'racaoCoelho', label: '🐰 Ração de Coelhos', desc: 'Para Coelho Angorá. 3💰/dia.' },
-                  { key: 'racaoCarnivora', label: '🍖 Ração Carnívora', desc: 'Para Jacaré e animais exóticos. 6💰/dia.' }
+                  { key: 'racaoCarnivora', label: '🍖 Ração Carnívora', desc: 'Para Jacaré e animais exóticos. 6💰/dia.' },
+                  { key: 'racaoPeixe' as any, label: '🐟 Ração de Peixes', desc: 'Para Tanques de Tilápia. 4💰/ciclo.' }
                 ] as const).map((feed) => {
                   const currentStock = inventory[feed.key] ?? 0;
                   const unitPrice = getFeedPriceWithModifiers(feed.key);
@@ -915,6 +939,38 @@ export default function GameSidebar({
                     </button>
                   </div>
                 </div>
+
+              {/* --- LOJA DE INSUMOS: Sal --- */}
+              <div className="mt-3 bg-white/80 p-3 rounded-2xl border-2 border-stone-300 hover:border-stone-400 transition-all flex flex-col gap-2.5 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-sans font-black text-stone-700 text-xs uppercase leading-tight">🧂 Sal</h4>
+                      <p className="text-[9px] text-stone-500 font-mono mt-0.5">Tempero para Defumados e Moqueca</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[8px] text-stone-500 font-mono uppercase font-black tracking-wider leading-none">Estoque</span>
+                      <span className="font-mono text-sm font-black text-stone-700">{(inventory as any).sal ?? 0}u</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-stone-200/70">
+                    <button
+                      type="button"
+                      onClick={(e) => buySal(1, e)}
+                      disabled={gold < 3}
+                      className="bg-stone-100 hover:bg-stone-200 text-stone-700 text-[9px] font-mono font-bold py-1 px-0.5 rounded-lg border border-stone-300 disabled:opacity-40 transition-all cursor-pointer text-center leading-none"
+                    >
+                      +1u (3💰)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => buySal(10, e)}
+                      disabled={gold < 30}
+                      className="bg-stone-50 hover:bg-stone-100 text-stone-700 text-[9px] font-mono font-bold py-1 px-0.5 rounded-lg border border-stone-300 disabled:opacity-40 transition-all cursor-pointer text-center leading-none"
+                    >
+                      +10u (30💰)
+                    </button>
+                  </div>
+              </div>
 
                 {farmLevel >= 10 && (
                 <div className="mt-4 bg-white/80 p-3 rounded-2xl border-2 border-emerald-300 hover:border-emerald-400 transition-all flex flex-col gap-2.5 shadow-xs">

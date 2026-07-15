@@ -829,6 +829,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       racaoCoelho: 0,
       racaoCarnivora: 0,
       racaoSuina: 0,
+      racaoPeixe: 0,
       queijoCoalho: 0,
       queijoMucarela: 0,
       queijoBrie: 0,
@@ -960,6 +961,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       ovo_caipira: [10, 10, 10, 10, 10, 10, 10],
       bolo_caipira: [50, 50, 50, 50, 50, 50, 50],
       pudim_caipira: [35, 35, 35, 35, 35, 35, 35],
+      peixe_defumado: [70, 70, 70, 70, 70, 70, 70],
+      bolinho_peixe: [85, 85, 85, 85, 85, 85, 85],
+      moqueca: [160, 160, 160, 160, 160, 160, 160],
       ovo_defumado: [120, 120, 120, 120, 120, 120, 120],
       conserva_codorna: [80, 80, 80, 80, 80, 80, 80],
       creme_cosmetico: [220, 220, 220, 220, 220, 220, 220],
@@ -1575,10 +1579,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   // feedAnimal moved to useAnimals hook
 
   // Feed pricing helpers
-  const getFeedBasePrice = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina'): number => {
+  const getFeedBasePrice = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe'): number => {
     if (type === 'racaoBovina') return 4;
     if (type === 'racaoOvinos') return 3;
     if (type === 'racaoAves') return 3;
+    if ((type as string) === 'racaoPeixe') return 4;
     if (type === 'racaoAquatica') return 4;
     if (type === 'racaoCoelho') return 3;
     if (type === 'racaoCarnivora') return 6;
@@ -1586,7 +1591,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     return 2;
   };
 
-  const getFeedPriceWithModifiers = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina', day = currentDay): number => {
+  const getFeedPriceWithModifiers = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe', day = currentDay): number => {
     let base = getFeedBasePrice(type);
 
     // Desconto de 10% no nível 4 ou superior
@@ -1615,7 +1620,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   // Buy feed packages with bulk discounts
   const buyFeed = (
-    type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina',
+    type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe',
     quantity: 1 | 10 | 50,
     event: React.MouseEvent
   ) => {
@@ -1650,7 +1655,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       spending: prev.spending + totalCost
     }));
     
-    const feedLabel = type === 'racaoBovina' ? 'Ração Bovina 🌾' : type === 'racaoOvinos' ? 'Ração de Ovinos 🐐' : type === 'racaoAves' ? 'Ração de Aves 🐔' : type === 'racaoAquatica' ? 'Ração Aquática 🦆' : type === 'racaoCoelho' ? 'Ração de Coelhos 🐰' : type === 'racaoSuina' ? 'Ração Suína 🐷' : 'Ração Carnívora 🍖';
+    const feedLabel = type === 'racaoBovina' ? 'Ração Bovina 🌾' : type === 'racaoOvinos' ? 'Ração de Ovinos 🐐' : type === 'racaoAves' ? 'Ração de Aves 🐔' : type === 'racaoAquatica' ? 'Ração Aquática 🦆' : type === 'racaoCoelho' ? 'Ração de Coelhos 🐰' : type === 'racaoSuina' ? 'Ração Suína 🐷' : (type as string) === 'racaoPeixe' ? 'Ração de Peixes 🐟' : 'Ração Carnívora 🍖';
     addLog(`🛍️ Compra realizada: +${quantity}u de ${feedLabel} por ${totalCost} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🌽', `-${totalCost}💰`, event);
@@ -1780,7 +1785,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Storage limits for Celeiro and Câmara Fria
-  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair','cachecol_mohair','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','bolo_caipira','sabonete_natural','minhoca_viva','biofertilizante']);
+  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair','cachecol_mohair','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','bolo_caipira','peixe_defumado','bolinho_peixe','moqueca','sabonete_natural','minhoca_viva','biofertilizante']);
   const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','ovo_caipira','pudim_caipira','muco','creme_cosmetico','sabonete_natural','serum_facial','mascara_facial']);
 
   const getCeleiroLimit = () => ([30, 60, 120, 250, 999][celeiroLevel] ?? 30);
@@ -1826,6 +1831,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if ((itemType as string) === 'ovo_caipira') return 10;
     if ((itemType as string) === 'bolo_caipira') return 50;
     if ((itemType as string) === 'pudim_caipira') return 35;
+    if ((itemType as string) === 'peixe_defumado') return 70;
+    if ((itemType as string) === 'bolinho_peixe') return 85;
+    if ((itemType as string) === 'moqueca') return 160;
     if (itemType === 'mayo') {
       return 14;  // era 16 — proporcional ao ovo
     }
@@ -2048,6 +2056,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     craftMayonese,
     craftBoloCaipira,
     craftPudimCaipira,
+    craftPeixeDefumado,
+    craftBolinhoPeixe,
+    craftMoqueca,
     craftButter,
     craftYogurt,
     craftQueijoCabra,
@@ -2103,6 +2114,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     sellProduct,
     sellAllItemsNoConfirm,
     buyFarinha,
+    buySal,
     buyFolhaAmoreira,
   } = useInventory({
     gold,
@@ -2162,6 +2174,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     collectGooseProduct,
     collectBuffaloMilk,
     collectMilk,
+    collectPeixe,
+    feedTilapia,
     collectWool,
     collectAlpacaWool,
     collectCoelhoWool,
@@ -2828,11 +2842,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
     // C. Alimentador Automático (runs before processarFomeFelicidade so hunger is set before health check)
     if (machinesObj.feederPurchased && machinesObj.feederActive) {
-      const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
+      const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'tanque_tilapia'];
       updatedAnimals = updatedAnimals.map(a => {
         if (noFeedAnimals.includes(a.type)) return a;
         if (a.isAdult === false) return a; // filhotes não consomem ração industrial
-        let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' = 'racaoBovina';
+        let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' = 'racaoBovina';
         let feedLabel = 'Ração Bovina';
         if (a.type === 'vaca' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
         else if (a.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
@@ -2903,7 +2917,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       const copy = { ...animal };
 
       // Animals that don't eat: skip hunger processing. Sal Mineral e Silagem evitam perda de fome.
-      const noHungerTypes = ['minhoca', 'caracol', 'colmeia_abelhas'];
+      const noHungerTypes = ['minhoca', 'caracol', 'colmeia_abelhas', 'tanque_tilapia'];
       const skipHunger = noHungerTypes.includes(copy.type) || silagemDays > 0;
 
       // Perda de fome diária: 12 + random 0-7 (gulosa consome +20%)
@@ -2945,7 +2959,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       }
 
       // Evento de humor aleatório por animal (15% chance - saudavel é imune)
-      if (Math.random() < 0.15 && copy.trait !== 'saudavel' && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(copy.type)) {
+      if (Math.random() < 0.15 && copy.trait !== 'saudavel' && !['minhoca', 'caracol', 'colmeia_abelhas', 'tanque_tilapia'].includes(copy.type)) {
         if (Math.random() > 0.5) {
           copy.happiness = Math.max(0, copy.happiness - 20);
           logs.push({
@@ -4752,6 +4766,15 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
 
         // Minhocário: a cada 3 dias marca humusReady + a cada 5 dias gera Minhoca Viva automática
+        // Tanque de Tilápia: ciclo sazonal (primavera/verão 3d, outono 4d, inverno 5d)
+        if (a.type === 'tanque_tilapia' && (a.age || 0) > 0) {
+          const est = getEstacaoKey(nextDayValue);
+          const ciclo = (est === 'primavera' || est === 'verao') ? 3 : est === 'outono' ? 4 : 5;
+          if ((a.age || 0) % ciclo === 0 && !copy.fishReady) {
+            copy.fishReady = true;
+            logsToAdd.push({ msg: `🐟 ${a.name}: tilápias no ponto de pesca!${copy.fishBoosted ? ' (turbinado: 3 peixes!)' : ''}`, type: 'success' });
+          }
+        }
         if (a.type === 'minhoca' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
           copy.humusReady = true;
           logsToAdd.push({ msg: `🪱 ${a.name} produziu húmus — pronto para coletar!`, type: 'success' });
@@ -5721,7 +5744,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (type === 'coelho_angora') return 'racaoCoelho';
             return 'racaoCarnivora';
           };
-          const noFeedTypes = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
+          const noFeedTypes = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas', 'tanque_tilapia'];
           // Pre-compute which animals can be fed (using closure inventory snapshot)
           // Silagem ativa: não consome ração do inventário
           const tmpInv2 = { ...inventory } as Record<string, number>;
@@ -7100,6 +7123,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             inventory={inventory}
             feedAnimal={feedAnimalWithToast}
             collectMilk={collectMilkWithToast}
+            collectPeixe={collectPeixe}
+            feedTilapia={feedTilapia}
             collectWool={collectWool}
             collectEgg={collectEggWithToast}
             collectMel={collectMelWithToast}
@@ -7187,6 +7212,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             getFeedPriceWithModifiers={getFeedPriceWithModifiers}
             buyFeed={buyFeed}
             buyFarinha={buyFarinha}
+            buySal={buySal}
             buyFolhaAmoreira={buyFolhaAmoreira}
             sellProduct={sellProduct}
             triggerAudioResult={triggerAudioResult}
@@ -7327,7 +7353,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             craftQueijoParmesao, craftQueijoSerra,
             craftScarf, craftTapeteLhama, craftCachecolAngora, craftCachecolMohair, craftTecidoAlpaca,
             craftFioSeda, craftMantaPremium,
-            craftMayonese, craftBoloCaipira, craftPudimCaipira, craftPatePato, craftOvoDefumado, craftConservaCodorna,
+            craftMayonese, craftBoloCaipira, craftPudimCaipira, craftPeixeDefumado, craftBolinhoPeixe, craftMoqueca, craftPatePato, craftOvoDefumado, craftConservaCodorna,
             craftIncubarOvos, craftHidromel, craftRisotoCogumelo, craftConservaPeixe,
             craftMelEnvasado, craftSopaCogumelo,
             craftCremeCosmetico, craftSaboneteNatural, craftSerumFacial, craftMascaraFacial, craftRacaoOrganica, craftFertilizante,

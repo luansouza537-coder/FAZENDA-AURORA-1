@@ -58,6 +58,9 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   conserva_codorna: { energy: 1, water: 1 },
   bolo_caipira:     { energy: 2, water: 1 },
   pudim_caipira:    { energy: 1, water: 1 },
+  peixe_defumado:   { energy: 2, water: 0 },
+  bolinho_peixe:    { energy: 1, water: 1 },
+  moqueca:          { energy: 2, water: 1 },
   creme_cosmetico:  { energy: 1, water: 1 },
   sabonete_natural: { energy: 1, water: 1 },
   serum_facial:     { energy: 2, water: 1 },
@@ -240,9 +243,13 @@ export function useInventory({
           kit_gourmet: inv.kit_gourmet ?? 0,
           racaoSuina: inv.racaoSuina ?? 0,
           farinha: inv.farinha ?? 0,
+          racaoPeixe: inv.racaoPeixe ?? 0,
           ovo_caipira: inv.ovo_caipira ?? 0,
           bolo_caipira: inv.bolo_caipira ?? 0,
           pudim_caipira: inv.pudim_caipira ?? 0,
+          peixe_defumado: inv.peixe_defumado ?? 0,
+          bolinho_peixe: inv.bolinho_peixe ?? 0,
+          moqueca: inv.moqueca ?? 0,
           fio_lhama: inv.fio_lhama ?? 0,
           cachecol_lhama: inv.cachecol_lhama ?? 0,
           gorro_lhama: inv.gorro_lhama ?? 0,
@@ -335,9 +342,13 @@ export function useInventory({
       kit_gourmet: 0,
       racaoSuina: 0,
       farinha: 0,
+      racaoPeixe: 0,
       ovo_caipira: 0,
       bolo_caipira: 0,
       pudim_caipira: 0,
+      peixe_defumado: 0,
+      bolinho_peixe: 0,
+      moqueca: 0,
       fio_lhama: 0,
       cachecol_lhama: 0,
       gorro_lhama: 0,
@@ -566,6 +577,54 @@ export function useInventory({
     addLog('🍮 Pudim Caipira cremoso pronto! O ovo caipira faz toda a diferença.', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍮', '+1 Pudim', event);
+  };
+
+  // 🐟 Peixe Defumado: 1 peixe + 1 sal
+  const craftPeixeDefumado = (event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if ((inventory.peixe ?? 0) < 1 || ((inventory as any).sal ?? 0) < 1) {
+      addLog('🐟 Ingredientes insuficientes! Peixe Defumado: 1 Peixe + 1 Sal.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Faltam itens!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 1, sal: ((prev as any).sal ?? 0) - 1, peixe_defumado: ((prev as any).peixe_defumado ?? 0) + 1 } as any));
+    applyCraftCost('peixe_defumado');
+    addLog('🐟 Tilápia defumada no capricho! Sabor de fazenda.', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🐟', '+1 Defumado', event);
+  };
+
+  // 🥟 Bolinho de Peixe: 1 peixe + 1 farinha + 1 ovo
+  const craftBolinhoPeixe = (event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if ((inventory.peixe ?? 0) < 1 || ((inventory as any).farinha ?? 0) < 1 || (inventory.egg ?? 0) < 1) {
+      addLog('🥟 Ingredientes insuficientes! Bolinho de Peixe: 1 Peixe + 1 Farinha + 1 Ovo.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Faltam itens!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 1, farinha: ((prev as any).farinha ?? 0) - 1, egg: (prev.egg ?? 0) - 1, bolinho_peixe: ((prev as any).bolinho_peixe ?? 0) + 1 } as any));
+    applyCraftCost('bolinho_peixe');
+    addLog('🥟 Bolinhos de tilápia fritinhos, direto da feira!', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥟', '+1 Bolinho', event);
+  };
+
+  // 🍲 Moqueca da Fazenda: 2 peixes + 1 leite + 1 sal
+  const craftMoqueca = (event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if ((inventory.peixe ?? 0) < 2 || (inventory.milk ?? 0) < 1 || ((inventory as any).sal ?? 0) < 1) {
+      addLog('🍲 Ingredientes insuficientes! Moqueca: 2 Peixes + 1 Leite + 1 Sal.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Faltam itens!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 2, milk: prev.milk - 1, sal: ((prev as any).sal ?? 0) - 1, moqueca: ((prev as any).moqueca ?? 0) + 1 } as any));
+    applyCraftCost('moqueca');
+    addLog('🍲 Moqueca da Fazenda borbulhando! O prato mais nobre da cozinha.', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🍲', '+1 Moqueca', event);
   };
 
   const craftButter = (event?: React.MouseEvent) => {
@@ -1264,6 +1323,9 @@ export function useInventory({
     else if ((itemType as string) === 'ovo_caipira') label = 'Ovo Caipira';
     else if ((itemType as string) === 'bolo_caipira') label = 'Bolo Caipira';
     else if ((itemType as string) === 'pudim_caipira') label = 'Pudim Caipira';
+    else if ((itemType as string) === 'peixe_defumado') label = 'Peixe Defumado';
+    else if ((itemType as string) === 'bolinho_peixe') label = 'Bolinho de Peixe';
+    else if ((itemType as string) === 'moqueca') label = 'Moqueca da Fazenda';
     else if (itemType === 'goat_milk') label = 'Leite de Cabra';
     else if (itemType === 'llama_wool') label = 'Lã de Lhama';
     else if (itemType === 'duck_egg') label = 'Ovo de Pato';
@@ -2027,6 +2089,25 @@ export function useInventory({
 
   // --- BUY FUNCTIONS ---
 
+  const buySal = (qty: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const pricePerUnit = 3;
+    const totalCost = pricePerUnit * qty;
+    if (gold < totalCost) {
+      addLog(`💰 Moedas insuficientes! Requer ${totalCost} moedas.`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Falta 💰!', event);
+      return;
+    }
+    setGold(prev => prev - totalCost);
+    onGoldSpent?.(totalCost);
+    setInventory(prev => ({ ...prev, sal: (prev.sal ?? 0) + qty }));
+    setWeeklyStats(prev => ({ ...prev, spending: prev.spending + totalCost }));
+    addLog(`🧂 Compra realizada: +${qty} Sal por ${totalCost} moedas!`, 'success');
+    triggerAudioResult(() => sfx.playSound('click'));
+    spawnFeedback('🧂', `-${totalCost}💰`, event);
+  };
+
   const buyFarinha = (qty: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
     const pricePerUnit = 6;
@@ -2094,6 +2175,9 @@ export function useInventory({
     craftMayonese,
     craftBoloCaipira,
     craftPudimCaipira,
+    craftPeixeDefumado,
+    craftBolinhoPeixe,
+    craftMoqueca,
     craftButter,
     craftYogurt,
     craftQueijoCabra,
@@ -2151,6 +2235,7 @@ export function useInventory({
     sellAllItemsNoConfirm,
     // Buy functions
     buyFarinha,
+    buySal,
     buyFolhaAmoreira,
   };
 }
