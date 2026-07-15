@@ -42,7 +42,6 @@ interface AnimalGridProps {
   sellFrango?: (id: number, e: React.MouseEvent) => void;
   collectPeixe?: (id: number, e: React.MouseEvent) => void;
   collectLeiteJersey?: (id: number, e: React.MouseEvent) => void;
-  feedTilapia?: (id: number, e: React.MouseEvent) => void;
   getFrangoEmoji?: (weight: number) => string;
   calculatePorcoValue: (animal: Animal) => number;
   sellPorco: (id: number, e?: React.MouseEvent) => void;
@@ -133,7 +132,6 @@ export default function AnimalGrid({
   sellFrango,
   collectPeixe,
   collectLeiteJersey,
-  feedTilapia,
   getFrangoEmoji,
   calculatePorcoValue,
   sellPorco,
@@ -431,7 +429,7 @@ export default function AnimalGrid({
                     {farmLevel < 5 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv5+</span>}
                     <span className="text-4xl">🐟</span>
                     <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Tanque de Tilápia</h4>
-                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Pesca a cada 3-5 dias (verão acelera, inverno atrasa). Alimente com Ração de Peixes p/ colher 3x!</p>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Come Ração de Peixes todo dia! Fome alta = 3 peixes por colheita (ciclo 3-5 dias conforme a estação).</p>
                     <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('tanque_tilapia')}</span>
                     <button
                       type="button"
@@ -1061,7 +1059,6 @@ export default function AnimalGrid({
                               onSellFrango={sellFrango}
                               onCollectPeixe={collectPeixe}
                               onCollectLeiteJersey={collectLeiteJersey}
-                              onFeedTilapia={feedTilapia}
                               calculateFrangoValue={calculateFrangoValue}
                               calculateBoiValue={calculateBoiValue}
                               calculatePorcoValue={calculatePorcoValue}
@@ -1096,7 +1093,6 @@ export default function AnimalGrid({
                         onSellFrango={sellFrango}
                         onCollectPeixe={collectPeixe}
                         onCollectLeiteJersey={collectLeiteJersey}
-                        onFeedTilapia={feedTilapia}
                         calculateFrangoValue={calculateFrangoValue}
                         getFrangoEmoji={getFrangoEmoji}
                         onCollectGoatMilk={collectGoatMilk}

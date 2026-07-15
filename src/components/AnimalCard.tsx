@@ -46,7 +46,6 @@ export interface AnimalListRowProps {
   onSellFrango?: (id: number, e: React.MouseEvent) => void;
   onCollectPeixe?: (id: number, e: React.MouseEvent) => void;
   onCollectLeiteJersey?: (id: number, e: React.MouseEvent) => void;
-  onFeedTilapia?: (id: number, e: React.MouseEvent) => void;
   onCollectMel?: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
   calculateFrangoValue?: (animal: Animal) => number;
@@ -69,7 +68,6 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   onSellFrango,
   onCollectPeixe,
   onCollectLeiteJersey,
-  onFeedTilapia,
   onCollectMel,
   calculateBoiValue,
   calculateFrangoValue,
@@ -80,7 +78,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   onCollectCabraAngoraMohair,
 }) => {
   if (animal.type === 'porco') return null;
-  const noHungerAnimal = ['minhoca','caracol','colmeia_abelhas','tanque_tilapia'].includes(animal.type);
+  const noHungerAnimal = ['minhoca','caracol','colmeia_abelhas'].includes(animal.type);
   const noHappinessAnimal = ['minhoca','caracol','colmeia_abelhas','bicho_seda','tanque_tilapia'].includes(animal.type);
   const isCritical = (!noHappinessAnimal && animal.happiness < 20) || (!noHungerAnimal && animal.hunger < 25);
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
@@ -198,7 +196,6 @@ export interface AnimalCardProps {
   onSellFrango?: (id: number, e: React.MouseEvent) => void;
   onCollectPeixe?: (id: number, e: React.MouseEvent) => void;
   onCollectLeiteJersey?: (id: number, e: React.MouseEvent) => void;
-  onFeedTilapia?: (id: number, e: React.MouseEvent) => void;
   onCollectGoatMilk: (id: number, e: React.MouseEvent) => void;
   onCollectSheepMilk: (id: number, e: React.MouseEvent) => void;
   onCollectLlamaWool: (id: number, e: React.MouseEvent) => void;
@@ -262,7 +259,6 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onSellFrango,
   onCollectPeixe,
   onCollectLeiteJersey,
-  onFeedTilapia,
   onCollectGoatMilk,
   onCollectSheepMilk,
   onCollectLlamaWool,
@@ -320,7 +316,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const valueOfPorco = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
   const valueOfPeru = animal.type === 'peru' && calculatePeruValue ? calculatePeruValue(animal) : 0;
 
-  const noHungerAnimal = ['minhoca', 'caracol', 'colmeia_abelhas', 'tanque_tilapia'].includes(animal.type);
+  const noHungerAnimal = ['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type);
   const noHappinessAnimal = ['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda', 'tanque_tilapia'].includes(animal.type);
   const bichoIsLagarta = animal.type === 'bicho_seda' && animal.age >= 3 && animal.age <= 12;
   const isCritical = (!noHappinessAnimal && animal.happiness < 20) || (!noHungerAnimal && animal.hunger < 25) || (bichoIsLagarta && animal.hunger < 25);
@@ -527,11 +523,11 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             {animal.type === 'tanque_tilapia' && (
               animal.fishReady ? (
                 <span className="flex items-center gap-1.5 text-[#166534] font-display animate-pulse">
-                  🐟 Tilápias no ponto de pesca!{animal.fishBoosted ? ' (3x!)' : ''}
+                  🐟 Tilápias no ponto de pesca!{animal.hunger > 60 ? ' Cardume gordo (3x)!' : ''}
                 </span>
               ) : (
                 <span className="flex items-center gap-1.5 text-[#78350f] font-sans font-bold">
-                  ⏳ Tilápias crescendo{animal.fishBoosted ? ' · 🐟 Turbinado (3x na colheita)' : ''}
+                  ⏳ Tilápias crescendo · mantenha a fome alta para colher 3x
                 </span>
               )
             )}
@@ -877,7 +873,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
       </div>
 
       {/* Stats - Fome and Felicidade — oculto para animais sem barras */}
-      {!collapsed && !['minhoca', 'caracol', 'colmeia_abelhas', 'tanque_tilapia'].includes(animal.type) && (animal.type !== 'bicho_seda' || bichoIsLagarta) && <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
+      {!collapsed && !['minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && (animal.type !== 'bicho_seda' || bichoIsLagarta) && <div className="bg-[#fffbeb] rounded-[24px] p-4 mb-4 space-y-3.5 border-2 border-[#fbbf24] shadow-inner">
 
         {/* Hunger bar — bicho_seda só na fase Lagarta (age 3–12) */}
         {(animal.type !== 'bicho_seda' || bichoIsLagarta) && (
@@ -906,7 +902,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         )}
 
         {/* Happiness bar — hidden for bicho-da-seda */}
-        {animal.type !== 'bicho_seda' && <div className="relative group/happinesstooltip">
+        {animal.type !== 'bicho_seda' && animal.type !== 'tanque_tilapia' && <div className="relative group/happinesstooltip">
           <div className="flex justify-between items-center text-xs font-sans font-extrabold uppercase tracking-wider text-[#92400e]">
             <span className="flex items-center gap-1">😊 Felicidade
               {/* IMPROVEMENT 4: Cabra bonus tooltip */}
@@ -1209,15 +1205,15 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         {/* Alimentar (Dynamic feed count based on animal type) */}
         {(() => {
           // Animais que não comem ração
-          const noFeedUI = ['minhoca', 'caracol', 'colmeia_abelhas', 'tanque_tilapia'];
+          const noFeedUI = ['minhoca', 'caracol', 'colmeia_abelhas'];
           if (noFeedUI.includes(animal.type)) {
             return <span className="text-[10px] text-stone-400 font-mono italic flex-1 flex items-center justify-center">Sem ração necessária 🌿</span>;
           }
           if (animal.type === 'bicho_seda') return null;
           // BUG FIX: novos animais usam a ração correta na UI
-          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'ovelha_leiteira' || animal.type === 'cabra' || animal.type === 'cabra_angora' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
+          const feedType = (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') ? 'racaoBovina' : animal.type === 'porco' ? 'racaoSuina' : (animal.type === 'ovelha' || animal.type === 'ovelha_leiteira' || animal.type === 'cabra' || animal.type === 'cabra_angora' || animal.type === 'lhama' || animal.type === 'alpaca') ? 'racaoOvinos' : (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') ? 'racaoAves' : (animal.type === 'pato' || animal.type === 'ganso') ? 'racaoAquatica' : animal.type === 'coelho_angora' ? 'racaoCoelho' : animal.type === 'tanque_tilapia' ? 'racaoPeixe' : (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') ? 'racaoCarnivora' : 'racaoBovina';
           const feedQty = inventory[feedType] ?? 0;
-          const label = feedType === 'racaoBovina' ? 'Ração Bovina' : feedType === 'racaoSuina' ? 'Ração Suína' : feedType === 'racaoOvinos' ? 'Ração de Ovinos' : feedType === 'racaoAves' ? 'Ração de Aves' : feedType === 'racaoAquatica' ? 'Ração Aquática' : feedType === 'racaoCoelho' ? 'Ração de Coelhos' : 'Ração Carnívora';
+          const label = feedType === 'racaoBovina' ? 'Ração Bovina' : feedType === 'racaoSuina' ? 'Ração Suína' : feedType === 'racaoOvinos' ? 'Ração de Ovinos' : feedType === 'racaoAves' ? 'Ração de Aves' : feedType === 'racaoAquatica' ? 'Ração Aquática' : feedType === 'racaoCoelho' ? 'Ração de Coelhos' : (feedType as string) === 'racaoPeixe' ? 'Ração de Peixes' : 'Ração Carnívora';
           if (animal.type === 'cabra_angora') {
             return (
               <>
@@ -1372,18 +1368,9 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               onClick={(e) => { e.preventDefault(); onCollectPeixe?.(animal.id, e); }}
               disabled={!animal.fishReady}
               className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.fishReady ? 'bg-sky-600 hover:bg-sky-500 border-b-4 border-sky-800 shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
-              title={animal.fishReady ? `Pescar no tanque (+${animal.fishBoosted ? 3 : 1} peixe)` : 'Aguarde o ciclo de crescimento'}
+              title={animal.fishReady ? `Pescar no tanque (fome ${Math.floor(animal.hunger)}%: ${animal.hunger > 60 ? '3 peixes!' : animal.hunger > 25 ? '1 peixe' : 'cardume faminto!'})` : 'Aguarde o ciclo de crescimento'}
             >
-              🎣 Pescar{animal.fishReady && animal.fishBoosted ? ' (3x)' : ''}
-            </button>
-            <button
-              type="button"
-              onClick={(e) => { e.preventDefault(); onFeedTilapia?.(animal.id, e); }}
-              disabled={animal.fishBoosted || ((inventory as any).racaoPeixe ?? 0) < 2}
-              className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${!animal.fishBoosted && ((inventory as any).racaoPeixe ?? 0) >= 2 ? 'bg-[#10b981] hover:bg-[#059669] border-b-4 border-[#065f46] shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
-              title={animal.fishBoosted ? 'Tanque já alimentado neste ciclo' : `Alimentar tanque: consome 2 Ração de Peixes (estoque: ${(inventory as any).racaoPeixe ?? 0}) → colheita 3x`}
-            >
-              🐟 Alimentar ({(inventory as any).racaoPeixe ?? 0}u)
+              🎣 Pescar{animal.fishReady && animal.hunger > 60 ? ' (3x)' : ''}
             </button>
           </>
         )}

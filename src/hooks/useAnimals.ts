@@ -253,13 +253,14 @@ export function useAnimals({
   };
 
   // Helper: get feed type and label for an animal type
-  const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina'; feedLabel: string } => {
+  const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe'; feedLabel: string } => {
     if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'bufalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
     if (type === 'porco') return { feedType: 'racaoSuina', feedLabel: 'Ração Suína' };
     if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'cabra_angora' || type === 'lhama' || type === 'alpaca') return { feedType: 'racaoOvinos', feedLabel: 'Ração de Ovinos' };
     if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'peru' || type === 'frango_corte' || type === 'galinha_caipira') return { feedType: 'racaoAves', feedLabel: 'Ração de Aves' };
     if (type === 'pato' || type === 'ganso') return { feedType: 'racaoAquatica', feedLabel: 'Ração Aquática' };
     if (type === 'coelho_angora') return { feedType: 'racaoCoelho', feedLabel: 'Ração de Coelhos' };
+    if (type === 'tanque_tilapia') return { feedType: 'racaoPeixe' as any, feedLabel: 'Ração de Peixes' };
     if (type === 'ra' || type === 'avestruz' || type === 'jacare') return { feedType: 'racaoCarnivora', feedLabel: 'Ração Carnívora' };
     // minhoca, caracol, bicho_seda: eat nothing — but buyAnimal still checks feedType; we use racaoBovina as dummy and override qty check below
     if (type === 'minhoca' || type === 'caracol' || type === 'bicho_seda') return { feedType: 'racaoBovina', feedLabel: 'Nenhuma ração necessária' };
@@ -359,7 +360,7 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal) return;
 
-    let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' = 'racaoBovina';
+    let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' = 'racaoBovina';
     let feedLabel = 'Ração Bovina';
     if (animal.type === 'vaca' || animal.type === 'boi' || animal.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
     else if (animal.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
@@ -367,6 +368,7 @@ export function useAnimals({
     else if (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
     else if (animal.type === 'pato' || animal.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
     else if (animal.type === 'coelho_angora') { feedType = 'racaoCoelho'; feedLabel = 'Ração de Coelhos'; }
+    else if (animal.type === 'tanque_tilapia') { feedType = 'racaoPeixe' as any; feedLabel = 'Ração de Peixes'; }
     else if (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') { feedType = 'racaoCarnivora'; feedLabel = 'Ração Carnívora'; }
 
     if ((inventory[feedType] ?? 0) < 1) {
@@ -1182,7 +1184,15 @@ export function useAnimals({
       spawnFeedback('⏳', 'Crescendo', event);
       return;
     }
-    const qty = animal.fishBoosted ? 3 : 1;
+    // Colheita definida pela fome do cardume: bem alimentado = 3, ok = 1, faminto = 0
+    const qty = animal.hunger > 60 ? 3 : animal.hunger > 25 ? 1 : 0;
+    if (qty === 0) {
+      setAnimals(prev => prev.map(a => a.id === id ? { ...a, fishReady: false } : a));
+      addLog(`🐟 ${animal.name}: cardume faminto demais — a colheita foi perdida! Alimente o tanque.`, 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('💀', 'Cardume faminto', event);
+      return;
+    }
     if (!canAddToInventory('peixe', qty)) {
       addLog('📦 Celeiro cheio! Sem espaço para os peixes.', 'error');
       spawnFeedback('❌', 'Cheio!', event);
@@ -1190,7 +1200,7 @@ export function useAnimals({
     }
     setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) + qty }));
     setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + qty }));
-    setAnimals(prev => prev.map(a => a.id === id ? { ...a, fishReady: false, fishBoosted: false } : a));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, fishReady: false } : a));
     addLog(`🐟 Pescaria no tanque: +${qty} tilápia(s) fresquinha(s)!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🐟', `+${qty} Peixe`, event);
@@ -1198,26 +1208,6 @@ export function useAnimals({
     onItemCollected?.();
   };
 
-  const feedTilapia = (id: number, event: React.MouseEvent) => {
-    if (event) event.preventDefault();
-    const animal = animals.find(a => a.id === id);
-    if (!animal || animal.type !== 'tanque_tilapia') return;
-    if (animal.fishBoosted) {
-      addLog('🐟 O tanque já foi alimentado neste ciclo!', 'error');
-      return;
-    }
-    if (((inventory as any).racaoPeixe ?? 0) < 2) {
-      addLog('🐟 Ração de Peixes insuficiente! Precisa de 2 unidades (Silo de Rações).', 'error');
-      triggerAudioResult(() => sfx.playSound('error'));
-      spawnFeedback('❌', 'Sem Ração!', event);
-      return;
-    }
-    setInventory(prev => ({ ...prev, racaoPeixe: ((prev as any).racaoPeixe ?? 0) - 2 } as any));
-    setAnimals(prev => prev.map(a => a.id === id ? { ...a, fishBoosted: true } : a));
-    addLog('🐟 Tanque alimentado! A próxima colheita renderá 3 tilápias.', 'success');
-    triggerAudioResult(() => sfx.playSound('click'));
-    spawnFeedback('🐟', 'Turbinado!', event);
-  };
 
   // 5c. Frango de Corte — engorda rápida (~8 dias), venda na feira, sem abate
   const calculateFrangoValue = (frango: Animal): number => {
@@ -1436,7 +1426,7 @@ export function useAnimals({
     if (type === 'cabra_angora' && farmLevel < 9) { addLog('🔒 Cabra Angorá requer Nível 9!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
 
     const { feedType } = getAnimalFeedType(type);
-    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas', 'tanque_tilapia'];
+    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
 
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
     const name = type === 'boi' ? getUniqueOxName(animals) : type === 'frango_corte' ? getUniqueFrangoName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : type === 'tanque_tilapia' ? 'Tanque de Tilápia' : getRandomName(type);
@@ -1471,7 +1461,7 @@ export function useAnimals({
       ...(type === 'peru' && { weightGain: 0.05 }),
       ...(type === 'frango_corte' && { weightGain: 0.05 }),
       ...(type === 'galinha_caipira' && { hasProducedToday: false, daysSinceLastEgg: 1 }),
-      ...(type === 'tanque_tilapia' && { fishReady: false, fishBoosted: false, trait: undefined }),
+      ...(type === 'tanque_tilapia' && { fishReady: false, trait: undefined }),
       ...(type === 'vaca_jersey' && { hasProducedToday: false }),
       ...(type === 'cabra' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'ovelha_leiteira' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
@@ -1576,7 +1566,7 @@ export function useAnimals({
     }
 
     const { feedType } = getAnimalFeedType(type);
-    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas', 'tanque_tilapia'];
+    const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
 
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
     const name = type === 'boi' ? getUniqueOxName(animals) : type === 'frango_corte' ? getUniqueFrangoName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : getRandomName(type);
@@ -1674,7 +1664,6 @@ export function useAnimals({
     sellFrango,
     collectPeixe,
     collectLeiteJersey,
-    feedTilapia,
     sellAnimal,
     retireAnimal,
     buyAnimal,

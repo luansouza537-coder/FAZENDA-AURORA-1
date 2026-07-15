@@ -2190,7 +2190,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     collectMilk,
     collectPeixe,
     collectLeiteJersey,
-    feedTilapia,
     collectWool,
     collectAlpacaWool,
     collectCoelhoWool,
@@ -2865,7 +2864,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
     // C. Alimentador Automático (runs before processarFomeFelicidade so hunger is set before health check)
     if (machinesObj.feederPurchased && machinesObj.feederActive) {
-      const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'tanque_tilapia'];
+      const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda'];
       updatedAnimals = updatedAnimals.map(a => {
         if (noFeedAnimals.includes(a.type)) return a;
         if (a.isAdult === false) return a; // filhotes não consomem ração industrial
@@ -2877,6 +2876,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao' || a.type === 'frango_corte' || a.type === 'galinha_caipira') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
         else if (a.type === 'pato' || a.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
         else if (a.type === 'coelho_angora') { feedType = 'racaoCoelho'; feedLabel = 'Ração de Coelhos'; }
+        else if (a.type === 'tanque_tilapia') { feedType = 'racaoPeixe' as any; feedLabel = 'Ração de Peixes'; }
         else if (a.type === 'ra' || a.type === 'avestruz' || a.type === 'jacare') { feedType = 'racaoCarnivora'; feedLabel = 'Ração Carnívora'; }
 
         if ((nextInv[feedType] ?? 0) >= 1) {
@@ -2940,7 +2940,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       const copy = { ...animal };
 
       // Animals that don't eat: skip hunger processing. Sal Mineral e Silagem evitam perda de fome.
-      const noHungerTypes = ['minhoca', 'caracol', 'colmeia_abelhas', 'tanque_tilapia'];
+      const noHungerTypes = ['minhoca', 'caracol', 'colmeia_abelhas'];
       const skipHunger = noHungerTypes.includes(copy.type) || silagemDays > 0;
 
       // Perda de fome diária: 12 + random 0-7 (gulosa consome +20%)
@@ -4804,7 +4804,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           const ciclo = (est === 'primavera' || est === 'verao') ? 3 : est === 'outono' ? 4 : 5;
           if ((a.age || 0) % ciclo === 0 && !copy.fishReady) {
             copy.fishReady = true;
-            logsToAdd.push({ msg: `🐟 ${a.name}: tilápias no ponto de pesca!${copy.fishBoosted ? ' (turbinado: 3 peixes!)' : ''}`, type: 'success' });
+            logsToAdd.push({ msg: `🐟 ${a.name}: tilápias no ponto de pesca! (fome alta = 3 peixes)`, type: 'success' });
           }
         }
         if (a.type === 'minhoca' && (a.age || 0) > 0 && (a.age || 0) % 3 === 0) {
@@ -5774,9 +5774,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'frango_corte' || type === 'galinha_caipira') return 'racaoAves';
             if (type === 'pato' || type === 'ganso') return 'racaoAquatica';
             if (type === 'coelho_angora') return 'racaoCoelho';
+            if (type === 'tanque_tilapia') return 'racaoPeixe' as any;
             return 'racaoCarnivora';
           };
-          const noFeedTypes = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas', 'tanque_tilapia'];
+          const noFeedTypes = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
           // Pre-compute which animals can be fed (using closure inventory snapshot)
           // Silagem ativa: não consome ração do inventário
           const tmpInv2 = { ...inventory } as Record<string, number>;
@@ -7157,7 +7158,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             collectMilk={collectMilkWithToast}
             collectPeixe={collectPeixe}
             collectLeiteJersey={collectLeiteJerseyWithToast}
-            feedTilapia={feedTilapia}
             collectWool={collectWool}
             collectEgg={collectEggWithToast}
             collectMel={collectMelWithToast}
