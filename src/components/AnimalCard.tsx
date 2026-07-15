@@ -115,10 +115,11 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
         {isReady && <span className="text-[9px] bg-green-500 text-white font-black px-1.5 py-0.5 rounded-full">✅ Pronto</span>}
       </div>
       <div className="flex gap-1 ml-2 shrink-0">
-        {animal.isAdult !== false && (
+        {!noHungerAnimal && animal.type !== 'bicho_seda' && (
           <button
             onClick={e => onFeed(animal.id, e)}
             className="text-[9px] font-black px-2 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 cursor-pointer transition-all"
+            title="Alimentar"
           >🍽️</button>
         )}
         {animal.type === 'vaca' && animal.hasProducedToday && (
