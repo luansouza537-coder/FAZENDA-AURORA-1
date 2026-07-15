@@ -56,6 +56,8 @@ export interface CraftActions {
   craftFioSeda: (e?: React.MouseEvent) => void;
   craftMantaPremium: (e?: React.MouseEvent) => void;
   craftMayonese: (e?: React.MouseEvent) => void;
+  craftBoloCaipira: (e?: React.MouseEvent) => void;
+  craftPudimCaipira: (e?: React.MouseEvent) => void;
   craftPatePato: (e?: React.MouseEvent) => void;
   craftOvoDefumado: (e?: React.MouseEvent) => void;
   craftConservaCodorna: (e?: React.MouseEvent) => void;
@@ -320,6 +322,8 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                 <h4 className="font-display font-black text-xs uppercase tracking-wider text-orange-900 mb-2">🥣 Cozinha & Processados</h4>
                 {[
                   { label: 'Maionese', emoji: '🥣', req: `🥚 2 ovos (${inventory.egg}/2) • Nv1`, canCraft: inventory.egg >= 2, reqLevel: 1, onClick: (e: React.MouseEvent) => c.craftMayonese(e) },
+                  { label: 'Bolo Caipira', emoji: '🍰', req: `🥚 2 Ov.Caipira (${(inventory as any).ovo_caipira ?? 0}/2) + 🌾 1 Farinha (${(inventory as any).farinha ?? 0}/1) + 🥛 1 Leite (${inventory.milk}/1) • Nv4`, canCraft: farmLevel >= 4 && ((inventory as any).ovo_caipira ?? 0) >= 2 && ((inventory as any).farinha ?? 0) >= 1 && (inventory.milk ?? 0) >= 1, reqLevel: 4, onClick: (e: React.MouseEvent) => c.craftBoloCaipira(e) },
+                  { label: 'Pudim Caipira', emoji: '🍮', req: `🥚 1 Ov.Caipira (${(inventory as any).ovo_caipira ?? 0}/1) + 🥛 2 Leite (${inventory.milk}/2) • Nv4`, canCraft: farmLevel >= 4 && ((inventory as any).ovo_caipira ?? 0) >= 1 && (inventory.milk ?? 0) >= 2, reqLevel: 4, onClick: (e: React.MouseEvent) => c.craftPudimCaipira(e) },
                   { label: 'Panquecinhas Douradas de Ovos de Pato', emoji: '🥞', req: `🦆 2 Ov.Pato (${inventory.duck_egg ?? 0}/2) + 🧈 1 Manteiga (${inventory.butter ?? 0}/1) • Nv5`, canCraft: farmLevel >= 5 && (inventory.duck_egg ?? 0) >= 2 && (inventory.butter ?? 0) >= 1, reqLevel: 5, onClick: (e: React.MouseEvent) => c.craftPatePato(e) },
                   { label: 'Ovo Defumado', emoji: '🥚', req: `🪿 1 Ov.Ganso (${inventory.goose_egg ?? 0}/1) • Nv6`, canCraft: farmLevel >= 6 && (inventory.goose_egg ?? 0) >= 1, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftOvoDefumado(e) },
                   { label: 'Conserva de Codorna', emoji: '🥚', req: `🐦 6 Ov.Codorna (${inventory.quail_egg ?? 0}/6) • Nv4`, canCraft: farmLevel >= 4 && (inventory.quail_egg ?? 0) >= 6, reqLevel: 4, onClick: (e: React.MouseEvent) => c.craftConservaCodorna(e) },

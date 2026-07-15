@@ -56,6 +56,8 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   pate_pato:        { energy: 1, water: 1 },
   ovo_defumado:     { energy: 2, water: 1 },
   conserva_codorna: { energy: 1, water: 1 },
+  bolo_caipira:     { energy: 2, water: 1 },
+  pudim_caipira:    { energy: 1, water: 1 },
   creme_cosmetico:  { energy: 1, water: 1 },
   sabonete_natural: { energy: 1, water: 1 },
   serum_facial:     { energy: 2, water: 1 },
@@ -238,6 +240,9 @@ export function useInventory({
           kit_gourmet: inv.kit_gourmet ?? 0,
           racaoSuina: inv.racaoSuina ?? 0,
           farinha: inv.farinha ?? 0,
+          ovo_caipira: inv.ovo_caipira ?? 0,
+          bolo_caipira: inv.bolo_caipira ?? 0,
+          pudim_caipira: inv.pudim_caipira ?? 0,
           fio_lhama: inv.fio_lhama ?? 0,
           cachecol_lhama: inv.cachecol_lhama ?? 0,
           gorro_lhama: inv.gorro_lhama ?? 0,
@@ -330,6 +335,9 @@ export function useInventory({
       kit_gourmet: 0,
       racaoSuina: 0,
       farinha: 0,
+      ovo_caipira: 0,
+      bolo_caipira: 0,
+      pudim_caipira: 0,
       fio_lhama: 0,
       cachecol_lhama: 0,
       gorro_lhama: 0,
@@ -515,6 +523,49 @@ export function useInventory({
     addLog(`🥣 Sucesso! Você misturou vitoriosamente 2 Ovos em 1 pote de Maionese cremosa!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥣', '+1 Maionese', event);
+  };
+
+  // 🍰 Bolo Caipira: 2 ovos caipiras + 1 farinha + 1 leite
+  const craftBoloCaipira = (event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if ((inventory.ovo_caipira ?? 0) < 2 || ((inventory as any).farinha ?? 0) < 1 || (inventory.milk ?? 0) < 1) {
+      addLog('🍰 Ingredientes insuficientes! Bolo Caipira: 2 Ovos Caipiras + 1 Farinha + 1 Leite.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Faltam itens!', event);
+      return;
+    }
+    setInventory(prev => ({
+      ...prev,
+      ovo_caipira: (prev.ovo_caipira ?? 0) - 2,
+      farinha: ((prev as any).farinha ?? 0) - 1,
+      milk: prev.milk - 1,
+      bolo_caipira: (prev.bolo_caipira ?? 0) + 1,
+    }));
+    applyCraftCost('bolo_caipira');
+    addLog('🍰 Bolo Caipira saindo do forno! Receita da vovó com ovos premium.', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🍰', '+1 Bolo Caipira', event);
+  };
+
+  // 🍮 Pudim Caipira: 1 ovo caipira + 2 leites
+  const craftPudimCaipira = (event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if ((inventory.ovo_caipira ?? 0) < 1 || (inventory.milk ?? 0) < 2) {
+      addLog('🍮 Ingredientes insuficientes! Pudim Caipira: 1 Ovo Caipira + 2 Leites.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Faltam itens!', event);
+      return;
+    }
+    setInventory(prev => ({
+      ...prev,
+      ovo_caipira: (prev.ovo_caipira ?? 0) - 1,
+      milk: prev.milk - 2,
+      pudim_caipira: (prev.pudim_caipira ?? 0) + 1,
+    }));
+    applyCraftCost('pudim_caipira');
+    addLog('🍮 Pudim Caipira cremoso pronto! O ovo caipira faz toda a diferença.', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🍮', '+1 Pudim', event);
   };
 
   const craftButter = (event?: React.MouseEvent) => {
@@ -1210,6 +1261,9 @@ export function useInventory({
     else if (itemType === 'scarf') label = 'Cachecol';
     else if (itemType === 'egg') label = 'Ovo';
     else if (itemType === 'mayo') label = 'Maionese';
+    else if ((itemType as string) === 'ovo_caipira') label = 'Ovo Caipira';
+    else if ((itemType as string) === 'bolo_caipira') label = 'Bolo Caipira';
+    else if ((itemType as string) === 'pudim_caipira') label = 'Pudim Caipira';
     else if (itemType === 'goat_milk') label = 'Leite de Cabra';
     else if (itemType === 'llama_wool') label = 'Lã de Lhama';
     else if (itemType === 'duck_egg') label = 'Ovo de Pato';
@@ -2038,6 +2092,8 @@ export function useInventory({
     // Craft functions
     craftBuffaloMozzarella,
     craftMayonese,
+    craftBoloCaipira,
+    craftPudimCaipira,
     craftButter,
     craftYogurt,
     craftQueijoCabra,

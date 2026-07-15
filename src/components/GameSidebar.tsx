@@ -186,6 +186,7 @@ export default function GameSidebar({
                       { key: 'wool', label: '🧶 Lã', qty: inventory.wool, priceKey: 'wool' },
                       { key: 'llama_wool', label: '🧶 Lã Lhama', qty: inventory.llama_wool ?? 0, priceKey: 'llama_wool' },
                       { key: 'egg', label: '🥚 Ovo', qty: inventory.egg ?? 0, priceKey: 'egg', freshKey: 'egg' },
+                      { key: 'ovo_caipira', label: '🥚 Ovo Caipira', qty: (inventory as any).ovo_caipira ?? 0, priceKey: 'ovo_caipira' as any },
                       { key: 'duck_egg', label: '🥚 Ov. Pato', qty: inventory.duck_egg ?? 0, priceKey: 'duck_egg', freshKey: 'duck_egg' },
                       { key: 'goose_egg', label: '🥚 Ov. Ganso', qty: inventory.goose_egg ?? 0, priceKey: 'goose_egg', freshKey: 'goose_egg' },
                       { key: 'fertile_egg', label: '✨ Ovo Fértil', qty: inventory.fertile_egg ?? 0, priceKey: 'fertile_egg', freshKey: 'fertile_egg', tooltip: '🐣 Use 3 Ovos Férteis na Incubadora para chocar filhotes! Produzido por galinhas felicidade ≥95.' },
@@ -223,6 +224,8 @@ export default function GameSidebar({
                       { key: 'pate_pato', label: '🥞 Panquecinhas Douradas', qty: (inventory as any).pate_pato ?? 0, priceKey: 'pate_pato' as any },
                       { key: 'ovo_defumado', label: '🥚 Ovo Defumado', qty: (inventory as any).ovo_defumado ?? 0, priceKey: 'ovo_defumado' as any },
                       { key: 'conserva_codorna', label: '🥚 Conserva Codorna', qty: (inventory as any).conserva_codorna ?? 0, priceKey: 'conserva_codorna' as any },
+                      { key: 'bolo_caipira', label: '🍰 Bolo Caipira', qty: (inventory as any).bolo_caipira ?? 0, priceKey: 'bolo_caipira' as any },
+                      { key: 'pudim_caipira', label: '🍮 Pudim Caipira', qty: (inventory as any).pudim_caipira ?? 0, priceKey: 'pudim_caipira' as any },
                     ]
                   }
                 ];
@@ -328,6 +331,24 @@ export default function GameSidebar({
                   <button type="button" onClick={(e) => sellProduct('mayo', 1, e)}
                     className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
                     🥣 Maionese · {inventory.mayo ?? 0}u ({getActualSellPrice('mayo')}💰)
+                  </button>
+                  )}
+                  {((inventory as any).ovo_caipira ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('ovo_caipira' as any, 1, e)}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🥚 Ovo Caipira · {(inventory as any).ovo_caipira ?? 0}u ({getActualSellPrice('ovo_caipira' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).bolo_caipira ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('bolo_caipira' as any, 1, e)}
+                    className="bg-pink-50 hover:bg-pink-100 border border-pink-300 text-pink-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-pink-300">
+                    🍰 Bolo Caipira · {(inventory as any).bolo_caipira ?? 0}u ({getActualSellPrice('bolo_caipira' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).pudim_caipira ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('pudim_caipira' as any, 1, e)}
+                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 text-orange-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-orange-300">
+                    🍮 Pudim Caipira · {(inventory as any).pudim_caipira ?? 0}u ({getActualSellPrice('pudim_caipira' as any)}💰)
                   </button>
                   )}
                   {inventory.cheese > 0 && (
