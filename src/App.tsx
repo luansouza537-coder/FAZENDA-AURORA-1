@@ -908,7 +908,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setHasSilo(false);
     setHasFridge(false);
     setHasTipBox(false);
-    setProductFreshness({ milk: 3, egg: 3, goat_milk: 3, duck_egg: 3, goose_egg: 3, buffalo_milk: 3, fertile_egg: 3, ovo_caipira: 3 });
+    setProductFreshness({ milk: 3, egg: 3, goat_milk: 3, duck_egg: 3, goose_egg: 3, buffalo_milk: 3, fertile_egg: 3, ovo_caipira: 3, leite_jersey: 3 });
     setWeeklyTaxPaid(0);
     setPriceHistory({
       milk: [5, 5, 5, 5, 5, 5, 5],
@@ -964,6 +964,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       peixe_defumado: [70, 70, 70, 70, 70, 70, 70],
       bolinho_peixe: [85, 85, 85, 85, 85, 85, 85],
       moqueca: [160, 160, 160, 160, 160, 160, 160],
+      leite_jersey: [14, 14, 14, 14, 14, 14, 14],
+      manteiga_jersey: [60, 60, 60, 60, 60, 60, 60],
+      queijo_minas_jersey: [95, 95, 95, 95, 95, 95, 95],
+      doce_leite_jersey: [120, 120, 120, 120, 120, 120, 120],
+      gouda_jersey: [200, 200, 200, 200, 200, 200, 200],
       ovo_defumado: [120, 120, 120, 120, 120, 120, 120],
       conserva_codorna: [80, 80, 80, 80, 80, 80, 80],
       creme_cosmetico: [220, 220, 220, 220, 220, 220, 220],
@@ -1785,8 +1790,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Storage limits for Celeiro and Câmara Fria
-  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair','cachecol_mohair','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','bolo_caipira','peixe_defumado','bolinho_peixe','moqueca','sabonete_natural','minhoca_viva','biofertilizante']);
-  const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','ovo_caipira','pudim_caipira','muco','creme_cosmetico','sabonete_natural','serum_facial','mascara_facial']);
+  const CELEIRO_ITEMS = new Set(['wool','llama_wool','alpaca_wool','angora_wool','mohair','cachecol_mohair','seda_bruta','couro_avestruz','couro_jacare','humus','mel','cogumelo','peixe','cachecol_angora','tecido_alpaca','fio_seda','manta_premium','tapete_lhama','scarf','colete_couro','bolsa_exotica','hidromel','mel_envasado','conserva_peixe','bolo_caipira','peixe_defumado','bolinho_peixe','moqueca','queijo_minas_jersey','gouda_jersey','sabonete_natural','minhoca_viva','biofertilizante']);
+  const CAMARA_FRIA_ITEMS = new Set(['milk','goat_milk','buffalo_milk','egg','duck_egg','goose_egg','quail_egg','fertile_egg','butter','yogurt','iogurte_cabra','leite_condensado','carne_jacare','carne_avestruz','coxa_ra','pate_pato','ovo_defumado','ovo_caipira','pudim_caipira','leite_jersey','manteiga_jersey','doce_leite_jersey','muco','creme_cosmetico','sabonete_natural','serum_facial','mascara_facial']);
 
   const getCeleiroLimit = () => ([30, 60, 120, 250, 999][celeiroLevel] ?? 30);
   const getCamaraFriaLimit = () => ([15, 40, 80, 180][camaraFriaLevel] ?? 15);
@@ -1834,6 +1839,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if ((itemType as string) === 'peixe_defumado') return 70;
     if ((itemType as string) === 'bolinho_peixe') return 85;
     if ((itemType as string) === 'moqueca') return 160;
+    if ((itemType as string) === 'leite_jersey') return 14;
+    if ((itemType as string) === 'manteiga_jersey') return 60;
+    if ((itemType as string) === 'queijo_minas_jersey') return 95;
+    if ((itemType as string) === 'doce_leite_jersey') return 120;
+    if ((itemType as string) === 'gouda_jersey') return 200;
     if (itemType === 'mayo') {
       return 14;  // era 16 — proporcional ao ovo
     }
@@ -2059,6 +2069,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     craftPeixeDefumado,
     craftBolinhoPeixe,
     craftMoqueca,
+    craftManteigaJersey,
+    craftQueijoMinasJersey,
+    craftDoceLeiteJersey,
+    craftGoudaJersey,
     craftButter,
     craftYogurt,
     craftQueijoCabra,
@@ -2175,6 +2189,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     collectBuffaloMilk,
     collectMilk,
     collectPeixe,
+    collectLeiteJersey,
     feedTilapia,
     collectWool,
     collectAlpacaWool,
@@ -2280,6 +2295,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     feedAnimal(id, event);
     if (animal) addToast(`${animal.name} alimentado!`, 'info', '🍽️');
   }, [animals, feedAnimal, addToast]);
+
+  const collectLeiteJerseyWithToast = useCallback((id: number, event: React.MouseEvent) => {
+    const result = collectLeiteJersey(id, event);
+    if (result === 'success') addToast('+Leite Jersey coletado!', 'success', '🥛');
+    else if (result === 'full') addToast('Câmara Fria cheia! Venda o leite primeiro.', 'error', '❄️');
+  }, [collectLeiteJersey, addToast]);
 
   const collectMilkWithToast = useCallback((id: number, event: React.MouseEvent) => {
     const result = collectMilk(id, event);
@@ -2850,7 +2871,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (a.isAdult === false) return a; // filhotes não consomem ração industrial
         let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' = 'racaoBovina';
         let feedLabel = 'Ração Bovina';
-        if (a.type === 'vaca' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+        if (a.type === 'vaca' || a.type === 'vaca_jersey' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
         else if (a.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
         else if (a.type === 'ovelha' || a.type === 'ovelha_leiteira' || a.type === 'cabra' || a.type === 'cabra_angora' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
         else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao' || a.type === 'frango_corte' || a.type === 'galinha_caipira') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
@@ -2924,7 +2945,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       // Perda de fome diária: 12 + random 0-7 (gulosa consome +20%)
       const baseHungerLoss = 12 + Math.floor(Math.random() * 8);
-      const hungerLoss = copy.trait === 'gulosa' ? Math.round(baseHungerLoss * 1.2) : baseHungerLoss;
+      let hungerLoss = copy.trait === 'gulosa' ? Math.round(baseHungerLoss * 1.2) : baseHungerLoss;
+      // Vaca Jersey: porte menor, consome ~25% menos (perde fome mais devagar)
+      if (copy.type === 'vaca_jersey') hungerLoss = Math.round(hungerLoss * 0.75);
       if (!skipHunger) copy.hunger = Math.max(0, copy.hunger - hungerLoss);
 
       // Regras de felicidade baseadas na fome:
@@ -3098,6 +3121,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
         } else {
           logs.push({ msg: `🐔 ${copy.name} botou um lindo ovo de quintal!`, type: 'info' });
+        }
+      }
+      else if (copy.type === 'vaca_jersey') {
+        const canProduce = copy.hunger > 25 && copy.happiness > 30 && !sickProductionBlock;
+        copy.hasProducedToday = canProduce;
+        if (canProduce) {
+          logs.push({ msg: `🐄 ${copy.name} (Jersey) produziu leite rico em gordura!`, type: 'info' });
         }
       }
       else if (copy.type === 'galinha_caipira') {
@@ -3477,7 +3507,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     });
 
     readyQueijos.forEach(tipo => {
-      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : tipo === 'queijo_cabra' ? 'Queijo de Cabra' : tipo === 'iogurte_cabra' ? 'Iogurte de Cabra' : tipo === 'parmesao' ? 'Queijo Parmesão' : tipo === 'serra' ? 'Queijo da Serra' : tipo === 'butter' ? 'Manteiga' : tipo === 'iogurte_bufala' ? 'Iogurte de Búfala' : tipo === 'manteiga_bufala' ? 'Manteiga de Búfala' : tipo === 'doce_leite_bufala' ? 'Doce de Leite Búfala' : tipo === 'burrata' ? 'Burrata' : 'Queijo Brie';
+      const label = tipo === 'coalho' ? 'Queijo Coalho' : tipo === 'mucarela' ? 'Queijo Muçarela' : tipo === 'buffalo_mozzarella' ? 'Muçarela de Búfala' : tipo === 'yogurt' ? 'Iogurte' : tipo === 'queijo_cabra' ? 'Queijo de Cabra' : tipo === 'iogurte_cabra' ? 'Iogurte de Cabra' : tipo === 'parmesao' ? 'Queijo Parmesão' : tipo === 'serra' ? 'Queijo da Serra' : tipo === 'butter' ? 'Manteiga' : tipo === 'iogurte_bufala' ? 'Iogurte de Búfala' : tipo === 'manteiga_bufala' ? 'Manteiga de Búfala' : tipo === 'doce_leite_bufala' ? 'Doce de Leite Búfala' : tipo === 'burrata' ? 'Burrata' : (tipo as string) === 'gouda_jersey' ? 'Gouda Jersey' : 'Queijo Brie';
       const emoji = tipo === 'butter' || tipo === 'manteiga_bufala' ? '🧈' : tipo === 'yogurt' || tipo === 'iogurte_cabra' || tipo === 'iogurte_bufala' ? '🥛' : tipo === 'doce_leite_bufala' ? '🍮' : '🧀';
       logs.push({
         msg: `${emoji} Sua ${label} ficou pronta e está disponível no Armazém!`,
@@ -4318,8 +4348,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       // --- GRUPO 4a: Frescor dos produtos perecíveis ---
       {
-        type FreshnessKey = 'milk' | 'egg' | 'goat_milk' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'fertile_egg' | 'ovo_caipira';
-        const perishables: FreshnessKey[] = ['milk', 'egg', 'goat_milk', 'duck_egg', 'goose_egg', 'buffalo_milk', 'fertile_egg', 'ovo_caipira'];
+        type FreshnessKey = 'milk' | 'egg' | 'goat_milk' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'fertile_egg' | 'ovo_caipira' | 'leite_jersey';
+        const perishables: FreshnessKey[] = ['milk', 'egg', 'goat_milk', 'duck_egg', 'goose_egg', 'buffalo_milk', 'fertile_egg', 'ovo_caipira', 'leite_jersey'];
         setProductFreshness(prev => {
           const next = { ...prev };
           perishables.forEach(key => {
@@ -5320,7 +5350,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setInventory(inv => {
           const nextInv = { ...inv };
           readyQueijos.forEach(tipo => {
-            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'queijo_cabra' ? 'queijo_cabra' : tipo === 'iogurte_cabra' ? 'iogurte_cabra' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : tipo === 'butter' ? 'butter' : tipo === 'iogurte_bufala' ? 'iogurte_bufala' : tipo === 'manteiga_bufala' ? 'manteiga_bufala' : tipo === 'doce_leite_bufala' ? 'doce_leite_bufala' : tipo === 'burrata' ? 'burrata' : tipo === 'queijo_pecorino' ? 'queijo_pecorino' : tipo === 'iogurte_ovelha' ? 'iogurte_ovelha' : tipo === 'doce_leite_ovelha' ? 'doce_leite_ovelha' : 'queijoBrie';
+            const key = tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : tipo === 'buffalo_mozzarella' ? 'buffalo_mozzarella' : tipo === 'yogurt' ? 'yogurt' : tipo === 'queijo_cabra' ? 'queijo_cabra' : tipo === 'iogurte_cabra' ? 'iogurte_cabra' : tipo === 'parmesao' ? 'queijo_parmesao' : tipo === 'serra' ? 'queijo_serra' : tipo === 'butter' ? 'butter' : tipo === 'iogurte_bufala' ? 'iogurte_bufala' : tipo === 'manteiga_bufala' ? 'manteiga_bufala' : tipo === 'doce_leite_bufala' ? 'doce_leite_bufala' : tipo === 'burrata' ? 'burrata' : tipo === 'queijo_pecorino' ? 'queijo_pecorino' : tipo === 'iogurte_ovelha' ? 'iogurte_ovelha' : tipo === 'doce_leite_ovelha' ? 'doce_leite_ovelha' : (tipo as string) === 'gouda_jersey' ? 'gouda_jersey' : 'queijoBrie';
             nextInv[key] = (nextInv[key] ?? 0) + 1;
           });
           return nextInv;
@@ -5738,7 +5768,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         // --- Tratador: alimenta todos os animais consumindo ração correta do inventário ---
         if (workers.some(w => w.role === 'tratador')) {
           const getFeedKeyForType2 = (type: string): keyof typeof inventory => {
-            if (type === 'vaca' || type === 'boi' || type === 'bufalo') return 'racaoBovina';
+            if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'bufalo') return 'racaoBovina';
             if (type === 'porco') return 'racaoSuina';
             if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
             if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'frango_corte' || type === 'galinha_caipira') return 'racaoAves';
@@ -7126,6 +7156,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             feedAnimal={feedAnimalWithToast}
             collectMilk={collectMilkWithToast}
             collectPeixe={collectPeixe}
+            collectLeiteJersey={collectLeiteJerseyWithToast}
             feedTilapia={feedTilapia}
             collectWool={collectWool}
             collectEgg={collectEggWithToast}
@@ -7355,7 +7386,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             craftQueijoParmesao, craftQueijoSerra,
             craftScarf, craftTapeteLhama, craftCachecolAngora, craftCachecolMohair, craftTecidoAlpaca,
             craftFioSeda, craftMantaPremium,
-            craftMayonese, craftBoloCaipira, craftPudimCaipira, craftPeixeDefumado, craftBolinhoPeixe, craftMoqueca, craftPatePato, craftOvoDefumado, craftConservaCodorna,
+            craftMayonese, craftBoloCaipira, craftPudimCaipira, craftPeixeDefumado, craftBolinhoPeixe, craftMoqueca, craftManteigaJersey, craftQueijoMinasJersey, craftDoceLeiteJersey, craftGoudaJersey, craftPatePato, craftOvoDefumado, craftConservaCodorna,
             craftIncubarOvos, craftHidromel, craftRisotoCogumelo, craftConservaPeixe,
             craftMelEnvasado, craftSopaCogumelo,
             craftCremeCosmetico, craftSaboneteNatural, craftSerumFacial, craftMascaraFacial, craftRacaoOrganica, craftFertilizante,

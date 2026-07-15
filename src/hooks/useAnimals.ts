@@ -86,6 +86,11 @@ export type InventoryState = {
   peixe_defumado?: number;
   bolinho_peixe?: number;
   moqueca?: number;
+  leite_jersey?: number;
+  manteiga_jersey?: number;
+  queijo_minas_jersey?: number;
+  doce_leite_jersey?: number;
+  gouda_jersey?: number;
   fio_lhama: number;
   cachecol_lhama: number;
   gorro_lhama: number;
@@ -249,7 +254,7 @@ export function useAnimals({
 
   // Helper: get feed type and label for an animal type
   const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina'; feedLabel: string } => {
-    if (type === 'vaca' || type === 'boi' || type === 'bufalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
+    if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'bufalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
     if (type === 'porco') return { feedType: 'racaoSuina', feedLabel: 'Ração Suína' };
     if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'cabra_angora' || type === 'lhama' || type === 'alpaca') return { feedType: 'racaoOvinos', feedLabel: 'Ração de Ovinos' };
     if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'peru' || type === 'frango_corte' || type === 'galinha_caipira') return { feedType: 'racaoAves', feedLabel: 'Ração de Aves' };
@@ -291,6 +296,7 @@ export function useAnimals({
     if (type === 'frango_corte') basePrice = 10;
     if (type === 'galinha_caipira') basePrice = 90;
     if (type === 'tanque_tilapia') basePrice = 150;
+    if (type === 'vaca_jersey') basePrice = 160;
 
     // Specialization purchase penalty
     const purchasePenalty =
@@ -1137,6 +1143,35 @@ export function useAnimals({
     spawnFeedback('💰', `+${value} 💰`, event);
   };
 
+  // 5e. Vaca Jersey — 1 leite premium por dia
+  const collectLeiteJersey = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'vaca_jersey') return undefined;
+    if (!animal.hasProducedToday) {
+      addLog(`🥛 ${animal.name} já foi ordenhada ou não produziu hoje!`, 'error');
+      spawnFeedback('⏳', 'Vazia', event);
+      return undefined;
+    }
+    if (canAddToInventory && !canAddToInventory('leite_jersey', 1)) {
+      addLog('🥛 Câmara Fria cheia! Libere espaço antes de ordenhar a Jersey.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❄️', 'Câmara Cheia!', event);
+      return 'full';
+    }
+    if (soundEnabled) sfx.playAnimalSound('vaca');
+    setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) + 1 } as any));
+    setProductFreshness(prev => ({ ...prev, leite_jersey: 3 } as any));
+    setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + 1, totalMilk: ((prev as any).totalMilk || 0) + 1 }));
+    setAnimals(prev => prev.map(a => a.id === id ? { ...a, hasProducedToday: false } : a));
+    addLog(`🥛 ${animal.name} rendeu 1 Leite Jersey — gordo e cremoso!`, 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🥛', '+1 Jersey', event);
+    updateMissionProgress('collect_items', 1);
+    onItemCollected?.();
+    return 'success';
+  };
+
   // 5d. Tanque de Tilápia — colheita (pesca) e alimentação com ração de peixes
   const collectPeixe = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -1380,6 +1415,7 @@ export function useAnimals({
     }
 
     // Level unlock checks for new animals
+    if (type === 'vaca_jersey' && farmLevel < 6) { addLog('🔒 Vaca Jersey requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'tanque_tilapia' && farmLevel < 5) { addLog('🔒 Tanque de Tilápia requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'galinha_caipira' && farmLevel < 4) { addLog('🔒 Galinha Caipira requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'frango_corte' && farmLevel < 2) { addLog('🔒 Frango de Corte requer Nível 2!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
@@ -1409,7 +1445,7 @@ export function useAnimals({
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80
 
     // F1: maxAge por tipo com variação ±20%
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = (type === 'colmeia_abelhas' || type === 'tanque_tilapia') ? 1 : 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -1436,6 +1472,7 @@ export function useAnimals({
       ...(type === 'frango_corte' && { weightGain: 0.05 }),
       ...(type === 'galinha_caipira' && { hasProducedToday: false, daysSinceLastEgg: 1 }),
       ...(type === 'tanque_tilapia' && { fishReady: false, fishBoosted: false, trait: undefined }),
+      ...(type === 'vaca_jersey' && { hasProducedToday: false }),
       ...(type === 'cabra' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'ovelha_leiteira' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'lhama' && { woolAccumulated: 0 }),
@@ -1544,7 +1581,7 @@ export function useAnimals({
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
     const name = type === 'boi' ? getUniqueOxName(animals) : type === 'frango_corte' ? getUniqueFrangoName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : getRandomName(type);
     const happiness = Math.floor(Math.random() * 21) + 60;
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -1636,6 +1673,7 @@ export function useAnimals({
     sellOx,
     sellFrango,
     collectPeixe,
+    collectLeiteJersey,
     feedTilapia,
     sellAnimal,
     retireAnimal,

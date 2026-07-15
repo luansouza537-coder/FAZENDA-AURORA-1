@@ -61,6 +61,10 @@ export interface CraftActions {
   craftPeixeDefumado: (e?: React.MouseEvent) => void;
   craftBolinhoPeixe: (e?: React.MouseEvent) => void;
   craftMoqueca: (e?: React.MouseEvent) => void;
+  craftManteigaJersey: (e?: React.MouseEvent) => void;
+  craftQueijoMinasJersey: (e?: React.MouseEvent) => void;
+  craftDoceLeiteJersey: (e?: React.MouseEvent) => void;
+  craftGoudaJersey: (e?: React.MouseEvent) => void;
   craftPatePato: (e?: React.MouseEvent) => void;
   craftOvoDefumado: (e?: React.MouseEvent) => void;
   craftConservaCodorna: (e?: React.MouseEvent) => void;
@@ -333,6 +337,10 @@ const QueijariaModal: React.FC<QueijariaModalProps> = ({
                   { label: 'Incubar Ovos (Nova Galinha)', emoji: '🐣', req: `🥚 3 Ov.Férteis (${inventory.fertile_egg ?? 0}/3) • Nv7`, canCraft: farmLevel >= 7 && (inventory.fertile_egg ?? 0) >= 3, reqLevel: 7, onClick: (e: React.MouseEvent) => c.craftIncubarOvos(e) },
                   { label: 'Hidromel Artesanal', emoji: '🍺', req: `🍯 2 Mel (${inventory.mel ?? 0}/2) + 🥛 3 Leite (${inventory.milk}/3) • Nv8`, canCraft: farmLevel >= 8 && (inventory.mel ?? 0) >= 2 && inventory.milk >= 3, reqLevel: 8, onClick: (e: React.MouseEvent) => c.craftHidromel(e) },
                   { label: 'Risoto de Cogumelo', emoji: '🍄', req: `🍄 3 Cogumelos (${inventory.cogumelo ?? 0}/3) • Nv5`, canCraft: farmLevel >= 5 && (inventory.cogumelo ?? 0) >= 3, reqLevel: 5, onClick: (e: React.MouseEvent) => c.craftRisotoCogumelo(e) },
+                  { label: 'Manteiga Jersey', emoji: '🧈', req: `🥛 2 L.Jersey (${(inventory as any).leite_jersey ?? 0}/2) • Nv6`, canCraft: farmLevel >= 6 && ((inventory as any).leite_jersey ?? 0) >= 2, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftManteigaJersey(e) },
+                  { label: 'Queijo Minas Jersey', emoji: '🧀', req: `🥛 3 L.Jersey (${(inventory as any).leite_jersey ?? 0}/3) + 🧂 1 Sal (${(inventory as any).sal ?? 0}/1) • Nv7`, canCraft: farmLevel >= 7 && ((inventory as any).leite_jersey ?? 0) >= 3 && ((inventory as any).sal ?? 0) >= 1, reqLevel: 7, onClick: (e: React.MouseEvent) => c.craftQueijoMinasJersey(e) },
+                  { label: 'Doce de Leite Jersey', emoji: '🍮', req: `🥛 2 L.Jersey (${(inventory as any).leite_jersey ?? 0}/2) + 🍯 1 Mel (${(inventory as any).mel ?? 0}/1) • Nv8`, canCraft: farmLevel >= 8 && ((inventory as any).leite_jersey ?? 0) >= 2 && ((inventory as any).mel ?? 0) >= 1, reqLevel: 8, onClick: (e: React.MouseEvent) => c.craftDoceLeiteJersey(e) },
+                  { label: 'Gouda Jersey (matura 8d)', emoji: '🧀', req: `🥛 4 L.Jersey (${(inventory as any).leite_jersey ?? 0}/4) + 🧂 1 Sal (${(inventory as any).sal ?? 0}/1) • Nv10`, canCraft: farmLevel >= 10 && ((inventory as any).leite_jersey ?? 0) >= 4 && ((inventory as any).sal ?? 0) >= 1, reqLevel: 10, onClick: (e: React.MouseEvent) => c.craftGoudaJersey(e) },
                   { label: 'Peixe Defumado', emoji: '🐟', req: `🐟 1 Peixe (${(inventory as any).peixe ?? 0}/1) + 🧂 1 Sal (${(inventory as any).sal ?? 0}/1) • Nv5`, canCraft: farmLevel >= 5 && ((inventory as any).peixe ?? 0) >= 1 && ((inventory as any).sal ?? 0) >= 1, reqLevel: 5, onClick: (e: React.MouseEvent) => c.craftPeixeDefumado(e) },
                   { label: 'Bolinho de Peixe', emoji: '🥟', req: `🐟 1 Peixe (${(inventory as any).peixe ?? 0}/1) + 🌾 1 Farinha (${(inventory as any).farinha ?? 0}/1) + 🥚 1 Ovo (${inventory.egg}/1) • Nv6`, canCraft: farmLevel >= 6 && ((inventory as any).peixe ?? 0) >= 1 && ((inventory as any).farinha ?? 0) >= 1 && (inventory.egg ?? 0) >= 1, reqLevel: 6, onClick: (e: React.MouseEvent) => c.craftBolinhoPeixe(e) },
                   { label: 'Moqueca da Fazenda', emoji: '🍲', req: `🐟 2 Peixes (${(inventory as any).peixe ?? 0}/2) + 🥛 1 Leite (${inventory.milk}/1) + 🧂 1 Sal (${(inventory as any).sal ?? 0}/1) • Nv8`, canCraft: farmLevel >= 8 && ((inventory as any).peixe ?? 0) >= 2 && (inventory.milk ?? 0) >= 1 && ((inventory as any).sal ?? 0) >= 1, reqLevel: 8, onClick: (e: React.MouseEvent) => c.craftMoqueca(e) },

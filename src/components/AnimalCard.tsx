@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { Pencil, Scissors, Utensils } from 'lucide-react';
 import type { Animal, AnimalType, AnimalTrait } from '../types';
 import CaipiraHen from './CaipiraHen';
+import JerseyCow from './JerseyCow';
 
 // ─── Shared helper types ────────────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ export interface AnimalListRowProps {
   onSellOx: (id: number, e: React.MouseEvent) => void;
   onSellFrango?: (id: number, e: React.MouseEvent) => void;
   onCollectPeixe?: (id: number, e: React.MouseEvent) => void;
+  onCollectLeiteJersey?: (id: number, e: React.MouseEvent) => void;
   onFeedTilapia?: (id: number, e: React.MouseEvent) => void;
   onCollectMel?: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
@@ -66,6 +68,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   onSellOx,
   onSellFrango,
   onCollectPeixe,
+  onCollectLeiteJersey,
   onFeedTilapia,
   onCollectMel,
   calculateBoiValue,
@@ -85,6 +88,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   const valueOfPorcoRow = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
   const isReady =
     (animal.type === 'vaca' && animal.hasProducedToday) ||
+    (animal.type === 'vaca_jersey' && animal.hasProducedToday) ||
     (animal.type === 'ovelha' && animal.woolReady) ||
     (animal.type === 'galinha' && animal.hasProducedToday) ||
     (animal.type === 'galinha_caipira' && animal.hasProducedToday) ||
@@ -96,7 +100,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
     (animal.type === 'bufalo' && animal.hasProducedToday && animal.isLactating !== false) ||
     (animal.type === 'cabra_angora' && animal.woolReady);
   const typeLabel: Record<string, string> = {
-    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐', peru: '🦃', cabra_angora: '🐐', frango_corte: '🐓', galinha_caipira: '🐔', tanque_tilapia: '🐟',
+    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐', peru: '🦃', cabra_angora: '🐐', frango_corte: '🐓', galinha_caipira: '🐔', tanque_tilapia: '🐟', vaca_jersey: '🐄',
     lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
     codorna: '🐦', alpaca: '🦙', minhoca: '🪱', caracol: '🐌',
     coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊', porco: '🐷',
@@ -133,6 +137,9 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
             className="text-[9px] font-black px-2 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 cursor-pointer transition-all"
             title="Alimentar"
           >🍽️</button>
+        )}
+        {animal.type === 'vaca_jersey' && animal.hasProducedToday && onCollectLeiteJersey && (
+          <button onClick={e => onCollectLeiteJersey(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-yellow-100 border border-yellow-300 text-yellow-800 hover:bg-yellow-200 cursor-pointer">🥛</button>
         )}
         {animal.type === 'vaca' && animal.hasProducedToday && (
           <button onClick={e => onCollectMilk(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 hover:bg-blue-200 cursor-pointer">🥛</button>
@@ -190,6 +197,7 @@ export interface AnimalCardProps {
   onSellOx: (id: number, e: React.MouseEvent) => void;
   onSellFrango?: (id: number, e: React.MouseEvent) => void;
   onCollectPeixe?: (id: number, e: React.MouseEvent) => void;
+  onCollectLeiteJersey?: (id: number, e: React.MouseEvent) => void;
   onFeedTilapia?: (id: number, e: React.MouseEvent) => void;
   onCollectGoatMilk: (id: number, e: React.MouseEvent) => void;
   onCollectSheepMilk: (id: number, e: React.MouseEvent) => void;
@@ -253,6 +261,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onSellOx,
   onSellFrango,
   onCollectPeixe,
+  onCollectLeiteJersey,
   onFeedTilapia,
   onCollectGoatMilk,
   onCollectSheepMilk,
@@ -470,7 +479,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
           {/* Animal Badge */}
           <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'galinha_caipira' ? '🐔 Galinha Caipira' : animal.type === 'frango_corte' ? '🐓 Frango de Corte' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'peru' ? '🦃 Peru' : animal.type === 'cabra_angora' ? '🐐 Cabra Angorá' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : animal.type === 'tanque_tilapia' ? '🐟 Tanque de Tilápia' : '🐾 Animal'}
+            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'galinha_caipira' ? '🐔 Galinha Caipira' : animal.type === 'frango_corte' ? '🐓 Frango de Corte' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'peru' ? '🦃 Peru' : animal.type === 'cabra_angora' ? '🐐 Cabra Angorá' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : animal.type === 'tanque_tilapia' ? '🐟 Tanque de Tilápia' : animal.type === 'vaca_jersey' ? '🐄 Vaca Jersey' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
           {animal.trait && !['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda', 'tanque_tilapia'].includes(animal.type) && (() => {
@@ -644,6 +653,12 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               <>
                 <span className="select-none">🐑</span>
                 {animal.woolReady && <span className="absolute -bottom-2 -right-1 text-base animate-wool-shiny select-none">🧶</span>}
+              </>
+            )}
+            {animal.type === 'vaca_jersey' && (
+              <>
+                <JerseyCow size={44} />
+                {animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-droplet-flow select-none">🥛</span>}
               </>
             )}
             {animal.type === 'tanque_tilapia' && (
@@ -1332,6 +1347,20 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               💰 Vender
             </button>
           )
+        )}
+
+        {/* Coletar Leite Jersey */}
+        {animal.type === 'vaca_jersey' && (
+          <button
+            type="button"
+            data-onboarding="collect-product-btn"
+            onClick={(e) => { e.preventDefault(); onCollectLeiteJersey?.(animal.id, e); }}
+            disabled={!animal.hasProducedToday}
+            className={`rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none ${animal.hasProducedToday ? 'bg-yellow-600 hover:bg-yellow-500 border-b-4 border-yellow-800 shadow-md active:translate-y-0.5 hover:scale-[1.02]' : 'bg-stone-300 text-stone-500 border-none cursor-not-allowed opacity-60 shadow-none'}`}
+            title={animal.hasProducedToday ? 'Ordenhar a Jersey: 1 Leite Premium rico em gordura' : 'Aguarde o amanhecer para a ordenha'}
+          >
+            🥛 Ordenhar
+          </button>
         )}
 
         {/* Tanque de Tilápia: pescar + alimentar */}

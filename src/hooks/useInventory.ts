@@ -61,6 +61,10 @@ const CRAFT_COSTS: Record<string, { energy: number; water: number }> = {
   peixe_defumado:   { energy: 2, water: 0 },
   bolinho_peixe:    { energy: 1, water: 1 },
   moqueca:          { energy: 2, water: 1 },
+  manteiga_jersey:  { energy: 1, water: 1 },
+  queijo_minas_jersey: { energy: 1, water: 1 },
+  doce_leite_jersey: { energy: 2, water: 0 },
+  gouda_jersey:     { energy: 2, water: 1 },
   creme_cosmetico:  { energy: 1, water: 1 },
   sabonete_natural: { energy: 1, water: 1 },
   serum_facial:     { energy: 2, water: 1 },
@@ -250,6 +254,11 @@ export function useInventory({
           peixe_defumado: inv.peixe_defumado ?? 0,
           bolinho_peixe: inv.bolinho_peixe ?? 0,
           moqueca: inv.moqueca ?? 0,
+          leite_jersey: inv.leite_jersey ?? 0,
+          manteiga_jersey: inv.manteiga_jersey ?? 0,
+          queijo_minas_jersey: inv.queijo_minas_jersey ?? 0,
+          doce_leite_jersey: inv.doce_leite_jersey ?? 0,
+          gouda_jersey: inv.gouda_jersey ?? 0,
           fio_lhama: inv.fio_lhama ?? 0,
           cachecol_lhama: inv.cachecol_lhama ?? 0,
           gorro_lhama: inv.gorro_lhama ?? 0,
@@ -349,6 +358,11 @@ export function useInventory({
       peixe_defumado: 0,
       bolinho_peixe: 0,
       moqueca: 0,
+      leite_jersey: 0,
+      manteiga_jersey: 0,
+      queijo_minas_jersey: 0,
+      doce_leite_jersey: 0,
+      gouda_jersey: 0,
       fio_lhama: 0,
       cachecol_lhama: 0,
       gorro_lhama: 0,
@@ -394,7 +408,7 @@ export function useInventory({
   });
 
   // --- QUEIJARIA STATES ---
-  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt' | 'parmesao' | 'serra' | 'butter' | 'queijo_cabra' | 'iogurte_cabra' | 'iogurte_bufala' | 'manteiga_bufala' | 'doce_leite_bufala' | 'burrata'; diasRestantes: number }[]>(() => {
+  const [queijosEmMaturacao, setQueijosEmMaturacao] = useState<{ tipo: 'coalho' | 'mucarela' | 'brie' | 'buffalo_mozzarella' | 'yogurt' | 'parmesao' | 'serra' | 'butter' | 'queijo_cabra' | 'iogurte_cabra' | 'iogurte_bufala' | 'manteiga_bufala' | 'doce_leite_bufala' | 'burrata' | 'gouda_jersey'; diasRestantes: number }[]>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
       if (saved) {
@@ -625,6 +639,79 @@ export function useInventory({
     addLog('🍲 Moqueca da Fazenda borbulhando! O prato mais nobre da cozinha.', 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍲', '+1 Moqueca', event);
+  };
+
+  // 🧈 Manteiga Jersey: 2 leites jersey
+  const craftManteigaJersey = (event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (((inventory as any).leite_jersey ?? 0) < 2) {
+      addLog('🧈 Falta Leite Jersey! Manteiga Jersey: 2 Leites Jersey.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Falta Leite!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) - 2, manteiga_jersey: ((prev as any).manteiga_jersey ?? 0) + 1 } as any));
+    applyCraftCost('manteiga_jersey');
+    addLog('🧈 Manteiga Jersey amarelinha, batida na hora!', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧈', '+1 Manteiga Jersey', event);
+  };
+
+  // 🧀 Queijo Minas Jersey: 3 leites jersey + 1 sal
+  const craftQueijoMinasJersey = (event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (((inventory as any).leite_jersey ?? 0) < 3 || ((inventory as any).sal ?? 0) < 1) {
+      addLog('🧀 Ingredientes insuficientes! Minas Jersey: 3 Leites Jersey + 1 Sal.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Faltam itens!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) - 3, sal: ((prev as any).sal ?? 0) - 1, queijo_minas_jersey: ((prev as any).queijo_minas_jersey ?? 0) + 1 } as any));
+    applyCraftCost('queijo_minas_jersey');
+    addLog('🧀 Queijo Minas Frescal Jersey pronto — sabor de fazenda!', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧀', '+1 Minas Jersey', event);
+  };
+
+  // 🍮 Doce de Leite Jersey: 2 leites jersey + 1 mel
+  const craftDoceLeiteJersey = (event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (((inventory as any).leite_jersey ?? 0) < 2 || ((inventory as any).mel ?? 0) < 1) {
+      addLog('🍮 Ingredientes insuficientes! Doce de Leite Jersey: 2 Leites Jersey + 1 Mel.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Faltam itens!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) - 2, mel: ((prev as any).mel ?? 0) - 1, doce_leite_jersey: ((prev as any).doce_leite_jersey ?? 0) + 1 } as any));
+    applyCraftCost('doce_leite_jersey');
+    addLog('🍮 Doce de Leite Jersey cremoso no ponto perfeito!', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🍮', '+1 Doce Jersey', event);
+  };
+
+  // 🧀 Gouda Jersey: 4 leites jersey + 1 sal → matura 8 dias nas prateleiras
+  const craftGoudaJersey = (event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    if (queijosEmMaturacao.length >= maxPrateleiras) {
+      addLog('🧀 Prateleiras cheias! Aguarde outros queijos maturarem.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Prateleiras Cheias!', event);
+      return;
+    }
+    if (((inventory as any).leite_jersey ?? 0) < 4 || ((inventory as any).sal ?? 0) < 1) {
+      addLog('🧀 Ingredientes insuficientes! Gouda Jersey: 4 Leites Jersey + 1 Sal.', 'error');
+      triggerAudioResult(() => sfx.playSound('error'));
+      spawnFeedback('❌', 'Faltam itens!', event);
+      return;
+    }
+    setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) - 4, sal: ((prev as any).sal ?? 0) - 1 } as any));
+    setQueijosEmMaturacao(prev => [...prev, { tipo: 'gouda_jersey' as any, diasRestantes: 8 }]);
+    setTotalQueijosFabricados(prev => prev + 1);
+    setStats(prev => ({ ...prev, totalCheese: (prev.totalCheese || 0) + 1 }));
+    applyCraftCost('gouda_jersey');
+    addLog('🧀 Gouda Jersey na prateleira! Maturação de 8 dias iniciada.', 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🧀', 'Gouda maturando', event);
   };
 
   const craftButter = (event?: React.MouseEvent) => {
@@ -1326,6 +1413,11 @@ export function useInventory({
     else if ((itemType as string) === 'peixe_defumado') label = 'Peixe Defumado';
     else if ((itemType as string) === 'bolinho_peixe') label = 'Bolinho de Peixe';
     else if ((itemType as string) === 'moqueca') label = 'Moqueca da Fazenda';
+    else if ((itemType as string) === 'leite_jersey') label = 'Leite Jersey';
+    else if ((itemType as string) === 'manteiga_jersey') label = 'Manteiga Jersey';
+    else if ((itemType as string) === 'queijo_minas_jersey') label = 'Queijo Minas Jersey';
+    else if ((itemType as string) === 'doce_leite_jersey') label = 'Doce de Leite Jersey';
+    else if ((itemType as string) === 'gouda_jersey') label = 'Gouda Jersey';
     else if (itemType === 'goat_milk') label = 'Leite de Cabra';
     else if (itemType === 'llama_wool') label = 'Lã de Lhama';
     else if (itemType === 'duck_egg') label = 'Ovo de Pato';
@@ -2178,6 +2270,10 @@ export function useInventory({
     craftPeixeDefumado,
     craftBolinhoPeixe,
     craftMoqueca,
+    craftManteigaJersey,
+    craftQueijoMinasJersey,
+    craftDoceLeiteJersey,
+    craftGoudaJersey,
     craftButter,
     craftYogurt,
     craftQueijoCabra,

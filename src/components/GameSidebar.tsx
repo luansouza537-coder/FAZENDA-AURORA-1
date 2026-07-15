@@ -189,6 +189,7 @@ export default function GameSidebar({
                       { key: 'llama_wool', label: '🧶 Lã Lhama', qty: inventory.llama_wool ?? 0, priceKey: 'llama_wool' },
                       { key: 'egg', label: '🥚 Ovo', qty: inventory.egg ?? 0, priceKey: 'egg', freshKey: 'egg' },
                       { key: 'ovo_caipira', label: '🥚 Ovo Caipira', qty: (inventory as any).ovo_caipira ?? 0, priceKey: 'ovo_caipira' as any },
+                      { key: 'leite_jersey', label: '🥛 Leite Jersey', qty: (inventory as any).leite_jersey ?? 0, priceKey: 'leite_jersey' as any },
                       { key: 'duck_egg', label: '🥚 Ov. Pato', qty: inventory.duck_egg ?? 0, priceKey: 'duck_egg', freshKey: 'duck_egg' },
                       { key: 'goose_egg', label: '🥚 Ov. Ganso', qty: inventory.goose_egg ?? 0, priceKey: 'goose_egg', freshKey: 'goose_egg' },
                       { key: 'fertile_egg', label: '✨ Ovo Fértil', qty: inventory.fertile_egg ?? 0, priceKey: 'fertile_egg', freshKey: 'fertile_egg', tooltip: '🐣 Use 3 Ovos Férteis na Incubadora para chocar filhotes! Produzido por galinhas felicidade ≥95.' },
@@ -231,6 +232,10 @@ export default function GameSidebar({
                       { key: 'peixe_defumado', label: '🐟 Peixe Defumado', qty: (inventory as any).peixe_defumado ?? 0, priceKey: 'peixe_defumado' as any },
                       { key: 'bolinho_peixe', label: '🥟 Bolinho de Peixe', qty: (inventory as any).bolinho_peixe ?? 0, priceKey: 'bolinho_peixe' as any },
                       { key: 'moqueca', label: '🍲 Moqueca da Fazenda', qty: (inventory as any).moqueca ?? 0, priceKey: 'moqueca' as any },
+                      { key: 'manteiga_jersey', label: '🧈 Manteiga Jersey', qty: (inventory as any).manteiga_jersey ?? 0, priceKey: 'manteiga_jersey' as any },
+                      { key: 'queijo_minas_jersey', label: '🧀 Minas Jersey', qty: (inventory as any).queijo_minas_jersey ?? 0, priceKey: 'queijo_minas_jersey' as any },
+                      { key: 'doce_leite_jersey', label: '🍮 Doce Jersey', qty: (inventory as any).doce_leite_jersey ?? 0, priceKey: 'doce_leite_jersey' as any },
+                      { key: 'gouda_jersey', label: '🧀 Gouda Jersey', qty: (inventory as any).gouda_jersey ?? 0, priceKey: 'gouda_jersey' as any },
                     ]
                   }
                 ];
@@ -372,6 +377,36 @@ export default function GameSidebar({
                   <button type="button" onClick={(e) => sellProduct('moqueca' as any, 1, e)}
                     className="bg-orange-50 hover:bg-orange-100 border border-orange-300 text-orange-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-orange-300">
                     🍲 Moqueca · {(inventory as any).moqueca ?? 0}u ({getActualSellPrice('moqueca' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).leite_jersey ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('leite_jersey' as any, 1, e)}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
+                    🥛 L.Jersey · {(inventory as any).leite_jersey ?? 0}u ({getActualSellPrice('leite_jersey' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).manteiga_jersey ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('manteiga_jersey' as any, 1, e)}
+                    className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-yellow-300">
+                    🧈 Manteiga J. · {(inventory as any).manteiga_jersey ?? 0}u ({getActualSellPrice('manteiga_jersey' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).queijo_minas_jersey ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('queijo_minas_jersey' as any, 1, e)}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-300">
+                    🧀 Minas J. · {(inventory as any).queijo_minas_jersey ?? 0}u ({getActualSellPrice('queijo_minas_jersey' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).doce_leite_jersey ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('doce_leite_jersey' as any, 1, e)}
+                    className="bg-orange-50 hover:bg-orange-100 border border-orange-300 text-orange-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-orange-300">
+                    🍮 Doce J. · {(inventory as any).doce_leite_jersey ?? 0}u ({getActualSellPrice('doce_leite_jersey' as any)}💰)
+                  </button>
+                  )}
+                  {((inventory as any).gouda_jersey ?? 0) > 0 && (
+                  <button type="button" onClick={(e) => sellProduct('gouda_jersey' as any, 1, e)}
+                    className="bg-amber-50 hover:bg-amber-100 border border-amber-400 text-amber-950 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-amber-400">
+                    🧀 Gouda J. · {(inventory as any).gouda_jersey ?? 0}u ({getActualSellPrice('gouda_jersey' as any)}💰)
                   </button>
                   )}
                   {inventory.cheese > 0 && (
