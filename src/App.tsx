@@ -6450,8 +6450,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const getFrangoEmoji = (weight: number): string => {
     if (weight < 0.25) return '🐤';
     if (weight < 0.5) return '🐥';
-    if (weight < 0.75) return '🐓';
-    return '🐓✨';
+    return '🐓';
   };
 
   return (
