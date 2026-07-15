@@ -96,3 +96,26 @@ export function getUniqueOxName(currentAnimals: { type: string; name: string }[]
   // Safe fallback
   return `Boi ${Math.floor(Math.random() * 200) + 1}`;
 }
+
+
+export function getUniqueFrangoName(currentAnimals: { type: string; name: string }[]): string {
+  const existingNumbers = new Set(
+    currentAnimals
+      .filter(a => a.type === 'frango_corte')
+      .map(a => {
+        const match = a.name.match(/Frango\s+(\d+)/i);
+        return match ? parseInt(match[1], 10) : null;
+      })
+      .filter((n): n is number => n !== null)
+  );
+
+  let attempts = 0;
+  while (attempts < 1000) {
+    const r = Math.floor(Math.random() * 500) + 1;
+    if (!existingNumbers.has(r)) {
+      return `Frango ${r}`;
+    }
+    attempts++;
+  }
+  return `Frango ${Date.now() % 1000}`;
+}

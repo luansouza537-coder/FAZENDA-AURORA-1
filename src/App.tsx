@@ -992,6 +992,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       totalMilk: 0,
       totalWool: 0,
       totalOxSold: 0,
+      totalFrangoSold: 0,
       totalCheese: 0,
       totalScarf: 0,
       totalEggs: 0,
@@ -2142,6 +2143,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     getAnimalPurchasePrice,
     getCarneMultiplier,
     calculateBoiValue,
+    calculateFrangoValue,
     calcFairScore,
     feedAnimal,
     collectEgg,
@@ -2163,6 +2165,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     sellAvestruz,
     sellJacare,
     sellOx,
+    sellFrango,
     sellPeru,
     calculatePeruValue,
     sellPorco,
@@ -2826,7 +2829,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (a.type === 'vaca' || a.type === 'boi' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
         else if (a.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
         else if (a.type === 'ovelha' || a.type === 'ovelha_leiteira' || a.type === 'cabra' || a.type === 'cabra_angora' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
-        else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
+        else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao' || a.type === 'frango_corte') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
         else if (a.type === 'pato' || a.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
         else if (a.type === 'coelho_angora') { feedType = 'racaoCoelho'; feedLabel = 'Ração de Coelhos'; }
         else if (a.type === 'ra' || a.type === 'avestruz' || a.type === 'jacare') { feedType = 'racaoCarnivora'; feedLabel = 'Ração Carnívora'; }
@@ -3001,6 +3004,25 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.15) + gain));
         if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
           logs.push({ msg: `🏆 ${copy.name} (Boi) atingiu o peso ideal! Você obterá valor máximo na venda!`, type: 'success' });
+        }
+      }
+      else if (copy.type === 'frango_corte') {
+        // Frango de Corte: engorda em ~8 dias bem cuidado; calor do verão
+        // reduz o ganho em 25% (Estábulo climatiza e anula o efeito)
+        let gain = 0.06;
+        if (copy.hunger > 65) gain += 0.04;
+        if (copy.happiness > 70) gain += 0.02;
+        if (copy.hunger < 20) gain -= 0.04;
+        if (copy.isBestFriend) gain += 0.05;
+        if (copy.hunger < 12) {
+          gain = -0.02;
+        } else {
+          gain = Math.min(0.13, Math.max(0, gain));
+        }
+        if (getEstacaoKey(dayForSeason) === 'verao' && !hasStable) gain *= 0.75;
+        copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.05) + gain));
+        if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
+          logs.push({ msg: `🏆 ${copy.name} (Frango de Corte) atingiu o peso ideal! Hora de vender na feira!`, type: 'success' });
         }
       }
       else if (copy.type === 'peru') {
@@ -3309,7 +3331,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           let benefitTxt = "";
           if (copy.type === 'vaca') benefitTxt = "+1 leite diário permanente!";
           if (copy.type === 'ovelha') benefitTxt = "lã a cada 2 dias em vez de 3!";
-          if (copy.type === 'boi') benefitTxt = "+0.05 de ganho de peso!";
+          if (copy.type === 'boi' || copy.type === 'frango_corte') benefitTxt = "+0.05 de ganho de peso!";
           if (copy.type === 'galinha') benefitTxt = "+1 ovo diário permanente!";
 
           logs.push({
@@ -5674,7 +5696,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (type === 'vaca' || type === 'boi' || type === 'bufalo') return 'racaoBovina';
             if (type === 'porco') return 'racaoSuina';
             if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
-            if (type === 'galinha' || type === 'codorna' || type === 'pavao') return 'racaoAves';
+            if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'frango_corte') return 'racaoAves';
             if (type === 'pato' || type === 'ganso') return 'racaoAquatica';
             if (type === 'coelho_angora') return 'racaoCoelho';
             return 'racaoCarnivora';
@@ -6405,6 +6427,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     return '🐂👑';
   };
 
+  const getFrangoEmoji = (weight: number): string => {
+    if (weight < 0.25) return '🐤';
+    if (weight < 0.5) return '🐥';
+    if (weight < 0.75) return '🐓';
+    return '🐓✨';
+  };
+
   return (
     <div className={`min-h-screen bg-gradient-to-br ${currentScreen === 'game' ? seasonBg : 'from-emerald-800 via-[#064e3b] to-emerald-950'} p-4 sm:p-6 md:p-8 flex items-center justify-center font-sans relative overflow-hidden transition-all duration-1000`}>
       
@@ -7058,7 +7087,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             collectHumus={collectHumus}
             collectMuco={collectMuco}
             sellOx={sellOx}
+            sellFrango={sellFrango}
             calculateBoiValue={calculateBoiValue}
+            calculateFrangoValue={calculateFrangoValue}
             calculatePorcoValue={calculatePorcoValue}
             sellPorco={sellPorco}
             sellPeru={sellPeru}
@@ -7100,6 +7131,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             getTraitInfo={getTraitInfo}
             getLifePhase={getLifePhase}
             getBoiEmoji={getBoiEmoji}
+            getFrangoEmoji={getFrangoEmoji}
             renderGrowthBadge={renderGrowthBadge}
             setCruzarModal={setCruzarModal}
             saveRename={saveRename}

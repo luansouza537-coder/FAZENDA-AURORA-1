@@ -36,6 +36,9 @@ interface AnimalGridProps {
   collectEgg: (id: number, e?: React.MouseEvent) => void;
   sellOx: (id: number, e?: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
+  calculateFrangoValue?: (animal: Animal) => number;
+  sellFrango?: (id: number, e: React.MouseEvent) => void;
+  getFrangoEmoji?: (weight: number) => string;
   calculatePorcoValue: (animal: Animal) => number;
   sellPorco: (id: number, e?: React.MouseEvent) => void;
   sellPeru: (id: number, e?: React.MouseEvent) => void;
@@ -121,6 +124,9 @@ export default function AnimalGrid({
   collectEgg,
   sellOx,
   calculateBoiValue,
+  calculateFrangoValue,
+  sellFrango,
+  getFrangoEmoji,
   calculatePorcoValue,
   sellPorco,
   sellPeru,
@@ -335,6 +341,28 @@ export default function AnimalGrid({
                   </div>
 
                   {/* Chicken */}
+
+                  {/* Frango de Corte */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
+                    <span className="text-4xl">🐓</span>
+                    <h4 className="font-display font-black text-[#78350f] text-xs uppercase mt-1">Frango de Corte</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Engorda em ~8 dias e vale até ~45💰 na Feira! Cuidado com o calor do verão — o Estábulo protege.</p>
+                    <span className="text-[#92400e] text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('frango_corte')}</span>
+                    <div className="relative w-full">
+                      {farmLevel >= 4 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white font-black text-[8px] px-1 py-0.5 rounded-full uppercase z-10">10% Off</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => buyAnimal('frango_corte', e)}
+                        disabled={gold < getAnimalPurchasePrice('frango_corte') || farmLevel < 2}
+                        className="mt-2.5 w-full bg-[#10b981] hover:bg-[#059669] disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-[#065f46] shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                        title="Compra um pintinho de corte. Engorda em ~8 dias e é vendido vivo na feira."
+                      >
+                        {farmLevel < 2 ? '🔒 Nível 2' : 'Comprar + 1 🌾'}
+                      </button>
+                    </div>
+                  </div>
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel >= 4 && (
                       <span className="absolute -top-2.5 -right-2 bg-red-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">10% Off</span>
@@ -742,7 +770,7 @@ export default function AnimalGrid({
                       const lotIndex = Math.floor(i / 5);
                       const slotAnimal = animals[i];
                       const typeEmoji: Record<string, string> = {
-                        vaca:'🐄', ovelha:'🐑', boi:'🐂', galinha:'🐔', cabra:'🐐',
+                        vaca:'🐄', ovelha:'🐑', boi:'🐂', galinha:'🐔', cabra:'🐐', frango_corte:'🐓',
                         lhama:'🦙', pato:'🦆', ganso:'🦢', bufalo:'🐃', pavao:'🦚',
                         codorna:'🐦', alpaca:'🦙', minhoca:'🪱', caracol:'🐌',
                         coelho_angora:'🐰', bicho_seda:'🐛', ra:'🐸', avestruz:'🦤', jacare:'🐊',
@@ -828,7 +856,7 @@ export default function AnimalGrid({
                         if (animalFilter === 'all') return true;
                         if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday) || (a.type === 'cabra_angora' && a.woolReady);
                         if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo'].includes(a.type);
-                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru'].includes(a.type);
+                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru','frango_corte'].includes(a.type);
                         if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra_angora','cabra','bicho_seda'].includes(a.type);
                         if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
                         return a.type === animalFilter;
@@ -937,7 +965,7 @@ export default function AnimalGrid({
                         if (animalFilter === 'all') return true;
                         if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday) || (a.type === 'cabra_angora' && a.woolReady);
                         if (animalFilter === '__bovinos__') return ['vaca','boi','bufalo'].includes(a.type);
-                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru'].includes(a.type);
+                        if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru','frango_corte'].includes(a.type);
                         if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra_angora','cabra','bicho_seda'].includes(a.type);
                         if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
                         return a.type === animalFilter;
@@ -967,6 +995,8 @@ export default function AnimalGrid({
                               onCollectWool={collectWool}
                               onCollectEgg={collectEgg}
                               onSellOx={sellOx}
+                              onSellFrango={sellFrango}
+                              calculateFrangoValue={calculateFrangoValue}
                               calculateBoiValue={calculateBoiValue}
                               calculatePorcoValue={calculatePorcoValue}
                               onSellPorco={sellPorco}
@@ -997,6 +1027,9 @@ export default function AnimalGrid({
                         onCollectWool={collectWool}
                         onCollectEgg={collectEgg}
                         onSellOx={sellOx}
+                        onSellFrango={sellFrango}
+                        calculateFrangoValue={calculateFrangoValue}
+                        getFrangoEmoji={getFrangoEmoji}
                         onCollectGoatMilk={collectGoatMilk}
                         onCollectSheepMilk={collectSheepMilk}
                         onCollectLlamaWool={collectLlamaWool}

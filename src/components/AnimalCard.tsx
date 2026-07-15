@@ -41,8 +41,10 @@ export interface AnimalListRowProps {
   onCollectWool: (id: number, e: React.MouseEvent) => void;
   onCollectEgg: (id: number, e: React.MouseEvent) => void;
   onSellOx: (id: number, e: React.MouseEvent) => void;
+  onSellFrango?: (id: number, e: React.MouseEvent) => void;
   onCollectMel?: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
+  calculateFrangoValue?: (animal: Animal) => number;
   calculatePorcoValue: (animal: Animal) => number;
   onSellPorco: (id: number, e: React.MouseEvent) => void;
   onSellPeru?: (id: number, e: React.MouseEvent) => void;
@@ -59,8 +61,10 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   onCollectWool,
   onCollectEgg,
   onSellOx,
+  onSellFrango,
   onCollectMel,
   calculateBoiValue,
+  calculateFrangoValue,
   calculatePorcoValue,
   onSellPorco,
   onSellPeru,
@@ -72,19 +76,21 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   const noHappinessAnimal = ['minhoca','caracol','colmeia_abelhas','bicho_seda'].includes(animal.type);
   const isCritical = (!noHappinessAnimal && animal.happiness < 20) || (!noHungerAnimal && animal.hunger < 25);
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
+  const valueOfFrango = animal.type === 'frango_corte' && calculateFrangoValue ? calculateFrangoValue(animal) : 0;
   const valueOfPorcoRow = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
   const isReady =
     (animal.type === 'vaca' && animal.hasProducedToday) ||
     (animal.type === 'ovelha' && animal.woolReady) ||
     (animal.type === 'galinha' && animal.hasProducedToday) ||
     (animal.type === 'boi' && (animal.weightGain || 0) >= 0.8) ||
+    (animal.type === 'frango_corte' && (animal.weightGain || 0) >= 0.8) ||
     (animal.type === 'porco' && (animal.weightGain || 0) >= 0.8) ||
     (animal.type === 'cabra' && animal.isLactating && animal.hasProducedToday) ||
     (animal.type === 'pato' && animal.hasProducedToday) ||
     (animal.type === 'bufalo' && animal.hasProducedToday && animal.isLactating !== false) ||
     (animal.type === 'cabra_angora' && animal.woolReady);
   const typeLabel: Record<string, string> = {
-    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐', peru: '🦃', cabra_angora: '🐐',
+    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐', peru: '🦃', cabra_angora: '🐐', frango_corte: '🐓',
     lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
     codorna: '🐦', alpaca: '🦙', minhoca: '🪱', caracol: '🐌',
     coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊', porco: '🐷',
@@ -110,7 +116,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
       <div className="flex items-center gap-1 ml-auto">
         {!['bicho_seda', 'minhoca', 'caracol', 'colmeia_abelhas'].includes(animal.type) && <span className="text-[10px] font-mono text-stone-500">❤️{animal.happiness}%</span>}
         {!noHungerAnimal && <span className="text-[10px] font-mono text-stone-500">🍽️{animal.hunger}%</span>}
-        {(animal.type === 'boi' || animal.type === 'porco' || animal.type === 'peru') && <span className="text-[10px] font-mono text-stone-500">🔥{Math.floor((animal.weightGain||0)*100)}%</span>}
+        {(animal.type === 'boi' || animal.type === 'porco' || animal.type === 'peru' || animal.type === 'frango_corte') && <span className="text-[10px] font-mono text-stone-500">🔥{Math.floor((animal.weightGain||0)*100)}%</span>}
         {isCritical && <span className="text-[9px] bg-red-500 text-white font-black px-1.5 py-0.5 rounded-full animate-pulse">⚠️</span>}
         {isReady && <span className="text-[9px] bg-green-500 text-white font-black px-1.5 py-0.5 rounded-full">✅ Pronto</span>}
       </div>
@@ -133,6 +139,9 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
         )}
         {animal.type === 'boi' && animal.isAdult !== false && (
           <button onClick={e => onSellOx(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-red-100 border border-red-300 text-red-800 hover:bg-red-200 cursor-pointer">💰{valueOfOx}</button>
+        )}
+        {animal.type === 'frango_corte' && onSellFrango && (
+          <button onClick={e => onSellFrango(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-red-100 border border-red-300 text-red-800 hover:bg-red-200 cursor-pointer">💰{valueOfFrango}</button>
         )}
         {animal.type === 'colmeia_abelhas' && animal.melReady && (
           <button onClick={e => onCollectMel?.(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 cursor-pointer">🍯</button>
@@ -170,6 +179,7 @@ export interface AnimalCardProps {
   onCollectWool: (id: number, e: React.MouseEvent) => void;
   onCollectEgg: (id: number, e: React.MouseEvent) => void;
   onSellOx: (id: number, e: React.MouseEvent) => void;
+  onSellFrango?: (id: number, e: React.MouseEvent) => void;
   onCollectGoatMilk: (id: number, e: React.MouseEvent) => void;
   onCollectSheepMilk: (id: number, e: React.MouseEvent) => void;
   onCollectLlamaWool: (id: number, e: React.MouseEvent) => void;
@@ -190,6 +200,7 @@ export interface AnimalCardProps {
   onSellAnimal: (id: number, e: React.MouseEvent) => void;
   onRetireAnimal: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
+  calculateFrangoValue?: (animal: Animal) => number;
   calculatePorcoValue: (animal: Animal) => number;
   onSellPorco: (id: number, e: React.MouseEvent) => void;
   onSellPeru?: (id: number, e: React.MouseEvent) => void;
@@ -199,6 +210,7 @@ export interface AnimalCardProps {
   getTraitInfo: (trait: AnimalTrait) => TraitInfo;
   getLifePhase: (animal: { age?: number; maxAge?: number; isAdult?: boolean; adulthoodDay?: number }) => LifePhase;
   getBoiEmoji: (weight: number) => string;
+  getFrangoEmoji?: (weight: number) => string;
   renderGrowthBadge: (weight: number) => React.ReactNode;
   onSetCruzarModal: (val: { animalId: number; type: AnimalType }) => void;
   onSetEditingId: (id: number | null) => void;
@@ -228,6 +240,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onCollectWool,
   onCollectEgg,
   onSellOx,
+  onSellFrango,
   onCollectGoatMilk,
   onCollectSheepMilk,
   onCollectLlamaWool,
@@ -248,6 +261,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onSellAnimal,
   onRetireAnimal,
   calculateBoiValue,
+  calculateFrangoValue,
   calculatePorcoValue,
   onSellPorco,
   onSellPeru,
@@ -257,6 +271,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   getTraitInfo,
   getLifePhase,
   getBoiEmoji,
+  getFrangoEmoji,
   renderGrowthBadge,
   onSetCruzarModal,
   onSetEditingId,
@@ -270,6 +285,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 }) => {
   const [pendingSell, setPendingSell] = useState(false);
   const [pendingSellOx, setPendingSellOx] = useState(false);
+  const [pendingSellFrango, setPendingSellFrango] = useState(false);
   const [pendingSellAvestruz, setPendingSellAvestruz] = useState(false);
   const [pendingSellPeru, setPendingSellPeru] = useState(false);
   const [pendingSellJacare, setPendingSellJacare] = useState(false);
@@ -278,6 +294,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
   const isEditing = editingId === animal.id;
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
+  const valueOfFrango = animal.type === 'frango_corte' && calculateFrangoValue ? calculateFrangoValue(animal) : 0;
   const valueOfPorco = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
   const valueOfPeru = animal.type === 'peru' && calculatePeruValue ? calculatePeruValue(animal) : 0;
 
@@ -613,6 +630,9 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             )}
             {animal.type === 'boi' && (
               <span className="select-none">{getBoiEmoji(animal.weightGain || 0.15)}</span>
+            )}
+            {animal.type === 'frango_corte' && (
+              <span className="select-none">{getFrangoEmoji ? getFrangoEmoji(animal.weightGain || 0.05) : '🐓'}</span>
             )}
             {animal.type === 'peru' && (
               <span className="select-none">🦃</span>
@@ -954,6 +974,25 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 </div>
               </div>
             )}
+            {animal.type === 'frango_corte' && (
+              <div className="flex flex-col gap-1 w-full uppercase">
+                <div className="flex justify-between items-center w-full">
+                  <span className="flex items-center gap-1 text-[11px]">
+                    📈 Peso: <span className="font-mono font-black ml-1 text-xs">{Math.floor((animal.weightGain || 0.05) * 100)}%</span>
+                  </span>
+                  {renderGrowthBadge(animal.weightGain || 0.05)}
+                </div>
+                <div className="w-full bg-[#e5e7eb] h-2.5 rounded-full overflow-hidden mt-1 border border-stone-300 relative">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.floor((animal.weightGain || 0.05) * 100)}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-[#78350f]/80 font-mono text-left border-t border-[#fbbf24]/50 pt-1 mt-1.5 leading-none self-start w-full">
+                  Pronto em ~8 dias · Valor na Feira: 💰 ~{valueOfFrango} moedas
+                </div>
+              </div>
+            )}
             {animal.type === 'cabra_angora' && (
               <>
                 {animal.woolReady ? (
@@ -1259,6 +1298,28 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
           )
         )}
 
+        {/* Sell Frango de Corte */}
+        {animal.type === 'frango_corte' && onSellFrango && (
+          pendingSellFrango ? (
+            <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-300 rounded-xl px-2 py-1.5 w-full">
+              <span className="text-[9px] font-mono font-black text-red-700 leading-tight flex-1">Vender {animal.name}?<br/><span className="text-red-500">~{valueOfFrango}💰</span></span>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellFrango(false); onSellFrango(animal.id, e); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellFrango(false); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); setPendingSellFrango(true); }}
+              className="bg-red-500 hover:bg-[#dc2626] border-b-4 border-[#991b1b] shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+              title={`Vender Frango: venda imediata na Feira. Retorna moedas baseadas no peso (%): 💰 ~${valueOfFrango}`}
+            >
+              💰 Vender
+            </button>
+          )
+        )}
+
         {/* Sell Peru */}
         {animal.type === 'peru' && onSellPeru && (
           pendingSellPeru ? (
@@ -1341,7 +1402,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         )}
 
         {/* Vender Animal — qualquer adulto exceto boi, porco, avestruz, jacaré, cabra, lhama, búfalo, bicho_seda (têm botões próprios ou ciclo curto sem sentido de venda) */}
-        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'ovelha_leiteira' && animal.type !== 'lhama' && animal.type !== 'bufalo' && animal.type !== 'ganso' && animal.type !== 'bicho_seda' && (() => {
+        {animal.isAdult !== false && animal.type !== 'boi' && animal.type !== 'frango_corte' && animal.type !== 'porco' && animal.type !== 'avestruz' && animal.type !== 'jacare' && animal.type !== 'cabra' && animal.type !== 'ovelha_leiteira' && animal.type !== 'lhama' && animal.type !== 'bufalo' && animal.type !== 'ganso' && animal.type !== 'bicho_seda' && (() => {
           const age = animal.age ?? 0;
           const maxAge = animal.maxAge ?? 90;
           const lifeFraction = Math.min(1, age / maxAge);
