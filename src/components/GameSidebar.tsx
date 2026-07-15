@@ -667,8 +667,8 @@ export default function GameSidebar({
                   {(inventory.peixe ?? 0) > 0 && (
                   <button type="button" onClick={(e) => sellProduct('peixe' as any, 1, e)} disabled={(inventory.peixe ?? 0) < 1}
                     className="bg-blue-50 hover:bg-blue-100 border border-blue-300 disabled:opacity-40 disabled:cursor-not-allowed text-blue-900 py-2 rounded-xl text-[10px] font-sans font-extrabold uppercase active:scale-95 hover:scale-[1.03] transition-all cursor-pointer shadow-sm border-b-2 border-blue-300"
-                    title="Vende 1 Peixe do Lago. Preço base: 45 moedas.">
-                    🐟 Peixe · {inventory.peixe ?? 0}u ({getActualSellPrice('peixe' as any)}💰)
+                    title="Vende 1 Tilápia. Preço base: 45 moedas.">
+                    🐟 Tilápia · {inventory.peixe ?? 0}u ({getActualSellPrice('peixe' as any)}💰)
                   </button>
                   )}
 

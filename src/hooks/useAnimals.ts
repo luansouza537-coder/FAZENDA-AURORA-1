@@ -1243,7 +1243,7 @@ export function useAnimals({
     setAnimals(prev => prev.map(a => a.id === id ? { ...a, fishReady: false } : a));
     addLog(`🐟 Pescaria no tanque: +${qty} tilápia(s) fresquinha(s)!`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🐟', `+${qty} Peixe`, event);
+    spawnFeedback('🐟', `+${qty} Tilápia`, event);
     updateMissionProgress('collect_items', qty);
     updateMissionProgress('collect_fish', qty);
     onItemCollected?.();

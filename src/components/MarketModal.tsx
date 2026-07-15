@@ -271,7 +271,7 @@ const MarketModal: React.FC<MarketModalProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {landBiomes.some(b => b.biome === 'lago') && (
                     <div className="bg-white border border-blue-200 rounded-xl p-3">
-                      <div className="font-display font-black text-xs uppercase text-[#78350f]">🐟 Peixe (Lago)</div>
+                      <div className="font-display font-black text-xs uppercase text-[#78350f]">🐟 Tilápia</div>
                       <div className="text-stone-400 text-[9px] font-mono">Base: 45💰 | Atual: {m.getActualSellPrice('peixe' as any)}💰</div>
                       <div className="text-[9px] text-stone-400 font-mono">Estoque: {inventory.peixe ?? 0}u · Produz a cada 3 dias</div>
                     </div>

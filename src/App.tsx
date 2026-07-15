@@ -5958,9 +5958,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           const eggsCollected = finalAnimals.filter(a => a.type === 'galinha' && a.isAdult !== false && a.hasProducedToday).length;
           const duckEggs = finalAnimals.filter(a => a.type === 'pato' && a.isAdult !== false && a.hasProducedToday).length;
           const gooseEggs = finalAnimals.filter(a => a.type === 'ganso' && a.isAdult !== false && a.hasProducedToday).length;
+          const caipiraEggs = finalAnimals.filter(a => a.type === 'galinha_caipira' && a.isAdult !== false && a.hasProducedToday).length;
           const ostrichReady = finalAnimals.filter(a => a.type === 'avestruz' && a.isAdult !== false && a.woolReady).length;
           const avicultorIds = new Set(finalAnimals.filter(a => {
-            if ((a.type === 'galinha' || a.type === 'pato' || a.type === 'ganso') && a.isAdult !== false && a.hasProducedToday) return true;
+            if ((a.type === 'galinha' || a.type === 'pato' || a.type === 'ganso' || a.type === 'galinha_caipira') && a.isAdult !== false && a.hasProducedToday) return true;
             if (a.type === 'avestruz' && a.isAdult !== false && a.woolReady) return true;
             return false;
           }).map(a => a.id));
@@ -5968,6 +5969,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setAnimals(prev => prev.map(a => {
               if (!avicultorIds.has(a.id)) return a;
               if (a.type === 'avestruz') return { ...a, woolReady: false, daysSinceLastWool: 0 };
+              if (a.type === 'galinha_caipira') return { ...a, hasProducedToday: false, daysSinceLastEgg: 0 };
               return { ...a, hasProducedToday: false };
             }));
           }
@@ -5982,6 +5984,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (gooseEggs > 0) {
             setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) + gooseEggs }));
             logsToAdd.push({ msg: `🦢 Avicultor coletou +${gooseEggs} ovo(s) de ganso!`, type: 'success' });
+          }
+          if (caipiraEggs > 0) {
+            setInventory(prev => ({ ...prev, ovo_caipira: ((prev as any).ovo_caipira ?? 0) + caipiraEggs } as any));
+            logsToAdd.push({ msg: `🐔 Avicultor coletou +${caipiraEggs} ovo(s) caipira!`, type: 'success' });
           }
         }
 
@@ -6154,7 +6160,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           const fishAmt = lagoCount;
           setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) + fishAmt }));
           setBiomeWeeklyIncome(prev => ({ ...prev, lago: prev.lago + fishAmt * 45 }));
-          logsToAdd.push({ msg: `🐟 Lago produziu ${fishAmt} peixe(s)!`, type: 'success' });
+          logsToAdd.push({ msg: `🐟 Lago produziu ${fishAmt} tilápia(s)!`, type: 'success' });
         }
 
         // Floresta biome: produces mushroom every 4 days (mel now produced by colmeias)

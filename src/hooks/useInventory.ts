@@ -599,7 +599,7 @@ export function useInventory({
   const craftPeixeDefumado = (event: React.MouseEvent) => {
     if (event) event.preventDefault();
     if ((inventory.peixe ?? 0) < 1 || ((inventory as any).sal ?? 0) < 1) {
-      addLog('🐟 Ingredientes insuficientes! Peixe Defumado: 1 Peixe + 1 Sal.', 'error');
+      addLog('🐟 Ingredientes insuficientes! Peixe Defumado: 1 Tilápia + 1 Sal.', 'error');
       triggerAudioResult(() => sfx.playSound('error'));
       spawnFeedback('❌', 'Faltam itens!', event);
       return;
@@ -615,7 +615,7 @@ export function useInventory({
   const craftBolinhoPeixe = (event: React.MouseEvent) => {
     if (event) event.preventDefault();
     if ((inventory.peixe ?? 0) < 1 || ((inventory as any).farinha ?? 0) < 1 || (inventory.egg ?? 0) < 1) {
-      addLog('🥟 Ingredientes insuficientes! Bolinho de Peixe: 1 Peixe + 1 Farinha + 1 Ovo.', 'error');
+      addLog('🥟 Ingredientes insuficientes! Bolinho de Peixe: 1 Tilápia + 1 Farinha + 1 Ovo.', 'error');
       triggerAudioResult(() => sfx.playSound('error'));
       spawnFeedback('❌', 'Faltam itens!', event);
       return;
@@ -631,7 +631,7 @@ export function useInventory({
   const craftMoqueca = (event: React.MouseEvent) => {
     if (event) event.preventDefault();
     if ((inventory.peixe ?? 0) < 2 || (inventory.milk ?? 0) < 1 || ((inventory as any).sal ?? 0) < 1) {
-      addLog('🍲 Ingredientes insuficientes! Moqueca: 2 Peixes + 1 Leite + 1 Sal.', 'error');
+      addLog('🍲 Ingredientes insuficientes! Moqueca: 2 Tilápias + 1 Leite + 1 Sal.', 'error');
       triggerAudioResult(() => sfx.playSound('error'));
       spawnFeedback('❌', 'Faltam itens!', event);
       return;
@@ -1414,6 +1414,7 @@ export function useInventory({
     else if ((itemType as string) === 'ovo_caipira') label = 'Ovo Caipira';
     else if ((itemType as string) === 'bolo_caipira') label = 'Bolo Caipira';
     else if ((itemType as string) === 'pudim_caipira') label = 'Pudim Caipira';
+    else if ((itemType as string) === 'peixe') label = 'Tilápia';
     else if ((itemType as string) === 'peixe_defumado') label = 'Peixe Defumado';
     else if ((itemType as string) === 'bolinho_peixe') label = 'Bolinho de Peixe';
     else if ((itemType as string) === 'moqueca') label = 'Moqueca da Fazenda';
@@ -1864,7 +1865,7 @@ export function useInventory({
     if (couroAvestruzQty > 0) messageParts.push(`${couroAvestruzQty} couro de avestruz`);
     if (carneJacareQty > 0) messageParts.push(`${carneJacareQty} carne de jacaré`);
     if (couroJacareQty > 0) messageParts.push(`${couroJacareQty} couro de jacaré`);
-    if (peixeQty > 0) messageParts.push(`${peixeQty} peixes`);
+    if (peixeQty > 0) messageParts.push(`${peixeQty} tilápias`);
     if (melQty > 0) messageParts.push(`${melQty} mel`);
     if (cogumeloQty > 0) messageParts.push(`${cogumeloQty} cogumelos`);
     if (hidromelQty > 0) messageParts.push(`${hidromelQty} hidromeis`);
@@ -1948,7 +1949,7 @@ export function useInventory({
 
   const craftConservaPeixe = (event?: React.MouseEvent) => {
     if (farmLevel < 4) { addLog('🐟 Conserva requer Nível 4!', 'error'); return; }
-    if ((inventory.peixe ?? 0) < 2) { addLog('🐟 Precisa: 2 Peixe', 'error'); return; }
+    if ((inventory.peixe ?? 0) < 2) { addLog('🐟 Precisa: 2 Tilápias', 'error'); return; }
     setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 2, conserva_peixe: (prev.conserva_peixe ?? 0) + 1 }));
     applyCraftCost('conserva_peixe');
     addLog('🐟 Conserva de Peixe envasada! (+95💰)', 'success');
