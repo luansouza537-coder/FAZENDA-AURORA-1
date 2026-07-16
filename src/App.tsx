@@ -581,6 +581,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [lastUpgradeDay, setLastUpgradeDay] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).lastUpgradeDay ?? -1; } catch(e) {} return -1;
   });
+  // Nível da fazenda na última visita à Loja — usado para o selo "Novo!" quando algo desbloqueia
+  const [lojaSeenLevel, setLojaSeenLevel] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).lojaSeenLevel ?? 1; } catch(e) {} return 1;
+  });
 
   // --- OFICINA DE AUTOMAÇÃO ---
   const [milkerLevel, setMilkerLevel] = useState<number>(() => {
@@ -2734,6 +2738,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         shownMilestones,
         vehicleTiers,
         lastUpgradeDay,
+        lojaSeenLevel,
         onboardingStep,
         weather,
       };
@@ -6808,12 +6813,15 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </button>
               <button
                 data-onboarding="loja-btn"
-                onClick={() => { setShowUpgradesModal(true); triggerAudioResult(() => sfx.playSound('click')); }}
-                className="bg-orange-600 border-3 border-orange-400 hover:bg-orange-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#7c2d12] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
+                onClick={() => { setShowUpgradesModal(true); setLojaSeenLevel(farmLevel); triggerAudioResult(() => sfx.playSound('click')); }}
+                className="relative bg-orange-600 border-3 border-orange-400 hover:bg-orange-500 text-white font-mono font-black text-xs px-3 py-2.5 rounded-full active:translate-y-0.5 shadow-[0_4px_0_#7c2d12] cursor-pointer transition-all hover:scale-105 flex items-center gap-1 focus:outline-none"
                 title="Loja da Fazenda: infraestrutura, consumíveis e upgrades"
               >
                 <span>🏪</span>
                 <span>Loja</span>
+                {farmLevel > lojaSeenLevel && (
+                  <span className="absolute -top-1.5 -right-1 bg-yellow-400 text-[#451a03] text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase animate-pulse pointer-events-none">Novo!</span>
+                )}
               </button>
             </div>
 

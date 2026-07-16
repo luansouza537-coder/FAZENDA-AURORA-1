@@ -88,8 +88,90 @@ const VEHICLE_CATEGORIES = [
   { key: 'luxo',      label: '💎 Luxo, Exóticos e Gourmet', desc: 'Penas, couros, cosméticos e kits premium',        penalty: [8,  4, 0], winterExtra: [6, 3, 0], vehicles: ['Caixinha de Papelão', 'Maleta Segura', 'Transportadora Premium'], prices: [0, 500, 2000] },
 ];
 
+const LOT_TIERS = [
+  { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3000, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 10000, minLevel: 8 },
+  { lot: 6, price: 28000, minLevel: 10 }, { lot: 7, price: 70000, minLevel: 12 }, { lot: 8, price: 350000, minLevel: 14 }, { lot: 9, price: 800000, minLevel: 16 }, { lot: 10, price: 2000000, minLevel: 18 },
+];
+const WELL_TIERS = [{ lvl: 1, price: 700 }, { lvl: 2, price: 2000 }, { lvl: 3, price: 5500 }, { lvl: 4, price: 25000 }, { lvl: 5, price: 70000 }];
+const SOLAR_TIERS = [{ lvl: 1, price: 1200, minFarm: 1 }, { lvl: 2, price: 3500, minFarm: 1 }, { lvl: 3, price: 9000, minFarm: 5 }, { lvl: 4, price: 40000, minFarm: 14 }];
+const IRRIG_TIERS = [{ lvl: 1, price: 1500 }, { lvl: 2, price: 4500 }, { lvl: 3, price: 20000 }];
+const CELEIRO_TIERS = [
+  { level: 1, label: 'Celeiro Básico', capacity: 60, price: 500, minLevel: 2 },
+  { level: 2, label: 'Celeiro Ampliado', capacity: 120, price: 1500, minLevel: 5 },
+  { level: 3, label: 'Celeiro Grande', capacity: 250, price: 4000, minLevel: 9 },
+  { level: 4, label: 'Celeiro Industrial', capacity: 999, price: 10000, minLevel: 14 },
+] as const;
+const CAMARA_TIERS = [
+  { level: 1, label: 'Câmara Fria Básica', capacity: 40, price: 800, minLevel: 3 },
+  { level: 2, label: 'Câmara Fria Pequena', capacity: 80, price: 2500, minLevel: 6 },
+  { level: 3, label: 'Câmara Fria Grande', capacity: 180, price: 6000, minLevel: 11 },
+] as const;
+const PRAT_TIERS = [{ slots: 4, price: 300 }, { slots: 6, price: 800 }, { slots: 8, price: 2000 }, { slots: 10, price: 5000 }, { slots: 12, price: 12000 }];
+
+const Section: React.FC<{
+  title: string; summary: string; hasAvailable: boolean; open: boolean; onToggle: () => void; children: React.ReactNode;
+}> = ({ title, summary, hasAvailable, open, onToggle, children }) => (
+  <div className="border-4 border-orange-200 rounded-3xl bg-white overflow-hidden">
+    <button
+      type="button"
+      onClick={onToggle}
+      className={`w-full flex items-center justify-between px-4 py-3 cursor-pointer transition-all text-left gap-2 ${open ? 'bg-orange-100' : 'bg-orange-50 hover:bg-orange-100'}`}
+    >
+      <span className="font-display font-black text-sm text-orange-900 flex items-center gap-1.5 flex-wrap">
+        {title}
+        {hasAvailable && <span className="bg-amber-400 text-amber-950 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase animate-pulse">Disponível!</span>}
+      </span>
+      <span className="flex items-center gap-2 shrink-0">
+        <span className="text-[10px] font-mono font-bold text-orange-700 text-right">{summary}</span>
+        <span className="text-orange-700 text-xs">{open ? '▲' : '▼'}</span>
+      </span>
+    </button>
+    {open && <div className="p-3 space-y-4 border-t-2 border-orange-100">{children}</div>}
+  </div>
+);
+
 const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
   const [activeTab, setActiveTab] = useState<'infraestrutura' | 'consumiveis' | 'automacao'>('infraestrutura');
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const toggleSection = (id: string) => setOpenSection(prev => (prev === id ? null : id));
+
+  // --- Disponibilidade por seção (para o selo "Disponível!" no cabeçalho) ---
+  const nextLot = LOT_TIERS.find(l => l.lot === p.landLots + 1);
+  const availTerrenos = !!nextLot && p.gold >= nextLot.price && p.farmLevel >= nextLot.minLevel;
+  const availUtilidades = p.lastUpgradeDay !== p.currentDay && (
+    (p.wellLevel < 5 && p.gold >= WELL_TIERS[p.wellLevel].price) ||
+    (p.solarLevel < 4 && p.gold >= SOLAR_TIERS[p.solarLevel].price && !(p.solarLevel + 1 >= 3 && p.farmLevel < SOLAR_TIERS[p.solarLevel].minFarm)) ||
+    (p.irrigationLevel < 3 && p.gold >= IRRIG_TIERS[p.irrigationLevel].price && !(p.irrigationLevel + 1 === 3 && p.farmLevel < 12))
+  );
+  const availArmazenamento =
+    (p.celeiroLevel < 4 && p.farmLevel >= CELEIRO_TIERS[p.celeiroLevel].minLevel && p.gold >= CELEIRO_TIERS[p.celeiroLevel].price) ||
+    (p.camaraFriaLevel < 3 && p.farmLevel >= CAMARA_TIERS[p.camaraFriaLevel].minLevel && p.gold >= CAMARA_TIERS[p.camaraFriaLevel].price);
+  const segurosAtivos = [p.insurance.active, p.insuranceClimate.active, p.insuranceTheft.active].filter(Boolean).length;
+  const availSeguros =
+    (!p.insurance.active && p.farmLevel >= 2 && p.gold >= 800) ||
+    (!p.insuranceClimate.active && p.insurance.active && p.farmLevel >= 6 && p.gold >= 2500) ||
+    (!p.insuranceTheft.active && p.insuranceClimate.active && p.farmLevel >= 12 && p.gold >= 8000);
+  const CONSTRUCOES_STATUS = [
+    { done: p.hasStable, label: '🏠 Estábulo', price: 1800, req: 0 },
+    { done: p.hasSilo, label: '🏗️ Silo de Grãos', price: 2500, req: 0 },
+    { done: p.hasFridge, label: '🧊 Geladeira Industrial', price: 3500, req: 0 },
+    { done: p.hasTipBox, label: '🪙 Caixinha de Gorjeta', price: 50, req: 0 },
+    { done: p.hasTourism, label: '🏕️ Área de Visitantes', price: 400, req: 4 },
+    { done: p.hasLaboratorio, label: '🔬 Laboratório', price: 8000, req: 6 },
+    { done: p.hasPastagem, label: '🌿 Pastagem Ampliada', price: 15000, req: 8 },
+    { done: p.hasExportCenter, label: '🚢 Centro de Exportação', price: 50000, req: 12 },
+    { done: p.hasAcademia, label: '🎓 Academia', price: 120000, req: 16 },
+    { done: p.licencaExotica, label: '🦎 Licença Exótica', price: 500, req: 13 },
+    { done: p.abatedouroUnlocked, label: '🏭 Abatedouro', price: 8000, req: 10 },
+  ];
+  const construcoesFeitas = CONSTRUCOES_STATUS.filter(c => c.done);
+  const availConstrucoes = CONSTRUCOES_STATUS.some(c => !c.done && p.farmLevel >= c.req && p.gold >= c.price) ||
+    PRAT_TIERS.some(t => p.maxPrateleiras < t.slots && p.gold >= t.price);
+  const vehiclesMax = VEHICLE_CATEGORIES.filter(v => (p.vehicleTiers[v.key] ?? 0) >= 2).length;
+  const availLogistica = VEHICLE_CATEGORIES.some(v => {
+    const tier = p.vehicleTiers[v.key] ?? 0;
+    return tier < 2 && p.gold >= v.prices[tier + 1];
+  });
 
   return (
     <AnimatePresence>
@@ -160,8 +242,9 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             </div>
           )}
           {activeTab === 'infraestrutura' && (
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-6 space-y-2.5">
 
+            <Section title="🏞️ Terrenos & Biomas" summary={`Lote ${p.landLots}/10 · ${p.landBiomes.length} biomas`} hasAvailable={availTerrenos} open={openSection === 'terrenos'} onToggle={() => toggleSection('terrenos')}>
             {/* Expansão de Terreno */}
             <div className="bg-white border-4 border-green-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-green-800 mb-1">🏡 Expansão de Terreno</h4>
@@ -247,7 +330,9 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 )}
               </div>
             </div>
+            </Section>
 
+            <Section title="💧 Água & Energia" summary={`Poço ${p.wellLevel}/5 · Solar ${p.solarLevel}/4 · Irrig. ${p.irrigationLevel}/3`} hasAvailable={availUtilidades} open={openSection === 'utilidades'} onToggle={() => toggleSection('utilidades')}>
             {/* Poço d'Água */}
             <div className="bg-white border-4 border-blue-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-blue-800 mb-1">💧 Poço d'Água</h4>
@@ -311,7 +396,9 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 })}
               </div>
             </div>
+            </Section>
 
+            <Section title="📦 Armazenamento" summary={`Celeiro ${p.celeiroLevel}/4 · Câmara ${p.camaraFriaLevel}/3`} hasAvailable={availArmazenamento} open={openSection === 'armazenamento'} onToggle={() => toggleSection('armazenamento')}>
             {/* Celeiro */}
             <div className="bg-white border-4 border-amber-300 rounded-3xl p-4 space-y-3">
               <h4 className="font-display font-black text-sm uppercase text-amber-800 mb-1">📦 Celeiro</h4>
@@ -377,6 +464,9 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               <div className="text-[10px] text-sky-700 font-mono">Capacidade atual: {[15,40,80,180][p.camaraFriaLevel] ?? 15}/item</div>
             </div>
 
+            </Section>
+
+            <Section title="🛡️ Seguros" summary={`${segurosAtivos}/3 ativos`} hasAvailable={availSeguros} open={openSection === 'seguros'} onToggle={() => toggleSection('seguros')}>
             {/* Seguros — 3 tiers progressivos e permanentes */}
             <div className="bg-white border-4 border-emerald-300 rounded-3xl p-4 space-y-3">
               <h4 className="font-display font-black text-sm uppercase text-emerald-800 mb-1">🛡️ Sistema de Seguros</h4>
@@ -410,13 +500,25 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               })}
             </div>
 
+            </Section>
+
+            <Section title="🏗️ Construções & Produção" summary={`${construcoesFeitas.length}/${CONSTRUCOES_STATUS.length} construídas · Prat. ${p.maxPrateleiras}`} hasAvailable={availConstrucoes} open={openSection === 'construcoes'} onToggle={() => toggleSection('construcoes')}>
+            {/* Já adquiridas — linha compacta */}
+            {construcoesFeitas.length > 0 && (
+              <div className="bg-green-50 border-2 border-green-200 rounded-2xl px-3 py-2">
+                <span className="text-[9px] font-mono font-black uppercase text-green-700 mr-1.5">✅ Adquiridas:</span>
+                {construcoesFeitas.map(c => (
+                  <span key={c.label} className="inline-block text-[10px] font-mono text-green-800 bg-white border border-green-200 rounded-full px-2 py-0.5 mr-1 mb-0.5">{c.label}</span>
+                ))}
+              </div>
+            )}
             {/* Estruturas simples */}
             {[
               { key: 'stable', label: '🏠 Estábulo', color: 'stone', price: 1800, state: p.hasStable, setState: p.setHasStable, desc: `No inverno, animais perdem 50% menos felicidade (recuperam +5 por dia). ${p.hasStable ? '✅ Instalado' : 'Não instalado'}`, log: '🏠 Estábulo construído! Animais mais confortáveis no inverno.', reqLevel: 0 },
               { key: 'silo', label: '🏗️ Silo de Grãos', color: 'orange', price: 2500, state: p.hasSilo, setState: p.setHasSilo, desc: `15% de desconto em todas as compras de ração. ${p.hasSilo ? '✅ Instalado' : 'Não instalado'}`, log: '🏗️ Silo de grãos construído! 15% de desconto em rações.', reqLevel: 0 },
               { key: 'fridge', label: '🧊 Geladeira Industrial', color: 'sky', price: 3500, state: p.hasFridge, setState: p.setHasFridge, desc: `Previne perda de qualidade dos produtos perecíveis (leite, ovos duram 50% mais). ${p.hasFridge ? '✅ Instalada' : 'Não instalada'}`, log: '🧊 Geladeira industrial instalada! Produtos perecíveis duram mais.', reqLevel: 0 },
               { key: 'tipbox', label: '🪙 Caixinha de Gorjeta', color: 'yellow', price: 50, state: p.hasTipBox, setState: p.setHasTipBox, desc: `25% de chance por dia de receber gorjeta de 5-25 moedas de visitantes. ${p.hasTipBox ? '✅ Instalada' : 'Não instalada'}`, log: '🪙 Caixinha de gorjeta colocada! Visitantes poderão deixar gorjetas.', reqLevel: 0 },
-            ].map(({ key, label, color, price, state, setState, desc, log }) => (
+            ].filter(item => !item.state).map(({ key, label, color, price, state, setState, desc, log }) => (
               <div key={key} className={`bg-white border-4 border-${color}-300 rounded-3xl p-4`}>
                 <h4 className={`font-display font-black text-sm uppercase text-${color}-800 mb-1`}>{label}</h4>
                 <p className="text-xs text-stone-500 font-mono mb-2">{desc}</p>
@@ -430,6 +532,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             ))}
 
             {/* Turismo */}
+            {!p.hasTourism && (
             <div className="bg-white border-4 border-teal-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-teal-800 mb-1">🏕️ Área de Visitantes (Turismo Rural)</h4>
               <p className="text-xs text-stone-500 font-mono mb-2">Receba turistas semanalmente! Receita = (nível×20) + (animais×5) + (pavões×30) moedas. Requer Nível 4+. {p.hasTourism ? '✅ Instalada' : 'Não instalada'}</p>
@@ -440,6 +543,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 {p.hasTourism ? '✅ Área de Visitantes Instalada' : p.farmLevel < 4 ? '🔒 Requer Nível 4 (400💰)' : 'Construir Área de Visitantes (400💰)'}
               </button>
             </div>
+            )}
 
             {/* Queijaria */}
             <div className="bg-white border-4 border-amber-300 rounded-3xl p-4">
@@ -464,7 +568,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               { key: 'export', label: '🚢 Centro de Exportação', color: 'indigo', price: 50000, state: p.hasExportCenter, setState: p.setHasExportCenter, desc: `+20% preço de venda em TODOS os produtos. Requer Nível 12.`, log: '🚢 Centro de Exportação construído! Todos os produtos valem +20%.', reqLevel: 12, achievement: 'export_center' },
               { key: 'acad', label: '🎓 Academia de Criadores', color: 'violet', price: 120000, state: p.hasAcademia, setState: p.setHasAcademia, desc: `+15% XP por dia + animais jovens crescem 20% mais rápido. Requer Nível 16.`, log: '🎓 Academia de Criadores construída! +15% XP/dia e filhotes crescem mais rápido.', reqLevel: 16, achievement: 'academia' },
             ].map(({ key, label, color, price, state, setState, desc, log, reqLevel, achievement }) => {
-              if (!state && p.farmLevel + 2 < reqLevel) return null;
+              if (state || p.farmLevel + 2 < reqLevel) return null;
               const isLockedPreview = !state && p.farmLevel < reqLevel;
               return (
               <div key={key} className={`${isLockedPreview ? 'bg-stone-50 border-4 border-dashed border-stone-300' : `bg-white border-4 border-${color}-300`} rounded-3xl p-4`}>
@@ -481,6 +585,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             })}
 
             {/* Licença Exótica */}
+            {!p.licencaExotica && (
             <div className="bg-white border-4 border-purple-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-purple-800 mb-1">🦎 Licença de Fauna Exótica</h4>
               <p className="text-xs text-stone-500 font-mono mb-2">Autoriza criação de jacaré sem multas de fiscalização (5%/dia = -300💰). Requer Nível 13. {p.licencaExotica ? '✅ Obtida' : 'Não obtida'}</p>
@@ -491,9 +596,10 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 {p.licencaExotica ? '✅ Licença Obtida' : p.farmLevel < 13 ? '🔒 Requer Nível 13 (500💰)' : 'Obter Licença (500💰)'}
               </button>
             </div>
+            )}
 
             {/* 🏭 ABATEDOURO */}
-            {p.farmLevel + 2 >= 10 && (
+            {p.farmLevel + 2 >= 10 && !p.abatedouroUnlocked && (
               <div className={`${p.farmLevel < 10 ? 'bg-stone-50 border-4 border-dashed border-stone-300' : 'bg-white border-4 border-red-300'} rounded-3xl p-4`}>
                 <h4 className={`font-display font-black text-sm uppercase ${p.farmLevel < 10 ? 'text-stone-400' : 'text-red-800'} mb-1`}>🏭 Abatedouro Parceiro</h4>
                 <p className="text-xs text-stone-500 font-mono mb-3">Frigorífico externo que processa bois engordados. Desbloqueia os contratos de abate — os mais lucrativos do jogo. Requer Certificado Sanitário. Custo fixo: +38⚡/dia de energia.</p>
@@ -522,6 +628,9 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               </div>
             )}
 
+            </Section>
+
+            <Section title="🚚 Logística" summary={`${vehiclesMax}/${VEHICLE_CATEGORIES.length} frotas sem frete`} hasAvailable={availLogistica} open={openSection === 'logistica'} onToggle={() => toggleSection('logistica')}>
             {/* 🚚 FROTAS DE TRANSPORTE */}
             <div className="bg-white border-4 border-slate-300 rounded-3xl p-4">
               <h4 className="font-display font-black text-sm uppercase text-slate-800 mb-1">🚚 Frotas de Transporte</h4>
@@ -592,6 +701,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 );
               })()}
             </div>
+            </Section>
 
           </div>
           )} {/* end infraestrutura tab */}
