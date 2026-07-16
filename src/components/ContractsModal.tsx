@@ -218,6 +218,7 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                                   {isExpanded && (
                                     <div className="px-3 pb-3">
                                       <div className="text-[10px] font-mono text-green-600 mb-1.5">+{premiumPct}% acima do mercado</div>
+                                      <div className="text-[9px] font-mono text-stone-400 mb-1.5 leading-snug">💡 Você vende pelo preço de mercado do dia; a diferença até {cat.pricePerUnit}💰/un é paga como prêmio no fim da semana ao cumprir a meta (50% se parcial).</div>
                                       <p className="text-[11px] text-stone-600 font-mono mb-2.5 leading-relaxed">{cat.description}</p>
                                       <div className="grid grid-cols-3 gap-2 mb-3 text-[10px] font-mono text-stone-600">
                                         <div className="bg-stone-50 rounded-lg px-2 py-1 text-center"><span className="block font-black text-stone-800">{cat.weeklyGoal} un/sem</span>Meta semanal</div>
