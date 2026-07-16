@@ -202,6 +202,8 @@ export interface MachineState {
   shearerActive: boolean;
   feederPurchased: boolean;
   feederActive: boolean;
+  collectorPurchased: boolean;
+  collectorActive: boolean;
 }
 
 export interface FinancialEntry {

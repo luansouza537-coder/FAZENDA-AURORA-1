@@ -596,8 +596,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [feederLevel, setFeederLevel] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).feederLevel ?? 1; } catch(e) {} return 1;
   });
-  const [machineUsageStats, setMachineUsageStats] = useState<{ milker: number; shearer: number; feeder: number }>(() => {
-    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).machineUsageStats ?? { milker: 0, shearer: 0, feeder: 0 }; } catch(e) {} return { milker: 0, shearer: 0, feeder: 0 };
+  const [machineUsageStats, setMachineUsageStats] = useState<{ milker: number; shearer: number; feeder: number; collector: number }>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return { milker: 0, shearer: 0, feeder: 0, collector: 0, ...(JSON.parse(s).machineUsageStats ?? {}) }; } catch(e) {} return { milker: 0, shearer: 0, feeder: 0, collector: 0 };
   });
 
   // --- EFEITOS DO MERCADOR EXTRAS ---
@@ -1007,7 +1007,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       shearerPurchased: false,
       shearerActive: false,
       feederPurchased: false,
-      feederActive: false
+      feederActive: false,
+      collectorPurchased: false,
+      collectorActive: false
     });
     setStats({
       totalEarned: 0,
@@ -2766,12 +2768,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     }
   }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
-  const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
+  const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     let price = 2500;
     let reqLevel = 6;
     let label = "";
     if (machineKey === 'shearer') { price = 2000; reqLevel = 5; label = "Tosquiadeira Elétrica"; }
     else if (machineKey === 'feeder') { price = 1500; reqLevel = 4; label = "Alimentador Automático"; }
+    else if (machineKey === 'collector') { price = 1800; reqLevel = 5; label = "Coletor de Ovos"; }
     else { label = "Ordenhadeira Automática"; }
 
     if (gold < price) {
@@ -2798,11 +2801,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     triggerAudioResult(() => sfx.playSound('levelup'));
   };
 
-  const toggleMachine = (machineKey: 'milker' | 'shearer' | 'feeder') => {
+  const toggleMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     setMachines(prev => {
       const field = `${machineKey}Active` as const;
       const nextVal = !prev[field];
-      addLog(`🏭 Máquina ${machineKey === 'milker' ? 'Ordenhadeira' : machineKey === 'shearer' ? 'Tosquiadeira' : 'Alimentador'} foi ${nextVal ? 'LIGADA' : 'DESLIGADA'}!`, 'info');
+      addLog(`🏭 Máquina ${machineKey === 'milker' ? 'Ordenhadeira' : machineKey === 'shearer' ? 'Tosquiadeira' : machineKey === 'collector' ? 'Coletor de Ovos' : 'Alimentador'} foi ${nextVal ? 'LIGADA' : 'DESLIGADA'}!`, 'info');
       triggerAudioResult(() => sfx.playSound('click'));
       return {
         ...prev,
@@ -3948,6 +3951,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (machines.milkerPurchased && machines.milkerActive) activeCount++;
       if (machines.shearerPurchased && machines.shearerActive) activeCount++;
       if (machines.feederPurchased && machines.feederActive) activeCount++;
+      if (machines.collectorPurchased && machines.collectorActive) activeCount++;
       const costReal = activeCount * getCustoManutencaoMaquinas(farmLevel);
       const maintPaid = gold >= costReal;
 
@@ -4367,6 +4371,33 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             logsToAdd.push({ msg: `🏭 Tosquiadeira Elétrica: Coletou +${woolCollected} Lã(s) de ${shearedSheep} ovelhas!`, type: 'success' });
           }
         }
+
+        // C. Coletor de Ovos — recolhe ovos de galinha, caipira, pata, gansa e codorna
+        if (machines.collectorPurchased && machines.collectorActive) {
+          let eggCount = 0, caipiraCount = 0, duckCount = 0, gooseCount = 0;
+          updatedAnimalsList = updatedAnimalsList.map(a => {
+            if (a.isAdult === false || !a.hasProducedToday) return a;
+            if (a.type === 'galinha') { eggCount++; return { ...a, hasProducedToday: false }; }
+            if (a.type === 'galinha_caipira') { caipiraCount++; return { ...a, hasProducedToday: false, daysSinceLastEgg: 0 }; }
+            if (a.type === 'pato') { duckCount++; return { ...a, hasProducedToday: false }; }
+            if (a.type === 'ganso') { gooseCount++; return { ...a, hasProducedToday: false }; }
+            return a;
+          });
+          const totalEggs = eggCount + caipiraCount + duckCount + gooseCount;
+          if (totalEggs > 0) {
+            setMachineUsageStats(prev => ({ ...prev, collector: (prev.collector ?? 0) + 1 }));
+            setInventory(prev => ({
+              ...prev,
+              egg: prev.egg + eggCount,
+              ovo_caipira: ((prev as any).ovo_caipira ?? 0) + caipiraCount,
+              duck_egg: (prev.duck_egg ?? 0) + duckCount,
+              goose_egg: (prev.goose_egg ?? 0) + gooseCount,
+            } as any));
+            setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + totalEggs, totalEggs: (prev.totalEggs || 0) + eggCount }));
+            setWeeklyStats(prev => ({ ...prev, egg: prev.egg + eggCount }));
+            logsToAdd.push({ msg: `🏭 Coletor de Ovos: Recolheu +${totalEggs} ovo(s) do galinheiro!`, type: 'success' });
+          }
+        }
       }
 
       // --- DEBUFF DE ESPECIALIZAÇÃO: penalidade por diversidade sem peões especializados ---
@@ -4666,8 +4697,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       const milkerEnergy = machines.milkerPurchased && machines.milkerActive ? 27 : 0;
       const shearerEnergy = machines.shearerPurchased && machines.shearerActive ? 21 : 0;
       const feederEnergy = machines.feederPurchased && machines.feederActive ? 15 : 0;
+      const collectorEnergy = machines.collectorPurchased && machines.collectorActive ? 18 : 0;
       const infraEnergy = (hasFridge ? 18 : 0) + (hasSilo ? 9 : 0) + (hasStable ? 12 : 0) + (hasBebedouro ? 8 : 0) + (queijariaNivel > 0 ? queijariaNivel * 9 : 0) + (abatedouroUnlocked ? 38 : 0);
-      const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy + infraEnergy;
+      const machineEnergyCost = milkerEnergy + shearerEnergy + feederEnergy + collectorEnergy + infraEnergy;
       const energyDiscount = solarLevel === 1 ? 0.4 : solarLevel === 2 ? 0.7 : solarLevel >= 3 ? 1.0 : 0;
       const energyCost = isWeeklyBillDay && machineEnergyCost > 0 ? Math.round(machineEnergyCost * (1 - energyDiscount)) : 0;
       const craftEnergy = isWeeklyBillDay ? Math.round(craftEnergyRef.current * (1 - energyDiscount)) : 0;
@@ -7641,6 +7673,15 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             ...(hasRoofReinforcement ? ['roof_reinforcement'] : []),
           ]}
           sickCount={animals.filter(a => a.isSick).length}
+          buffDays={{
+            production_boost_7days: productionBoostDays,
+            suplemento_mineral_7days: suplementoMineralDays,
+            silagem_5days: silagemDays,
+            anti_pest_14days: antiPestDays,
+            water_truck_14days: waterTruckDays,
+            vaccination_30days: vaccinationDays,
+            isencao_multa_2x: isencaoMultaCount,
+          }}
           onBuyConsumivel={(item, payload) => {
             const sickAnimals = animals.filter(a => a.isSick);
             if (item.effect === 'vet_visit' && sickAnimals.length === 0) { addLog('🚑 Nenhum animal doente — o veterinário não tem o que tratar.', 'info'); return; }

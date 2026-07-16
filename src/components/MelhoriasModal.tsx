@@ -64,6 +64,7 @@ interface MelhoriasModalProps {
   getFreightMultiplier: (cat: string) => number;
   ownedOneTimeEffects: string[];
   sickCount: number;
+  buffDays: Record<string, number>; // effect → dias restantes (ou usos, p/ isenção de multa)
   onBuyConsumivel: (item: typeof MERCHANT_SPECIAL_ITEMS[number], payload?: { feedType?: string }) => void;
   abatedouroUnlocked: boolean;
   setAbatedouroUnlocked: (v: boolean) => void;
@@ -73,9 +74,9 @@ interface MelhoriasModalProps {
   setCeleiroLevel: (v: number) => void;
   camaraFriaLevel: number;
   setCamaraFriaLevel: (v: number) => void;
-  buyMachine: (key: 'milker' | 'shearer' | 'feeder') => void;
-  toggleMachine: (key: 'milker' | 'shearer' | 'feeder') => void;
-  machineUsageStats: { milker: number; shearer: number; feeder: number };
+  buyMachine: (key: 'milker' | 'shearer' | 'feeder' | 'collector') => void;
+  toggleMachine: (key: 'milker' | 'shearer' | 'feeder' | 'collector') => void;
+  machineUsageStats: { milker: number; shearer: number; feeder: number; collector: number };
   infraEnergyPerDay: number;
 }
 
@@ -135,6 +136,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
   const [activeTab, setActiveTab] = useState<'infraestrutura' | 'consumiveis' | 'automacao'>('infraestrutura');
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [feedPickerOpen, setFeedPickerOpen] = useState(false);
+  const [openConsGroup, setOpenConsGroup] = useState<string | null>('saude');
   const toggleSection = (id: string) => setOpenSection(prev => (prev === id ? null : id));
 
   // --- Disponibilidade por seção (para o selo "Disponível!" no cabeçalho) ---
@@ -216,21 +218,46 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
           </div>
 
           {activeTab === 'consumiveis' && (
-            <div className="flex-1 overflow-y-auto p-6">
-              <p className="text-xs text-stone-500 font-mono mb-4">Itens disponíveis a qualquer momento. Itens únicos só podem ser comprados uma vez.</p>
+            <div className="flex-1 overflow-y-auto p-6 space-y-2.5">
+              <p className="text-xs text-stone-500 font-mono mb-2">Itens disponíveis a qualquer momento. Itens únicos só podem ser comprados uma vez.</p>
+              {([
+                { key: 'saude', title: '🩺 Saúde & Bem-estar' },
+                { key: 'clima', title: '🌦️ Clima & Proteção' },
+                { key: 'suprimentos', title: '📦 Suprimentos & Serviços' },
+              ]).map(({ key: groupKey, title }) => {
+                const groupItems = MERCHANT_SPECIAL_ITEMS.filter(i => i.group === groupKey);
+                const ownedCount = groupItems.filter(i => i.oneTime && p.ownedOneTimeEffects.includes(i.effect)).length;
+                const oneTimeCount = groupItems.filter(i => i.oneTime).length;
+                const activeBuffs = groupItems.filter(i => (p.buffDays[i.effect] ?? 0) > 0).length;
+                // Sinalização: vet acionável quando há doentes; itens únicos acessíveis e não comprados
+                const hasAvailable = groupItems.some(i => {
+                  if (i.effect === 'vet_visit') return p.sickCount > 0 && p.gold >= i.price * p.sickCount;
+                  if (i.effect === 'cure_one_sick') return p.sickCount > 0 && p.gold >= i.price;
+                  if (i.oneTime) return !p.ownedOneTimeEffects.includes(i.effect) && p.gold >= i.price;
+                  return false;
+                });
+                const summary = `${groupItems.length} itens${oneTimeCount > 0 ? ` · ${ownedCount}/${oneTimeCount} únicos` : ''}${activeBuffs > 0 ? ` · ${activeBuffs} ativo(s)` : ''}`;
+                return (
+              <Section key={groupKey} title={title} summary={summary} hasAvailable={hasAvailable} open={openConsGroup === groupKey} onToggle={() => setOpenConsGroup(prev => prev === groupKey ? null : groupKey)}>
               <div className="grid grid-cols-2 gap-3">
-                {MERCHANT_SPECIAL_ITEMS.map(item => {
+                {groupItems.map(item => {
                   const isOwned = item.oneTime && p.ownedOneTimeEffects.includes(item.effect);
                   const isVet = item.effect === 'vet_visit';
                   const isBulkFeed = item.effect === 'bulk_feed';
                   const price = isVet ? Math.max(item.price, item.price * p.sickCount) : item.price;
                   const canAfford = p.gold >= price;
                   const vetBlocked = isVet && p.sickCount === 0;
+                  const activeDays = p.buffDays[item.effect] ?? 0;
                   return (
-                    <div key={item.id} className={`bg-white border-2 rounded-2xl p-3 flex flex-col gap-1.5 ${isOwned ? 'border-green-300 opacity-70' : 'border-orange-200'}`}>
+                    <div key={item.id} className={`bg-white border-2 rounded-2xl p-3 flex flex-col gap-1.5 ${isOwned ? 'border-green-300 opacity-70' : activeDays > 0 ? 'border-emerald-400' : 'border-orange-200'}`}>
                       <span className="text-sm font-black text-stone-800">{item.label}</span>
                       <span className="text-[10px] text-stone-500 font-mono flex-1">{item.desc}</span>
                       {item.oneTime && <span className="text-[9px] text-amber-600 font-mono font-bold uppercase">único</span>}
+                      {activeDays > 0 && (
+                        <span className="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full px-2 py-0.5 font-mono font-bold w-fit">
+                          ⏳ ativo: {activeDays} {item.effect === 'isencao_multa_2x' ? 'isenção(ões) restante(s)' : 'dia(s) restante(s)'}
+                        </span>
+                      )}
                       {isVet && p.sickCount > 0 && <span className="text-[9px] text-red-600 font-mono font-bold">{p.sickCount} animal(is) doente(s)</span>}
                       {isBulkFeed && feedPickerOpen && !isOwned && (
                         <div className="flex flex-wrap gap-1">
@@ -265,6 +292,9 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                   );
                 })}
               </div>
+              </Section>
+                );
+              })}
             </div>
           )}
           {activeTab === 'infraestrutura' && (
@@ -740,6 +770,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 { key: 'milker' as const, emoji: '🥛', name: 'Ordenhadeira Automática', desc: 'Coleta automaticamente o leite de TODAS as vacas, cabras e ovelhas leiteiras produtoras ao final de cada dia.', cost: 2500, minLevel: 6, energy: 27, purchased: p.machines.milkerPurchased, active: p.machines.milkerActive },
                 { key: 'shearer' as const, emoji: '✂️', name: 'Tosquiadeira Elétrica', desc: 'Coleta automaticamente a lã de TODAS as ovelhas com lã madura no fim do dia.', cost: 2000, minLevel: 5, energy: 21, purchased: p.machines.shearerPurchased, active: p.machines.shearerActive },
                 { key: 'feeder' as const, emoji: '🌾', name: 'Alimentador Automático', desc: 'Alimenta TODOS os animais no final do dia. Consome ração do Armazém (1 unidade por animal).', cost: 1500, minLevel: 4, energy: 15, purchased: p.machines.feederPurchased, active: p.machines.feederActive },
+                { key: 'collector' as const, emoji: '🥚', name: 'Coletor de Ovos', desc: 'Recolhe automaticamente os ovos de TODAS as galinhas, caipiras, patas e gansas no fim do dia.', cost: 1800, minLevel: 5, energy: 18, purchased: p.machines.collectorPurchased, active: p.machines.collectorActive },
               ]).map(({ key, emoji, name, desc, cost, minLevel, energy, purchased, active }) => {
                 const levelOk = p.farmLevel >= minLevel;
                 const canBuy = !purchased && levelOk && p.gold >= cost;
@@ -775,6 +806,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                             {active ? '🟢 LIGADO' : '🔴 DESLIGADO'}
                           </button>
                           {(() => {
+                            if (key === 'collector') return null; // coletor não tem upgrades
                             const lvl = key === 'milker' ? p.milkerLevel : key === 'shearer' ? p.shearerLevel : p.feederLevel;
                             const upgCost = key === 'feeder' ? lvl * 600 : lvl * 800;
                             const canUpg = lvl < 3 && p.gold >= upgCost;
@@ -812,7 +844,8 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 const milkerE = p.machines.milkerPurchased && p.machines.milkerActive ? 27 : 0;
                 const shearerE = p.machines.shearerPurchased && p.machines.shearerActive ? 21 : 0;
                 const feederE = p.machines.feederPurchased && p.machines.feederActive ? 15 : 0;
-                const totalMachineE = milkerE + shearerE + feederE;
+                const collectorE = p.machines.collectorPurchased && p.machines.collectorActive ? 18 : 0;
+                const totalMachineE = milkerE + shearerE + feederE + collectorE;
                 const totalBruto = totalMachineE + p.infraEnergyPerDay;
                 const solarDiscount = p.solarLevel === 1 ? 0.4 : p.solarLevel === 2 ? 0.7 : p.solarLevel >= 3 ? 1.0 : 0;
                 const discountedE = Math.round(totalBruto * (1 - solarDiscount));
@@ -824,6 +857,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                         { label: '🥛 Ordenhadeira', e: milkerE, active: p.machines.milkerPurchased && p.machines.milkerActive },
                         { label: '✂️ Tosquiadeira', e: shearerE, active: p.machines.shearerPurchased && p.machines.shearerActive },
                         { label: '🌾 Alimentador', e: feederE, active: p.machines.feederPurchased && p.machines.feederActive },
+                        { label: '🥚 Coletor de Ovos', e: collectorE, active: p.machines.collectorPurchased && p.machines.collectorActive },
                       ].map(({ label, e, active }) => (
                         <div key={label} className={`rounded-xl p-2 text-center border ${active ? 'bg-white border-blue-200' : 'bg-stone-100 border-stone-200 opacity-50'}`}>
                           <p className="text-[10px] font-mono text-stone-500">{label}</p>
@@ -850,7 +884,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                     )}
 
                     {/* Contador de Uso das Máquinas */}
-                    {(p.machines.milkerPurchased || p.machines.shearerPurchased || p.machines.feederPurchased) && (
+                    {(p.machines.milkerPurchased || p.machines.shearerPurchased || p.machines.feederPurchased || p.machines.collectorPurchased) && (
                       <div className="mt-3 pt-3 border-t border-blue-100">
                         <p className="font-display font-black text-xs uppercase text-blue-700 mb-2">🔢 Contador de Uso das Máquinas</p>
                         <div className="grid grid-cols-3 gap-2">
@@ -858,6 +892,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                             { label: '🥛 Ordenhadeira', count: p.machineUsageStats.milker, owned: p.machines.milkerPurchased },
                             { label: '✂️ Tosquiadeira', count: p.machineUsageStats.shearer, owned: p.machines.shearerPurchased },
                             { label: '🌾 Alimentador', count: p.machineUsageStats.feeder, owned: p.machines.feederPurchased },
+                            { label: '🥚 Coletor', count: p.machineUsageStats.collector ?? 0, owned: p.machines.collectorPurchased },
                           ].map(({ label, count, owned }) => (
                             <div key={label} className={`rounded-xl p-2 text-center border ${owned ? 'bg-white border-blue-200' : 'bg-stone-100 border-stone-200 opacity-40'}`}>
                               <p className="text-[10px] font-mono text-stone-500">{label}</p>

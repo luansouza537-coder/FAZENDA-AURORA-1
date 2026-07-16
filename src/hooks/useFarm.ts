@@ -413,22 +413,27 @@ export function useFarm({ gold, setGold, checkAndUnlockAchievement }: UseFarmPro
     shearerActive: boolean;
     feederPurchased: boolean;
     feederActive: boolean;
+    collectorPurchased: boolean;
+    collectorActive: boolean;
   }>(() => {
-    try {
-      const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.machines) return parsed.machines;
-      }
-    } catch (e) {}
-    return {
+    const defaults = {
       milkerPurchased: false,
       milkerActive: false,
       shearerPurchased: false,
       shearerActive: false,
       feederPurchased: false,
-      feederActive: false
+      feederActive: false,
+      collectorPurchased: false,
+      collectorActive: false
     };
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.machines) return { ...defaults, ...parsed.machines };
+      }
+    } catch (e) {}
+    return defaults;
   });
 
   const [farmWisdomBonus, setFarmWisdomBonus] = useState<{ vaca: number; ovelha: number; boi: number; galinha: number }>(() => {
