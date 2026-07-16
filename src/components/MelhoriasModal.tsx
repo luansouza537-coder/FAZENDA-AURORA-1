@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BiomeType, LandLot, InsuranceState, MachineState } from '../types';
-import { MERCHANT_SPECIAL_ITEMS } from '../data/merchantItems';
+import { MERCHANT_SPECIAL_ITEMS, FEED_TYPES } from '../data/merchantItems';
 
 interface MelhoriasModalProps {
   gold: number;
@@ -63,7 +63,8 @@ interface MelhoriasModalProps {
   setVehicleTier: (cat: string, tier: number) => void;
   getFreightMultiplier: (cat: string) => number;
   ownedOneTimeEffects: string[];
-  onBuyConsumivel: (item: typeof MERCHANT_SPECIAL_ITEMS[number]) => void;
+  sickCount: number;
+  onBuyConsumivel: (item: typeof MERCHANT_SPECIAL_ITEMS[number], payload?: { feedType?: string }) => void;
   abatedouroUnlocked: boolean;
   setAbatedouroUnlocked: (v: boolean) => void;
   lastUpgradeDay: number;
@@ -133,6 +134,7 @@ const Section: React.FC<{
 const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
   const [activeTab, setActiveTab] = useState<'infraestrutura' | 'consumiveis' | 'automacao'>('infraestrutura');
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const [feedPickerOpen, setFeedPickerOpen] = useState(false);
   const toggleSection = (id: string) => setOpenSection(prev => (prev === id ? null : id));
 
   // --- Disponibilidade por seção (para o selo "Disponível!" no cabeçalho) ---
@@ -219,21 +221,45 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               <div className="grid grid-cols-2 gap-3">
                 {MERCHANT_SPECIAL_ITEMS.map(item => {
                   const isOwned = item.oneTime && p.ownedOneTimeEffects.includes(item.effect);
-                  const canAfford = p.gold >= item.price;
+                  const isVet = item.effect === 'vet_visit';
+                  const isBulkFeed = item.effect === 'bulk_feed';
+                  const price = isVet ? Math.max(item.price, item.price * p.sickCount) : item.price;
+                  const canAfford = p.gold >= price;
+                  const vetBlocked = isVet && p.sickCount === 0;
                   return (
                     <div key={item.id} className={`bg-white border-2 rounded-2xl p-3 flex flex-col gap-1.5 ${isOwned ? 'border-green-300 opacity-70' : 'border-orange-200'}`}>
                       <span className="text-sm font-black text-stone-800">{item.label}</span>
                       <span className="text-[10px] text-stone-500 font-mono flex-1">{item.desc}</span>
                       {item.oneTime && <span className="text-[9px] text-amber-600 font-mono font-bold uppercase">único</span>}
+                      {isVet && p.sickCount > 0 && <span className="text-[9px] text-red-600 font-mono font-bold">{p.sickCount} animal(is) doente(s)</span>}
+                      {isBulkFeed && feedPickerOpen && !isOwned && (
+                        <div className="flex flex-wrap gap-1">
+                          {FEED_TYPES.map(ft => (
+                            <button
+                              key={ft.key}
+                              onClick={() => { p.onBuyConsumivel(item, { feedType: ft.key }); setFeedPickerOpen(false); }}
+                              className="text-[9px] font-black px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-300 border border-amber-400 text-amber-900 cursor-pointer"
+                            >
+                              {ft.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                       <button
-                        disabled={isOwned || !canAfford}
-                        onClick={() => p.onBuyConsumivel(item)}
+                        disabled={isOwned || !canAfford || vetBlocked}
+                        onClick={() => {
+                          if (isBulkFeed) { setFeedPickerOpen(v => !v); return; }
+                          p.onBuyConsumivel(item);
+                        }}
                         className={`mt-1 text-[11px] font-black uppercase px-3 py-1.5 rounded-xl border-b-2 transition-all cursor-pointer
                           ${isOwned ? 'bg-green-100 border-green-300 text-green-700 cursor-not-allowed' :
-                            canAfford ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-700' :
+                            (canAfford && !vetBlocked) ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-700' :
                             'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed opacity-60'}`}
                       >
-                        {isOwned ? '✅ Adquirido' : `${item.price}💰 Comprar`}
+                        {isOwned ? '✅ Adquirido' :
+                          vetBlocked ? 'Sem doentes' :
+                          isBulkFeed ? (feedPickerOpen ? 'Escolha a ração ▲' : `${price}💰 Escolher tipo`) :
+                          `${price}💰 Comprar`}
                       </button>
                     </div>
                   );

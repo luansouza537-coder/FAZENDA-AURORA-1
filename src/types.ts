@@ -94,6 +94,7 @@ export interface Animal {
   isSick?: boolean;          // adoeceu de tristeza prolongada (produção reduzida 50%)
   sickDays?: number;         // quantos dias está doente
   diedFromIllness?: boolean; // marcado para remoção ao fim do dia (morreu de doença)
+  convalescentDays?: number; // dias de repouso após tratamento veterinário (não produz)
 }
 
 // Funcionalidade 4: Contratos de fornecimento

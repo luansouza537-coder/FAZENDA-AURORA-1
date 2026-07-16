@@ -628,6 +628,15 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [isencaoMultaCount, setIsencaoMultaCount] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).isencaoMultaCount ?? 0; } catch(e) {} return 0;
   });
+  const [hasRoofReinforcement, setHasRoofReinforcement] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasRoofReinforcement ?? false; } catch(e) {} return false;
+  });
+  const [waterTruckDays, setWaterTruckDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).waterTruckDays ?? 0; } catch(e) {} return 0;
+  });
+  const [vaccinationDays, setVaccinationDays] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).vaccinationDays ?? 0; } catch(e) {} return 0;
+  });
 
   // --- EVENTOS DO MUNDO ---
   const [worldEvent, setWorldEvent] = useState<{ id: string; title: string; desc: string; daysLeft: number; priceMult: number; items: string[] } | null>(() => {
@@ -2734,6 +2743,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         financialLog,
         suplementoMineralDays, silagemDays,
         hasCisterna, abatedouroUnlocked, blockNextStorm, blockNextDrought, isencaoMultaCount,
+        hasRoofReinforcement, waterTruckDays, vaccinationDays,
 
         shownMilestones,
         vehicleTiers,
@@ -3011,7 +3021,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       }
 
       // IMPROVEMENT 9: Sick animals produce 50% less (50% chance to skip production)
-      const sickProductionBlock = copy.isSick && Math.random() < 0.5;
+      const sickProductionBlock = (copy.isSick && Math.random() < 0.5) || (copy.convalescentDays ?? 0) > 0;
 
       // Atualizações de produção baseadas nas espécies
       if (copy.type === 'vaca') {
@@ -3481,13 +3491,19 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         copy.stressedDays = (copy.stressedDays ?? 0) - 1;
       }
 
+      // Convalescença pós-tratamento veterinário
+      if ((copy.convalescentDays ?? 0) > 0) {
+        copy.convalescentDays = (copy.convalescentDays ?? 0) - 1;
+      }
+
       // IMPROVEMENT 9: Sick state from prolonged sadness
       if (copy.happiness < 20) {
         copy.lowHappinessDays = (copy.lowHappinessDays ?? 0) + 1;
       } else {
         copy.lowHappinessDays = Math.max(0, (copy.lowHappinessDays ?? 0) - 1);
       }
-      if ((copy.lowHappinessDays ?? 0) >= 3 && !copy.isSick) {
+      // Vacinação: animais imunizados resistem mais antes de adoecer (5 dias em vez de 3)
+      if ((copy.lowHappinessDays ?? 0) >= (vaccinationDays > 0 ? 5 : 3) && !copy.isSick) {
         copy.isSick = true;
         copy.sickDays = 0;
         logs.push({ msg: `🤒 ${copy.name} adoeceu de tristeza! Produção reduzida em 50%. Trate com Veterinário!`, type: 'error' });
@@ -4134,6 +4150,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (item.effect === 'licenca_exotica' && licencaExotica) return false;
           if (item.effect === 'licenca_criadouro' && licencaCriadouro) return false;
           if (item.effect === 'cisterna' && hasCisterna) return false;
+          if (item.effect === 'roof_reinforcement' && hasRoofReinforcement) return false;
           return true;
         });
         const shuffled = [...availableMerchItems].sort(() => Math.random() - 0.5);
@@ -4939,10 +4956,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // Apply climate event mutations directly into finalAnimals array
       // (must happen here so they're included in the final setAnimals call)
       if (nextDayEvent === 'tempestade' && !blockNextStorm && !insuranceClimate.active) {
+        // Reforço de Telhado: estruturas protegidas reduzem o impacto em 60%
+        const stormPenalty = hasRoofReinforcement ? 4 : 10;
         finalAnimals.forEach(a => {
           if (a.isAdult !== false) {
-            a.stressedDays = Math.max(a.stressedDays ?? 0, 1);
-            a.happiness = Math.max(0, a.happiness - 10);
+            if (!hasRoofReinforcement) a.stressedDays = Math.max(a.stressedDays ?? 0, 1);
+            a.happiness = Math.max(0, a.happiness - stormPenalty);
           }
         });
       }
@@ -5071,6 +5090,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setBlockNextStorm(false);
           } else if (insuranceClimate.active) {
             logsToAdd.push({ msg: `🌦️ Tempestade chegou, mas o Seguro Climático protegeu seus animais!`, type: 'success' });
+          } else if (hasRoofReinforcement) {
+            logsToAdd.push({ msg: `🪵 Tempestade! O Reforço de Telhado segurou o impacto — apenas -4 felicidade, sem estresse.`, type: 'info' });
           } else {
             logsToAdd.push({ msg: `⛈️ Tempestade! Animais estressados — produção reduzida e -10 felicidade hoje.`, type: 'error' });
             setTimeout(() => addNotification('⛈️ Tempestade! Produção reduzida hoje.', 'warning', nextDayValue), 0);
@@ -5468,7 +5489,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // Epidemia (3% por dia, max 1 a cada 30 dias, -5% se bebedouro)
       const epidemicChance = hasBebedouro ? 0.025 : 0.03;
       if (Math.random() < epidemicChance && (currentDay - lastEpidemicDay) >= 30) {
-        if (epidemicPrevented) {
+        if (vaccinationDays > 0) {
+          logsToAdd.push({ msg: `💉 Campanha de Vacinação bloqueou uma epidemia iminente! Rebanho protegido.`, type: 'success' });
+        } else if (epidemicPrevented) {
           setEpidemicPrevented(false);
           logsToAdd.push({ msg: `💉 Vacina Veterinária bloqueou uma epidemia iminente!`, type: 'success' });
         } else {
@@ -5527,6 +5550,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           } else if (blockNextDrought) {
             logsToAdd.push({ msg: `💧 Seca detectada mas a Bomba d'Água neutralizou o impacto! Animais protegidos.`, type: 'success' });
             setBlockNextDrought(false);
+          } else if (waterTruckDays > 0) {
+            logsToAdd.push({ msg: `🚛 Seca detectada, mas o Caminhão-Pipa garante o abastecimento! Fazenda protegida.`, type: 'success' });
           } else {
             logsToAdd.push({ msg: `🏜️ Uma seca prolongada começou! Custo de água será triplicado por 3 dias!`, type: 'error' });
             setTimeout(() => addNotification('🏜️ Seca prolongada por 3 dias! Custo de água triplicado!', 'warning', nextDayValue), 0);
@@ -6306,6 +6331,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (antiPestDays > 0) setAntiPestDays(prev => prev - 1);
       if (suplementoMineralDays > 0) setSuplementoMineralDays(prev => prev - 1);
       if (silagemDays > 0) setSilagemDays(prev => prev - 1);
+      if (waterTruckDays > 0) setWaterTruckDays(prev => prev - 1);
+      if (vaccinationDays > 0) setVaccinationDays(prev => prev - 1);
       // Decrementar seguros temporários (daysLeft < 9999 = bônus de level-up, não permanente)
       if (insuranceClimate.active && insuranceClimate.daysLeft < 9999) {
         const next = insuranceClimate.daysLeft - 1;
@@ -7097,8 +7124,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (droughtDaysRemaining > 0) activeEvents.push({ icon: '🏜️', label: 'Seca — custo de água triplicado', days: droughtDaysRemaining, color: 'bg-yellow-800 border-yellow-500' });
           if (worldEvent) activeEvents.push({ icon: '🌍', label: `${worldEvent.title} — ${worldEvent.priceMult >= 1 ? '+' : ''}${Math.round((worldEvent.priceMult - 1) * 100)}% preços`, days: worldEvent.daysLeft, color: worldEvent.priceMult >= 1 ? 'bg-green-800 border-green-500' : 'bg-red-800 border-red-500' });
           if (activeMarketEvent) activeEvents.push({ icon: '📊', label: `${activeMarketEvent.title} — +${Math.round((activeMarketEvent.mult - 1) * 100)}% mercado`, days: activeMarketEvent.daysLeft, color: 'bg-blue-800 border-blue-500' });
-          if (productionBoostDays > 0) activeEvents.push({ icon: '📚', label: 'Manual Avançado — +15% produção', days: productionBoostDays, color: 'bg-indigo-800 border-indigo-500' });
+          if (productionBoostDays > 0) activeEvents.push({ icon: '👨‍🌾', label: 'Consultoria Agronômica — +15% produção', days: productionBoostDays, color: 'bg-indigo-800 border-indigo-500' });
           if (antiPestDays > 0) activeEvents.push({ icon: '🧴', label: 'Anti-Pragas ativo', days: antiPestDays, color: 'bg-teal-800 border-teal-500' });
+          if (waterTruckDays > 0) activeEvents.push({ icon: '🚛', label: 'Caminhão-Pipa — fazenda protegida de secas', days: waterTruckDays, color: 'bg-cyan-800 border-cyan-500' });
+          if (vaccinationDays > 0) activeEvents.push({ icon: '💉', label: 'Vacinação — rebanho protegido de epidemias', days: vaccinationDays, color: 'bg-emerald-800 border-emerald-500' });
           if (activeEvents.length === 0) return null;
           return (
             <div className="mx-4 sm:mx-6 lg:mx-8 mb-0">
@@ -7609,26 +7638,37 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             ...(licencaExotica ? ['licenca_exotica'] : []),
             ...(licencaCriadouro ? ['licenca_criadouro'] : []),
             ...(hasCisterna ? ['cisterna'] : []),
+            ...(hasRoofReinforcement ? ['roof_reinforcement'] : []),
           ]}
-          onBuyConsumivel={(item) => {
-            if (gold < item.price) { addLog(`💰 Moedas insuficientes! Precisa de ${item.price} moedas.`, 'error'); return; }
-            setGold(prev => prev - item.price);
-            addLog(`🛒 Comprou ${item.label} por ${item.price}💰!`, 'success');
-            if (item.effect === 'premium_feed') {
-              setInventory((prev: any) => ({ ...prev, racaoBovina: (prev.racaoBovina ?? 0) + 10, racaoOvinos: (prev.racaoOvinos ?? 0) + 10, racaoAves: (prev.racaoAves ?? 0) + 10, racaoAquatica: (prev.racaoAquatica ?? 0) + 10, racaoCoelho: (prev.racaoCoelho ?? 0) + 10, racaoCarnivora: (prev.racaoCarnivora ?? 0) + 10, racaoSuina: (prev.racaoSuina ?? 0) + 10 }));
-              addLog('🥣 +10 de cada ração adicionadas ao Armazém!', 'success');
+          sickCount={animals.filter(a => a.isSick).length}
+          onBuyConsumivel={(item, payload) => {
+            const sickAnimals = animals.filter(a => a.isSick);
+            if (item.effect === 'vet_visit' && sickAnimals.length === 0) { addLog('🚑 Nenhum animal doente — o veterinário não tem o que tratar.', 'info'); return; }
+            const cost = item.effect === 'vet_visit' ? item.price * sickAnimals.length : item.price;
+            if (gold < cost) { addLog(`💰 Moedas insuficientes! Precisa de ${cost} moedas.`, 'error'); return; }
+            setGold(prev => prev - cost);
+            addLog(`🛒 Comprou ${item.label} por ${cost}💰!`, 'success');
+            if (item.effect === 'bulk_feed') {
+              const feedType = payload?.feedType ?? 'racaoBovina';
+              setInventory((prev: any) => ({ ...prev, [feedType]: (prev[feedType] ?? 0) + 30 }));
+              addLog(`🚚 Carga a granel entregue: +30 de ração no Armazém!`, 'success');
             }
+            else if (item.effect === 'vet_visit') {
+              setAnimals(prev => prev.map(a => a.isSick ? { ...a, isSick: false, sickDays: 0, lowHappinessDays: 0, convalescentDays: 1 } : a));
+              addLog(`🚑 O veterinário tratou ${sickAnimals.length} animal(is)! Eles descansam 1 dia antes de voltar a produzir.`, 'success');
+            }
+            else if (item.effect === 'roof_reinforcement') { setHasRoofReinforcement(true); addLog('🪵 Reforço de Telhado instalado! Tempestades causam 60% menos impacto.', 'success'); }
+            else if (item.effect === 'water_truck_14days') { setWaterTruckDays(prev => prev + 14); addLog('🚛 Caminhão-Pipa contratado! Secas não afetam a fazenda por 14 dias.', 'success'); }
+            else if (item.effect === 'vaccination_30days') { setVaccinationDays(prev => prev + 30); addLog('💉 Campanha de Vacinação concluída! Rebanho protegido por 30 dias.', 'success'); }
             else if (item.effect === 'bebedouro') { setHasBebedouro(true); addLog('🪣 Bebedouro Automático instalado! Animais sempre hidratados.', 'success'); }
             else if (item.effect === 'cert_sanitario') { setHasCertSanitario(true); addLog('📜 Certificado Sanitário adquirido! +10% preço de carne permanente.', 'success'); }
             else if (item.effect === 'licenca_exotica') { setLicencaExotica(true); addLog('📋 Licença Exótica obtida! Agora pode criar Jacaré legalmente.', 'success'); }
             else if (item.effect === 'licenca_criadouro') { setLicencaCriadouro(true); addLog('📜 Licença de Criadouro obtida! Reprodução controlada desbloqueada.', 'success'); }
-            else if (item.effect === 'cure_all_sick') { setAnimals(prev => prev.map(a => ({ ...a, isSick: false }))); addLog('🩺 Todos os animais doentes foram curados!', 'success'); }
             else if (item.effect === 'anti_pest_14days') { setAntiPestDays(prev => prev + 14); addLog('🧴 Antídoto Anti-Pragas ativo por 14 dias!', 'success'); }
-            else if (item.effect === 'production_boost_7days') { setProductionBoostDays(prev => prev + 7); addLog('📚 Manual de Produção Avançada! +15% produção por 7 dias!', 'success'); }
+            else if (item.effect === 'production_boost_7days') { setProductionBoostDays(prev => prev + 7); addLog('👨‍🌾 Consultoria Agronômica realizada! +15% produção por 7 dias!', 'success'); }
             else if (item.effect === 'suplemento_mineral_7days') { setSuplementoMineralDays(prev => prev + 7); addLog('💊 Suplemento Mineral aplicado! +20% produção de leite e ovos por 7 dias!', 'success'); }
             else if (item.effect === 'cure_one_sick') { const sick = animals.find(a => a.isSick); if (sick) { setAnimals(prev => prev.map(a => a.id === sick.id ? { ...a, isSick: false } : a)); addLog(`🩹 ${sick.name} foi curado com a bandagem veterinária!`, 'success'); } else addLog('🩹 Nenhum animal doente no momento.', 'info'); }
             else if (item.effect === 'cisterna') { setHasCisterna(true); addLog('🪣 Cisterna de Água instalada! -30% conta de água semanal!', 'success'); }
-            else if (item.effect === 'block_storm_drought') { setBlockNextStorm(true); setBlockNextDrought(true); addLog('🛡️ Kit de Proteção Climática pronto! Próxima tempestade e seca não afetarão a fazenda!', 'success'); }
             else if (item.effect === 'silagem_5days') { setSilagemDays(prev => prev + 5); addLog('🌽 Silagem Premium estocada! Animais não consomem ração por 5 dias!', 'success'); }
             else if (item.effect === 'isencao_multa_2x') { setIsencaoMultaCount(prev => prev + 3); addLog('🚚 Contrato de Transporte ativo! Próximas 3 multas por entrega vencida serão isentas!', 'success'); }
             triggerAudioResult(() => sfx.playSound('sell'));
