@@ -16,6 +16,17 @@ if (!RESUME) fs.writeFileSync(OUT, '');
 
 const RESERVA = 250; // ouro de segurança para contas semanais
 
+// Tabelas do jogo (useFarm.ts) — para a política de poupança do level-up
+const XP_THRESHOLDS = { 1: 0, 2: 100, 3: 280, 4: 550, 5: 950, 6: 1500, 7: 2200, 8: 3100, 9: 4200, 10: 5600, 11: 7300, 12: 9400, 13: 11900, 14: 14900, 15: 18500, 16: 22800, 17: 27800, 18: 33800, 19: 40800, 20: 49000 };
+const LEVELUP_GOLD = lvl => lvl <= 3 ? 0 : ({ 4: 500, 5: 1200, 6: 2000, 7: 2500, 8: 3000, 9: 4000, 10: 4800, 11: 5600, 12: 6400 }[lvl] ?? 6400 + (lvl - 12) * 1200);
+// quanto guardar: se o XP já bateu (ou está perto de bater) o próximo nível, poupa o custo do level-up
+const metaPoupanca = (save) => {
+  const next = (save.farmLevel ?? 1) + 1;
+  const xpNeeded = XP_THRESHOLDS[next] ?? Infinity;
+  const perto = (save.farmXp ?? 0) >= xpNeeded * 0.8;
+  return perto ? LEVELUP_GOLD(next) : 0;
+};
+
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 page.setDefaultTimeout(4000);
@@ -106,7 +117,7 @@ async function comprarMaquinas(save) {
     { flag: m.feederPurchased, lvl: 4, price: 1500, label: /Comprar \(1[.,]500💰\)/i },
     { flag: m.collectorPurchased, lvl: 5, price: 1800, label: /Comprar \(1[.,]800💰\)/i },
     { flag: m.milkerPurchased, lvl: 6, price: 2500, label: /Comprar \(2[.,]500💰\)/i },
-  ].filter(w => !w.flag && (save.farmLevel ?? 1) >= w.lvl && save.gold > w.price + RESERVA);
+  ].filter(w => !w.flag && (save.farmLevel ?? 1) >= w.lvl && save.gold > w.price + RESERVA + metaPoupanca(save));
   if (wants.length === 0) return;
   if (!(await clickIf(page.locator('[data-onboarding="loja-btn"]')))) return;
   await page.waitForTimeout(600);
@@ -120,6 +131,7 @@ async function comprarMaquinas(save) {
 async function expandirLote(save) {
   const cap = (save.landLots ?? 1) * 5;
   if ((save.animals?.length ?? 0) < cap) return;
+  if (save.gold < 1000 + metaPoupanca(save)) return; // Lote 2 é o mais barato
   if (!(await clickIf(page.locator('[data-onboarding="loja-btn"]')))) return;
   await page.waitForTimeout(600);
   await clickIf(page.locator('button', { hasText: /Terrenos & Biomas/i }));
@@ -134,7 +146,7 @@ async function comprarAnimal(save) {
   const cap = (save.landLots ?? 1) * 5;
   if ((save.animals?.length ?? 0) >= cap) return;
   // prioridade: vaca (leite = renda estável) > galinha (barata); sem reserva no bootstrap
-  const reserva = (save.animals?.length ?? 0) === 0 ? 0 : RESERVA;
+  const reserva = ((save.animals?.length ?? 0) === 0 ? 0 : RESERVA) + metaPoupanca(save);
   const alvo = save.gold > 400 + reserva ? 'Vaca' : save.gold > 45 + reserva ? 'Galinha' : null;
   if (!alvo) return;
   if (!(await clickIf(page.locator('[data-onboarding="buy-animal-btn"]')))) return;
