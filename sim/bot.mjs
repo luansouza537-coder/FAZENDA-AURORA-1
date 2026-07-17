@@ -136,7 +136,7 @@ async function expandirLote(save) {
   await page.waitForTimeout(600);
   await clickIf(page.locator('button', { hasText: /Terrenos & Biomas/i }));
   await page.waitForTimeout(400);
-  await clickIf(page.locator('button:not([disabled])', { hasText: /Lote \d/ }));
+  await clickIf(page.locator('button:not([disabled])', { hasText: /Lote \d+ \([\d.,]+💰\)/ }));
   await page.waitForTimeout(400);
   await clickIf(page.locator('button', { hasText: /Fechar Loja/i }));
   await page.waitForTimeout(300);
