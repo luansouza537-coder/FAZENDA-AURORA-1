@@ -255,12 +255,15 @@ export const getLevelUpDetails = (level: number): { title: string; perks: string
   }
 };
 
+// Balanceamento (simulação dia 1→217): com o lote 1 (5 animais) a renda líquida é ~10-30💰/dia,
+// e o custo antigo do Nv6 (2000💰) prendia o jogador por 100+ dias com XP de sobra.
+// Custos dos níveis 6-8 reduzidos para acompanhar a renda da fase; do 9 em diante mantidos.
 export const getLevelUpGoldCost = (toLevel: number): number => {
   if (toLevel <= 3) return 0;
   if (toLevel === 4) return 500;
-  if (toLevel === 5) return 1200;
-  if (toLevel <= 8) return 2000 + (toLevel - 6) * 500;
-  if (toLevel <= 12) return 4000 + (toLevel - 9) * 800;
+  if (toLevel === 5) return 800;
+  if (toLevel <= 8) return 1000 + (toLevel - 6) * 500;   // 6:1000, 7:1500, 8:2000
+  if (toLevel <= 12) return 4000 + (toLevel - 9) * 800;  // 9:4000 … 12:6400
   return 7200 + (toLevel - 13) * 1200;
 };
 
