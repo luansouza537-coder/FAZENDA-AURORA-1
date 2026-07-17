@@ -36,14 +36,16 @@ async function clickIf(locator) {
 }
 
 async function fecharModais() {
-  // fecha level-up, resumo semanal e sobras genéricas
-  for (let i = 0; i < 4; i++) {
+  // fecha level-up, resumo semanal/diário e sobras genéricas
+  await page.keyboard.press('Escape').catch(() => {});
+  for (let i = 0; i < 5; i++) {
     const closed =
-      (await clickIf(page.locator('button', { hasText: /Continuar Fazenda!/i }))) ||
-      (await clickIf(page.locator('button', { hasText: /^Fechar( Relatório)?$/i }))) ||
+      (await clickIf(page.locator('button', { hasText: /Continuar Fazenda/i }))) ||
+      (await clickIf(page.locator('button', { hasText: /Avançar para o Dia/i }))) ||
+      (await clickIf(page.locator('button', { hasText: /^(Fechar|Continuar|Entendi|OK)/i }))) ||
       (await clickIf(page.locator('button:has-text("✕")')));
     if (!closed) break;
-    await page.waitForTimeout(350);
+    await page.waitForTimeout(400);
   }
   await page.keyboard.press('Escape').catch(() => {});
 }
@@ -199,10 +201,17 @@ for (let step = 0; step < MAX_DAYS; step++) {
   await expandirLote(save);
   await comprarAnimal(save);
   if ((save.currentDay ?? 1) % 7 === 0) await assinarContratos();
+  const dayBefore = save.currentDay ?? 1;
   await avancarDia();
-
-  const s = await state();
+  let s = await state();
+  if (s && s.currentDay === dayBefore) {
+    // dia não avançou (modal preso?) — fecha tudo e tenta de novo
+    await fecharModais();
+    await avancarDia();
+    s = await state();
+  }
   if (!s) break;
+  if (s.currentDay === dayBefore) { log(`dia ${dayBefore} preso — abortando para diagnóstico`); break; }
   const contracts = (s.contracts ?? []).filter(c => c.contractType === 'long');
   const snap = {
     day: s.currentDay, level: s.farmLevel, xp: s.farmXp, gold: s.gold, debt: s.debt ?? 0,
