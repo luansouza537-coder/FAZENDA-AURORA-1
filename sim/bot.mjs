@@ -103,9 +103,9 @@ async function venderTudo() {
 async function comprarMaquinas(save) {
   const m = save.machines ?? {};
   const wants = [
-    { flag: m.feederPurchased, lvl: 4, price: 1500, label: /Comprar \(1\.500💰\)/ },
-    { flag: m.collectorPurchased, lvl: 5, price: 1800, label: /Comprar \(1\.800💰\)/ },
-    { flag: m.milkerPurchased, lvl: 6, price: 2500, label: /Comprar \(2\.500💰\)/ },
+    { flag: m.feederPurchased, lvl: 4, price: 1500, label: /Comprar \(1[.,]500💰\)/i },
+    { flag: m.collectorPurchased, lvl: 5, price: 1800, label: /Comprar \(1[.,]800💰\)/i },
+    { flag: m.milkerPurchased, lvl: 6, price: 2500, label: /Comprar \(2[.,]500💰\)/i },
   ].filter(w => !w.flag && (save.farmLevel ?? 1) >= w.lvl && save.gold > w.price + RESERVA);
   if (wants.length === 0) return;
   if (!(await clickIf(page.locator('[data-onboarding="loja-btn"]')))) return;
