@@ -393,12 +393,16 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
         </div>
       )}
 
-      {/* Veteran badge */}
-      {animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75 && (
+      {/* Veteran/Idoso badge */}
+      {animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.9 ? (
+        <span className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-red-100 border border-red-400 text-red-800 cursor-help animate-pulse" title={`No fim da vida (~${animal.maxAge - animal.age} dias restantes). Venda enquanto há valor ou prepare um substituto.`}>
+          🧓 Idoso
+        </span>
+      ) : animal.age !== undefined && animal.maxAge !== undefined && animal.age >= animal.maxAge * 0.75 ? (
         <span className="inline-flex items-center gap-1 mt-1 ml-1 text-[9px] font-mono font-black px-2 py-0.5 rounded-full bg-amber-100 border border-amber-400 text-amber-800 cursor-help" title="Este animal está na fase final da vida. Considere aposentá-lo.">
           👴 Veterano
         </span>
-      )}
+      ) : null}
 
       {/* Badge de galinha super feliz (pode gerar ovo fértil) */}
       {animal.type === 'galinha' && animal.happiness >= 95 && !animal.isBestFriend && (

@@ -4828,6 +4828,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (becameVeteran) {
           logsToAdd.push({ msg: `🏅 ${a.name} (${a.type}) completou metade da vida e se tornou Veterano! +5% produção permanente.`, type: 'success' });
         }
+        // Aviso de velhice: dispara uma única vez ao cruzar 90% da vida
+        if (maxAge < 999 && newAge === Math.ceil(maxAge * 0.9) && !['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas', 'tanque_tilapia'].includes(a.type)) {
+          const restantes = maxAge - newAge;
+          logsToAdd.push({ msg: `🧓 ${a.name} (${a.type}) está no fim da vida — ~${restantes} dias restantes. Considere vender ou preparar um substituto.`, type: 'info' });
+          setTimeout(() => addNotification(`🧓 ${a.name} está idoso(a) — ~${restantes} dias restantes. Venda ou prepare um substituto.`, 'warning', nextDayValue), 0);
+        }
         return { ...a, age: newAge, isVeteran: wasVeteran || becameVeteran };
       });
       const survivorsAfterAge = agedAnimals.filter(a => {
