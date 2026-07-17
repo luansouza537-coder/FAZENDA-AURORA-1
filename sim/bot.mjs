@@ -62,23 +62,27 @@ async function comprarRacao(save) {
     if (count === 0) continue;
     const stock = save.inventory?.[key] ?? 0;
     if (stock >= count * 2) continue;
-    const row = page.locator(`[data-onboarding="silo-racoes"] div`, { hasText: labels[key] }).last();
-    const btn = count >= 5 ? row.locator('button', { hasText: /\+50u/ }) : row.locator('button', { hasText: /\+10u/ });
-    if (!(await clickIf(btn))) await clickIf(row.locator('button', { hasText: /\+10u/ }));
+    const row = page.locator(`[data-onboarding="silo-racoes"] div`)
+      .filter({ hasText: labels[key] })
+      .filter({ has: page.locator('button', { hasText: /\+1u/ }) })
+      .last();
+    const tried = count >= 5
+      ? (await clickIf(row.locator('button', { hasText: /\+50u/ }))) || (await clickIf(row.locator('button', { hasText: /\+10u/ })))
+      : await clickIf(row.locator('button', { hasText: /\+10u/ }));
+    if (!tried) { // fallback: compra unitária quando o ouro está curto
+      for (let i = 0; i < Math.min(count * 2 - stock, 5); i++) await clickIf(row.locator('button', { hasText: /\+1u/ }));
+    }
     await page.waitForTimeout(200);
   }
 }
 
 async function alimentarEColetar() {
-  for (let round = 0; round < 2; round++) {
-    const feed = page.locator('button', { hasText: /ALIMENTAR \(/i });
-    const n = Math.min(await feed.count(), 40);
-    for (let i = 0; i < n; i++) { await clickIf(feed.nth(0)); await page.waitForTimeout(120); }
-    if (n === 0) break;
-  }
+  const feed = page.locator('button', { hasText: /ALIMENTAR \(/i });
+  const n = Math.min(await feed.count(), 40);
+  for (let i = 0; i < n; i++) { await clickIf(feed.nth(i)); await page.waitForTimeout(120); }
   const collect = page.locator('button:has-text("COLETAR"):not([disabled])');
   const c = Math.min(await collect.count(), 40);
-  for (let i = 0; i < c; i++) { await clickIf(collect.nth(0)); await page.waitForTimeout(120); }
+  for (let i = c - 1; i >= 0; i--) { await clickIf(collect.nth(i)); await page.waitForTimeout(120); }
 }
 
 async function venderTudo() {
@@ -209,6 +213,10 @@ for (let step = 0; step < MAX_DAYS; step++) {
     contractsActive: contracts.filter(c => c.active).length,
     contractsMissedWeeks: contracts.reduce((n, c) => n + (c.missedWeeks ?? 0), 0),
     goldDelta: s.gold - prevGold,
+    minHunger: Math.min(...(s.animals ?? []).map(a => Math.round(a.hunger ?? 0)), 999),
+    minHappy: Math.min(...(s.animals ?? []).map(a => Math.round(a.happiness ?? 0)), 999),
+    feedStock: { aves: s.inventory?.racaoAves ?? 0, bovina: s.inventory?.racaoBovina ?? 0 },
+    eggStock: s.inventory?.egg ?? 0,
   };
   prevGold = s.gold;
   fs.appendFileSync(OUT, JSON.stringify(snap) + '\n');
