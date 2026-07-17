@@ -159,25 +159,49 @@ async function comprarAnimal(save) {
   await page.waitForTimeout(300);
 }
 
-async function assinarContratos() {
+async function assinarContratos(save) {
+  // assina contratos apenas de produtos que o plantel realmente gera
+  const types = new Set((save.animals ?? []).map(a => a.type));
+  const alvos = [];
+  if (types.has('vaca')) alvos.push({ fam: /Laticínios/i, prod: /Leite Cru/i }, { fam: /Laticínios/i, prod: /Queijo Simples/i });
+  if (types.has('galinha')) alvos.push({ fam: /Ovos/i, prod: /Ovos de Galinha/i });
+  if (types.has('ovelha')) alvos.push({ fam: /Fibras/i, prod: /Lã Crua/i });
+  if (alvos.length === 0) return;
   if (!(await clickIf(page.locator('[data-onboarding="mais-btn"]')))) return;
   await page.waitForTimeout(400);
   await page.evaluate(() => document.querySelector('[data-onboarding="contratos-btn"]')?.click());
   await page.waitForTimeout(900);
   const modal = page.locator('div[class*="z-[99]"]').first();
-  // abre as duas primeiras famílias e assina o que estiver disponível (máx 2/visita)
-  let signed = 0;
-  for (const fam of ['Laticínios', 'Ovos']) {
-    await clickIf(modal.locator('button', { hasText: new RegExp(fam, 'i') }));
+  for (const alvo of alvos) {
+    // abre a família (acordeão: clicar em outra fecha a anterior)
+    if (!(await clickIf(modal.locator('button', { hasText: alvo.fam }).first()))) continue;
     await page.waitForTimeout(400);
-    for (let i = 0; i < 4 && signed < 2; i++) {
-      // expande um card e tenta assinar
-      const card = modal.locator('button', { hasText: /🧒 NV \d/ }).nth(i);
-      if (!(await clickIf(card))) break;
-      await page.waitForTimeout(300);
-      if (await clickIf(modal.locator('button', { hasText: /Assinar contrato/i }))) signed++;
-      await page.waitForTimeout(300);
-    }
+    // expande o card do produto (cabeçalho tem "N un/sem") e assina
+    const card = modal.locator('button', { hasText: alvo.prod }).filter({ hasText: /un\/sem/ }).first();
+    if (!(await clickIf(card))) continue;
+    await page.waitForTimeout(350);
+    await clickIf(modal.locator('button', { hasText: /Assinar contrato/i }).first());
+    await page.waitForTimeout(350);
+  }
+  await fecharModais();
+}
+
+async function produzir() {
+  // Produção (queijaria/tecelagem/cozinha): fabrica tudo que estiver habilitado e coleta o que maturou
+  if (!(await clickIf(page.locator('[data-onboarding="producao-btn"]')))) return;
+  await page.waitForTimeout(700);
+  const modal = page.locator('div[class*="z-[99]"]').first();
+  // coleta itens maturados primeiro (libera prateleiras)
+  const col = modal.locator('button:has-text("Coletar"):not([disabled])');
+  const nc = Math.min(await col.count(), 12);
+  for (let i = 0; i < nc; i++) { await clickIf(col.nth(0)); await page.waitForTimeout(150); }
+  // fabrica tudo que der (2 passadas: produtos em cadeia, ex. manteiga → doce de leite)
+  for (let round = 0; round < 2; round++) {
+    const fab = modal.locator('button:has-text("Fabricar"):not([disabled])');
+    const n = Math.min(await fab.count(), 15);
+    if (n === 0) break;
+    for (let i = 0; i < n; i++) { await clickIf(fab.nth(0)); await page.waitForTimeout(150); }
+    await page.waitForTimeout(300);
   }
   await fecharModais();
 }
@@ -207,12 +231,13 @@ for (let step = 0; step < MAX_DAYS; step++) {
 
   await comprarRacao(save);
   await alimentarEColetar();
+  await produzir();
   await venderTudo();
   save = await state() ?? save;
   await comprarMaquinas(save);
   await expandirLote(save);
   await comprarAnimal(save);
-  if ((save.currentDay ?? 1) % 7 === 0) await assinarContratos();
+  if ((save.currentDay ?? 1) % 7 === 0) await assinarContratos(save);
   const dayBefore = save.currentDay ?? 1;
   await avancarDia();
   let s = await state();

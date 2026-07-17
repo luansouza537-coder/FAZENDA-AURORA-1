@@ -1291,6 +1291,70 @@ export function useInventory({
 
   // --- SELL FUNCTIONS ---
 
+  // F4: credita vendas nas entregas de contratos ativos.
+  // REGRA: todo produto em Contract['product'] DEVE ter entrada no mapa abaixo.
+  // Usado por sellProduct (venda individual) e sellAllItemsNoConfirm (Vender Tudo).
+  const CONTRACT_PRODUCT_MAP: Record<string, Contract['product']> = {
+    milk: 'milk', wool: 'wool', egg: 'egg',
+    cheese: 'cheese', queijoCoalho: 'queijoCoalho', queijoMucarela: 'queijoMucarela', queijoBrie: 'queijoBrie',
+    butter: 'butter', yogurt: 'yogurt',
+    goat_milk: 'goat_milk', buffalo_milk: 'buffalo_milk', buffalo_mozzarella: 'buffalo_mozzarella',
+    duck_egg: 'duck_egg', quail_egg: 'quail_egg', goose_egg: 'goose_egg',
+    alpaca_wool: 'alpaca_wool', angora_wool: 'angora_wool', llama_wool: 'llama_wool',
+    muco: 'muco', mel: 'mel', mel_envasado: 'mel_envasado', seda_bruta: 'seda_bruta',
+    mayo: 'mayo', queijo_cabra: 'queijo_cabra', iogurte_cabra: 'iogurte_cabra',
+    tapete_lhama: 'tapete_lhama', leite_condensado: 'leite_condensado', tecido_alpaca: 'tecido_alpaca',
+    cachecol_angora: 'cachecol_angora', coxa_ra: 'coxa_ra',
+    carne_avestruz: 'carne_avestruz', couro_avestruz: 'couro_avestruz',
+    fio_seda: 'fio_seda', carne_jacare: 'carne_jacare', couro_jacare: 'couro_jacare',
+    sheep_milk: 'sheep_milk', queijo_pecorino: 'queijo_pecorino',
+    iogurte_ovelha: 'iogurte_ovelha', ricota_ovelha: 'ricota_ovelha',
+    doce_leite_ovelha: 'doce_leite_ovelha',
+    ovo_caipira: 'ovo_caipira', peixe: 'peixe',
+    bolo_caipira: 'bolo_caipira', queijo_minas_jersey: 'queijo_minas_jersey',
+    leite_jersey: 'leite_jersey', manteiga_jersey: 'manteiga_jersey', doce_leite_jersey: 'doce_leite_jersey', gouda_jersey: 'gouda_jersey', iogurte_bufala: 'iogurte_bufala', manteiga_bufala: 'manteiga_bufala', doce_leite_bufala: 'doce_leite_bufala', burrata: 'burrata', queijo_parmesao: 'queijo_parmesao', queijo_serra: 'queijo_serra', fertile_egg: 'fertile_egg', pate_pato: 'pate_pato', ovo_defumado: 'ovo_defumado', conserva_codorna: 'conserva_codorna', pudim_caipira: 'pudim_caipira', peixe_defumado: 'peixe_defumado', bolinho_peixe: 'bolinho_peixe', moqueca: 'moqueca', conserva_peixe: 'conserva_peixe', scarf: 'scarf', fio_lhama: 'fio_lhama', cachecol_lhama: 'cachecol_lhama', gorro_lhama: 'gorro_lhama', luvas_lhama: 'luvas_lhama', poncho_lhama: 'poncho_lhama', manta_lhama: 'manta_lhama', mohair: 'mohair', cachecol_mohair: 'cachecol_mohair', creme_cosmetico: 'creme_cosmetico', serum_facial: 'serum_facial', mascara_facial: 'mascara_facial', sabonete_natural: 'sabonete_natural', humus: 'humus', minhoca_viva: 'minhoca_viva', biofertilizante: 'biofertilizante', cogumelo: 'cogumelo', hidromel: 'hidromel', risoto_cogumelo: 'risoto_cogumelo', sopa_cogumelo: 'sopa_cogumelo', massa_fresca: 'massa_fresca', pao_rustico: 'pao_rustico', crepe_rustico: 'crepe_rustico', waffle_mel: 'waffle_mel', bolsa_exotica: 'bolsa_exotica',
+  };
+
+  const creditContractDeliveries = (itemType: string, qty: number) => {
+    const contractProduct = CONTRACT_PRODUCT_MAP[itemType];
+    if (!contractProduct || qty <= 0) return;
+    // Processa contratos sequencialmente para evitar crédito duplicado
+    // quando dois contratos exigem o mesmo produto
+    setContracts(prev => {
+      let qtyLeft = qty;
+      return prev.map(c => {
+        if (!c.active || c.product !== contractProduct || qtyLeft <= 0) return c;
+        const remaining = c.quantity - c.delivered;
+        if (remaining <= 0) return c;
+        const toDeliver = Math.min(qtyLeft, remaining);
+        qtyLeft -= toDeliver;
+        const newDelivered = c.delivered + toDeliver;
+        if (newDelivered >= c.quantity) {
+          if (c.contractType === 'long') {
+            const bonus = c.completionBonus ?? 0;
+            const xp = c.completionXP ?? 0;
+            if (bonus > 0) {
+              setGold(prev => prev + bonus);
+              addFinancialEntry?.({ day: currentDay ?? 0, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
+            }
+            setFarmXp(prev => prev + xp);
+            setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
+            setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
+            addLog(`🏆 Contrato com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
+          } else {
+            setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
+            addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
+            setFarmXp(prev => prev + 20);
+            setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
+          }
+          setTimeout(() => onContractDelivered?.(), 0);
+          return { ...c, delivered: newDelivered, active: false };
+        }
+        return { ...c, delivered: newDelivered };
+      });
+    });
+  };
+
   const sellProduct = (itemType: keyof InventoryState, qty: number, event: React.MouseEvent) => {
     if (event) { event.preventDefault(); event.stopPropagation(); }
     if ((inventory[itemType] ?? 0) < qty) {
@@ -1341,66 +1405,7 @@ export function useInventory({
     }));
 
     // F4: deduzir da entrega de contratos ativos
-    // REGRA: todo produto em Contract['product'] DEVE ter entrada aqui.
-    // Ao adicionar novo produto de contrato em types.ts, adicionar aqui também.
-    const contractProductMap: Record<string, Contract['product']> = {
-      milk: 'milk', wool: 'wool', egg: 'egg',
-      cheese: 'cheese', queijoCoalho: 'queijoCoalho', queijoMucarela: 'queijoMucarela', queijoBrie: 'queijoBrie',
-      butter: 'butter', yogurt: 'yogurt',
-      goat_milk: 'goat_milk', buffalo_milk: 'buffalo_milk', buffalo_mozzarella: 'buffalo_mozzarella',
-      duck_egg: 'duck_egg', quail_egg: 'quail_egg', goose_egg: 'goose_egg',
-      alpaca_wool: 'alpaca_wool', angora_wool: 'angora_wool', llama_wool: 'llama_wool',
-      muco: 'muco', mel: 'mel', mel_envasado: 'mel_envasado', seda_bruta: 'seda_bruta',
-      mayo: 'mayo', queijo_cabra: 'queijo_cabra', iogurte_cabra: 'iogurte_cabra',
-      tapete_lhama: 'tapete_lhama', leite_condensado: 'leite_condensado', tecido_alpaca: 'tecido_alpaca',
-      cachecol_angora: 'cachecol_angora', coxa_ra: 'coxa_ra',
-      carne_avestruz: 'carne_avestruz', couro_avestruz: 'couro_avestruz',
-      fio_seda: 'fio_seda', carne_jacare: 'carne_jacare', couro_jacare: 'couro_jacare',
-      sheep_milk: 'sheep_milk', queijo_pecorino: 'queijo_pecorino',
-      iogurte_ovelha: 'iogurte_ovelha', ricota_ovelha: 'ricota_ovelha',
-      doce_leite_ovelha: 'doce_leite_ovelha',
-      ovo_caipira: 'ovo_caipira', peixe: 'peixe',
-      bolo_caipira: 'bolo_caipira', queijo_minas_jersey: 'queijo_minas_jersey',
-      leite_jersey: 'leite_jersey', manteiga_jersey: 'manteiga_jersey', doce_leite_jersey: 'doce_leite_jersey', gouda_jersey: 'gouda_jersey', iogurte_bufala: 'iogurte_bufala', manteiga_bufala: 'manteiga_bufala', doce_leite_bufala: 'doce_leite_bufala', burrata: 'burrata', queijo_parmesao: 'queijo_parmesao', queijo_serra: 'queijo_serra', fertile_egg: 'fertile_egg', pate_pato: 'pate_pato', ovo_defumado: 'ovo_defumado', conserva_codorna: 'conserva_codorna', pudim_caipira: 'pudim_caipira', peixe_defumado: 'peixe_defumado', bolinho_peixe: 'bolinho_peixe', moqueca: 'moqueca', conserva_peixe: 'conserva_peixe', scarf: 'scarf', fio_lhama: 'fio_lhama', cachecol_lhama: 'cachecol_lhama', gorro_lhama: 'gorro_lhama', luvas_lhama: 'luvas_lhama', poncho_lhama: 'poncho_lhama', manta_lhama: 'manta_lhama', mohair: 'mohair', cachecol_mohair: 'cachecol_mohair', creme_cosmetico: 'creme_cosmetico', serum_facial: 'serum_facial', mascara_facial: 'mascara_facial', sabonete_natural: 'sabonete_natural', humus: 'humus', minhoca_viva: 'minhoca_viva', biofertilizante: 'biofertilizante', cogumelo: 'cogumelo', hidromel: 'hidromel', risoto_cogumelo: 'risoto_cogumelo', sopa_cogumelo: 'sopa_cogumelo', massa_fresca: 'massa_fresca', pao_rustico: 'pao_rustico', crepe_rustico: 'crepe_rustico', waffle_mel: 'waffle_mel', bolsa_exotica: 'bolsa_exotica',
-    };
-    const contractProduct = contractProductMap[itemType as string];
-    if (contractProduct) {
-      // Processa contratos sequencialmente para evitar crédito duplicado
-      // quando dois contratos exigem o mesmo produto
-      setContracts(prev => {
-        let qtyLeft = qty;
-        return prev.map(c => {
-          if (!c.active || c.product !== contractProduct || qtyLeft <= 0) return c;
-          const remaining = c.quantity - c.delivered;
-          if (remaining <= 0) return c;
-          const toDeliver = Math.min(qtyLeft, remaining);
-          qtyLeft -= toDeliver;
-          const newDelivered = c.delivered + toDeliver;
-          if (newDelivered >= c.quantity) {
-            if (c.contractType === 'long') {
-              const bonus = c.completionBonus ?? 0;
-              const xp = c.completionXP ?? 0;
-              if (bonus > 0) {
-                setGold(prev => prev + bonus);
-                addFinancialEntry?.({ day: currentDay ?? 0, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
-              }
-              setFarmXp(prev => prev + xp);
-              setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
-              setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
-              addLog(`🏆 Contrato com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
-            } else {
-              setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
-              addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
-              setFarmXp(prev => prev + 20);
-              setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
-            }
-            setTimeout(() => onContractDelivered?.(), 0);
-            return { ...c, delivered: newDelivered, active: false };
-          }
-          return { ...c, delivered: newDelivered };
-        });
-      });
-    }
+    creditContractDeliveries(itemType as string, qty);
 
     let label = '';
     if (itemType === 'milk') label = 'Leite Cru';
@@ -1502,6 +1507,12 @@ export function useInventory({
   };
 
   const sellAllItemsNoConfirm = (quietValue = false) => {
+    // BUG FIX: "Vender Tudo" agora credita entregas de contratos como a venda individual
+    for (const [key, qty] of Object.entries(inventory)) {
+      if (typeof qty === 'number' && qty > 0 && CONTRACT_PRODUCT_MAP[key]) {
+        creditContractDeliveries(key, qty);
+      }
+    }
     const milkQty = inventory.milk;
     const woolQty = inventory.wool;
     const cheeseQty = inventory.cheese;
