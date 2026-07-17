@@ -90,9 +90,12 @@ const VEHICLE_CATEGORIES = [
   { key: 'luxo',      label: '💎 Luxo, Exóticos e Gourmet', desc: 'Penas, couros, cosméticos e kits premium',        penalty: [8,  4, 0], winterExtra: [6, 3, 0], vehicles: ['Caixinha de Papelão', 'Maleta Segura', 'Transportadora Premium'], prices: [0, 500, 2000] },
 ];
 
+// Balanceamento (sim corrida B): pico de ouro em 281 dias foi ~4k — os lotes 8-10
+// custavam 350k/800k/2M (89-507× o pico) e eram inalcançáveis. Reduzidos uma ordem
+// de grandeza; Lote 7 acompanhou (70k→30k) para manter a escada crescente.
 const LOT_TIERS = [
   { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3000, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 10000, minLevel: 8 },
-  { lot: 6, price: 28000, minLevel: 10 }, { lot: 7, price: 70000, minLevel: 12 }, { lot: 8, price: 350000, minLevel: 14 }, { lot: 9, price: 800000, minLevel: 16 }, { lot: 10, price: 2000000, minLevel: 18 },
+  { lot: 6, price: 28000, minLevel: 10 }, { lot: 7, price: 30000, minLevel: 12 }, { lot: 8, price: 35000, minLevel: 14 }, { lot: 9, price: 90000, minLevel: 16 }, { lot: 10, price: 250000, minLevel: 18 },
 ];
 const WELL_TIERS = [{ lvl: 1, price: 700 }, { lvl: 2, price: 2000 }, { lvl: 3, price: 5500 }, { lvl: 4, price: 25000 }, { lvl: 5, price: 70000 }];
 const SOLAR_TIERS = [{ lvl: 1, price: 1200, minFarm: 1 }, { lvl: 2, price: 3500, minFarm: 1 }, { lvl: 3, price: 9000, minFarm: 5 }, { lvl: 4, price: 40000, minFarm: 14 }];
@@ -306,10 +309,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               <h4 className="font-display font-black text-sm uppercase text-green-800 mb-1">🏡 Expansão de Terreno</h4>
               <p className="text-xs text-stone-500 font-mono mb-3">Cada lote permite +5 animais. Atual: Lote {p.landLots}/10 ({p.landLots * 5} animais máx) • Compra sequencial obrigatória</p>
               <div className="grid grid-cols-2 gap-2 mb-3">
-                {[
-                  { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3000, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 10000, minLevel: 8 },
-                  { lot: 6, price: 28000, minLevel: 10 }, { lot: 7, price: 70000, minLevel: 12 }, { lot: 8, price: 350000, minLevel: 14 }, { lot: 9, price: 800000, minLevel: 16 }, { lot: 10, price: 2000000, minLevel: 18 },
-                ].map(({ lot, price, minLevel }) => {
+                {LOT_TIERS.map(({ lot, price, minLevel }) => {
                   const canBuy = p.gold >= price && p.landLots === lot - 1 && p.farmLevel >= minLevel;
                   const locked = p.farmLevel < minLevel;
                   const needsPrev = p.landLots < lot - 1;

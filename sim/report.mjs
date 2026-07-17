@@ -57,7 +57,7 @@ for (const file of files) {
   console.log(`\n## Poder de compra`);
   console.log(`Pico de ouro na corrida: **${fmt(peak)}**`);
   const alvos = [
-    ['Lote 6', 28000], ['Lote 7', 70000], ['Lote 8', 350000], ['Lote 9', 800000], ['Lote 10', 2000000],
+    ['Lote 6', 28000], ['Lote 7', 30000], ['Lote 8', 35000], ['Lote 9', 90000], ['Lote 10', 250000],
     ['Solar Nv4', 40000], ['Poço Nv5', 70000], ['Boi Angus', 1500], ['Jacaré', 900],
   ];
   for (const [nome, preco] of alvos) {
