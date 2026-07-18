@@ -117,7 +117,6 @@ import FarmNameModal from './components/FarmNameModal';
 import OnlineRankingModal from './components/RankingModal';
 import DoacaoModal from './components/DoacaoModal';
 import RaceModal from './components/RaceModal';
-import OnlineRaceModal from './components/OnlineRaceModal';
 import AnnouncementBanner from './components/AnnouncementBanner';
 
 
@@ -2468,7 +2467,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     prestigeNotifiedRef,
   } = useFairs({ addNotification });
   const [showRaceModal, setShowRaceModal] = useState<import('./components/RaceModal').RaceResult | null>(null);
-  const [showOnlineRace, setShowOnlineRace] = useState(false);
 
   // Monitor states to unlock achievements dynamically
   useEffect(() => {
@@ -7121,10 +7119,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                     🏆 Conquistas
                   </button>
-                  <button onClick={() => { setShowOnlineRace(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
-                    className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
-                    🌐 Corrida Online <span className="text-[8px] bg-sky-600 text-white px-1.5 py-0.5 rounded-full uppercase">novo</span>
-                  </button>
                   <button onClick={() => { setShowStatsModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                     📊 Estatísticas
@@ -8079,35 +8073,30 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           isLoggedIn={!!auth.user}
           onlineCount={onlineCount}
           onSignOut={() => auth.signOut()}
+          raceProps={{
+            user: auth.user,
+            farmName: auth.farmName,
+            animals,
+            gold,
+            onOpenAuth: () => { setShowOnlineRanking(false); setShowAuthModal(true); },
+            onSpendGold: (amount, desc) => {
+              setGold(prev => prev - amount);
+              addFinancialEntry({ day: currentDay, type: 'expense', amount, category: 'evento', description: desc });
+            },
+            onEarnGold: (amount, desc) => {
+              setGold(prev => prev + amount);
+              addFinancialEntry({ day: currentDay, type: 'income', amount, category: 'evento', description: desc });
+              addLog(`${desc}: +${amount}💰`, 'success');
+              triggerAudioResult(() => sfx.playSound('coin'));
+            },
+            onEarnXp: (amount) => setFarmXp(prev => prev + amount),
+            addLog,
+          }}
         />
       )}
 
       {/* ☕ MODAL DE DOAÇÃO PIX */}
       {showDoacao && <DoacaoModal onClose={() => setShowDoacao(false)} />}
-
-      {/* 🌐 CORRIDA ONLINE */}
-      {showOnlineRace && (
-        <OnlineRaceModal
-          user={auth.user}
-          farmName={auth.farmName}
-          animals={animals}
-          gold={gold}
-          onOpenAuth={() => setShowAuthModal(true)}
-          onSpendGold={(amount, desc) => {
-            setGold(prev => prev - amount);
-            addFinancialEntry({ day: currentDay, type: 'expense', amount, category: 'evento', description: desc });
-          }}
-          onEarnGold={(amount, desc) => {
-            setGold(prev => prev + amount);
-            addFinancialEntry({ day: currentDay, type: 'income', amount, category: 'evento', description: desc });
-            addLog(`${desc}: +${amount}💰`, 'success');
-            triggerAudioResult(() => sfx.playSound('coin'));
-          }}
-          onEarnXp={(amount) => setFarmXp(prev => prev + amount)}
-          addLog={addLog}
-          onClose={() => setShowOnlineRace(false)}
-        />
-      )}
 
       {/* 🏇 GRANDE PRÊMIO AURORA */}
       {showRaceModal && (

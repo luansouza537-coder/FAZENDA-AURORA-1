@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useChat } from '../hooks/useChat';
+import OnlineRacePanel, { OnlineRacePanelProps } from './OnlineRaceModal';
 
 interface RankingEntry {
   id: string;
@@ -15,6 +16,7 @@ interface RankingEntry {
 
 interface RankingModalProps {
   onClose: () => void;
+  raceProps: OnlineRacePanelProps;
   currentUserId?: string;
   currentNick?: string;
   isLoggedIn: boolean;
@@ -25,8 +27,8 @@ interface RankingModalProps {
 const TIME_FORMAT = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
 function formatTime(iso: string) { return TIME_FORMAT.format(new Date(iso)); }
 
-export default function RankingModal({ onClose, currentUserId, currentNick, isLoggedIn, onlineCount, onSignOut }: RankingModalProps) {
-  const [tab, setTab] = useState<'ranking' | 'chat'>('ranking');
+export default function RankingModal({ onClose, currentUserId, currentNick, isLoggedIn, onlineCount, onSignOut, raceProps }: RankingModalProps) {
+  const [tab, setTab] = useState<'ranking' | 'chat' | 'corrida'>('ranking');
 
   // --- RANKING STATE ---
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
@@ -157,7 +159,7 @@ export default function RankingModal({ onClose, currentUserId, currentNick, isLo
 
         {/* Abas */}
         <div className="flex gap-2 mx-5 mb-3 bg-amber-100 rounded-2xl p-1 shrink-0">
-          {(['ranking', 'chat'] as const).map(t => (
+          {(['ranking', 'chat', 'corrida'] as const).map(t => (
             <button
               key={t}
               type="button"
@@ -168,10 +170,13 @@ export default function RankingModal({ onClose, currentUserId, currentNick, isLo
                   : 'text-stone-500 hover:text-stone-700'
               }`}
             >
-              {t === 'ranking' ? '🏆 Ranking' : '💬 Chat'}
+              {t === 'ranking' ? '🏆 Ranking' : t === 'chat' ? '💬 Chat' : '🏇 Corrida'}
             </button>
           ))}
         </div>
+
+        {/* ===== ABA CORRIDA ONLINE ===== */}
+        {tab === 'corrida' && <OnlineRacePanel {...raceProps} />}
 
         {/* ===== ABA RANKING ===== */}
         {tab === 'ranking' && (

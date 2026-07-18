@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import type { User } from '@supabase/supabase-js';
 import { Animal } from '../types';
 import { useOnlineRace } from '../hooks/useOnlineRace';
@@ -9,7 +8,7 @@ import RaceModal, { RaceResult } from './RaceModal';
 const BET_VALUES = [50, 100, 250];
 const BET_MULT = 3; // palpite certo paga 3×
 
-interface Props {
+export interface OnlineRacePanelProps {
   user: User | null;
   farmName: string;
   animals: Animal[];
@@ -19,10 +18,9 @@ interface Props {
   onEarnGold: (amount: number, desc: string) => void;
   onEarnXp: (amount: number) => void;
   addLog: (msg: string, type: string) => void;
-  onClose: () => void;
 }
 
-export const OnlineRaceModal: React.FC<Props> = (p) => {
+export const OnlineRacePanel: React.FC<OnlineRacePanelProps> = (p) => {
   const race = useOnlineRace();
   const todayKey = raceKeyToday();
   const yesterdayKey = raceKeyYesterday();
@@ -126,19 +124,14 @@ export const OnlineRaceModal: React.FC<Props> = (p) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[115] flex items-center justify-center p-3" onClick={p.onClose}>
-      <motion.div
-        initial={{ scale: 0.94, y: 16 }} animate={{ scale: 1, y: 0 }}
-        onClick={e => e.stopPropagation()}
-        className="bg-[#1a3a1a] border-8 border-sky-700 rounded-[32px] max-w-lg w-full p-5 shadow-2xl max-h-[88vh] overflow-y-auto"
-      >
-        <h3 className="text-center font-display font-black text-lg uppercase text-sky-300 mb-1">🌐 Corrida Online</h3>
-        <p className="text-center text-[10px] font-mono text-sky-100/60 mb-4">Uma corrida por dia, contra cavalos de jogadores reais. Resultado no dia seguinte!</p>
+    <div className="px-5 pb-5 overflow-y-auto">
+      <div className="bg-[#1a3a1a] border-4 border-sky-700 rounded-3xl p-4">
+        <p className="text-center text-[10px] font-mono text-sky-100/60 mb-4">🏇 Uma corrida por dia, contra cavalos de jogadores reais. Resultado no dia seguinte!</p>
 
         {!p.user ? (
           <div className="text-center">
             <p className="text-sm text-amber-100/80 font-mono mb-4">Entre na sua conta para inscrever seu cavalo e dar palpites contra outros fazendeiros!</p>
-            <button onClick={() => { p.onClose(); p.onOpenAuth(); }} className="bg-sky-600 hover:bg-sky-500 text-white border-b-4 border-sky-800 rounded-2xl py-3 px-6 font-display font-black uppercase text-xs tracking-wider cursor-pointer">
+            <button onClick={() => p.onOpenAuth()} className="bg-sky-600 hover:bg-sky-500 text-white border-b-4 border-sky-800 rounded-2xl py-3 px-6 font-display font-black uppercase text-xs tracking-wider cursor-pointer">
               🔑 Entrar / Criar conta
             </button>
           </div>
@@ -231,14 +224,11 @@ export const OnlineRaceModal: React.FC<Props> = (p) => {
               ) : null}
             </div>
 
-            <button onClick={p.onClose} className="w-full mt-3 bg-stone-600 hover:bg-stone-500 text-white border-b-4 border-stone-800 rounded-2xl py-2.5 font-display font-black uppercase text-xs tracking-wider cursor-pointer">
-              Fechar
-            </button>
           </>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 };
 
-export default OnlineRaceModal;
+export default OnlineRacePanel;
