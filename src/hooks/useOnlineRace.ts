@@ -7,7 +7,7 @@ import { OnlineEntry } from '../lib/onlineRace';
 const LS_KEY = 'aurora_online_race';
 
 interface LocalRaceState {
-  bet?: { raceKey: string; runnerKey: string; runnerName: string; amount: number } | null;
+  bet?: { raceKey: string; runnerKey: string; runnerName: string; amount: number; odd: number } | null;
   claimed: string[]; // race_keys já reivindicadas
 }
 
@@ -69,10 +69,21 @@ export function useOnlineRace() {
     return s.bet && s.bet.raceKey === raceKey ? s.bet : null;
   }, []);
 
-  const placeBet = useCallback((raceKey: string, runnerKey: string, runnerName: string, amount: number) => {
+  const placeBet = useCallback((raceKey: string, runnerKey: string, runnerName: string, amount: number, odd: number) => {
     const s = loadLocal();
-    s.bet = { raceKey, runnerKey, runnerName, amount };
+    s.bet = { raceKey, runnerKey, runnerName, amount, odd };
     saveLocal(s);
+  }, []);
+
+  /** Registra vitória online no ranking (fire-and-forget). */
+  const recordOnlineWin = useCallback((user: User, farmName: string) => {
+    supabase.from('farm_rankings').select('online_race_wins').eq('id', user.id).maybeSingle().then(
+      ({ data }) => {
+        const wins = ((data as any)?.online_race_wins ?? 0) + 1;
+        supabase.from('farm_rankings').upsert({ id: user.id, farm_name: farmName || 'Fazenda', online_race_wins: wins }).then(() => {}, () => {});
+      },
+      () => {}
+    );
   }, []);
 
   const isClaimed = useCallback((raceKey: string) => loadLocal().claimed?.includes(raceKey) ?? false, []);
@@ -83,5 +94,5 @@ export function useOnlineRace() {
     saveLocal(s);
   }, []);
 
-  return { loading, error, submitEntry, fetchEntries, getBet, placeBet, isClaimed, markClaimed };
+  return { loading, error, submitEntry, fetchEntries, getBet, placeBet, isClaimed, markClaimed, recordOnlineWin };
 }

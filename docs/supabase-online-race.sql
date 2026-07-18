@@ -25,3 +25,6 @@ create policy "own entry insert" on race_entries
   for insert with check (auth.uid() = user_id);
 create policy "own entry update" on race_entries
   for update using (auth.uid() = user_id);
+
+-- 🏆 Contador de vitórias na Corrida Online (rode também, ou só esta linha se já criou a tabela acima)
+alter table farm_rankings add column if not exists online_race_wins int not null default 0;

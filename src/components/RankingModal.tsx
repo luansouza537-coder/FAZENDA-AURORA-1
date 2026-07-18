@@ -11,6 +11,7 @@ interface RankingEntry {
   weekly_production: number;
   total_earned: number;
   animal_count: number;
+  online_race_wins?: number;
   updated_at: string;
 }
 
@@ -79,7 +80,7 @@ export default function RankingModal({ onClose, currentUserId, currentNick, isLo
         } else {
           const { data: allAbove } = await supabase
             .from('farm_rankings')
-            .select('id, farm_name, farm_level, total_earned, animal_count, weekly_production, updated_at')
+            .select('id, farm_name, farm_level, total_earned, animal_count, weekly_production, online_race_wins, updated_at')
             .order('farm_level', { ascending: false })
             .order('total_earned', { ascending: false });
           if (allAbove) {
@@ -271,7 +272,7 @@ export default function RankingModal({ onClose, currentUserId, currentNick, isLo
                           <div className="min-w-0">
                             <div className="flex items-center gap-1">
                               <span className={`font-display font-black text-xs uppercase truncate ${isMe ? 'text-[#92400e]' : 'text-stone-700'}`}>
-                                {entry.farm_name}
+                                {entry.farm_name}{(entry.online_race_wins ?? 0) > 0 && <span className="ml-1 text-[9px] bg-amber-100 text-amber-800 border border-amber-300 rounded-full px-1.5 font-black" title="Vitórias na Corrida Online">🏇{entry.online_race_wins}</span>}
                               </span>
                               {isMe && <span className="text-[8px] bg-amber-400 text-white font-black px-1.5 py-0.5 rounded-full shrink-0">Você</span>}
                             </div>

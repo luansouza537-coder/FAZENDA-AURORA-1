@@ -51,6 +51,12 @@ const NPC_POOL = [
   { name: 'Furacão Caipira', owner: 'Rancho Alegre' },
   { name: 'Pé de Vento', owner: 'Coudelaria Sul' },
   { name: 'Serenata da Noite', owner: 'Estância Bela Vista' },
+  { name: 'Poeira de Ouro', owner: 'Haras Dourado' },
+  { name: 'Vassoura Doida', owner: 'Chácara da Bisa' },
+  { name: 'Meteoro Manso', owner: 'Recanto do Ipê' },
+  { name: 'Barba de Milho', owner: 'Sítio Boa Prosa' },
+  { name: 'Sombra Ligeira', owner: 'Fazenda Lua Cheia' },
+  { name: 'Teimoso Real', owner: 'Coudelaria Imperial' },
 ];
 
 const MIN_RUNNERS = 6;
@@ -85,9 +91,10 @@ export function resolveOnlineRace(raceKey: string, entries: OnlineEntry[]): Onli
     };
   });
 
-  // completa o grid com NPCs determinísticos
+  // completa o grid com NPCs determinísticos (elenco rotaciona por dia)
+  const npcOffset = hashStr(raceKey) % NPC_POOL.length;
   for (let i = 0; runners.length < MIN_RUNNERS; i++) {
-    const npc = NPC_POOL[i % NPC_POOL.length];
+    const npc = NPC_POOL[(npcOffset + i) % NPC_POOL.length];
     const rng = mulberry32(hashStr(raceKey + '|npc:' + i));
     runners.push({
       key: 'npc:' + i,
@@ -108,4 +115,40 @@ export function raceKeyToday(now = new Date()): string {
 export function raceKeyYesterday(now = new Date()): string {
   const d = new Date(now.getTime() - 86400000);
   return d.toISOString().slice(0, 10);
+}
+
+export interface FieldRunner {
+  key: string;
+  name: string;
+  owner: string;
+  isNpc: boolean;
+  base: number;   // desempenho SEM a sorte — usado para odds justas
+}
+
+/** Grid provisório do dia (inscritos + NPCs de preenchimento), sem revelar a sorte. */
+export function previewField(raceKey: string, entries: OnlineEntry[]): FieldRunner[] {
+  const sorted = [...entries].sort((a, b) => a.user_id.localeCompare(b.user_id));
+  const avg = sorted.length > 0
+    ? sorted.reduce((s, e) => s + basePerformance(e), 0) / sorted.length
+    : 45;
+  const field: FieldRunner[] = sorted.map(e => ({
+    key: e.user_id, name: e.horse_name, owner: e.farm_name, isNpc: false, base: basePerformance(e),
+  }));
+  const npcOffset = hashStr(raceKey) % NPC_POOL.length;
+  for (let i = 0; field.length < MIN_RUNNERS; i++) {
+    const npc = NPC_POOL[(npcOffset + i) % NPC_POOL.length];
+    field.push({ key: 'npc:' + i, name: npc.name, owner: npc.owner, isNpc: true, base: avg });
+  }
+  return field;
+}
+
+/** Odds estilo turfe sobre o grid provisório (casa fica ~10%; travadas na hora do palpite). */
+export function fieldOdds(field: FieldRunner[]): Record<string, number> {
+  const total = field.reduce((s, r) => s + r.base, 0);
+  const odds: Record<string, number> = {};
+  for (const r of field) {
+    const prob = r.base / total;
+    odds[r.key] = Math.min(8, Math.max(1.2, Math.round((0.9 / prob) * 10) / 10));
+  }
+  return odds;
 }

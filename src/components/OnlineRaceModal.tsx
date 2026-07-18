@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { Animal } from '../types';
 import { useOnlineRace } from '../hooks/useOnlineRace';
-import { OnlineEntry, resolveOnlineRace, raceKeyToday, raceKeyYesterday } from '../lib/onlineRace';
+import { OnlineEntry, resolveOnlineRace, raceKeyToday, raceKeyYesterday, previewField, fieldOdds } from '../lib/onlineRace';
 import RaceModal, { RaceResult } from './RaceModal';
 
 const BET_VALUES = [50, 100, 250];
-const BET_MULT = 3; // palpite certo paga 3×
 
 export interface OnlineRacePanelProps {
   user: User | null;
@@ -69,12 +68,17 @@ export const OnlineRacePanel: React.FC<OnlineRacePanelProps> = (p) => {
     }
   };
 
+  const field = previewField(todayKey, todayEntries ?? []);
+  const odds = fieldOdds(field);
+
   const apostar = () => {
     if (!betRunner || !betAmount || betAmount > p.gold || betToday) return;
-    const runnerName = todayEntries?.find(e => e.user_id === betRunner)?.horse_name ?? betRunner;
-    race.placeBet(todayKey, betRunner, runnerName, betAmount);
-    p.onSpendGold(betAmount, `🎰 Palpite Corrida Online — ${runnerName}`);
-    p.addLog(`🎰 Palpite de ${betAmount}💰 em ${runnerName}. Acertou o vencedor = ${BET_MULT}× de volta amanhã!`, 'info');
+    const runner = field.find(f => f.key === betRunner);
+    if (!runner) return;
+    const odd = odds[betRunner] ?? 3;
+    race.placeBet(todayKey, betRunner, runner.name, betAmount, odd);
+    p.onSpendGold(betAmount, `🎰 Palpite Corrida Online — ${runner.name}`);
+    p.addLog(`🎰 Palpite de ${betAmount}💰 em ${runner.name} a ${odd.toFixed(1)}×. Se vencer amanhã: +${Math.round(betAmount * odd)}💰!`, 'info');
     setBetRunner(null); setBetAmount(null);
   };
 
@@ -90,10 +94,11 @@ export const OnlineRacePanel: React.FC<OnlineRacePanelProps> = (p) => {
       xp = pos === 1 ? 25 : 0; // vitória ONLINE vale mais XP
       if (prize > 0) p.onEarnGold(prize, `🌐 Corrida Online — ${pos}º lugar (${runners[myIdx].name})`);
       if (xp > 0) p.onEarnXp(xp);
+      if (pos === 1 && p.user) race.recordOnlineWin(p.user, p.farmName);
       // palpite de ontem
       if (betYesterday) {
         if (betYesterday.runnerKey === runners[0].key) {
-          const ganho = betYesterday.amount * BET_MULT;
+          const ganho = Math.round(betYesterday.amount * (betYesterday.odd ?? 3));
           p.onEarnGold(ganho, `🎰 Palpite certeiro — ${runners[0].name}`);
           setClaimMsg(`🎰 Palpite CERTEIRO! ${runners[0].name} venceu — +${ganho}💰`);
         } else {
@@ -178,25 +183,23 @@ export const OnlineRacePanel: React.FC<OnlineRacePanelProps> = (p) => {
                 </button>
               )}
 
-              {/* inscritos */}
-              <p className="text-[9px] font-mono text-amber-100/50 uppercase mb-1">Inscritos até agora:</p>
+              {/* grid do dia: inscritos + NPCs de preenchimento, com odds */}
+              <p className="text-[9px] font-mono text-amber-100/50 uppercase mb-1">Grid do dia (odds travam no palpite):</p>
               {todayEntries === null ? (
                 <p className="text-[10px] font-mono text-amber-100/50 mb-2">Carregando…</p>
-              ) : todayEntries.length === 0 ? (
-                <p className="text-[10px] font-mono text-amber-100/50 mb-2">Ninguém ainda — NPCs completarão o grid.</p>
               ) : (
                 <div className="space-y-1 mb-2">
-                  {todayEntries.map(e => (
+                  {field.map(f => (
                     <button
-                      key={e.user_id}
-                      onClick={() => !betToday && setBetRunner(e.user_id)}
+                      key={f.key}
+                      onClick={() => !betToday && setBetRunner(f.key)}
                       disabled={!!betToday}
-                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-left transition-all ${betRunner === e.user_id ? 'border-amber-400 bg-amber-400/20' : 'border-emerald-800 bg-emerald-900/40'} ${betToday ? 'opacity-60 cursor-default' : 'cursor-pointer hover:bg-emerald-900'}`}
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-left transition-all ${betRunner === f.key ? 'border-amber-400 bg-amber-400/20' : 'border-emerald-800 bg-emerald-900/40'} ${betToday ? 'opacity-60 cursor-default' : 'cursor-pointer hover:bg-emerald-900'}`}
                     >
                       <span className="text-[10px] font-mono font-black text-amber-100">
-                        🐎 {e.horse_name} <span className="font-normal text-amber-100/40">· {e.farm_name}</span>
+                        🐎 {f.name} <span className="font-normal text-amber-100/40">· {f.isNpc ? f.owner : `🌐 ${f.owner}`}</span>
                       </span>
-                      <span className="text-[9px] font-mono text-sky-300 shrink-0">vel {e.speed}</span>
+                      <span className="text-[9px] font-mono text-amber-300 font-black shrink-0">{(odds[f.key] ?? 3).toFixed(1)}×</span>
                     </button>
                   ))}
                 </div>
@@ -204,8 +207,8 @@ export const OnlineRacePanel: React.FC<OnlineRacePanelProps> = (p) => {
 
               {/* palpite */}
               {betToday ? (
-                <p className="text-[10px] font-mono text-emerald-300">🎰 Palpite do dia: {betToday.amount}💰 em {betToday.runnerName} (paga {BET_MULT}× amanhã se vencer)</p>
-              ) : (todayEntries?.length ?? 0) > 0 ? (
+                <p className="text-[10px] font-mono text-emerald-300">🎰 Palpite do dia: {betToday.amount}💰 em {betToday.runnerName} a {(betToday.odd ?? 3).toFixed(1)}× — retorno de {Math.round(betToday.amount * (betToday.odd ?? 3))}💰 se vencer amanhã</p>
+              ) : (
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     {BET_VALUES.map(v => (
@@ -216,12 +219,12 @@ export const OnlineRacePanel: React.FC<OnlineRacePanelProps> = (p) => {
                     ))}
                     <button onClick={apostar} disabled={!betRunner || !betAmount || (betAmount ?? 0) > p.gold}
                       className={`flex-1 py-1.5 rounded-lg font-display font-black uppercase text-[10px] tracking-wider transition-all ${betRunner && betAmount ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-b-2 border-amber-700 cursor-pointer' : 'bg-stone-600 text-stone-400 cursor-not-allowed'}`}>
-                      🎰 Palpitar ({BET_MULT}×)
+                      🎰 Palpitar{betRunner && betAmount ? ` (+${Math.round((betAmount ?? 0) * (odds[betRunner] ?? 3))}💰)` : ''}
                     </button>
                   </div>
-                  <p className="text-[9px] font-mono text-amber-100/40">Escolha um inscrito acima + valor. Acertou o vencedor de amanhã = {BET_MULT}× de volta.</p>
+                  <p className="text-[9px] font-mono text-amber-100/40">Escolha um competidor + valor. Acertou o vencedor de amanhã, recebe aposta × odd.</p>
                 </div>
-              ) : null}
+              )}
             </div>
 
           </>
