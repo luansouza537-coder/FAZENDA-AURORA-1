@@ -5,6 +5,7 @@ export interface RaceRunner {
   name: string;
   owner: string;        // 'Você' ou nome do NPC
   isPlayer: boolean;
+  style?: 'disparador' | 'folego' | 'temperamental' | 'normal';
   performance: number;  // desempenho pré-calculado — a animação só reproduz
 }
 
@@ -51,14 +52,23 @@ export const RaceModal: React.FC<{
     if (phase !== 'corrida') return;
     const maxPerf = Math.max(...result.runners.map(r => r.performance));
     const base = result.runners.map(r => (r.performance / maxPerf) * (100 / TICKS));
+    // pacing por fases: o estilo conta a história da corrida (o resultado final não muda)
+    const paceMod = (style: string | undefined, frac: number): number => {
+      if (style === 'disparador') return frac < 0.4 ? 1.35 : frac < 0.7 ? 0.95 : 0.72;
+      if (style === 'folego') return frac < 0.4 ? 0.72 : frac < 0.7 ? 1.0 : 1.35;
+      return 1.0;
+    };
     const id = setInterval(() => {
       tickRef.current += 1;
       const t = tickRef.current;
+      const frac = t / TICKS;
       setProgress(prev => {
         const next = prev.map((p, i) => {
           if (p >= 100) return 100;
-          const noise = t < TICKS * 0.8 ? (Math.random() - 0.5) * base[i] * 1.2 : 0;
-          const catchup = t >= TICKS * 0.8 ? (100 - p) / (TICKS - t + 1) : base[i] + noise;
+          const r = result.runners[i];
+          const noiseMult = r.style === 'temperamental' ? 2.4 : 1.2;
+          const noise = t < TICKS * 0.8 ? (Math.random() - 0.5) * base[i] * noiseMult : 0;
+          const catchup = t >= TICKS * 0.8 ? (100 - p) / (TICKS - t + 1) : base[i] * paceMod(r.style, frac) + noise;
           return Math.min(100, p + Math.max(0.2, catchup));
         });
         if (t === Math.floor(TICKS * 0.25) || t === Math.floor(TICKS * 0.55)) {

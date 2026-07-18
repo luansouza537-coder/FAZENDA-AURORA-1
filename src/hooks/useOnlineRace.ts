@@ -32,6 +32,8 @@ export function useOnlineRace() {
         farm_name: entry.farm_name,
         horse_name: entry.horse_name,
         speed: Math.round(entry.speed),
+        burst: Math.round(entry.burst ?? 40),
+        stamina: Math.round(entry.stamina ?? 40),
         forma: entry.forma,
         vigor: Math.round(entry.vigor),
         moral: Math.round(entry.moral),
@@ -51,7 +53,7 @@ export function useOnlineRace() {
     try {
       const { data, error: err } = await supabase
         .from('race_entries')
-        .select('race_key, user_id, farm_name, horse_name, speed, forma, vigor, moral, trait')
+        .select('race_key, user_id, farm_name, horse_name, speed, burst, stamina, forma, vigor, moral, trait')
         .eq('race_key', raceKey);
       setLoading(false);
       if (err) { setError('Arena online indisponível.'); return null; }

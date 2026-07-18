@@ -117,7 +117,7 @@ import FarmNameModal from './components/FarmNameModal';
 import OnlineRankingModal from './components/RankingModal';
 import DoacaoModal from './components/DoacaoModal';
 import RaceModal from './components/RaceModal';
-import { DISTANCE_INFO, RaceDistance, distanceTraitMod } from './lib/onlineRace';
+import { DISTANCE_INFO, RaceDistance, distanceTraitMod, effectiveSpeed, npcLineup, npcPerformance } from './lib/onlineRace';
 import AnnouncementBanner from './components/AnnouncementBanner';
 
 
@@ -678,6 +678,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   });
   const [vaccinationDays, setVaccinationDays] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).vaccinationDays ?? 0; } catch(e) {} return 0;
+  });
+  const [racingDivision, setRacingDivision] = useState<'B' | 'A'>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).racingDivision ?? 'B'; } catch(e) {} return 'B';
+  });
+  const [divisionWins, setDivisionWins] = useState<number>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).divisionWins ?? 0; } catch(e) {} return 0;
   });
 
   // --- EVENTOS DO MUNDO ---
@@ -2792,7 +2798,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         financialLog,
         suplementoMineralDays, silagemDays,
         hasCisterna, abatedouroUnlocked, blockNextStorm, blockNextDrought, isencaoMultaCount,
-        hasRoofReinforcement, waterTruckDays, vaccinationDays,
+        hasRoofReinforcement, waterTruckDays, vaccinationDays, racingDivision, divisionWins,
 
         shownMilestones,
         vehicleTiers,
@@ -5774,45 +5780,61 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (nextDayValue >= nextCorridaDay) {
         if (farmLevel >= 3) {
           const cavalos = finalAnimals.filter(a => a.type === 'cavalo' && a.isAdult !== false);
-          const npcNames = ['Relâmpago do Vale', 'Trovão Manco', 'Estrela da Serra', 'Furacão Caipira', 'Pé de Vento', 'Serenata da Noite'];
-          const npcOwners = ['Haras São Jorge', 'Sítio do Zé', 'Fazenda Mirante', 'Rancho Alegre', 'Coudelaria Sul', 'Estância Bela Vista'];
           const distSorteio = Math.random();
           const distKey = distSorteio < 0.34 ? 'curta' : distSorteio < 0.67 ? 'media' : 'longa';
           const distInfo = DISTANCE_INFO[distKey as RaceDistance];
           let runners: { name: string; owner: string; isPlayer: boolean; performance: number }[];
           let c: (typeof cavalos)[number] | null = null;
+          // NPCs com FICHA REAL e carreira (série B/A) — nada de elástico: treinar importa!
+          const week = Math.floor(nextDayValue / 7);
+          const styleOf = (t: string | null | undefined) =>
+            t === 'preguicosa' || t === 'gulosa' ? 'disparador' : t === 'trabalhadora' ? 'folego' : t === 'estressada' ? 'temperamental' : 'normal';
+          const lineup = npcLineup('local|' + week, week, cavalos.length > 0 ? 5 : 6, racingDivision);
+          const npcRunners = lineup.map(card => ({
+            name: card.name, owner: `${card.owner}${card.fase === 'novato' ? ' 🌱' : card.fase === 'veterano' ? ' 👴' : ''}`,
+            isPlayer: false, style: styleOf(card.trait),
+            performance: npcPerformance(card, distKey as RaceDistance) * (1 + (Math.random() * 0.2 - 0.1)),
+          }));
           if (cavalos.length > 0) {
-            // melhor cavalo do jogador corre contra 5 NPCs calibrados (±15%)
             c = cavalos.reduce((a, b) => (a.speed ?? 40) >= (b.speed ?? 40) ? a : b);
             const idade = (c.age !== undefined && c.maxAge) ? c.age / c.maxAge : 0.3;
             const forma = idade < 0.15 ? 0.6 : idade < 0.5 ? 1.0 : idade < 0.75 ? 0.9 : 0.75;
             const traitMod = distanceTraitMod(c.trait, distKey as RaceDistance) *
               (c.trait === 'estressada' ? 1 + (Math.random() * 0.3 - 0.15) : 1);
-            const desempenho = (c.speed ?? 40) * forma * (0.7 + 0.3 * (c.hunger / 100)) * (0.5 + 0.5 * (c.happiness / 100)) * traitMod * (1 + (Math.random() * 0.2 - 0.1));
-            runners = [
-              { name: c.name, owner: 'Você', isPlayer: true, performance: desempenho },
-              ...npcNames.slice(0, 5).map((n, i) => ({ name: n, owner: npcOwners[i], isPlayer: false, performance: desempenho * (0.85 + Math.random() * 0.3) })),
-            ];
+            const S = effectiveSpeed(c.speed ?? 40, c.burst ?? 30, c.stamina ?? 30, distKey as RaceDistance);
+            const desempenho = S * forma * (0.7 + 0.3 * (c.hunger / 100)) * (0.5 + 0.5 * (c.happiness / 100)) * traitMod * (1 + (Math.random() * 0.2 - 0.1));
+            runners = [{ name: c.name, owner: 'Você', isPlayer: true, style: styleOf(c.trait), performance: desempenho } as any, ...npcRunners];
           } else {
-            // sem cavalo próprio: prova só de NPCs — o jogador pode apostar
-            const base = 35 + farmLevel * 3;
-            runners = npcNames.map((n, i) => ({ name: n, owner: npcOwners[i], isPlayer: false, performance: base * (0.85 + Math.random() * 0.3) }));
+            runners = npcRunners;
           }
           runners.sort((a, b) => b.performance - a.performance);
           const pos = runners.findIndex(r => r.isPlayer) + 1; // 0 = sem cavalo próprio
-          const prize = pos === 1 ? 300 : pos === 2 ? 150 : pos === 3 ? 75 : 0;
-          const xp = pos === 1 ? 15 : 0;
+          const serieA = racingDivision === 'A';
+          const prize = pos === 1 ? (serieA ? 600 : 300) : pos === 2 ? (serieA ? 300 : 150) : pos === 3 ? (serieA ? 150 : 75) : 0;
+          const xp = pos === 1 ? (serieA ? 30 : 15) : 0;
           if (prize > 0) setGold(prev => prev + prize);
           if (xp > 0) setFarmXp(prev => prev + xp);
-          if (prize > 0 && c) addFinancialEntry({ day: nextDayValue, type: 'income', amount: prize, category: 'evento', description: `🏇 Grande Prêmio Aurora — ${pos}º lugar (${c.name})` });
+          if (prize > 0 && c) addFinancialEntry({ day: nextDayValue, type: 'income', amount: prize, category: 'evento', description: `🏇 GP Aurora Série ${racingDivision} — ${pos}º lugar (${c.name})` });
           if (pos === 1 && c) {
             const cid = c.id;
             setAnimals(prev => prev.map(a => a.id === cid ? { ...a, raceWins: (a.raceWins ?? 0) + 1 } : a));
             setStats(prev => ({ ...prev, corridasVencidas: (prev.corridasVencidas ?? 0) + 1 }));
+            if (!serieA) {
+              const novasVitorias = divisionWins + 1;
+              if (novasVitorias >= 3) {
+                setRacingDivision('A');
+                setDivisionWins(0);
+                logsToAdd.push({ msg: `🏅 PROMOVIDO! Com 3 vitórias na Série B, ${c.name} sobe para a SÉRIE A — adversários de elite e prêmios em dobro!`, type: 'success' });
+                setTimeout(() => addNotification(`🏅 Promovido à Série A das corridas! Prêmios em dobro.`, 'success', nextDayValue), 0);
+              } else {
+                setDivisionWins(novasVitorias);
+                logsToAdd.push({ msg: `🏅 Vitória ${novasVitorias}/3 na Série B — mais ${3 - novasVitorias} para subir à Série A!`, type: 'info' });
+              }
+            }
           }
-          if (c) logsToAdd.push({ msg: pos === 1 ? `🏆 ${c.name} VENCEU o Grande Prêmio Aurora! +${prize}💰 +${xp} XP!` : pos <= 3 ? `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio! +${prize}💰` : `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio. Treine mais!`, type: pos <= 3 ? 'success' : 'info' });
-          else logsToAdd.push({ msg: `🏇 Grande Prêmio Aurora aconteceu na vila! Compre um cavalo (Nv6) para competir — ou aposte na próxima!`, type: 'info' });
-          setTimeout(() => setShowRaceModal({ day: nextDayValue, distance: `${distInfo.emoji} ${distInfo.label}`, runners, playerPosition: pos, prize, xp }), 500);
+          if (c) logsToAdd.push({ msg: pos === 1 ? `🏆 ${c.name} VENCEU o GP Aurora (Série ${racingDivision})! +${prize}💰 +${xp} XP!` : pos <= 3 ? `🏇 ${c.name} chegou em ${pos}º no GP (Série ${racingDivision})! +${prize}💰` : `🏇 ${c.name} chegou em ${pos}º no GP (Série ${racingDivision}). Treine mais!`, type: pos <= 3 ? 'success' : 'info' });
+          else logsToAdd.push({ msg: `🏇 GP Aurora aconteceu na vila! Compre um cavalo (Nv6) para competir — ou aposte na próxima!`, type: 'info' });
+          setTimeout(() => setShowRaceModal({ day: nextDayValue, distance: `${distInfo.emoji} ${distInfo.label} · Série ${racingDivision}`, runners, playerPosition: pos, prize, xp }), 500);
         }
         setNextCorridaDay(nextDayValue + 7);
       }

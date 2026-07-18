@@ -9,6 +9,8 @@ export interface OnlineEntry {
   farm_name: string;
   horse_name: string;
   speed: number;
+  burst?: number;       // Tiro (30-100) — pesa nas provas curtas
+  stamina?: number;     // Fôlego (30-100) — pesa nas longas
   forma: number;        // 0.6-1.0 (idade)
   vigor: number;        // fome 0-100
   moral: number;        // felicidade 0-100
@@ -90,21 +92,26 @@ export function distanceTraitMod(trait: string | null | undefined, dist: RaceDis
   }
 }
 
+/** Velocidade efetiva: o peso de Tiro/Fôlego depende da distância da prova. */
+export function effectiveSpeed(speed: number, burst: number, stamina: number, dist: RaceDistance): number {
+  if (dist === 'curta') return speed * 0.7 + burst * 0.45;
+  if (dist === 'longa') return speed * 0.7 + stamina * 0.45;
+  return speed * 0.85 + burst * 0.15 + stamina * 0.15;
+}
+
 /** Desempenho base (sem sorte) a partir dos stats congelados na inscrição. */
-export function basePerformance(e: Pick<OnlineEntry, 'speed' | 'forma' | 'vigor' | 'moral' | 'trait'>, dist: RaceDistance = 'media'): number {
+export function basePerformance(e: Pick<OnlineEntry, 'speed' | 'burst' | 'stamina' | 'forma' | 'vigor' | 'moral' | 'trait'>, dist: RaceDistance = 'media'): number {
   // 'estressada' vira sorte extra na resolução (±17,5%, semeada)
-  return e.speed * e.forma * (0.7 + 0.3 * (e.vigor / 100)) * (0.5 + 0.5 * (e.moral / 100)) * distanceTraitMod(e.trait, dist);
+  const S = effectiveSpeed(e.speed, e.burst ?? 40, e.stamina ?? 40, dist);
+  return S * e.forma * (0.7 + 0.3 * (e.vigor / 100)) * (0.5 + 0.5 * (e.moral / 100)) * distanceTraitMod(e.trait, dist);
 }
 
 /** Resolve a corrida: mesma entrada → mesma ordem final, em qualquer cliente. */
 export function resolveOnlineRace(raceKey: string, entries: OnlineEntry[]): OnlineRunner[] {
   const dist = raceDistance(raceKey);
+  const week = Math.floor(Date.parse(raceKey + 'T00:00:00Z') / 86400000 / 7);
   // ordena inscritos por user_id para a semente não depender da ordem do fetch
   const sorted = [...entries].sort((a, b) => a.user_id.localeCompare(b.user_id));
-  // média dos inscritos calibra os NPCs de preenchimento
-  const avg = sorted.length > 0
-    ? sorted.reduce((s, e) => s + basePerformance(e, dist), 0) / sorted.length
-    : 45;
 
   const runners: OnlineRunner[] = sorted.map(e => {
     const rng = mulberry32(hashStr(raceKey + '|' + e.user_id));
@@ -119,19 +126,19 @@ export function resolveOnlineRace(raceKey: string, entries: OnlineEntry[]): Onli
     };
   });
 
-  // completa o grid com NPCs determinísticos (elenco rotaciona por dia)
-  const npcOffset = hashStr(raceKey) % NPC_POOL.length;
-  for (let i = 0; runners.length < MIN_RUNNERS; i++) {
-    const npc = NPC_POOL[(npcOffset + i) % NPC_POOL.length];
+  // completa o grid com NPCs de ficha real (carreira determinística por semana)
+  const fill = npcLineup(raceKey, week, Math.max(0, MIN_RUNNERS - runners.length), 'B');
+  fill.forEach((card, i) => {
     const rng = mulberry32(hashStr(raceKey + '|npc:' + i));
+    const luck = 1 + (rng() * 0.2 - 0.1);
     runners.push({
       key: 'npc:' + i,
-      name: npc.name,
-      owner: npc.owner,
+      name: card.name,
+      owner: card.owner,
       isNpc: true,
-      performance: avg * (0.85 + rng() * 0.3),
+      performance: npcPerformance(card, dist) * luck,
     });
-  }
+  });
 
   return runners.sort((a, b) => b.performance - a.performance);
 }
@@ -156,18 +163,15 @@ export interface FieldRunner {
 /** Grid provisório do dia (inscritos + NPCs de preenchimento), sem revelar a sorte. */
 export function previewField(raceKey: string, entries: OnlineEntry[]): FieldRunner[] {
   const dist = raceDistance(raceKey);
+  const week = Math.floor(Date.parse(raceKey + 'T00:00:00Z') / 86400000 / 7);
   const sorted = [...entries].sort((a, b) => a.user_id.localeCompare(b.user_id));
-  const avg = sorted.length > 0
-    ? sorted.reduce((s, e) => s + basePerformance(e, dist), 0) / sorted.length
-    : 45;
   const field: FieldRunner[] = sorted.map(e => ({
     key: e.user_id, name: e.horse_name, owner: e.farm_name, isNpc: false, base: basePerformance(e, dist),
   }));
-  const npcOffset = hashStr(raceKey) % NPC_POOL.length;
-  for (let i = 0; field.length < MIN_RUNNERS; i++) {
-    const npc = NPC_POOL[(npcOffset + i) % NPC_POOL.length];
-    field.push({ key: 'npc:' + i, name: npc.name, owner: npc.owner, isNpc: true, base: avg });
-  }
+  const fill = npcLineup(raceKey, week, Math.max(0, MIN_RUNNERS - field.length), 'B');
+  fill.forEach((card, i) => {
+    field.push({ key: 'npc:' + i, name: card.name, owner: card.owner, isNpc: true, base: npcPerformance(card, dist) });
+  });
   return field;
 }
 
@@ -180,4 +184,60 @@ export function fieldOdds(field: FieldRunner[]): Record<string, number> {
     odds[r.key] = Math.min(8, Math.max(1.2, Math.round((0.9 / prob) * 10) / 10));
   }
   return odds;
+}
+
+// ===== Fichas de NPC com carreira (determinísticas — sem armazenamento) =====
+// Cada NPC tem stats próprios que evoluem por semana: sobe até o auge (~15 semanas
+// de carreira), decai e "renova a dinastia" (novato com o mesmo nome, stats novos).
+export interface NpcCard {
+  name: string;
+  owner: string;
+  speed: number;
+  burst: number;
+  stamina: number;
+  trait: string | null;
+  fase: 'novato' | 'auge' | 'veterano';
+}
+
+const NPC_TRAITS = ['trabalhadora', 'preguicosa', 'gulosa', 'saudavel', 'estressada', null];
+const CAREER_WEEKS = 30;
+
+export function npcCard(npcIndex: number, week: number, tier: 'B' | 'A' = 'B'): NpcCard {
+  const base = NPC_POOL[npcIndex % NPC_POOL.length];
+  // geração atual da "dinastia" deste NPC
+  const born = hashStr('born|' + base.name) % CAREER_WEEKS;
+  const careerAge = ((week + born) % CAREER_WEEKS + CAREER_WEEKS) % CAREER_WEEKS;
+  const gen = Math.floor((week + born) / CAREER_WEEKS);
+  const rng = mulberry32(hashStr('npc|' + base.name + '|g' + gen));
+  const tierMult = tier === 'A' ? 1.3 : 1.0;
+  // potencial da geração
+  const potSpeed = (45 + Math.floor(rng() * 35)) * tierMult;
+  const potBurst = (35 + Math.floor(rng() * 45)) * tierMult;
+  const potStamina = (35 + Math.floor(rng() * 45)) * tierMult;
+  const trait = NPC_TRAITS[Math.floor(rng() * NPC_TRAITS.length)];
+  // curva de carreira: cresce até a semana 15, declina depois
+  const curve = careerAge <= 15 ? 0.7 + (careerAge / 15) * 0.4 : 1.1 - ((careerAge - 15) / 15) * 0.35;
+  const fase: NpcCard['fase'] = careerAge < 8 ? 'novato' : careerAge <= 20 ? 'auge' : 'veterano';
+  return {
+    name: base.name,
+    owner: base.owner,
+    speed: Math.min(100 * tierMult, Math.round(potSpeed * curve)),
+    burst: Math.min(100 * tierMult, Math.round(potBurst * curve)),
+    stamina: Math.min(100 * tierMult, Math.round(potStamina * curve)),
+    trait,
+    fase,
+  };
+}
+
+/** Escalação de NPCs para uma corrida (rotação por semana + fichas reais). */
+export function npcLineup(seedKey: string, week: number, count: number, tier: 'B' | 'A' = 'B'): NpcCard[] {
+  const offset = hashStr('lineup|' + seedKey) % NPC_POOL.length;
+  return Array.from({ length: count }, (_, i) => npcCard(offset + i, week, tier));
+}
+
+/** Desempenho de um NPC numa prova (usa a ficha real, não o elástico). */
+export function npcPerformance(card: NpcCard, dist: RaceDistance): number {
+  const S = effectiveSpeed(card.speed, card.burst, card.stamina, dist);
+  // NPCs correm sempre bem cuidados (vigor/moral ~85) — o desafio é a ficha deles
+  return S * 1.0 * (0.7 + 0.3 * 0.85) * (0.5 + 0.5 * 0.85) * distanceTraitMod(card.trait, dist);
 }

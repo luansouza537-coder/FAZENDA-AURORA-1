@@ -53,7 +53,9 @@ export interface Animal {
   weightGain?: number; // 0.0 to 1.0 (0% to 100%)
 
   // Cavalo (corridas)
-  speed?: number;        // 40-100, sobe com treino
+  speed?: number;        // Ritmo 40-100, sobe com treino
+  burst?: number;        // Tiro 30-100 — pesa nas provas curtas
+  stamina?: number;      // Fôlego 30-100 — pesa nas longas
   lastTrainDay?: number; // trava 1 treino/dia
   raceWins?: number;     // vitórias no Grande Prêmio
 

@@ -56,6 +56,8 @@ export const OnlineRacePanel: React.FC<OnlineRacePanelProps> = (p) => {
       farm_name: p.farmName || 'Fazenda sem nome',
       horse_name: meuCavalo.name,
       speed: meuCavalo.speed ?? 40,
+      burst: meuCavalo.burst ?? 30,
+      stamina: meuCavalo.stamina ?? 30,
       forma,
       vigor: meuCavalo.hunger,
       moral: meuCavalo.happiness,

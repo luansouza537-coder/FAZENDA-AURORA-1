@@ -1050,27 +1050,31 @@ export function useAnimals({
     onItemCollected?.(qty);
   };
 
-  // 🐴 Treinar cavalo: 1×/dia, consome 2 rações bovinas e -5 felicidade → +speed
-  const trainHorse = (id: number, event: React.MouseEvent) => {
+  // 🐴 Treinar cavalo: 1×/dia, consome 2 rações bovinas e -5 felicidade → +1 no foco escolhido
+  const trainHorse = (id: number, event: React.MouseEvent, focus: 'speed' | 'burst' | 'stamina' = 'speed') => {
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
     if (!animal || animal.type !== 'cavalo') return;
     if (animal.isAdult === false) { addLog(`🐴 ${animal.name} ainda é um potro — muito novo para treinar!`, 'error'); spawnFeedback('🍼', 'Potro', event); return; }
     if (animal.lastTrainDay === currentDay) { addLog(`🐴 ${animal.name} já treinou hoje. Descanso também faz parte!`, 'info'); spawnFeedback('😮‍💨', 'Já treinou', event); return; }
-    if ((animal.speed ?? 0) >= 100) { addLog(`🏇 ${animal.name} já está no auge da velocidade (100)!`, 'info'); spawnFeedback('🏆', 'Máximo!', event); return; }
+    const focoAtual = focus === 'speed' ? (animal.speed ?? 40) : focus === 'burst' ? (animal.burst ?? 30) : (animal.stamina ?? 30);
+    const focoLabel = focus === 'speed' ? '🏃 Ritmo' : focus === 'burst' ? '⚡ Tiro' : '🫁 Fôlego';
+    if (focoAtual >= 100) { addLog(`🏇 ${animal.name} já está no máximo de ${focoLabel} (100)!`, 'info'); spawnFeedback('🏆', 'Máximo!', event); return; }
     if ((inventory.racaoBovina ?? 0) < 2) { addLog(`🌾 Treino exige 2 Rações Bovinas no Armazém!`, 'error'); spawnFeedback('❌', 'Sem ração', event); return; }
     const veterano = animal.age !== undefined && animal.maxAge !== undefined && animal.age > animal.maxAge * 0.75;
     const ganho = veterano ? 0.5 : 1;
     setInventory(prev => ({ ...prev, racaoBovina: (prev.racaoBovina ?? 0) - 2 }));
     setAnimals(prev => prev.map(a => a.id === id ? {
       ...a,
-      speed: Math.min(100, (a.speed ?? 40) + ganho),
+      speed: focus === 'speed' ? Math.min(100, (a.speed ?? 40) + ganho) : (a.speed ?? 40),
+      burst: focus === 'burst' ? Math.min(100, (a.burst ?? 30) + ganho) : (a.burst ?? 30),
+      stamina: focus === 'stamina' ? Math.min(100, (a.stamina ?? 30) + ganho) : (a.stamina ?? 30),
       happiness: Math.max(0, a.happiness - 5),
       lastTrainDay: currentDay,
     } : a));
-    addLog(`🏋️ ${animal.name} treinou! Velocidade ${Math.min(100, (animal.speed ?? 40) + ganho)}/100${veterano ? ' (veterano: ganho reduzido)' : ''}.`, 'success');
+    addLog(`🏋️ ${animal.name} treinou ${focoLabel}: ${Math.min(100, focoAtual + ganho)}/100${veterano ? ' (veterano: ganho reduzido)' : ''}.`, 'success');
     triggerAudioResult(() => sfx.playSound('collect'));
-    spawnFeedback('🏇', `+${ganho} Velocidade`, event);
+    spawnFeedback('🏇', `+${ganho} ${focoLabel}`, event);
   };
 
   // Collect Avestruz carne
@@ -1532,7 +1536,7 @@ export function useAnimals({
       ...(type === 'tanque_tilapia' && { fishReady: false, trait: undefined }),
       ...(type === 'vaca_jersey' && { hasProducedToday: false }),
       ...(type === 'boi_angus' && { weightGain: 0.05 }),
-      ...(type === 'cavalo' && { speed: Math.floor(Math.random() * 21) + 40, raceWins: 0 }), // linhagem: 40-60
+      ...(type === 'cavalo' && { speed: Math.floor(Math.random() * 21) + 40, burst: Math.floor(Math.random() * 21) + 30, stamina: Math.floor(Math.random() * 21) + 30, raceWins: 0 }), // linhagem
       ...(type === 'cabra' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'ovelha_leiteira' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'lhama' && { woolAccumulated: 0 }),

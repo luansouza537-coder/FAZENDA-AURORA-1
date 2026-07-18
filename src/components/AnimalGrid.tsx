@@ -78,7 +78,7 @@ interface AnimalGridProps {
   collectBichoSeda: (id: number, e?: React.MouseEvent) => void;
   feedBichoSeda: (id: number, e?: React.MouseEvent) => void;
   collectRa: (id: number, e?: React.MouseEvent) => void;
-  trainHorse?: (id: number, e?: React.MouseEvent) => void;
+  trainHorse?: (id: number, e?: React.MouseEvent, focus?: 'speed' | 'burst' | 'stamina') => void;
   collectAvestruzPena: (id: number, e?: React.MouseEvent) => void;
   sellAvestruz: (id: number, e?: React.MouseEvent) => void;
   sellJacare: (id: number, e?: React.MouseEvent) => void;

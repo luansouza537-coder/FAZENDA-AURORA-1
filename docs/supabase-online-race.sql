@@ -28,3 +28,7 @@ create policy "own entry update" on race_entries
 
 -- 🏆 Contador de vitórias na Corrida Online (rode também, ou só esta linha se já criou a tabela acima)
 alter table farm_rankings add column if not exists online_race_wins int not null default 0;
+
+-- 🐴 Atributos Tiro/Fôlego dos cavalos (atualização — rode se já criou a tabela antes)
+alter table race_entries add column if not exists burst int not null default 40;
+alter table race_entries add column if not exists stamina int not null default 40;

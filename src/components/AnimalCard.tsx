@@ -218,7 +218,7 @@ export interface AnimalCardProps {
   onCollectBichoSeda: (id: number, e: React.MouseEvent) => void;
   onFeedBichoSeda: (id: number, e: React.MouseEvent) => void;
   onCollectRa: (id: number, e: React.MouseEvent) => void;
-  onTrainHorse?: (id: number, e: React.MouseEvent) => void;
+  onTrainHorse?: (id: number, e: React.MouseEvent, focus?: 'speed' | 'burst' | 'stamina') => void;
   onCollectAvestruzPena: (id: number, e: React.MouseEvent) => void;
   onSellAvestruz: (id: number, e: React.MouseEvent) => void;
   onSellJacare: (id: number, e: React.MouseEvent) => void;
@@ -1073,21 +1073,26 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
             {animal.type === 'cavalo' && (
               <div className="flex flex-col gap-1 w-full uppercase">
                 <div className="flex justify-between items-center w-full">
-                  <span className="flex items-center gap-1 text-[11px]">
-                    🏇 Velocidade: <span className="font-mono font-black ml-1 text-xs">{Math.floor(animal.speed ?? 40)}/100</span>
-                  </span>
+                  <span className="text-[10px] font-black">🏇 Ficha de corrida</span>
                   {(animal.raceWins ?? 0) > 0 && (
                     <span className="text-[9px] bg-amber-100 text-amber-800 border border-amber-400 font-black px-1.5 py-0.5 rounded-full">🏆 {animal.raceWins} vitória{(animal.raceWins ?? 0) > 1 ? 's' : ''}</span>
                   )}
                 </div>
-                <div className="w-full bg-[#e5e7eb] h-2.5 rounded-full overflow-hidden mt-1 border border-stone-300 relative">
-                  <div
-                    className="h-full bg-gradient-to-r from-amber-400 to-amber-700 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.floor(animal.speed ?? 40)}%` }}
-                  />
-                </div>
-                <div className="text-[10px] text-[#78350f]/80 font-mono text-left border-t border-[#fbbf24]/50 pt-1 mt-1.5 leading-none self-start w-full">
-                  Treine 1×/dia · Grande Prêmio Aurora a cada 7 dias
+                {([
+                  { label: '🏃 Ritmo', val: animal.speed ?? 40, cor: 'from-amber-400 to-amber-700' },
+                  { label: '⚡ Tiro', val: animal.burst ?? 30, cor: 'from-sky-400 to-sky-700' },
+                  { label: '🫁 Fôlego', val: animal.stamina ?? 30, cor: 'from-emerald-400 to-emerald-700' },
+                ]).map(b => (
+                  <div key={b.label} className="flex items-center gap-1.5 w-full">
+                    <span className="text-[9px] font-mono font-black w-16 shrink-0 text-left">{b.label}</span>
+                    <div className="flex-1 bg-[#e5e7eb] h-2 rounded-full overflow-hidden border border-stone-300">
+                      <div className={`h-full bg-gradient-to-r ${b.cor} rounded-full transition-all duration-300`} style={{ width: `${Math.floor(b.val)}%` }} />
+                    </div>
+                    <span className="text-[9px] font-mono font-black w-6 text-right shrink-0">{Math.floor(b.val)}</span>
+                  </div>
+                ))}
+                <div className="text-[10px] text-[#78350f]/80 font-mono text-left border-t border-[#fbbf24]/50 pt-1 mt-1 leading-none self-start w-full">
+                  Tiro pesa nas provas curtas · Fôlego nas longas · treino 1×/dia
                 </div>
               </div>
             )}
@@ -1870,11 +1875,19 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
         {/* Cavalo: treinar */}
         {animal.type === 'cavalo' && onTrainHorse && animal.isAdult !== false && (
-          <button type="button" onClick={(e) => { e.preventDefault(); onTrainHorse(animal.id, e); }}
-            className="rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center gap-1.5 transition-all select-none bg-amber-600 hover:bg-amber-500 border-b-4 border-amber-800 shadow-md active:translate-y-0.5 hover:scale-[1.02]"
-            title="Treinar (1x/dia): consome 2 Rações Bovinas e -5 felicidade, +1 velocidade">
-            🏋️ Treinar
-          </button>
+          <div className="flex gap-1 flex-1">
+            {([
+              { focus: 'speed' as const, label: '🏃', title: 'Treinar Ritmo (1x/dia): 2 rações, -5 felicidade, +1 Ritmo' },
+              { focus: 'burst' as const, label: '⚡', title: 'Treinar Tiro (provas curtas): 2 rações, -5 felicidade, +1 Tiro' },
+              { focus: 'stamina' as const, label: '🫁', title: 'Treinar Fôlego (provas longas): 2 rações, -5 felicidade, +1 Fôlego' },
+            ]).map(t => (
+              <button key={t.focus} type="button" onClick={(e) => { e.preventDefault(); onTrainHorse(animal.id, e, t.focus); }}
+                className="rounded-[14px] px-2 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold flex-1 cursor-pointer flex items-center justify-center transition-all select-none bg-amber-600 hover:bg-amber-500 border-b-4 border-amber-800 shadow-md active:translate-y-0.5"
+                title={t.title}>
+                🏋️{t.label}
+              </button>
+            ))}
+          </div>
         )}
 
         {/* Rã: coletar coxa */}
