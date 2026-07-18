@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { Animal } from '../types';
 import { useOnlineRace } from '../hooks/useOnlineRace';
-import { OnlineEntry, resolveOnlineRace, raceKeyToday, raceKeyYesterday, previewField, fieldOdds } from '../lib/onlineRace';
+import { OnlineEntry, resolveOnlineRace, raceKeyToday, raceKeyYesterday, previewField, fieldOdds, raceDistance, DISTANCE_INFO } from '../lib/onlineRace';
 import RaceModal, { RaceResult } from './RaceModal';
 
 const BET_VALUES = [50, 100, 250];
@@ -107,8 +107,10 @@ export const OnlineRacePanel: React.FC<OnlineRacePanelProps> = (p) => {
       }
       race.markClaimed(yesterdayKey);
     }
+    const distO = DISTANCE_INFO[raceDistance(yesterdayKey)];
     setReplay({
       day: 0,
+      distance: `${distO.emoji} ${distO.label}`,
       runners: runners.map(r => ({ name: r.name, owner: r.isNpc ? r.owner : `🌐 ${r.owner}`, isPlayer: p.user ? r.key === p.user.id : false, performance: r.performance })),
       playerPosition: pos > 0 ? pos : 0,
       prize, xp,
@@ -166,6 +168,7 @@ export const OnlineRacePanel: React.FC<OnlineRacePanelProps> = (p) => {
             {/* HOJE */}
             <div className="bg-emerald-950/60 border-2 border-emerald-800 rounded-2xl p-3">
               <p className="font-display font-black text-xs uppercase text-sky-300 mb-1.5">📋 Corrida de hoje ({todayKey})</p>
+              <p className="text-[10px] font-mono font-black text-amber-300 uppercase mb-1.5">{DISTANCE_INFO[raceDistance(todayKey)].emoji} {DISTANCE_INFO[raceDistance(todayKey)].label}</p>
 
               {/* inscrição */}
               {meuCavalo ? (

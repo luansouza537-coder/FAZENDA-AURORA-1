@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveOnlineRace, basePerformance, raceKeyToday, raceKeyYesterday, OnlineEntry } from '../lib/onlineRace';
+import { resolveOnlineRace, basePerformance, raceKeyToday, raceKeyYesterday, raceDistance, distanceTraitMod, OnlineEntry } from '../lib/onlineRace';
 
 describe('Corrida Online — resolução determinística', () => {
   const entries = [
@@ -48,5 +48,21 @@ describe('Corrida Online — resolução determinística', () => {
     const now = new Date('2026-07-18T15:00:00Z');
     expect(raceKeyToday(now)).toBe('2026-07-18');
     expect(raceKeyYesterday(now)).toBe('2026-07-17');
+  });
+
+  it('distância do dia é determinística e varia entre dias', () => {
+    expect(raceDistance('2026-07-18')).toBe(raceDistance('2026-07-18'));
+    const dias = ['2026-07-18','2026-07-19','2026-07-20','2026-07-21','2026-07-22','2026-07-23','2026-07-24'];
+    const dists = new Set(dias.map(raceDistance));
+    expect(dists.size).toBeGreaterThan(1); // em uma semana aparece mais de um tipo de prova
+  });
+
+  it('estilo interage com a distância: disparador vence no curto, fôlego no longo', () => {
+    expect(distanceTraitMod('preguicosa', 'curta')).toBeGreaterThan(distanceTraitMod('preguicosa', 'longa'));
+    expect(distanceTraitMod('trabalhadora', 'longa')).toBeGreaterThan(distanceTraitMod('trabalhadora', 'curta'));
+    const disparador = { speed: 60, forma: 1, vigor: 90, moral: 90, trait: 'preguicosa' };
+    const folego = { speed: 60, forma: 1, vigor: 90, moral: 90, trait: 'trabalhadora' };
+    expect(basePerformance(disparador, 'curta')).toBeGreaterThan(basePerformance(folego, 'curta'));
+    expect(basePerformance(folego, 'longa')).toBeGreaterThan(basePerformance(disparador, 'longa'));
   });
 });

@@ -10,6 +10,7 @@ export interface RaceRunner {
 
 export interface RaceResult {
   day: number;
+  distance?: string;            // rótulo da prova, ex: '⚡ Prova Curta — 1.000m'
   runners: RaceRunner[];        // já ordenados por desempenho (1º = índice 0)
   playerPosition: number;       // 1-6 (0 = jogador sem cavalo na prova)
   prize: number;                // 💰 creditado (já aplicado antes de abrir o modal)
@@ -121,8 +122,11 @@ export const RaceModal: React.FC<{
         ))}
 
         <h3 className="text-center font-display font-black text-lg uppercase text-amber-300 mb-0.5">
-          🏇 Grande Prêmio Aurora — Dia {result.day}
+          🏇 Grande Prêmio Aurora{result.day > 0 ? ` — Dia ${result.day}` : ''}
         </h3>
+        {result.distance && (
+          <p className="text-center text-[10px] font-mono font-black text-sky-300 uppercase mb-1">{result.distance}</p>
+        )}
 
         {/* ===== FASE DE APOSTAS ===== */}
         {phase === 'apostas' && (

@@ -61,21 +61,49 @@ const NPC_POOL = [
 
 const MIN_RUNNERS = 6;
 
+export type RaceDistance = 'curta' | 'media' | 'longa';
+export const DISTANCE_INFO: Record<RaceDistance, { label: string; emoji: string }> = {
+  curta: { label: 'Prova Curta — 1.000m', emoji: '⚡' },
+  media: { label: 'Prova Média — 1.800m', emoji: '🏇' },
+  longa: { label: 'Prova Longa — 2.600m', emoji: '🐢' },
+};
+
+/** Distância do dia (determinística pela semente da corrida). */
+export function raceDistance(raceKey: string): RaceDistance {
+  const r = mulberry32(hashStr('dist|' + raceKey))();
+  return r < 0.34 ? 'curta' : r < 0.67 ? 'media' : 'longa';
+}
+
+/** Estilo de corrida: o trait interage com a distância da prova. */
+export function distanceTraitMod(trait: string | null | undefined, dist: RaceDistance): number {
+  switch (trait) {
+    case 'preguicosa':  // Disparador: explode na largada, cansa
+      return dist === 'curta' ? 1.10 : dist === 'longa' ? 0.90 : 1.0;
+    case 'trabalhadora': // Fôlego de aço: cresce com a distância
+      return dist === 'curta' ? 0.95 : dist === 'longa' ? 1.12 : 1.05;
+    case 'gulosa':      // Energia rápida: bom no tiro curto, apaga no fim
+      return dist === 'curta' ? 1.02 : dist === 'longa' ? 0.93 : 0.97;
+    case 'saudavel':    // Constante
+      return 1.03;
+    default:            // feliz / estressada (a sorte extra cuida) / sem trait
+      return 1.0;
+  }
+}
+
 /** Desempenho base (sem sorte) a partir dos stats congelados na inscrição. */
-export function basePerformance(e: Pick<OnlineEntry, 'speed' | 'forma' | 'vigor' | 'moral' | 'trait'>): number {
-  const traitMod = e.trait === 'trabalhadora' ? 1.05 : e.trait === 'preguicosa' ? 0.95 :
-    e.trait === 'saudavel' ? 1.03 : e.trait === 'gulosa' ? 0.97 : 1;
-  // 'estressada' vira sorte extra na resolução (±15% adicionais, semeados)
-  return e.speed * e.forma * (0.7 + 0.3 * (e.vigor / 100)) * (0.5 + 0.5 * (e.moral / 100)) * traitMod;
+export function basePerformance(e: Pick<OnlineEntry, 'speed' | 'forma' | 'vigor' | 'moral' | 'trait'>, dist: RaceDistance = 'media'): number {
+  // 'estressada' vira sorte extra na resolução (±17,5%, semeada)
+  return e.speed * e.forma * (0.7 + 0.3 * (e.vigor / 100)) * (0.5 + 0.5 * (e.moral / 100)) * distanceTraitMod(e.trait, dist);
 }
 
 /** Resolve a corrida: mesma entrada → mesma ordem final, em qualquer cliente. */
 export function resolveOnlineRace(raceKey: string, entries: OnlineEntry[]): OnlineRunner[] {
+  const dist = raceDistance(raceKey);
   // ordena inscritos por user_id para a semente não depender da ordem do fetch
   const sorted = [...entries].sort((a, b) => a.user_id.localeCompare(b.user_id));
   // média dos inscritos calibra os NPCs de preenchimento
   const avg = sorted.length > 0
-    ? sorted.reduce((s, e) => s + basePerformance(e), 0) / sorted.length
+    ? sorted.reduce((s, e) => s + basePerformance(e, dist), 0) / sorted.length
     : 45;
 
   const runners: OnlineRunner[] = sorted.map(e => {
@@ -87,7 +115,7 @@ export function resolveOnlineRace(raceKey: string, entries: OnlineEntry[]): Onli
       name: e.horse_name,
       owner: e.farm_name,
       isNpc: false,
-      performance: basePerformance(e) * luck,
+      performance: basePerformance(e, dist) * luck,
     };
   });
 
@@ -127,12 +155,13 @@ export interface FieldRunner {
 
 /** Grid provisório do dia (inscritos + NPCs de preenchimento), sem revelar a sorte. */
 export function previewField(raceKey: string, entries: OnlineEntry[]): FieldRunner[] {
+  const dist = raceDistance(raceKey);
   const sorted = [...entries].sort((a, b) => a.user_id.localeCompare(b.user_id));
   const avg = sorted.length > 0
-    ? sorted.reduce((s, e) => s + basePerformance(e), 0) / sorted.length
+    ? sorted.reduce((s, e) => s + basePerformance(e, dist), 0) / sorted.length
     : 45;
   const field: FieldRunner[] = sorted.map(e => ({
-    key: e.user_id, name: e.horse_name, owner: e.farm_name, isNpc: false, base: basePerformance(e),
+    key: e.user_id, name: e.horse_name, owner: e.farm_name, isNpc: false, base: basePerformance(e, dist),
   }));
   const npcOffset = hashStr(raceKey) % NPC_POOL.length;
   for (let i = 0; field.length < MIN_RUNNERS; i++) {

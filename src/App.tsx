@@ -117,6 +117,7 @@ import FarmNameModal from './components/FarmNameModal';
 import OnlineRankingModal from './components/RankingModal';
 import DoacaoModal from './components/DoacaoModal';
 import RaceModal from './components/RaceModal';
+import { DISTANCE_INFO, RaceDistance, distanceTraitMod } from './lib/onlineRace';
 import AnnouncementBanner from './components/AnnouncementBanner';
 
 
@@ -5775,6 +5776,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           const cavalos = finalAnimals.filter(a => a.type === 'cavalo' && a.isAdult !== false);
           const npcNames = ['Relâmpago do Vale', 'Trovão Manco', 'Estrela da Serra', 'Furacão Caipira', 'Pé de Vento', 'Serenata da Noite'];
           const npcOwners = ['Haras São Jorge', 'Sítio do Zé', 'Fazenda Mirante', 'Rancho Alegre', 'Coudelaria Sul', 'Estância Bela Vista'];
+          const distSorteio = Math.random();
+          const distKey = distSorteio < 0.34 ? 'curta' : distSorteio < 0.67 ? 'media' : 'longa';
+          const distInfo = DISTANCE_INFO[distKey as RaceDistance];
           let runners: { name: string; owner: string; isPlayer: boolean; performance: number }[];
           let c: (typeof cavalos)[number] | null = null;
           if (cavalos.length > 0) {
@@ -5782,9 +5786,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             c = cavalos.reduce((a, b) => (a.speed ?? 40) >= (b.speed ?? 40) ? a : b);
             const idade = (c.age !== undefined && c.maxAge) ? c.age / c.maxAge : 0.3;
             const forma = idade < 0.15 ? 0.6 : idade < 0.5 ? 1.0 : idade < 0.75 ? 0.9 : 0.75;
-            const traitMod = c.trait === 'trabalhadora' ? 1.05 : c.trait === 'preguicosa' ? 0.95 :
-              c.trait === 'estressada' ? 1 + (Math.random() * 0.3 - 0.15) :
-              c.trait === 'saudavel' ? 1.03 : c.trait === 'gulosa' ? 0.97 : 1;
+            const traitMod = distanceTraitMod(c.trait, distKey as RaceDistance) *
+              (c.trait === 'estressada' ? 1 + (Math.random() * 0.3 - 0.15) : 1);
             const desempenho = (c.speed ?? 40) * forma * (0.7 + 0.3 * (c.hunger / 100)) * (0.5 + 0.5 * (c.happiness / 100)) * traitMod * (1 + (Math.random() * 0.2 - 0.1));
             runners = [
               { name: c.name, owner: 'Você', isPlayer: true, performance: desempenho },
@@ -5809,7 +5812,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
           if (c) logsToAdd.push({ msg: pos === 1 ? `🏆 ${c.name} VENCEU o Grande Prêmio Aurora! +${prize}💰 +${xp} XP!` : pos <= 3 ? `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio! +${prize}💰` : `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio. Treine mais!`, type: pos <= 3 ? 'success' : 'info' });
           else logsToAdd.push({ msg: `🏇 Grande Prêmio Aurora aconteceu na vila! Compre um cavalo (Nv6) para competir — ou aposte na próxima!`, type: 'info' });
-          setTimeout(() => setShowRaceModal({ day: nextDayValue, runners, playerPosition: pos, prize, xp }), 500);
+          setTimeout(() => setShowRaceModal({ day: nextDayValue, distance: `${distInfo.emoji} ${distInfo.label}`, runners, playerPosition: pos, prize, xp }), 500);
         }
         setNextCorridaDay(nextDayValue + 7);
       }
