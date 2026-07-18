@@ -112,6 +112,7 @@ import { ToastNotification, Toast } from './components/ToastNotification';
 import { DaySummaryModal, DaySummary } from './components/DaySummaryModal';
 import { useAuth } from './hooks/useAuth';
 import AuthModal from './components/AuthModal';
+import { useCloudSave } from './hooks/useCloudSave';
 import FarmNameModal from './components/FarmNameModal';
 import OnlineRankingModal from './components/RankingModal';
 import DoacaoModal from './components/DoacaoModal';
@@ -471,6 +472,32 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   // Online: autenticação e ranking global
   const auth = useAuth();
+  const cloudSave = useCloudSave();
+  const [cloudRestorePrompt, setCloudRestorePrompt] = useState<import('./hooks/useCloudSave').CloudSaveResult | null>(null);
+  const cloudCheckedUserRef = useRef<string | null>(null);
+
+  // ☁️ Restauração no login: compara o save da nuvem com o local (uma vez por usuário/sessão)
+  useEffect(() => {
+    const u = auth.user;
+    if (!u || cloudCheckedUserRef.current === u.id) return;
+    cloudCheckedUserRef.current = u.id;
+    cloudSave.fetchCloudSave(u).then(cloud => {
+      if (!cloud) return;
+      let localDay = 0;
+      let hasLocal = false;
+      try {
+        const raw = localStorage.getItem('aurora_farm_save');
+        if (raw) { const s = JSON.parse(raw); localDay = s.currentDay ?? 1; hasLocal = (s.animals?.length ?? 0) > 0 || (s.currentDay ?? 1) > 1; }
+      } catch { /* segue como sem save local */ }
+      if (!hasLocal) {
+        // aparelho novo/sem progresso: restaura direto
+        cloudSave.applyCloudSave(cloud);
+      } else if (cloud.gameDay > localDay) {
+        setCloudRestorePrompt(cloud);
+      }
+      // local ≥ nuvem: nada a fazer — o upload normal atualiza a nuvem
+    });
+  }, [auth.user, cloudSave]);
   const onlineCount = useOnlinePresence(auth.farmName || undefined);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showOnlineRanking, setShowOnlineRanking] = useState(false);
@@ -2762,6 +2789,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
         setShowSavedToast(true);
         setTimeout(() => setShowSavedToast(false), 2000);
+        // ☁️ Backup na nuvem para usuários logados (throttle interno de 60s, nunca bloqueia)
+        cloudSave.uploadSave(auth.user);
       } catch (e) {
         // armazenamento cheio/indisponível — avisa uma única vez
         if (!saveFailWarnedRef.current) {
@@ -7033,6 +7062,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                     📊 Estatísticas
                   </button>
+                  {auth.user && (
+                    <div className="flex items-center gap-2 text-[10px] font-mono text-[#a3c48a] py-1" title="Backup automático da fazenda na nuvem (jogadores logados)">
+                      {cloudSave.cloudStatus === 'saved' && cloudSave.lastSyncAt ? `☁️ Salvo na nuvem ${cloudSave.lastSyncAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` :
+                        cloudSave.cloudStatus === 'saving' ? '☁️ Salvando na nuvem…' :
+                        cloudSave.cloudStatus === 'error' ? '☁️ Erro ao sincronizar' : '☁️ Nuvem ativa'}
+                    </div>
+                  )}
                   <button onClick={() => { setShowNotifications(prev => !prev); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                     <span className="relative inline-flex items-center">
@@ -7921,6 +7957,36 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       )}
 
       {/* 🌐 AUTH MODAL */}
+      {/* ☁️ CONFIRMAÇÃO DE RESTAURAÇÃO DA NUVEM */}
+      {cloudRestorePrompt && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[130] flex items-center justify-center p-4">
+          <div className="bg-[#fffbeb] border-8 border-sky-700 rounded-[32px] max-w-md w-full p-6 shadow-2xl text-center">
+            <div className="text-4xl mb-2">☁️</div>
+            <h3 className="font-display font-black text-lg uppercase text-sky-900 mb-2">Fazenda encontrada na nuvem!</h3>
+            <p className="text-sm text-stone-600 font-mono mb-1">
+              Nuvem: <strong>Dia {cloudRestorePrompt.gameDay} · Nível {cloudRestorePrompt.farmLevel}</strong>
+            </p>
+            <p className="text-xs text-stone-500 font-mono mb-4">
+              Seu save neste aparelho está no Dia {currentDay}. Restaurar substituirá o save local.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => cloudSave.applyCloudSave(cloudRestorePrompt)}
+                className="flex-1 bg-sky-600 hover:bg-sky-500 text-white border-b-4 border-sky-800 rounded-2xl py-3 font-display font-black uppercase text-xs tracking-wider cursor-pointer"
+              >
+                ☁️ Restaurar da nuvem
+              </button>
+              <button
+                onClick={() => setCloudRestorePrompt(null)}
+                className="flex-1 bg-stone-300 hover:bg-stone-200 text-stone-700 border-b-4 border-stone-400 rounded-2xl py-3 font-display font-black uppercase text-xs tracking-wider cursor-pointer"
+              >
+                Continuar local
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showAuthModal && (
         <AuthModal
           onSignUp={auth.signUp}
