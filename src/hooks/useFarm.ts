@@ -263,7 +263,8 @@ export const getLevelUpGoldCost = (toLevel: number): number => {
   if (toLevel === 4) return 500;
   if (toLevel === 5) return 800;
   if (toLevel <= 8) return 1000 + (toLevel - 6) * 500;   // 6:1000, 7:1500, 8:2000
-  if (toLevel <= 12) return 4000 + (toLevel - 9) * 800;  // 9:4000 … 12:6400
+  // Rodada 2 (corrida B): níveis 9-12 levavam 56-58 dias (média 31) — custos suavizados
+  if (toLevel <= 12) return { 9: 3000, 10: 3600, 11: 4200, 12: 5000 }[toLevel]!;
   return 7200 + (toLevel - 13) * 1200;
 };
 

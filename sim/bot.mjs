@@ -18,7 +18,7 @@ const RESERVA = 250; // ouro de segurança para contas semanais
 
 // Tabelas do jogo (useFarm.ts) — para a política de poupança do level-up
 const XP_THRESHOLDS = { 1: 0, 2: 100, 3: 280, 4: 550, 5: 950, 6: 1500, 7: 2200, 8: 3100, 9: 4200, 10: 5600, 11: 7300, 12: 9400, 13: 11900, 14: 14900, 15: 18500, 16: 22800, 17: 27800, 18: 33800, 19: 40800, 20: 49000 };
-const LEVELUP_GOLD = lvl => lvl <= 3 ? 0 : ({ 4: 500, 5: 1200, 6: 2000, 7: 2500, 8: 3000, 9: 4000, 10: 4800, 11: 5600, 12: 6400 }[lvl] ?? 6400 + (lvl - 12) * 1200);
+const LEVELUP_GOLD = lvl => lvl <= 3 ? 0 : ({ 4: 500, 5: 800, 6: 1000, 7: 1500, 8: 2000, 9: 3000, 10: 3600, 11: 4200, 12: 5000 }[lvl] ?? 7200 + (lvl - 13) * 1200);
 // quanto guardar: se o XP já bateu (ou está perto de bater) o próximo nível, poupa o custo do level-up
 const metaPoupanca = (save) => {
   const next = (save.farmLevel ?? 1) + 1;
