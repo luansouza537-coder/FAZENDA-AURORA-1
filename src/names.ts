@@ -142,3 +142,12 @@ export function getUniqueAngusName(currentAnimals: { type: string; name: string 
   }
   return `Angus ${Date.now() % 1000}`;
 }
+
+const CAVALO_NAMES = ['Vendaval', 'Cometa', 'Alazão', 'Tempestade', 'Corisco', 'Faísca', 'Pampa', 'Sereno', 'Malandro', 'Bailarino', 'Imperador', 'Ligeirinho'];
+
+export function getUniqueCavaloName(currentAnimals: { type: string; name: string }[]): string {
+  const used = new Set(currentAnimals.filter(a => a.type === 'cavalo').map(a => a.name));
+  const free = CAVALO_NAMES.filter(n => !used.has(n));
+  if (free.length > 0) return free[Math.floor(Math.random() * free.length)];
+  return `Corcel ${Math.floor(Math.random() * 300) + 1}`;
+}

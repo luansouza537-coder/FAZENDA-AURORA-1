@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao' | 'codorna' | 'alpaca' | 'minhoca' | 'caracol' | 'coelho_angora' | 'bicho_seda' | 'ra' | 'avestruz' | 'jacare' | 'porco' | 'colmeia_abelhas' | 'ovelha_leiteira' | 'peru' | 'cabra_angora' | 'frango_corte' | 'galinha_caipira' | 'tanque_tilapia' | 'vaca_jersey' | 'boi_angus';
+export type AnimalType = 'vaca' | 'ovelha' | 'boi' | 'galinha' | 'cabra' | 'lhama' | 'pato' | 'ganso' | 'bufalo' | 'pavao' | 'codorna' | 'alpaca' | 'minhoca' | 'caracol' | 'coelho_angora' | 'bicho_seda' | 'ra' | 'avestruz' | 'jacare' | 'porco' | 'colmeia_abelhas' | 'ovelha_leiteira' | 'peru' | 'cabra_angora' | 'frango_corte' | 'galinha_caipira' | 'tanque_tilapia' | 'vaca_jersey' | 'boi_angus' | 'cavalo';
 
 export type AnimalTrait = 'gulosa' | 'preguicosa' | 'feliz' | 'estressada' | 'saudavel' | 'trabalhadora';
 
@@ -51,6 +51,11 @@ export interface Animal {
 
   // Ox specific
   weightGain?: number; // 0.0 to 1.0 (0% to 100%)
+
+  // Cavalo (corridas)
+  speed?: number;        // 40-100, sobe com treino
+  lastTrainDay?: number; // trava 1 treino/dia
+  raceWins?: number;     // vitórias no Grande Prêmio
 
   // Cabra
   lactationCycle?: number;   // dias até próxima cria (0 = em lactação, conta regressiva)
@@ -175,6 +180,7 @@ export interface FarmStats {
   totalOxSold?: number;
   totalFrangoSold?: number;
   totalAngusSold?: number;
+  corridasVencidas?: number;
   totalCheese?: number;
   totalScarf?: number;
   totalEggs?: number;

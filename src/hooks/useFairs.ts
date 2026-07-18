@@ -67,6 +67,14 @@ export function useFairs({ addNotification }: UseFairsProps) {
     return 120;
   });
 
+  const [nextCorridaDay, setNextCorridaDay] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aurora_farm_save');
+      if (saved) return JSON.parse(saved).nextCorridaDay ?? 40;
+    } catch (e) {}
+    return 40;
+  });
+
   const prestigeNotifiedRef = useRef<number[]>([]);
 
   // Prestige milestone notifications
@@ -101,6 +109,8 @@ export function useFairs({ addNotification }: UseFairsProps) {
     setNextFeiraExoticaDay,
     nextFestivalDay,
     setNextFestivalDay,
+    nextCorridaDay,
+    setNextCorridaDay,
     prestigeNotifiedRef,
   };
 }

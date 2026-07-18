@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Animal, AnimalType, AnimalTrait, FarmSpecialization, FarmStats, LogMessage } from '../types';
-import { getRandomName, getUniqueAngusName, getUniqueFrangoName, getUniqueOxName, getUniquePorcoName } from '../names';
+import { getRandomName, getUniqueAngusName, getUniqueCavaloName, getUniqueFrangoName, getUniqueOxName, getUniquePorcoName } from '../names';
 import { sfx } from '../utils/audio';
 
 // ---- Inventory type (mirrors the shape in App.tsx) ----
@@ -254,7 +254,7 @@ export function useAnimals({
 
   // Helper: get feed type and label for an animal type
   const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe'; feedLabel: string } => {
-    if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'boi_angus' || type === 'bufalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
+    if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'boi_angus' || type === 'bufalo' || type === 'cavalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
     if (type === 'porco') return { feedType: 'racaoSuina', feedLabel: 'Ração Suína' };
     if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'cabra_angora' || type === 'lhama' || type === 'alpaca') return { feedType: 'racaoOvinos', feedLabel: 'Ração de Ovinos' };
     if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'peru' || type === 'frango_corte' || type === 'galinha_caipira') return { feedType: 'racaoAves', feedLabel: 'Ração de Aves' };
@@ -299,6 +299,7 @@ export function useAnimals({
     if (type === 'tanque_tilapia') basePrice = 150;
     if (type === 'vaca_jersey') basePrice = 160;
     if (type === 'boi_angus') basePrice = 1500;
+    if (type === 'cavalo') basePrice = 550;
 
     // Specialization purchase penalty
     const purchasePenalty =
@@ -363,7 +364,7 @@ export function useAnimals({
 
     let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' = 'racaoBovina';
     let feedLabel = 'Ração Bovina';
-    if (animal.type === 'vaca' || animal.type === 'vaca_jersey' || animal.type === 'boi' || animal.type === 'boi_angus' || animal.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+    if (animal.type === 'vaca' || animal.type === 'vaca_jersey' || animal.type === 'boi' || animal.type === 'boi_angus' || animal.type === 'bufalo' || animal.type === 'cavalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
     else if (animal.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
     else if (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'cabra_angora' || animal.type === 'lhama' || animal.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
     else if (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
@@ -1049,6 +1050,29 @@ export function useAnimals({
     onItemCollected?.(qty);
   };
 
+  // 🐴 Treinar cavalo: 1×/dia, consome 2 rações bovinas e -5 felicidade → +speed
+  const trainHorse = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'cavalo') return;
+    if (animal.isAdult === false) { addLog(`🐴 ${animal.name} ainda é um potro — muito novo para treinar!`, 'error'); spawnFeedback('🍼', 'Potro', event); return; }
+    if (animal.lastTrainDay === currentDay) { addLog(`🐴 ${animal.name} já treinou hoje. Descanso também faz parte!`, 'info'); spawnFeedback('😮‍💨', 'Já treinou', event); return; }
+    if ((animal.speed ?? 0) >= 100) { addLog(`🏇 ${animal.name} já está no auge da velocidade (100)!`, 'info'); spawnFeedback('🏆', 'Máximo!', event); return; }
+    if ((inventory.racaoBovina ?? 0) < 2) { addLog(`🌾 Treino exige 2 Rações Bovinas no Armazém!`, 'error'); spawnFeedback('❌', 'Sem ração', event); return; }
+    const veterano = animal.age !== undefined && animal.maxAge !== undefined && animal.age > animal.maxAge * 0.75;
+    const ganho = veterano ? 0.5 : 1;
+    setInventory(prev => ({ ...prev, racaoBovina: (prev.racaoBovina ?? 0) - 2 }));
+    setAnimals(prev => prev.map(a => a.id === id ? {
+      ...a,
+      speed: Math.min(100, (a.speed ?? 40) + ganho),
+      happiness: Math.max(0, a.happiness - 5),
+      lastTrainDay: currentDay,
+    } : a));
+    addLog(`🏋️ ${animal.name} treinou! Velocidade ${Math.min(100, (animal.speed ?? 40) + ganho)}/100${veterano ? ' (veterano: ganho reduzido)' : ''}.`, 'success');
+    triggerAudioResult(() => sfx.playSound('collect'));
+    spawnFeedback('🏇', `+${ganho} Velocidade`, event);
+  };
+
   // Collect Avestruz carne
   const collectAvestruzPena = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -1467,18 +1491,19 @@ export function useAnimals({
     if (type === 'ovelha_leiteira' && farmLevel < 5) { addLog('🔒 Ovelha Leiteira requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'peru' && farmLevel < 8) { addLog('🔒 Peru requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'cabra_angora' && farmLevel < 9) { addLog('🔒 Cabra Angorá requer Nível 9!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'cavalo' && farmLevel < 7) { addLog('🔒 Cavalo requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
 
     const { feedType } = getAnimalFeedType(type);
     const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
 
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
-    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'frango_corte' ? getUniqueFrangoName(animals) : type === 'boi_angus' ? getUniqueAngusName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : type === 'tanque_tilapia' ? 'Tanque de Tilápia' : getRandomName(type);
+    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'frango_corte' ? getUniqueFrangoName(animals) : type === 'boi_angus' ? getUniqueAngusName(animals) : type === 'cavalo' ? getUniqueCavaloName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : type === 'tanque_tilapia' ? 'Tanque de Tilápia' : getRandomName(type);
 
     // Custom initial stats
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80
 
     // F1: maxAge por tipo com variação ±20%
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140, boi_angus: 160 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140, boi_angus: 160, cavalo: 160 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = (type === 'colmeia_abelhas' || type === 'tanque_tilapia') ? 1 : 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -1507,6 +1532,7 @@ export function useAnimals({
       ...(type === 'tanque_tilapia' && { fishReady: false, trait: undefined }),
       ...(type === 'vaca_jersey' && { hasProducedToday: false }),
       ...(type === 'boi_angus' && { weightGain: 0.05 }),
+      ...(type === 'cavalo' && { speed: Math.floor(Math.random() * 21) + 40, raceWins: 0 }), // linhagem: 40-60
       ...(type === 'cabra' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'ovelha_leiteira' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'lhama' && { woolAccumulated: 0 }),
@@ -1615,7 +1641,7 @@ export function useAnimals({
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
     const name = type === 'boi' ? getUniqueOxName(animals) : type === 'frango_corte' ? getUniqueFrangoName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : getRandomName(type);
     const happiness = Math.floor(Math.random() * 21) + 60;
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140, boi_angus: 160 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140, boi_angus: 160, cavalo: 160 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -1702,6 +1728,7 @@ export function useAnimals({
     collectBichoSeda,
     feedBichoSeda,
     collectRa,
+    trainHorse,
     collectAvestruzPena,
     sellAvestruz,
     sellJacare,

@@ -116,6 +116,7 @@ import { useCloudSave } from './hooks/useCloudSave';
 import FarmNameModal from './components/FarmNameModal';
 import OnlineRankingModal from './components/RankingModal';
 import DoacaoModal from './components/DoacaoModal';
+import RaceModal from './components/RaceModal';
 import AnnouncementBanner from './components/AnnouncementBanner';
 
 
@@ -2254,6 +2255,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     collectBichoSeda,
     feedBichoSeda,
     collectRa,
+    trainHorse,
     collectAvestruzPena,
     sellAvestruz,
     sellJacare,
@@ -2460,8 +2462,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setNextFeiraExoticaDay,
     nextFestivalDay,
     setNextFestivalDay,
+    nextCorridaDay,
+    setNextCorridaDay,
     prestigeNotifiedRef,
   } = useFairs({ addNotification });
+  const [showRaceModal, setShowRaceModal] = useState<import('./components/RaceModal').RaceResult | null>(null);
 
   // Monitor states to unlock achievements dynamically
   useEffect(() => {
@@ -2767,6 +2772,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         nextFeiraProdutosDay,
         nextFeiraExoticaDay,
         nextFestivalDay,
+        nextCorridaDay,
         workers,
         landBiomes,
         hasBebedouro,
@@ -2934,7 +2940,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (a.isAdult === false) return a; // filhotes não consomem ração industrial
         let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' = 'racaoBovina';
         let feedLabel = 'Ração Bovina';
-        if (a.type === 'vaca' || a.type === 'vaca_jersey' || a.type === 'boi' || a.type === 'boi_angus' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+        if (a.type === 'vaca' || a.type === 'vaca_jersey' || a.type === 'boi' || a.type === 'boi_angus' || a.type === 'bufalo' || a.type === 'cavalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
         else if (a.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
         else if (a.type === 'ovelha' || a.type === 'ovelha_leiteira' || a.type === 'cabra' || a.type === 'cabra_angora' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
         else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao' || a.type === 'frango_corte' || a.type === 'galinha_caipira') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
@@ -5763,6 +5769,41 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setNextFairDay(nextDayValue + 30);
       }
 
+      // 🏇 Grande Prêmio Aurora: corrida de cavalos semanal (Nível 7+, requer cavalo adulto)
+      if (nextDayValue >= nextCorridaDay) {
+        const cavalos = finalAnimals.filter(a => a.type === 'cavalo' && a.isAdult !== false);
+        if (farmLevel >= 7 && cavalos.length > 0) {
+          // melhor cavalo do jogador corre
+          const c = cavalos.reduce((a, b) => (a.speed ?? 40) >= (b.speed ?? 40) ? a : b);
+          const idade = (c.age !== undefined && c.maxAge) ? c.age / c.maxAge : 0.3;
+          const forma = idade < 0.15 ? 0.6 : idade < 0.5 ? 1.0 : idade < 0.75 ? 0.9 : 0.75;
+          const traitMod = c.trait === 'trabalhadora' ? 1.05 : c.trait === 'preguicosa' ? 0.95 :
+            c.trait === 'estressada' ? 1 + (Math.random() * 0.3 - 0.15) :
+            c.trait === 'saudavel' ? 1.03 : c.trait === 'gulosa' ? 0.97 : 1;
+          const desempenho = (c.speed ?? 40) * forma * (0.7 + 0.3 * (c.hunger / 100)) * (0.5 + 0.5 * (c.happiness / 100)) * traitMod * (1 + (Math.random() * 0.2 - 0.1));
+          // NPCs calibrados pelo cavalo do jogador (±15%) para a corrida ser disputada
+          const npcNames = ['Relâmpago do Vale', 'Trovão Manco', 'Estrela da Serra', 'Furacão Caipira', 'Pé de Vento'];
+          const npcOwners = ['Haras São Jorge', 'Sítio do Zé', 'Fazenda Mirante', 'Rancho Alegre', 'Coudelaria Sul'];
+          const runners = [
+            { name: c.name, owner: 'Você', isPlayer: true, performance: desempenho },
+            ...npcNames.map((n, i) => ({ name: n, owner: npcOwners[i], isPlayer: false, performance: desempenho * (0.85 + Math.random() * 0.3) })),
+          ].sort((a, b) => b.performance - a.performance);
+          const pos = runners.findIndex(r => r.isPlayer) + 1;
+          const prize = pos === 1 ? 300 : pos === 2 ? 150 : pos === 3 ? 75 : 0;
+          const xp = pos === 1 ? 15 : 0;
+          if (prize > 0) setGold(prev => prev + prize);
+          if (xp > 0) setFarmXp(prev => prev + xp);
+          if (prize > 0) addFinancialEntry({ day: nextDayValue, type: 'income', amount: prize, category: 'evento', description: `🏇 Grande Prêmio Aurora — ${pos}º lugar (${c.name})` });
+          if (pos === 1) {
+            setAnimals(prev => prev.map(a => a.id === c.id ? { ...a, raceWins: (a.raceWins ?? 0) + 1 } : a));
+            setStats(prev => ({ ...prev, corridasVencidas: (prev.corridasVencidas ?? 0) + 1 }));
+          }
+          logsToAdd.push({ msg: pos === 1 ? `🏆 ${c.name} VENCEU o Grande Prêmio Aurora! +${prize}💰 +${xp} XP!` : pos <= 3 ? `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio! +${prize}💰` : `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio. Treine mais!`, type: pos <= 3 ? 'success' : 'info' });
+          setTimeout(() => setShowRaceModal({ day: nextDayValue, runners, playerPosition: pos, prize, xp }), 500);
+        }
+        setNextCorridaDay(nextDayValue + 7);
+      }
+
       // Fair 2: Exposição de Raças (every 45 days, Level 5+)
       if (farmLevel >= 5 && nextDayValue >= nextExposicaoDay) {
         const npcExpScore = () => 60 + Math.floor(Math.random() * 35);
@@ -5960,7 +6001,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         // --- Tratador: alimenta todos os animais consumindo ração correta do inventário ---
         if (workers.some(w => w.role === 'tratador')) {
           const getFeedKeyForType2 = (type: string): keyof typeof inventory => {
-            if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'boi_angus' || type === 'bufalo') return 'racaoBovina';
+            if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'boi_angus' || type === 'bufalo' || type === 'cavalo') return 'racaoBovina';
             if (type === 'porco') return 'racaoSuina';
             if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
             if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'frango_corte' || type === 'galinha_caipira') return 'racaoAves';
@@ -7413,6 +7454,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             collectBichoSeda={collectBichoSeda}
             feedBichoSeda={feedBichoSeda}
             collectRa={collectRa}
+            trainHorse={trainHorse}
             collectAvestruzPena={collectAvestruzPena}
             sellAvestruz={sellAvestruz}
             sellJacare={sellJacare}
@@ -8026,6 +8068,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       {/* ☕ MODAL DE DOAÇÃO PIX */}
       {showDoacao && <DoacaoModal onClose={() => setShowDoacao(false)} />}
+
+      {/* 🏇 GRANDE PRÊMIO AURORA */}
+      {showRaceModal && <RaceModal result={showRaceModal} onClose={() => setShowRaceModal(null)} />}
 
       {/* 🤝 MODAL DE CRUZAMENTO */}
       {cruzarModal && (

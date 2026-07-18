@@ -78,6 +78,7 @@ interface AnimalGridProps {
   collectBichoSeda: (id: number, e?: React.MouseEvent) => void;
   feedBichoSeda: (id: number, e?: React.MouseEvent) => void;
   collectRa: (id: number, e?: React.MouseEvent) => void;
+  trainHorse?: (id: number, e?: React.MouseEvent) => void;
   collectAvestruzPena: (id: number, e?: React.MouseEvent) => void;
   sellAvestruz: (id: number, e?: React.MouseEvent) => void;
   sellJacare: (id: number, e?: React.MouseEvent) => void;
@@ -170,6 +171,7 @@ export default function AnimalGrid({
   collectBichoSeda,
   feedBichoSeda,
   collectRa,
+  trainHorse,
   collectAvestruzPena,
   sellAvestruz,
   sellJacare,
@@ -778,6 +780,23 @@ export default function AnimalGrid({
                       {farmLevel < 10 ? '🔒 Nível 10' : 'Comprar + 1 💎'}
                     </button>
                   </div>
+                  {/* Nível 7 — cavalo */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-amber-500 w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 7 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv7+</span>}
+                    <span className="text-5xl" style={{ display: 'inline-block', transform: 'scaleX(-1)' }}>🐴</span>
+                    <h4 className="font-display font-black text-stone-800 text-xs uppercase mt-1">Cavalo 🏇</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Não produz — CORRE! Treine-o e dispute o Grande Prêmio Aurora toda semana. Velocidade de nascença: 40-60.</p>
+                    <span className="text-stone-800 text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('cavalo')}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => buyAnimal('cavalo', e)}
+                      disabled={gold < getAnimalPurchasePrice('cavalo') || farmLevel < 7}
+                      className="mt-2.5 bg-amber-600 hover:bg-amber-500 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-amber-800 shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      title="Compra um cavalo de corrida. Treino diário aumenta a velocidade; corridas semanais pagam prêmios."
+                    >
+                      {farmLevel < 7 ? '🔒 Nível 7' : 'Comprar + 1 🏇'}
+                    </button>
+                  </div>
                   {/* Nível 13 — jacare */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-[#fbbf24] w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 13 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv13+</span>}
@@ -826,7 +845,7 @@ export default function AnimalGrid({
                       const lotIndex = Math.floor(i / 5);
                       const slotAnimal = animals[i];
                       const typeEmoji: Record<string, string> = {
-                        vaca:'🐄', ovelha:'🐑', boi:'🐂', galinha:'🐔', cabra:'🐐', frango_corte:'🐓', galinha_caipira:'🐔', tanque_tilapia:'🐟', vaca_jersey:'🐄', boi_angus:'🐂',
+                        vaca:'🐄', ovelha:'🐑', boi:'🐂', galinha:'🐔', cabra:'🐐', frango_corte:'🐓', galinha_caipira:'🐔', tanque_tilapia:'🐟', vaca_jersey:'🐄', boi_angus:'🐂', cavalo:'🐴',
                         lhama:'🦙', pato:'🦆', ganso:'🦢', bufalo:'🐃', pavao:'🦚',
                         codorna:'🐦', alpaca:'🦙', minhoca:'🪱', caracol:'🐌',
                         coelho_angora:'🐰', bicho_seda:'🐛', ra:'🐸', avestruz:'🦤', jacare:'🐊',
@@ -911,7 +930,7 @@ export default function AnimalGrid({
                       Mostrando {animals.filter(a => {
                         if (animalFilter === 'all') return true;
                         if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday) || (a.type === 'cabra_angora' && a.woolReady);
-                        if (animalFilter === '__bovinos__') return ['vaca','vaca_jersey','boi','boi_angus','bufalo'].includes(a.type);
+                        if (animalFilter === '__bovinos__') return ['vaca','vaca_jersey','boi','boi_angus','bufalo','cavalo'].includes(a.type);
                         if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru','frango_corte','galinha_caipira'].includes(a.type);
                         if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra_angora','cabra','bicho_seda'].includes(a.type);
                         if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
@@ -1020,7 +1039,7 @@ export default function AnimalGrid({
                       .filter(a => {
                         if (animalFilter === 'all') return true;
                         if (animalFilter === 'ready') return (a.type === 'vaca' && !a.hasProducedToday) || (a.type === 'ovelha' && a.woolReady) || ((a.type === 'galinha' || a.type === 'codorna') && !a.hasProducedToday) || (a.type === 'cabra' && a.isLactating) || (a.type === 'lhama' && (a.woolAccumulated ?? 0) > 0) || (a.type === 'pato' && a.hasProducedToday) || (a.type === 'bufalo' && !a.hasProducedToday) || (a.type === 'cabra_angora' && a.woolReady);
-                        if (animalFilter === '__bovinos__') return ['vaca','vaca_jersey','boi','boi_angus','bufalo'].includes(a.type);
+                        if (animalFilter === '__bovinos__') return ['vaca','vaca_jersey','boi','boi_angus','bufalo','cavalo'].includes(a.type);
                         if (animalFilter === '__aves__') return ['galinha','codorna','pavao','pato','ganso','avestruz','peru','frango_corte','galinha_caipira'].includes(a.type);
                         if (animalFilter === '__fibras__') return ['ovelha','lhama','alpaca','coelho_angora','cabra_angora','cabra','bicho_seda'].includes(a.type);
                         if (animalFilter === '__exoticos__') return ['jacare','ra','caracol','minhoca'].includes(a.type);
@@ -1105,6 +1124,7 @@ export default function AnimalGrid({
                         onCollectBichoSeda={collectBichoSeda}
                         onFeedBichoSeda={feedBichoSeda}
                         onCollectRa={collectRa}
+                        onTrainHorse={trainHorse}
                         onCollectAvestruzPena={collectAvestruzPena}
                         onSellAvestruz={sellAvestruz}
                         onSellJacare={sellJacare}
