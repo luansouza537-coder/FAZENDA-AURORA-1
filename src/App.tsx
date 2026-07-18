@@ -5769,36 +5769,46 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setNextFairDay(nextDayValue + 30);
       }
 
-      // 🏇 Grande Prêmio Aurora: corrida de cavalos semanal (Nível 7+, requer cavalo adulto)
+      // 🏇 Grande Prêmio Aurora: corrida semanal (Nível 3+ para assistir/apostar; cavalo próprio corre se houver)
       if (nextDayValue >= nextCorridaDay) {
-        const cavalos = finalAnimals.filter(a => a.type === 'cavalo' && a.isAdult !== false);
-        if (farmLevel >= 6 && cavalos.length > 0) {
-          // melhor cavalo do jogador corre
-          const c = cavalos.reduce((a, b) => (a.speed ?? 40) >= (b.speed ?? 40) ? a : b);
-          const idade = (c.age !== undefined && c.maxAge) ? c.age / c.maxAge : 0.3;
-          const forma = idade < 0.15 ? 0.6 : idade < 0.5 ? 1.0 : idade < 0.75 ? 0.9 : 0.75;
-          const traitMod = c.trait === 'trabalhadora' ? 1.05 : c.trait === 'preguicosa' ? 0.95 :
-            c.trait === 'estressada' ? 1 + (Math.random() * 0.3 - 0.15) :
-            c.trait === 'saudavel' ? 1.03 : c.trait === 'gulosa' ? 0.97 : 1;
-          const desempenho = (c.speed ?? 40) * forma * (0.7 + 0.3 * (c.hunger / 100)) * (0.5 + 0.5 * (c.happiness / 100)) * traitMod * (1 + (Math.random() * 0.2 - 0.1));
-          // NPCs calibrados pelo cavalo do jogador (±15%) para a corrida ser disputada
-          const npcNames = ['Relâmpago do Vale', 'Trovão Manco', 'Estrela da Serra', 'Furacão Caipira', 'Pé de Vento'];
-          const npcOwners = ['Haras São Jorge', 'Sítio do Zé', 'Fazenda Mirante', 'Rancho Alegre', 'Coudelaria Sul'];
-          const runners = [
-            { name: c.name, owner: 'Você', isPlayer: true, performance: desempenho },
-            ...npcNames.map((n, i) => ({ name: n, owner: npcOwners[i], isPlayer: false, performance: desempenho * (0.85 + Math.random() * 0.3) })),
-          ].sort((a, b) => b.performance - a.performance);
-          const pos = runners.findIndex(r => r.isPlayer) + 1;
+        if (farmLevel >= 3) {
+          const cavalos = finalAnimals.filter(a => a.type === 'cavalo' && a.isAdult !== false);
+          const npcNames = ['Relâmpago do Vale', 'Trovão Manco', 'Estrela da Serra', 'Furacão Caipira', 'Pé de Vento', 'Serenata da Noite'];
+          const npcOwners = ['Haras São Jorge', 'Sítio do Zé', 'Fazenda Mirante', 'Rancho Alegre', 'Coudelaria Sul', 'Estância Bela Vista'];
+          let runners: { name: string; owner: string; isPlayer: boolean; performance: number }[];
+          let c: (typeof cavalos)[number] | null = null;
+          if (cavalos.length > 0) {
+            // melhor cavalo do jogador corre contra 5 NPCs calibrados (±15%)
+            c = cavalos.reduce((a, b) => (a.speed ?? 40) >= (b.speed ?? 40) ? a : b);
+            const idade = (c.age !== undefined && c.maxAge) ? c.age / c.maxAge : 0.3;
+            const forma = idade < 0.15 ? 0.6 : idade < 0.5 ? 1.0 : idade < 0.75 ? 0.9 : 0.75;
+            const traitMod = c.trait === 'trabalhadora' ? 1.05 : c.trait === 'preguicosa' ? 0.95 :
+              c.trait === 'estressada' ? 1 + (Math.random() * 0.3 - 0.15) :
+              c.trait === 'saudavel' ? 1.03 : c.trait === 'gulosa' ? 0.97 : 1;
+            const desempenho = (c.speed ?? 40) * forma * (0.7 + 0.3 * (c.hunger / 100)) * (0.5 + 0.5 * (c.happiness / 100)) * traitMod * (1 + (Math.random() * 0.2 - 0.1));
+            runners = [
+              { name: c.name, owner: 'Você', isPlayer: true, performance: desempenho },
+              ...npcNames.slice(0, 5).map((n, i) => ({ name: n, owner: npcOwners[i], isPlayer: false, performance: desempenho * (0.85 + Math.random() * 0.3) })),
+            ];
+          } else {
+            // sem cavalo próprio: prova só de NPCs — o jogador pode apostar
+            const base = 35 + farmLevel * 3;
+            runners = npcNames.map((n, i) => ({ name: n, owner: npcOwners[i], isPlayer: false, performance: base * (0.85 + Math.random() * 0.3) }));
+          }
+          runners.sort((a, b) => b.performance - a.performance);
+          const pos = runners.findIndex(r => r.isPlayer) + 1; // 0 = sem cavalo próprio
           const prize = pos === 1 ? 300 : pos === 2 ? 150 : pos === 3 ? 75 : 0;
           const xp = pos === 1 ? 15 : 0;
           if (prize > 0) setGold(prev => prev + prize);
           if (xp > 0) setFarmXp(prev => prev + xp);
-          if (prize > 0) addFinancialEntry({ day: nextDayValue, type: 'income', amount: prize, category: 'evento', description: `🏇 Grande Prêmio Aurora — ${pos}º lugar (${c.name})` });
-          if (pos === 1) {
-            setAnimals(prev => prev.map(a => a.id === c.id ? { ...a, raceWins: (a.raceWins ?? 0) + 1 } : a));
+          if (prize > 0 && c) addFinancialEntry({ day: nextDayValue, type: 'income', amount: prize, category: 'evento', description: `🏇 Grande Prêmio Aurora — ${pos}º lugar (${c.name})` });
+          if (pos === 1 && c) {
+            const cid = c.id;
+            setAnimals(prev => prev.map(a => a.id === cid ? { ...a, raceWins: (a.raceWins ?? 0) + 1 } : a));
             setStats(prev => ({ ...prev, corridasVencidas: (prev.corridasVencidas ?? 0) + 1 }));
           }
-          logsToAdd.push({ msg: pos === 1 ? `🏆 ${c.name} VENCEU o Grande Prêmio Aurora! +${prize}💰 +${xp} XP!` : pos <= 3 ? `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio! +${prize}💰` : `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio. Treine mais!`, type: pos <= 3 ? 'success' : 'info' });
+          if (c) logsToAdd.push({ msg: pos === 1 ? `🏆 ${c.name} VENCEU o Grande Prêmio Aurora! +${prize}💰 +${xp} XP!` : pos <= 3 ? `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio! +${prize}💰` : `🏇 ${c.name} chegou em ${pos}º no Grande Prêmio. Treine mais!`, type: pos <= 3 ? 'success' : 'info' });
+          else logsToAdd.push({ msg: `🏇 Grande Prêmio Aurora aconteceu na vila! Compre um cavalo (Nv6) para competir — ou aposte na próxima!`, type: 'info' });
           setTimeout(() => setShowRaceModal({ day: nextDayValue, runners, playerPosition: pos, prize, xp }), 500);
         }
         setNextCorridaDay(nextDayValue + 7);
@@ -8070,7 +8080,24 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       {showDoacao && <DoacaoModal onClose={() => setShowDoacao(false)} />}
 
       {/* 🏇 GRANDE PRÊMIO AURORA */}
-      {showRaceModal && <RaceModal result={showRaceModal} onClose={() => setShowRaceModal(null)} />}
+      {showRaceModal && (
+        <RaceModal
+          result={showRaceModal}
+          gold={gold}
+          onBet={(amount, horseName) => {
+            setGold(prev => prev - amount);
+            addFinancialEntry({ day: currentDay, type: 'expense', amount, category: 'evento', description: `🎰 Aposta no Grande Prêmio — ${horseName}` });
+            addLog(`🎰 Aposta feita: ${amount}💰 em ${horseName}. Boa sorte!`, 'info');
+          }}
+          onPayout={(amount, horseName) => {
+            setGold(prev => prev + amount);
+            addFinancialEntry({ day: currentDay, type: 'income', amount, category: 'evento', description: `🎰 Aposta vencedora — ${horseName}` });
+            addLog(`🎰 APOSTA VENCEDORA! ${horseName} pagou +${amount}💰!`, 'success');
+            triggerAudioResult(() => sfx.playSound('coin'));
+          }}
+          onClose={() => setShowRaceModal(null)}
+        />
+      )}
 
       {/* 🤝 MODAL DE CRUZAMENTO */}
       {cruzarModal && (
