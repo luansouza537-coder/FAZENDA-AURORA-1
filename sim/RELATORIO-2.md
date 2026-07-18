@@ -59,6 +59,15 @@ estratégia fixa vacas+galinhas. Jogador real progride mais rápido — os *rati
 - Rodada 1 (já aplicada): custos de level-up Nv5-8 reduzidos (`useFarm.ts`)
 - Bot v2 + correções de automação (`sim/bot.mjs`)
 
+## Adendo — validação dos ajustes 2 e 4 (corrida B retomada até o dia 387)
+
+Aplicados: metas dos contratos de entrada -30% e level-ups 9-12 → 3000/3600/4200/5000.
+Resultado: **nível 10 alcançado no dia ~385**, mesmo após o rebanho ter zerado por velhice
+no dia ~320 (recuperação: recomprou 4 vacas, reconstruiu a renda e pagou o level-up em ~35 dias).
+O episódio do rebanho zerado é a evidência mais forte do achado nº 1 (reposição de rebanho):
+o jogador enfrenta o dilema "poupar para o nível vs repor animais", e escolher errado
+custa dezenas de dias.
+
 ## Próximos candidatos de balanceamento
 
 1. Suavizar custo dos level-ups 9-12 OU criar renda de contrato proporcional ao nível
