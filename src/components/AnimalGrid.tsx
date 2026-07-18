@@ -782,7 +782,7 @@ export default function AnimalGrid({
                   </div>
                   {/* Nível 7 — cavalo */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-amber-500 w-full max-w-[190px] text-center shadow-md relative">
-                    {farmLevel < 7 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv7+</span>}
+                    {farmLevel < 6 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv6+</span>}
                     <span className="text-5xl" style={{ display: 'inline-block', transform: 'scaleX(-1)' }}>🐴</span>
                     <h4 className="font-display font-black text-stone-800 text-xs uppercase mt-1">Cavalo 🏇</h4>
                     <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Não produz — CORRE! Treine-o e dispute o Grande Prêmio Aurora toda semana. Velocidade de nascença: 40-60.</p>
@@ -790,11 +790,11 @@ export default function AnimalGrid({
                     <button
                       type="button"
                       onClick={(e) => buyAnimal('cavalo', e)}
-                      disabled={gold < getAnimalPurchasePrice('cavalo') || farmLevel < 7}
+                      disabled={gold < getAnimalPurchasePrice('cavalo') || farmLevel < 6}
                       className="mt-2.5 bg-amber-600 hover:bg-amber-500 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-amber-800 shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
                       title="Compra um cavalo de corrida. Treino diário aumenta a velocidade; corridas semanais pagam prêmios."
                     >
-                      {farmLevel < 7 ? '🔒 Nível 7' : 'Comprar + 1 🏇'}
+                      {farmLevel < 6 ? '🔒 Nível 6' : 'Comprar + 1 🏇'}
                     </button>
                   </div>
                   {/* Nível 13 — jacare */}

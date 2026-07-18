@@ -1491,7 +1491,7 @@ export function useAnimals({
     if (type === 'ovelha_leiteira' && farmLevel < 5) { addLog('🔒 Ovelha Leiteira requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'peru' && farmLevel < 8) { addLog('🔒 Peru requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'cabra_angora' && farmLevel < 9) { addLog('🔒 Cabra Angorá requer Nível 9!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'cavalo' && farmLevel < 7) { addLog('🔒 Cavalo requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'cavalo' && farmLevel < 6) { addLog('🔒 Cavalo requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
 
     const { feedType } = getAnimalFeedType(type);
     const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];

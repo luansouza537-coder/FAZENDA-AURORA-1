@@ -5772,7 +5772,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // 🏇 Grande Prêmio Aurora: corrida de cavalos semanal (Nível 7+, requer cavalo adulto)
       if (nextDayValue >= nextCorridaDay) {
         const cavalos = finalAnimals.filter(a => a.type === 'cavalo' && a.isAdult !== false);
-        if (farmLevel >= 7 && cavalos.length > 0) {
+        if (farmLevel >= 6 && cavalos.length > 0) {
           // melhor cavalo do jogador corre
           const c = cavalos.reduce((a, b) => (a.speed ?? 40) >= (b.speed ?? 40) ? a : b);
           const idade = (c.age !== undefined && c.maxAge) ? c.age / c.maxAge : 0.3;
