@@ -475,14 +475,18 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const cloudSave = useCloudSave();
   const [cloudRestorePrompt, setCloudRestorePrompt] = useState<import('./hooks/useCloudSave').CloudSaveResult | null>(null);
   const cloudCheckedUserRef = useRef<string | null>(null);
+  // Gate anti-corrida: o upload só libera DEPOIS da checagem de restauração,
+  // senão o save local (possivelmente atrasado) sobrescreve a nuvem antes da comparação.
+  const cloudSyncReadyRef = useRef(false);
 
   // ☁️ Restauração no login: compara o save da nuvem com o local (uma vez por usuário/sessão)
   useEffect(() => {
     const u = auth.user;
     if (!u || cloudCheckedUserRef.current === u.id) return;
     cloudCheckedUserRef.current = u.id;
+    cloudSyncReadyRef.current = false;
     cloudSave.fetchCloudSave(u).then(cloud => {
-      if (!cloud) return;
+      if (!cloud) { cloudSyncReadyRef.current = true; return; }
       let localDay = 0;
       let hasLocal = false;
       try {
@@ -490,12 +494,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (raw) { const s = JSON.parse(raw); localDay = s.currentDay ?? 1; hasLocal = (s.animals?.length ?? 0) > 0 || (s.currentDay ?? 1) > 1; }
       } catch { /* segue como sem save local */ }
       if (!hasLocal) {
-        // aparelho novo/sem progresso: restaura direto
+        // aparelho novo/sem progresso: restaura direto (recarrega a página)
         cloudSave.applyCloudSave(cloud);
-      } else if (cloud.gameDay > localDay) {
-        setCloudRestorePrompt(cloud);
+        return;
       }
-      // local ≥ nuvem: nada a fazer — o upload normal atualiza a nuvem
+      if (cloud.gameDay > localDay) {
+        setCloudRestorePrompt(cloud);
+        // upload continua travado até o jogador decidir no modal
+        return;
+      }
+      // local ≥ nuvem: mantém o local e libera a sincronização
+      cloudSyncReadyRef.current = true;
     });
   }, [auth.user, cloudSave]);
   const onlineCount = useOnlinePresence(auth.farmName || undefined);
@@ -2789,8 +2798,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         localStorage.setItem('aurora_farm_save', JSON.stringify(saveData));
         setShowSavedToast(true);
         setTimeout(() => setShowSavedToast(false), 2000);
-        // ☁️ Backup na nuvem para usuários logados (throttle interno de 60s, nunca bloqueia)
-        cloudSave.uploadSave(auth.user);
+        // ☁️ Backup na nuvem para usuários logados (throttle interno de 60s, nunca bloqueia).
+        // Só depois da checagem de restauração, para não sobrescrever um save mais avançado.
+        if (cloudSyncReadyRef.current) cloudSave.uploadSave(auth.user);
       } catch (e) {
         // armazenamento cheio/indisponível — avisa uma única vez
         if (!saveFailWarnedRef.current) {
@@ -7977,7 +7987,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 ☁️ Restaurar da nuvem
               </button>
               <button
-                onClick={() => setCloudRestorePrompt(null)}
+                onClick={() => { setCloudRestorePrompt(null); cloudSyncReadyRef.current = true; }}
                 className="flex-1 bg-stone-300 hover:bg-stone-200 text-stone-700 border-b-4 border-stone-400 rounded-2xl py-3 font-display font-black uppercase text-xs tracking-wider cursor-pointer"
               >
                 Continuar local
