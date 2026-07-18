@@ -145,8 +145,10 @@ async function expandirLote(save) {
 async function comprarAnimal(save) {
   const cap = (save.landLots ?? 1) * 5;
   if ((save.animals?.length ?? 0) >= cap) return;
-  // prioridade: vaca (leite = renda estável) > galinha (barata); sem reserva no bootstrap
-  const reserva = ((save.animals?.length ?? 0) === 0 ? 0 : RESERVA) + metaPoupanca(save);
+  // prioridade: vaca (leite = renda estável) > galinha (barata)
+  // Sobrevivência antes da poupança: com rebanho pequeno (<3), repor SEM reter o custo do level-up
+  const poucos = (save.animals?.length ?? 0) < 3;
+  const reserva = (poucos ? 0 : RESERVA + metaPoupanca(save));
   const alvo = save.gold > 400 + reserva ? 'Vaca' : save.gold > 45 + reserva ? 'Galinha' : null;
   if (!alvo) return;
   if (!(await clickIf(page.locator('[data-onboarding="buy-animal-btn"]')))) return;
