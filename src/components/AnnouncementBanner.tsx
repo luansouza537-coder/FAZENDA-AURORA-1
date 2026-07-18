@@ -26,7 +26,7 @@ export default function AnnouncementBanner() {
           setAnnouncement(data);
         }
       })
-      .catch(() => {});
+      .then(undefined, () => {});
   }, []);
 
   if (!announcement || dismissed) return null;

@@ -435,7 +435,7 @@ export function useAnimals({
       spawnFeedback('🥚', '+1 Caipira', event);
       updateMissionProgress('collect_items', 1);
       updateMissionProgress('collect_caipira', 1);
-      onItemCollected?.();
+      onItemCollected?.(1);
       return 'success';
     }
 
@@ -1210,7 +1210,7 @@ export function useAnimals({
     spawnFeedback('🥛', '+1 Jersey', event);
     updateMissionProgress('collect_items', 1);
     updateMissionProgress('collect_jersey', 1);
-    onItemCollected?.();
+    onItemCollected?.(1);
     return 'success';
   };
 
@@ -1246,7 +1246,7 @@ export function useAnimals({
     spawnFeedback('🐟', `+${qty} Tilápia`, event);
     updateMissionProgress('collect_items', qty);
     updateMissionProgress('collect_fish', qty);
-    onItemCollected?.();
+    onItemCollected?.(qty);
   };
 
 

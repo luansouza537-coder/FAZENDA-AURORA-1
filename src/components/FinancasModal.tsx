@@ -49,7 +49,7 @@ const FinancasModal: React.FC<FinancasModalProps> = (p) => {
   const todayIncome = todayEntries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
   const todayExpense = todayEntries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
   const todayNet = todayIncome - todayExpense;
-  const days = [...new Set(financialLog.map(e => e.day))].sort((a, b) => b - a);
+  const days = [...new Set(financialLog.map(e => e.day))].sort((a: number, b: number) => b - a);
 
   const availableTiers = LOAN_TIERS.filter(t => farmLevel >= t.minLevel);
   const nextTier = LOAN_TIERS.find(t => farmLevel < t.minLevel);

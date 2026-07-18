@@ -24,7 +24,7 @@ interface MissionTemplate {
   goal: number;
   reward: number;
   minLevel: number;
-  sentiment: '😊' | '😤' | '🤔' | '📖';
+  sentiment: string; // emoji livre — as missões sazonais usam vários
 }
 
 const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {

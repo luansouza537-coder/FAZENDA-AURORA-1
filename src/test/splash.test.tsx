@@ -14,34 +14,49 @@ describe('SplashScreen', () => {
     expect(screen.getByText('Fazenda')).toBeInTheDocument();
   });
 
-  it('shows "Começar Fazenda" when no save exists', () => {
+  it('shows "+ Novo Jogo" always and "Continuar" desabilitado sem save', () => {
     render(<SplashScreen onStart={() => {}} hasSave={false} />);
-    expect(screen.getByText(/Começar Fazenda/i)).toBeInTheDocument();
+    expect(screen.getByText(/Novo Jogo/i)).toBeInTheDocument();
+    // sem save o "Continuar" é um placeholder não-clicável (div), não um botão
+    const continuar = screen.getByText(/▶ Continuar/i);
+    expect(continuar.closest('button')).toBeNull();
   });
 
-  it('shows "Continuar" when a save exists', () => {
-    render(<SplashScreen onStart={() => {}} hasSave={true} />);
-    expect(screen.getByText(/Continuar/i)).toBeInTheDocument();
+  it('shows "Continuar" clicável quando há save', () => {
+    const onStart = vi.fn();
+    render(<SplashScreen onStart={onStart} hasSave={true} savePreview={{ day: 5, level: 3 }} />);
+    const continuar = screen.getByText(/▶ Continuar/i);
+    expect(continuar.closest('button')).not.toBeNull();
+    fireEvent.click(continuar);
+    expect(onStart).toHaveBeenCalledOnce();
+    expect(screen.getByText(/Dia 5/i)).toBeInTheDocument();
   });
 
-  it('calls onStart when the main button is clicked', () => {
+  it('"+ Novo Jogo" inicia direto quando não há save', () => {
     const onStart = vi.fn();
     render(<SplashScreen onStart={onStart} hasSave={false} />);
-    fireEvent.click(screen.getByText(/Começar Fazenda/i));
+    fireEvent.click(screen.getByText(/Novo Jogo/i));
     expect(onStart).toHaveBeenCalledOnce();
   });
 
-  it('shows feature pills', () => {
-    render(<SplashScreen onStart={() => {}} hasSave={false} />);
-    expect(screen.getByText('19 animais')).toBeInTheDocument();
-    expect(screen.getByText('Conquistas')).toBeInTheDocument();
+  it('"+ Novo Jogo" pede confirmação quando há save', () => {
+    const onStart = vi.fn();
+    render(<SplashScreen onStart={onStart} hasSave={true} />);
+    fireEvent.click(screen.getByText(/Novo Jogo/i));
+    // abre confirmação em vez de iniciar
+    expect(onStart).not.toHaveBeenCalled();
+    expect(screen.getByText(/Cancelar/i)).toBeInTheDocument();
   });
 
-  it('shows "Nova partida" button only when hasSave is true', () => {
+  it('mostra aviso de apagar save apenas quando há save', () => {
     const { rerender } = render(<SplashScreen onStart={() => {}} hasSave={false} />);
-    expect(screen.queryByText(/Nova partida/i)).not.toBeInTheDocument();
-
+    expect(screen.queryByText(/apagará o save atual/i)).not.toBeInTheDocument();
     rerender(<SplashScreen onStart={() => {}} hasSave={true} />);
-    expect(screen.getByText(/Nova partida/i)).toBeInTheDocument();
+    expect(screen.getByText(/apagará o save atual/i)).toBeInTheDocument();
+  });
+
+  it('mostra botão "Carregar Save"', () => {
+    render(<SplashScreen onStart={() => {}} hasSave={false} />);
+    expect(screen.getByText(/Carregar Save/i)).toBeInTheDocument();
   });
 });

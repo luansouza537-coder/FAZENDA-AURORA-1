@@ -1,4 +1,14 @@
-export const MERCHANT_SPECIAL_ITEMS = [
+export interface MerchantItem {
+  id: string;
+  label: string;
+  desc: string;
+  price: number;
+  effect: string;
+  oneTime?: boolean;
+  group: 'saude' | 'clima' | 'suprimentos';
+}
+
+export const MERCHANT_SPECIAL_ITEMS: readonly MerchantItem[] = [
   { id: 'racao_granel',         label: '🚚 Carga de Ração a Granel',     desc: 'Compra por atacado: escolha um tipo de ração e receba +30 unidades', price: 90,  effect: 'bulk_feed' , group: 'suprimentos' as const },
   { id: 'bebedouro',            label: '🪣 Bebedouro Automático',        desc: 'Animais nunca ficam com sede',                                   price: 150, effect: 'bebedouro',            oneTime: true , group: 'clima' as const },
   { id: 'cert_sanitario',       label: '📜 Certificado Sanitário',       desc: '+10% preço de venda de carne permanente',                        price: 800, effect: 'cert_sanitario',       oneTime: true , group: 'suprimentos' as const },
@@ -15,9 +25,9 @@ export const MERCHANT_SPECIAL_ITEMS = [
   { id: 'silagem_premium',      label: '🌽 Silagem Premium',             desc: 'Animais não consomem ração do Armazém por 5 dias',               price: 110, effect: 'silagem_5days' , group: 'suprimentos' as const },
   { id: 'contrato_transporte',  label: '🚚 Contrato de Transporte',      desc: 'Isenta de multa nas próximas 3 entregas vencidas',               price: 95,  effect: 'isencao_multa_2x' , group: 'suprimentos' as const },
   { id: 'antidoto_anti_pragas', label: '🧴 Antídoto Anti-Pragas',        desc: 'Protege o celeiro de pragas por 14 dias',                         price: 75,  effect: 'anti_pest_14days' , group: 'clima' as const },
-] as const;
+];
 
-export type MerchantItemId = typeof MERCHANT_SPECIAL_ITEMS[number]['id'];
+export type MerchantItemId = MerchantItem['id'];
 
 // Tipos de ração para a Carga de Ração a Granel (bulk_feed)
 export const FEED_TYPES = [

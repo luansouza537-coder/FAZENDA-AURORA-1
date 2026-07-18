@@ -146,7 +146,7 @@ export function useAuth(): AuthState & AuthActions {
       total_earned: data.totalEarned,
       animal_count: data.animalCount,
       updated_at: new Date().toISOString(),
-    }).then(() => {}).catch(() => {});
+    }).then(() => {}, () => {});
   };
 
   const clearAuthError = () => setAuthError('');

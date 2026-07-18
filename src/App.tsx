@@ -6,6 +6,10 @@
 import React, { useState, useEffect, useRef, useCallback, Component, ErrorInfo, ReactNode } from 'react';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  // Declarações explícitas: com useDefineForClassFields desligado o tsc não herda
+  // os membros genéricos de Component ao checar esta classe.
+  declare state: { error: Error | null };
+  declare props: { children: ReactNode };
   constructor(props: { children: ReactNode }) {
     super(props);
     this.state = { error: null };
@@ -425,7 +429,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     id: string;
     day: number;
     type: 'income' | 'expense';
-    category: 'venda' | 'compra' | 'custo_diario' | 'trabalhador' | 'imposto' | 'evento' | 'emprestimo' | 'outro';
+    category: 'venda' | 'compra' | 'custo_diario' | 'trabalhador' | 'imposto' | 'evento' | 'emprestimo' | 'contrato' | 'outro';
     description: string;
     amount: number;
   }
@@ -1820,7 +1824,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Base raw item prices (increases with levels)
-  const getItemBaseSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'colete_couro' | 'bolsa_exotica' | 'mohair' | 'cachecol_mohair'): number => {
+  const getItemBaseSellPrice = (itemType: string): number => {
     // --- PREÇOS BASE BALANCEADOS ---
     // Grupo A: early game mais tenso — leite mais lucrativo, ovo mais barato
     if (itemType === 'milk') {
@@ -1967,7 +1971,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   };
 
   // Rounded to nearest integer for actual gold conversion
-  const getDynamicTransactionPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'colete_couro' | 'bolsa_exotica', d = currentDay, w = weather, sales = weeklySales): number => {
+  const getDynamicTransactionPrice = (itemType: string, d = currentDay, w = weather, sales = weeklySales): number => {
     const base = getItemBaseSellPrice(itemType);
     // Oferta: cada unidade vendida reduz 1%; demanda reprimida se vendeu <5 unidades (+5% a +15%)
     const weekSales = (sales[itemType as keyof typeof sales] || 0);
@@ -2027,7 +2031,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   // Final processed sell prices including dynamic pricing equations
   const COMERCIANTE_BONUS_ITEMS = new Set(['milk','wool','egg','goat_milk','llama_wool','duck_egg','goose_egg','buffalo_milk','quail_egg','alpaca_wool','humus','minhoca_viva','muco','angora_wool','mohair','seda_bruta','coxa_ra','carne_avestruz','couro_avestruz','carne_jacare','couro_jacare','ovo_caipira','peixe','leite_jersey']);
-  const getActualSellPrice = (itemType: 'milk' | 'wool' | 'cheese' | 'scarf' | 'egg' | 'mayo' | 'queijoCoalho' | 'queijoMucarela' | 'queijoBrie' | 'goat_milk' | 'llama_wool' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'buffalo_mozzarella' | 'butter' | 'yogurt' | 'fertile_egg' | 'quail_egg' | 'alpaca_wool' | 'humus' | 'muco' | 'angora_wool' | 'seda_bruta' | 'coxa_ra' | 'carne_avestruz' | 'couro_avestruz' | 'carne_jacare' | 'couro_jacare' | 'queijo_cabra' | 'iogurte_cabra' | 'leite_condensado' | 'tapete_lhama' | 'cachecol_angora' | 'tecido_alpaca' | 'fio_seda' | 'manta_premium' | 'pate_pato' | 'ovo_defumado' | 'conserva_codorna' | 'creme_cosmetico' | 'sabonete_natural' | 'colete_couro' | 'bolsa_exotica' | 'mohair' | 'cachecol_mohair'): number => {
+  const getActualSellPrice = (itemType: string): number => {
     const base = getDynamicTransactionPrice(itemType);
     const hasComercianteBonus = workers.some(w => w.role === 'comerciante_residente') && COMERCIANTE_BONUS_ITEMS.has(itemType);
     return hasComercianteBonus ? Math.round(base * 1.08) : base;
@@ -2762,7 +2766,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         // armazenamento cheio/indisponível — avisa uma única vez
         if (!saveFailWarnedRef.current) {
           saveFailWarnedRef.current = true;
-          addNotification('⚠️ Falha ao salvar o jogo (armazenamento cheio). Exporte seu save!', 'error', currentDay);
+          addNotification('⚠️ Falha ao salvar o jogo (armazenamento cheio). Exporte seu save!', 'warning', currentDay);
         }
       }
     }
@@ -5092,7 +5096,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             if (current > 0) {
               const lost = Math.floor(current * pestLossFraction);
               if (lost > 0) {
-                lostDetails.push(`${lost} ${itemLabels[key]}`);
+                lostDetails.push(`${lost} ${itemLabels[key as string]}`);
                 estimatedGoldLoss += lost * getActualSellPrice(key as string);
               }
             }
@@ -6376,7 +6380,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const next = insuranceClimate.daysLeft - 1;
         if (next <= 0) {
           setInsuranceClimate({ active: false, daysLeft: 0 });
-          setTimeout(() => addNotification('🌦️ Seguro Climático temporário expirou.', 'info', nextDayValue), 0);
+          setTimeout(() => addNotification('🌦️ Seguro Climático temporário expirou.', 'system', nextDayValue), 0);
         } else {
           setInsuranceClimate(prev => ({ ...prev, daysLeft: next }));
         }
@@ -6385,7 +6389,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const next = insuranceTheft.daysLeft - 1;
         if (next <= 0) {
           setInsuranceTheft({ active: false, daysLeft: 0 });
-          setTimeout(() => addNotification('🔒 Seguro contra Roubo temporário expirou.', 'info', nextDayValue), 0);
+          setTimeout(() => addNotification('🔒 Seguro contra Roubo temporário expirou.', 'system', nextDayValue), 0);
         } else {
           setInsuranceTheft(prev => ({ ...prev, daysLeft: next }));
         }
@@ -6413,7 +6417,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const ev = worldEvents[Math.floor(Math.random() * worldEvents.length)];
         setWorldEvent(ev);
         logsToAdd.push({ msg: `🌍 EVENTO MUNDIAL: ${ev.title} — ${ev.desc} (${ev.daysLeft} dias)`, type: 'event' });
-        setTimeout(() => addNotification(`🌍 Evento Mundial: ${ev.title}`, 'info', nextDayValue), 0);
+        setTimeout(() => addNotification(`🌍 Evento Mundial: ${ev.title}`, 'system', nextDayValue), 0);
         if (ev.priceMult < 1) setTimeout(() => checkAndUnlockAchievement('world_event_survived'), 0);
       }
 

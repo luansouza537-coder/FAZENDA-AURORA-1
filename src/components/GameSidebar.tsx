@@ -176,6 +176,7 @@ export default function GameSidebar({
                   priceKey?: 'milk'|'wool'|'cheese'|'scarf'|'egg'|'mayo'|'queijoCoalho'|'queijoMucarela'|'queijoBrie'|'goat_milk'|'llama_wool'|'duck_egg'|'goose_egg'|'buffalo_milk'|'buffalo_mozzarella'|'butter'|'yogurt'|'fertile_egg';
                   freshKey?: 'milk'|'egg'|'goat_milk'|'duck_egg'|'goose_egg'|'buffalo_milk'|'fertile_egg';
                   colSpan?: boolean;
+                  tooltip?: string;
                 };
                 const groups: { title: string; bg: string; items: InvItem[] }[] = [
                   {
