@@ -24,11 +24,12 @@ const BET_VALUES = [50, 100, 250];
 export const RaceModal: React.FC<{
   result: RaceResult;
   gold: number;
+  skipBetting?: boolean;   // replay (corrida online): pula a bilheteria
   onBet: (amount: number, horseName: string) => void;
   onPayout: (amount: number, horseName: string) => void;
   onClose: () => void;
-}> = ({ result, gold, onBet, onPayout, onClose }) => {
-  const [phase, setPhase] = useState<'apostas' | 'corrida'>('apostas');
+}> = ({ result, gold, skipBetting, onBet, onPayout, onClose }) => {
+  const [phase, setPhase] = useState<'apostas' | 'corrida'>(skipBetting ? 'corrida' : 'apostas');
   const [betIdx, setBetIdx] = useState<number | null>(null);
   const [betAmount, setBetAmount] = useState<number | null>(null);
   const [betPlaced, setBetPlaced] = useState<{ idx: number; amount: number; odd: number } | null>(null);
