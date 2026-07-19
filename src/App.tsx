@@ -119,7 +119,14 @@ import DoacaoModal from './components/DoacaoModal';
 import RaceModal from './components/RaceModal';
 import { DISTANCE_INFO, RaceDistance, distanceTraitMod, effectiveSpeed, npcLineup, npcPerformance } from './lib/onlineRace';
 import FairJudgingModal, { FairJudgingResult } from './components/FairJudgingModal';
+import GenericJudgingModal, { GenericJudgingResult } from './components/GenericJudgingModal';
+import FestivalJudgingModal from './components/FestivalJudgingModal';
 import { CATEGORY_INFO, FairCategory, FairDuelResult, entryFee, judgeAnimalScore, resolveDuel } from './lib/fairJudging';
+import {
+  ExpoCategory, EXPO_CATEGORY_INFO, expoEntryFee, judgeAnimalScoreExpo, resolveExpoDuel,
+  ProdCategory, PROD_CATEGORY_INFO, marketEntryFee, resolveProdDuel,
+  festivalEntryFee, resolveFestival, FestivalResult,
+} from './lib/fairJudging';
 import AnnouncementBanner from './components/AnnouncementBanner';
 
 
@@ -410,6 +417,21 @@ function GameApp() {
   const [fairCategoryCooldown, setFairCategoryCooldown] = useState<Record<string, number>>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).fairCategoryCooldown ?? {}; } catch(e) {} return {};
   });
+
+  // 🏅 Exposição de Raças — modal de julgamento + cooldown por categoria (perder bloqueia 1 ciclo)
+  const [showExpoJudgingModal, setShowExpoJudgingModal] = useState<GenericJudgingResult | null>(null);
+  const [expoCategoryCooldown, setExpoCategoryCooldown] = useState<Record<string, number>>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).expoCategoryCooldown ?? {}; } catch(e) {} return {};
+  });
+
+  // 🛒 Feira Regional de Produtos — modal de julgamento + cooldown por categoria
+  const [showProdJudgingModal, setShowProdJudgingModal] = useState<GenericJudgingResult | null>(null);
+  const [prodCategoryCooldown, setProdCategoryCooldown] = useState<Record<string, number>>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).prodCategoryCooldown ?? {}; } catch(e) {} return {};
+  });
+
+  // 🎭 Festival Cultural da Aurora — modal de julgamento (3 rodadas vs Fazenda rival)
+  const [showFestivalJudgingModal, setShowFestivalJudgingModal] = useState<{ result: FestivalResult; gold: number; prestige: number } | null>(null);
 
   const [lastTheftDay, setLastTheftDay] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).lastTheftDay ?? 0; } catch(e) {} return 0;
@@ -2776,6 +2798,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         nextFairDay,
         fairResults,
         fairCategoryCooldown,
+        expoCategoryCooldown,
+        prodCategoryCooldown,
         lastTheftDay,
         lastEpidemicDay,
         droughtDaysRemaining,
@@ -2832,7 +2856,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     let price = 2500;
@@ -5864,114 +5888,175 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setNextCorridaDay(nextDayValue + 7);
       }
 
-      // Fair 2: Exposição de Raças (every 45 days, Level 5+)
+      // Fair 2: Exposição de Raças (every 45 days, Level 5+) — versão elite da Feira Agropecuária:
+      // duelos 1x1 contra Juízes Federais nomeados, taxa mais alta, título "isCampiao" permanente.
       if (farmLevel >= 5 && nextDayValue >= nextExposicaoDay) {
-        const npcExpScore = () => 60 + Math.floor(Math.random() * 35);
-        let expGold = 0; let expWins = 0;
         const expLog: { msg: string; type: LogMessage['type'] }[] = [];
+        const expDuels: ReturnType<typeof resolveExpoDuel>[] = [];
+        const expSkipped: { category: string; reason: string }[] = [];
+        let expGold = 0;
+        let expFeesSpent = 0;
 
-        const milkCandidates = finalAnimals.filter(a => ['vaca','cabra','bufalo'].includes(a.type));
-        if (milkCandidates.length > 0) {
-          const best = milkCandidates.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
-          if (calcFairScore(best) > npcExpScore()) {
-            expGold += 300; expWins++;
-            setAnimals(prev => prev.map(a => a.id === best.id ? { ...a, isCampiao: true } : a));
-            setTimeout(() => triggerBigNotification(`${best.name} é CAMPEÃ!`, `Raça Leiteira — Título permanente + +300💰`, '🏆'), 500);
-            expLog.push({ msg: `🏆 Exposição: ${best.name} é CAMPEÃ de Raça Leiteira! +300💰 + título permanente!`, type: 'success' });
+        (Object.keys(EXPO_CATEGORY_INFO) as ExpoCategory[]).forEach(category => {
+          const info = EXPO_CATEGORY_INFO[category];
+          if (farmLevel < info.minLevel) return;
+          if ((expoCategoryCooldown[category] ?? 0) > nextDayValue) {
+            expSkipped.push({ category: info.label, reason: `Em recuperação até o dia ${expoCategoryCooldown[category]} (perdeu no ciclo anterior)` });
+            return;
+          }
+          const candidatos = finalAnimals.filter(a => info.animalTypes.includes(a.type) && a.isAdult !== false);
+          if (candidatos.length === 0) {
+            expSkipped.push({ category: info.label, reason: 'Sem animal elegível' });
+            return;
+          }
+          const fee = expoEntryFee(farmLevel);
+          if (gold - expFeesSpent < fee) {
+            expSkipped.push({ category: info.label, reason: `Sem fundos para a taxa de inscrição (${fee}💰)` });
+            return;
+          }
+          const melhor = candidatos.reduce((a, b) => judgeAnimalScoreExpo(a, category) > judgeAnimalScoreExpo(b, category) ? a : b);
+          expFeesSpent += fee;
+          const duelo = resolveExpoDuel(nextDayValue, farmLevel, category, melhor);
+          expDuels.push(duelo);
+          if (duelo.won) {
+            expGold += 300;
+            setAnimals(prev => prev.map(a => a.id === duelo.playerAnimalId ? { ...a, isCampiao: true } : a));
+            setTimeout(() => triggerBigNotification(`${duelo.playerAnimalName} é CAMPEÃ!`, `${info.label} — Título permanente + +300💰`, '🏆'), 500);
+            expLog.push({ msg: `🏆 Exposição: ${duelo.playerAnimalName} é CAMPEÃ de ${info.label} contra ${duelo.judge.name}! +300💰 + título permanente!`, type: 'success' });
           } else {
-            expLog.push({ msg: `🏆 Exposição: Perdeu Raça Leiteira. Invista em traits positivos!`, type: 'info' });
+            setExpoCategoryCooldown(prev => ({ ...prev, [category]: nextDayValue + 45 }));
+            expLog.push({ msg: `😔 Exposição: ${duelo.playerAnimalName} perdeu ${info.label} para ${duelo.judge.name} (taxa de ${fee}💰 não é reembolsável). Categoria em recuperação por 45 dias.`, type: 'error' });
           }
+        });
+
+        if (expFeesSpent > 0) {
+          setGold(prev => prev - expFeesSpent);
+          addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'evento', description: `Taxas de inscrição — Exposição de Raças (${expDuels.length} categoria(s))`, amount: expFeesSpent });
         }
 
-        const fiberCandidates = finalAnimals.filter(a => ['ovelha','alpaca','coelho_angora'].includes(a.type));
-        if (fiberCandidates.length > 0) {
-          const best = fiberCandidates.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
-          if (calcFairScore(best) > npcExpScore()) {
-            expGold += 300; expWins++;
-            setAnimals(prev => prev.map(a => a.id === best.id ? { ...a, isCampiao: true } : a));
-            expLog.push({ msg: `🧶 Exposição: ${best.name} é CAMPEÃ de Raça de Fibra! +300💰 + título!`, type: 'success' });
-          } else {
-            expLog.push({ msg: `🧶 Exposição: Perdeu Raça de Fibra.`, type: 'info' });
-          }
-        }
-
-        if (farmLevel >= 12) {
-          const exoticCandidates = finalAnimals.filter(a => ['avestruz','jacare','bicho_seda'].includes(a.type));
-          if (exoticCandidates.length > 0) {
-            const best = exoticCandidates.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
-            if (calcFairScore(best) > npcExpScore() - 5) {
-              expGold += 400; expWins++;
-              setAnimals(prev => prev.map(a => a.id === best.id ? { ...a, isCampiao: true } : a));
-              expLog.push({ msg: `🦎 Exposição: ${best.name} é CAMPEÃO Exótico! +400💰 + título!`, type: 'success' });
-            } else {
-              expLog.push({ msg: `🦎 Exposição: Perdeu Exótico.`, type: 'info' });
-            }
-          }
-        }
-
-        const expPrestige = expWins * 20;
+        const expWins = expDuels.filter(d => d.won).length;
+        const expPrestige = expWins * 25;
         if (expPrestige > 0) setPrestigePoints(prev => prev + expPrestige);
         if (expGold > 0) {
           setGold(prev => prev + expGold);
-          logsToAdd.push(...expLog);
-          logsToAdd.push({ msg: `⭐ +${expPrestige} Pontos de Prestígio pela Exposição!`, type: 'system' });
-          const newResult: FairResult = { day: nextDayValue, category: `Exposição de Raças - ${expWins} cats`, winner: 'Fazenda Aurora', earned: expGold };
-          setFairResults(prev => [...prev, newResult].slice(-30));
-          setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🏆 Exposição de Raças: ${expWins} campeões, +${expGold}💰!`, 'event', nextDayValue); }, 600);
-        } else {
-          logsToAdd.push(...expLog);
+          addFinancialEntry({ day: nextDayValue, type: 'income', category: 'evento', description: `Premiação — Exposição de Raças (${expWins} campeão(ões))`, amount: expGold });
         }
+        logsToAdd.push(...expLog);
+        if (expPrestige > 0) logsToAdd.push({ msg: `⭐ +${expPrestige} Pontos de Prestígio pela Exposição!`, type: 'system' });
+        if (expDuels.length === 0) {
+          logsToAdd.push({ msg: `🏅 Exposição de Raças passou sem disputas desta vez.`, type: 'info' });
+        }
+
+        const genericExpDuels: GenericJudgingResult['duels'] = expDuels.map(d => ({
+          categoryLabel: EXPO_CATEGORY_INFO[d.category].label,
+          categoryEmoji: EXPO_CATEGORY_INFO[d.category].emoji,
+          playerLabel: d.playerAnimalName,
+          playerScore: d.playerScore,
+          rivalLabel: d.judge.name,
+          rivalSub: d.judge.title,
+          rivalScore: d.rivalScore,
+          won: d.won,
+        }));
+        setTimeout(() => {
+          setShowExpoJudgingModal({ title: '🏅 Exposição de Raças', day: nextDayValue, duels: genericExpDuels, skipped: expSkipped, totalPrize: expGold, totalXp: 0 });
+          addNotification(`🏅 Exposição de Raças: ${expWins}/${expDuels.length} títulos, +${expGold}💰!`, 'event', nextDayValue);
+        }, 600);
         setNextExposicaoDay(nextDayValue + 45);
       }
 
-      // Fair 3: Feira Regional de Produtos (every 30 days, Level 6+)
+      // Fair 3: Feira Regional de Produtos (every 30 days, Level 6+) — julgamento de inventário
+      // contra Compradores/Juízes de Mercado nomeados. Entrar consome uma "amostra consignada"
+      // do produto (perdida independente do resultado) além da taxa em moedas.
       if (farmLevel >= 6 && nextDayValue >= nextFeiraProdutosDay) {
         const prodLog: { msg: string; type: LogMessage['type'] }[] = [];
-        let prodGold = 0; let prodWins = 0;
+        const prodDuels: ReturnType<typeof resolveProdDuel>[] = [];
+        const prodSkipped: { category: string; reason: string }[] = [];
+        let prodGold = 0;
+        let prodFeesSpent = 0;
+        const inventoryDeductions: Partial<Record<string, number>> = {};
+        const invSnapshot = { ...inventory } as Record<string, number>;
 
-        const hasQueijo = (inventory.queijoCoalho ?? 0) + (inventory.queijoMucarela ?? 0) + (inventory.queijoBrie ?? 0) + (inventory.queijo_cabra ?? 0) > 0;
-        if (hasQueijo) {
-          const score = (inventory.queijoCoalho ?? 0) * 1 + (inventory.queijoMucarela ?? 0) * 2 + (inventory.queijoBrie ?? 0) * 4 + (inventory.queijo_cabra ?? 0) * 2;
-          if (score >= 2) {
-            prodGold += 250; prodWins++;
-            prodLog.push({ msg: `🧀 Feira de Produtos: Seu queijo venceu! +250💰`, type: 'success' });
+        (Object.keys(PROD_CATEGORY_INFO) as ProdCategory[]).forEach(category => {
+          const info = PROD_CATEGORY_INFO[category];
+          if (farmLevel < info.minLevel) return;
+          if ((prodCategoryCooldown[category] ?? 0) > nextDayValue) {
+            prodSkipped.push({ category: info.label, reason: `Em recuperação até o dia ${prodCategoryCooldown[category]} (perdeu no ciclo anterior)` });
+            return;
+          }
+          const totalQty = Object.keys(info.weights).reduce((sum, k) => sum + (invSnapshot[k] ?? 0), 0);
+          if (totalQty < info.minQty) {
+            prodSkipped.push({ category: info.label, reason: 'Estoque insuficiente para participar' });
+            return;
+          }
+          const stakeAvailable = (invSnapshot[info.stakeItem] ?? 0) >= info.stakeQty;
+          if (!stakeAvailable) {
+            prodSkipped.push({ category: info.label, reason: `Sem ${info.stakeItem} suficiente para a amostra consignada` });
+            return;
+          }
+          const fee = marketEntryFee(farmLevel);
+          if (gold - prodFeesSpent < fee) {
+            prodSkipped.push({ category: info.label, reason: `Sem fundos para a taxa de inscrição (${fee}💰)` });
+            return;
+          }
+          prodFeesSpent += fee;
+          const duelo = resolveProdDuel(nextDayValue, farmLevel, category, invSnapshot);
+          prodDuels.push(duelo);
+          // Amostra consignada: consumida do estoque independente do resultado
+          invSnapshot[duelo.stakeItem] = (invSnapshot[duelo.stakeItem] ?? 0) - duelo.stakeQty;
+          inventoryDeductions[duelo.stakeItem] = (inventoryDeductions[duelo.stakeItem] ?? 0) + duelo.stakeQty;
+          if (duelo.won) {
+            prodGold += 250;
+            prodLog.push({ msg: `${info.emoji} Feira de Produtos: Você venceu ${info.label} contra ${duelo.judge.name}! +250💰 (amostra de ${duelo.stakeQty}x ${duelo.stakeItem} consignada).`, type: 'success' });
           } else {
-            prodLog.push({ msg: `🧀 Feira de Produtos: Queijo insuficiente para vencer.`, type: 'info' });
+            setProdCategoryCooldown(prev => ({ ...prev, [category]: nextDayValue + 30 }));
+            prodLog.push({ msg: `😔 Feira de Produtos: ${duelo.judge.name} preferiu a concorrência em ${info.label} (taxa ${fee}💰 + amostra consignada perdidas). Categoria em recuperação por 30 dias.`, type: 'error' });
           }
+        });
+
+        if (Object.keys(inventoryDeductions).length > 0) {
+          setInventory(prev => {
+            const next = { ...prev } as Record<string, number>;
+            for (const key of Object.keys(inventoryDeductions)) {
+              next[key] = Math.max(0, (next[key] ?? 0) - (inventoryDeductions[key] ?? 0));
+            }
+            return next as typeof prev;
+          });
+        }
+        if (prodFeesSpent > 0) {
+          setGold(prev => prev - prodFeesSpent);
+          addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'evento', description: `Taxas de inscrição — Feira Regional de Produtos (${prodDuels.length} categoria(s))`, amount: prodFeesSpent });
         }
 
-        const hasTextil = (inventory.scarf ?? 0) + (inventory.manta_premium ?? 0) + (inventory.tecido_alpaca ?? 0) + (inventory.cachecol_angora ?? 0) > 0;
-        if (hasTextil) {
-          const score = (inventory.scarf ?? 0) * 1 + (inventory.cachecol_angora ?? 0) * 2 + (inventory.tecido_alpaca ?? 0) * 3 + (inventory.manta_premium ?? 0) * 6;
-          if (score >= 3) {
-            prodGold += 200; prodWins++;
-            prodLog.push({ msg: `🧶 Feira de Produtos: Seu têxtil venceu! +200💰`, type: 'success' });
-          } else {
-            prodLog.push({ msg: `🧶 Feira de Produtos: Têxtil insuficiente.`, type: 'info' });
-          }
-        }
-
-        if (farmLevel >= 15) {
-          const hasRare = (inventory.bolsa_exotica ?? 0) + (inventory.colete_couro ?? 0) > 0;
-          if (hasRare) {
-            prodGold += 500; prodWins++;
-            prodLog.push({ msg: `🏺 Feira de Produtos: Produto raro venceu a categoria! +500💰`, type: 'success' });
-          }
-        }
-
+        const prodWins = prodDuels.filter(d => d.won).length;
         const prodPrestige = prodWins * 15;
         if (prodPrestige > 0) setPrestigePoints(prev => prev + prodPrestige);
         if (prodGold > 0) {
           setGold(prev => prev + prodGold);
-          logsToAdd.push(...prodLog);
-          if (prodPrestige > 0) logsToAdd.push({ msg: `⭐ +${prodPrestige} Pontos de Prestígio!`, type: 'system' });
-          const newResult: FairResult = { day: nextDayValue, category: `Feira de Produtos - ${prodWins} cats`, winner: 'Fazenda Aurora', earned: prodGold };
-          setFairResults(prev => [...prev, newResult].slice(-30));
-          setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🛒 Feira de Produtos: ${prodWins} vitórias, +${prodGold}💰!`, 'event', nextDayValue); }, 700);
-        } else {
-          logsToAdd.push(...prodLog);
-          logsToAdd.push({ msg: `🛒 Feira Regional de Produtos passou. Acumule mais produtos para vencer!`, type: 'info' });
+          addFinancialEntry({ day: nextDayValue, type: 'income', category: 'evento', description: `Premiação — Feira Regional de Produtos (${prodWins} vitória(s))`, amount: prodGold });
         }
+        logsToAdd.push(...prodLog);
+        if (prodPrestige > 0) logsToAdd.push({ msg: `⭐ +${prodPrestige} Pontos de Prestígio!`, type: 'system' });
+        if (prodDuels.length === 0) {
+          logsToAdd.push({ msg: `🛒 Feira Regional de Produtos passou sem disputas desta vez.`, type: 'info' });
+        }
+
+        const genericProdDuels: GenericJudgingResult['duels'] = prodDuels.map(d => ({
+          categoryLabel: PROD_CATEGORY_INFO[d.category].label,
+          categoryEmoji: PROD_CATEGORY_INFO[d.category].emoji,
+          playerLabel: 'Sua produção',
+          playerScore: d.playerScore,
+          rivalLabel: d.judge.name,
+          rivalSub: d.judge.title,
+          rivalScore: d.rivalScore,
+          won: d.won,
+        }));
+        const stakeNote = Object.keys(inventoryDeductions).length > 0
+          ? `Amostras consignadas perdidas: ${Object.entries(inventoryDeductions).map(([k, v]) => `${v}x ${k}`).join(', ')}`
+          : undefined;
+        setTimeout(() => {
+          setShowProdJudgingModal({ title: '🛒 Feira Regional de Produtos', day: nextDayValue, duels: genericProdDuels, skipped: prodSkipped, totalPrize: prodGold, totalXp: 0, extraNote: stakeNote });
+          addNotification(`🛒 Feira de Produtos: ${prodWins}/${prodDuels.length} vitórias, +${prodGold}💰!`, 'event', nextDayValue);
+        }, 700);
         setNextFeiraProdutosDay(nextDayValue + 30);
       }
 
@@ -6014,35 +6099,58 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setNextFeiraExoticaDay(nextDayValue + 60);
       }
 
-      // Fair 5: Festival Cultural da Aurora (every 120 days, Level 8+)
+      // Fair 5: Festival Cultural da Aurora (every 120 days, Level 8+) — fazenda inteira vs
+      // Fazenda Horizonte Dourado (rival nomeada), 3 sub-rodadas, vence quem ganhar 2 de 3.
+      // Perder dói de verdade agora: sem mais 300💰 fixos de consolação.
       if (farmLevel >= 8 && nextDayValue >= nextFestivalDay) {
         const festLog: { msg: string; type: LogMessage['type'] }[] = [];
-        let festGold = 0;
+        const fee = festivalEntryFee(farmLevel);
+        const canAfford = gold >= fee;
 
-        const farmScore = finalAnimals.reduce((sum, a) => sum + calcFairScore(a), 0) + farmLevel * 10;
-        const npcFarmScore = 200 + Math.floor(Math.random() * 300);
-
-        festLog.push({ msg: `🎪 FESTIVAL CULTURAL DA AURORA! Pontuação da fazenda: ${farmScore} vs NPC: ${npcFarmScore}`, type: 'event' });
-
-        if (farmScore > npcFarmScore) {
-          festGold += 1000 + farmLevel * 50;
-          festLog.push({ msg: `🏆 Fazenda Aurora venceu o Festival! +${festGold}💰!`, type: 'success' });
-          setPrestigePoints(prev => prev + 50);
-          festLog.push({ msg: `⭐ +50 Pontos de Prestígio pelo Festival Cultural!`, type: 'system' });
-          setMerchantActive(true);
-          setTimeout(() => addNotification(`🎭 Festival Cultural: VITÓRIA! Comerciante especial por 3 dias! +${festGold}💰`, 'event', nextDayValue), 1000);
+        if (!canAfford) {
+          festLog.push({ msg: `🎭 Festival Cultural da Aurora: sem fundos para a taxa de inscrição (${fee}💰). Ficou de fora deste ciclo.`, type: 'error' });
+          logsToAdd.push(...festLog);
+          setNextFestivalDay(nextDayValue + 120);
         } else {
-          festGold = 300;
-          festLog.push({ msg: `🎪 Festival: Não venceu, mas recebeu 300💰 de participação!`, type: 'info' });
-          setPrestigePoints(prev => prev + 15);
-        }
+          setGold(prev => prev - fee);
+          addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'evento', description: 'Taxa de inscrição — Festival Cultural da Aurora', amount: fee });
 
-        setGold(prev => prev + festGold);
-        logsToAdd.push(...festLog);
-        const newResult: FairResult = { day: nextDayValue, category: 'Festival Cultural', winner: farmScore > npcFarmScore ? 'Fazenda Aurora' : 'NPC', earned: festGold };
-        setFairResults(prev => [...prev, newResult].slice(-30));
-        setTimeout(() => setShowFairResultModal(newResult), 1200);
-        setNextFestivalDay(nextDayValue + 120);
+          const festResult = resolveFestival(nextDayValue, farmLevel, finalAnimals, prestigePoints);
+          let festGold = 0;
+          let festPrestige = 0;
+
+          festLog.push({ msg: `🎭 FESTIVAL CULTURAL DA AURORA! Fazenda Aurora venceu ${festResult.roundsWon}/3 rodadas contra a Fazenda Horizonte Dourado.`, type: 'event' });
+
+          if (festResult.overallWon) {
+            festGold = 1000 + farmLevel * 50;
+            festPrestige = 50;
+            festLog.push({ msg: `🏆 Fazenda Aurora venceu o Festival! +${festGold}💰!`, type: 'success' });
+            festLog.push({ msg: `⭐ +${festPrestige} Pontos de Prestígio pelo Festival Cultural!`, type: 'system' });
+            setMerchantActive(true);
+            setTimeout(() => addNotification(`🎭 Festival Cultural: VITÓRIA! Comerciante especial por 3 dias! +${festGold}💰`, 'event', nextDayValue), 1000);
+          } else if (festResult.roundsWon === 1) {
+            // Perdeu, mas levou 1 rodada — consolação bem mais modesta que os antigos 300💰 fixos.
+            festGold = 80;
+            festPrestige = 5;
+            festLog.push({ msg: `🎭 Festival: Perdeu (1/3 rodadas), mas o público reconheceu o esforço. +${festGold}💰 de participação.`, type: 'info' });
+          } else {
+            festGold = 0;
+            festPrestige = 0;
+            festLog.push({ msg: `😔 Festival: Derrota total (0/3 rodadas) para a Fazenda Horizonte Dourado. Nenhum prêmio desta vez — treine mais para o próximo!`, type: 'error' });
+          }
+
+          if (festGold > 0) {
+            setGold(prev => prev + festGold);
+            addFinancialEntry({ day: nextDayValue, type: 'income', category: 'evento', description: `Premiação — Festival Cultural da Aurora (${festResult.roundsWon}/3 rodadas)`, amount: festGold });
+          }
+          if (festPrestige > 0) setPrestigePoints(prev => prev + festPrestige);
+
+          logsToAdd.push(...festLog);
+          const newResult: FairResult = { day: nextDayValue, category: 'Festival Cultural', winner: festResult.overallWon ? 'Fazenda Aurora' : 'Fazenda Horizonte Dourado', earned: festGold };
+          setFairResults(prev => [...prev, newResult].slice(-30));
+          setTimeout(() => setShowFestivalJudgingModal({ result: festResult, gold: festGold, prestige: festPrestige }), 1200);
+          setNextFestivalDay(nextDayValue + 120);
+        }
       }
 
       // --- SISTEMA DE PEÕES (WORKERS) ---
@@ -8214,6 +8322,58 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         <FairJudgingModal
           result={showFairJudgingModal}
           onClose={() => setShowFairJudgingModal(null)}
+        />
+      )}
+
+      {/* 🏅 MODAL DE JULGAMENTO — Exposição de Raças (duelos contra Juízes Federais) */}
+      {showExpoJudgingModal && (
+        <GenericJudgingModal
+          result={showExpoJudgingModal}
+          onClose={() => setShowExpoJudgingModal(null)}
+        />
+      )}
+
+      {/* 🛒 MODAL DE JULGAMENTO — Feira Regional de Produtos (duelos contra Compradores) */}
+      {showProdJudgingModal && (
+        <GenericJudgingModal
+          result={showProdJudgingModal}
+          onClose={() => setShowProdJudgingModal(null)}
+        />
+      )}
+
+      {/* 🎭 MODAL DE JULGAMENTO — Festival Cultural da Aurora (3 rodadas vs Fazenda rival) */}
+      {showFestivalJudgingModal && (
+        <FestivalJudgingModal
+          result={showFestivalJudgingModal.result}
+          goldAwarded={showFestivalJudgingModal.gold}
+          prestigeAwarded={showFestivalJudgingModal.prestige}
+          onClose={() => setShowFestivalJudgingModal(null)}
+        />
+      )}
+
+      {/* 🏅 MODAL DE JULGAMENTO — Exposição de Raças (juízes federais de elite) */}
+      {showExpoJudgingModal && (
+        <GenericJudgingModal
+          result={showExpoJudgingModal}
+          onClose={() => setShowExpoJudgingModal(null)}
+        />
+      )}
+
+      {/* 🛒 MODAL DE JULGAMENTO — Feira Regional de Produtos (compradores de mercado) */}
+      {showProdJudgingModal && (
+        <GenericJudgingModal
+          result={showProdJudgingModal}
+          onClose={() => setShowProdJudgingModal(null)}
+        />
+      )}
+
+      {/* 🎭 MODAL DE JULGAMENTO — Festival Cultural da Aurora (3 rodadas vs fazenda rival) */}
+      {showFestivalJudgingModal && (
+        <FestivalJudgingModal
+          result={showFestivalJudgingModal.result}
+          goldAwarded={showFestivalJudgingModal.gold}
+          prestigeAwarded={showFestivalJudgingModal.prestige}
+          onClose={() => setShowFestivalJudgingModal(null)}
         />
       )}
 
