@@ -118,6 +118,8 @@ import OnlineRankingModal from './components/RankingModal';
 import DoacaoModal from './components/DoacaoModal';
 import RaceModal from './components/RaceModal';
 import { DISTANCE_INFO, RaceDistance, distanceTraitMod, effectiveSpeed, npcLineup, npcPerformance } from './lib/onlineRace';
+import FairJudgingModal, { FairJudgingResult } from './components/FairJudgingModal';
+import { CATEGORY_INFO, FairCategory, FairDuelResult, entryFee, judgeAnimalScore, resolveDuel } from './lib/fairJudging';
 import AnnouncementBanner from './components/AnnouncementBanner';
 
 
@@ -403,6 +405,11 @@ function GameApp() {
   // hasTourism — managed by useFarm hook
 
   const [showFairResultModal, setShowFairResultModal] = useState<FairResult | null>(null);
+  const [showFairJudgingModal, setShowFairJudgingModal] = useState<FairJudgingResult | null>(null);
+  // Cooldown por categoria da Feira Agropecuária: dia até o qual fica bloqueada após uma derrota.
+  const [fairCategoryCooldown, setFairCategoryCooldown] = useState<Record<string, number>>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).fairCategoryCooldown ?? {}; } catch(e) {} return {};
+  });
 
   const [lastTheftDay, setLastTheftDay] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).lastTheftDay ?? 0; } catch(e) {} return 0;
@@ -2768,6 +2775,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         hasTourism,
         nextFairDay,
         fairResults,
+        fairCategoryCooldown,
         lastTheftDay,
         lastEpidemicDay,
         droughtDaysRemaining,
@@ -2824,7 +2832,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     let price = 2500;
@@ -5726,75 +5734,70 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       // --- SISTEMA DE FEIRAS E CONCURSOS ---
 
-      // Fair 1: Feira Agropecuária (every 30 days)
+      // Fair 1: Feira Agropecuária — duelos 1x1 contra Criadores Rivais fixos (every 30 days)
+      // Substitui o antigo threshold aleatório: agora cada categoria tem um rival nomeado
+      // que escala com o nível da fazenda, cobra taxa de inscrição, e pune quem perde com
+      // cooldown de 1 ciclo. Ver src/lib/fairJudging.ts.
       if (nextDayValue >= nextFairDay) {
-        const npcScore = () => 55 + Math.floor(Math.random() * 40);
-        let fairGold = 0; let fairWins = 0;
         const fairLog: { msg: string; type: LogMessage['type'] }[] = [];
+        const duels: FairDuelResult[] = [];
+        const skipped: { category: string; reason: string }[] = [];
+        let fairGold = 0;
+        let goldSpentOnFees = 0;
 
-        const leiteiros = finalAnimals.filter(a => ['vaca','cabra','bufalo','alpaca'].includes(a.type));
-        if (leiteiros.length > 0) {
-          const best = leiteiros.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
-          if (calcFairScore(best) > npcScore()) {
-            fairGold += 180; fairWins++;
-            fairLog.push({ msg: `🥛 Feira: ${best.name} venceu Melhor Leiteiro! +180💰`, type: 'success' });
+        (Object.keys(CATEGORY_INFO) as FairCategory[]).forEach(category => {
+          const info = CATEGORY_INFO[category];
+          if (farmLevel < info.minLevel) return; // categoria ainda não desbloqueada — nem conta como tentativa
+          if ((fairCategoryCooldown[category] ?? 0) > nextDayValue) {
+            skipped.push({ category: info.label, reason: `Em recuperação até o dia ${fairCategoryCooldown[category]} (perdeu no ciclo anterior)` });
+            return;
+          }
+          const candidatos = finalAnimals.filter(a => info.animalTypes.includes(a.type) && a.isAdult !== false);
+          if (candidatos.length === 0) {
+            skipped.push({ category: info.label, reason: 'Sem animal elegível' });
+            return;
+          }
+          const fee = entryFee(farmLevel);
+          if (gold - goldSpentOnFees < fee) {
+            skipped.push({ category: info.label, reason: `Sem fundos para a taxa de inscrição (${fee}💰)` });
+            return;
+          }
+          const melhor = candidatos.reduce((a, b) => judgeAnimalScore(a, category) > judgeAnimalScore(b, category) ? a : b);
+          goldSpentOnFees += fee;
+          const duelo = resolveDuel(nextDayValue, farmLevel, category, melhor);
+          duels.push(duelo);
+          if (duelo.won) {
+            fairGold += 200;
+            fairLog.push({ msg: `🏆 ${duelo.playerAnimalName} venceu ${duelo.breeder.name} em ${info.label}! +200💰`, type: 'success' });
           } else {
-            fairLog.push({ msg: `🥛 Feira: Perdeu Melhor Leiteiro. Melhore a produção semanal!`, type: 'info' });
+            setFairCategoryCooldown(prev => ({ ...prev, [category]: nextDayValue + 30 }));
+            fairLog.push({ msg: `😔 ${duelo.playerAnimalName} perdeu para ${duelo.breeder.name} em ${info.label} (taxa de ${fee}💰 não é reembolsável). Categoria em recuperação por 30 dias.`, type: 'error' });
           }
+        });
+
+        if (goldSpentOnFees > 0) {
+          setGold(prev => prev - goldSpentOnFees);
+          addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'evento', description: `Taxas de inscrição — Feira Agropecuária (${duels.length} categoria(s))`, amount: goldSpentOnFees });
         }
 
-        const fibras = finalAnimals.filter(a => ['ovelha','lhama','alpaca','coelho_angora','cabra_angora'].includes(a.type));
-        if (fibras.length > 0) {
-          const best = fibras.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
-          if (calcFairScore(best) > npcScore()) {
-            fairGold += 180; fairWins++;
-            fairLog.push({ msg: `🧶 Feira: ${best.name} venceu Melhor Fibra! +180💰`, type: 'success' });
-          } else {
-            fairLog.push({ msg: `🧶 Feira: Perdeu Melhor Fibra.`, type: 'info' });
-          }
-        }
-
-        const aves = finalAnimals.filter(a => ['galinha','pato','ganso','codorna'].includes(a.type));
-        if (aves.length > 0) {
-          const best = aves.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
-          if (calcFairScore(best) > npcScore()) {
-            fairGold += 180; fairWins++;
-            fairLog.push({ msg: `🥚 Feira: ${best.name} venceu Melhor Ave! +180💰`, type: 'success' });
-          } else {
-            fairLog.push({ msg: `🥚 Feira: Perdeu Melhor Ave.`, type: 'info' });
-          }
-        }
-
-        if (farmLevel >= 6) {
-          const organicos = finalAnimals.filter(a => ['minhoca','caracol'].includes(a.type));
-          if (organicos.length > 0) {
-            const best = organicos.reduce((a,b) => calcFairScore(a) > calcFairScore(b) ? a : b);
-            if (calcFairScore(best) > npcScore() - 10) {
-              fairGold += 150; fairWins++;
-              fairLog.push({ msg: `🌿 Feira: ${best.name} venceu Melhor Orgânico! +150💰`, type: 'success' });
-            } else {
-              fairLog.push({ msg: `🌿 Feira: Perdeu Melhor Orgânico.`, type: 'info' });
-            }
-          }
-        }
-
-        if (fairWins >= 3) { fairGold += 500; fairLog.push({ msg: `🏆 CAMPEÃO DA FEIRA AGROPECUÁRIA! +500💰 bônus!`, type: 'success' }); }
-        const fairPrestige = fairWins * 10;
+        const vitorias = duels.filter(d => d.won).length;
+        if (vitorias >= 3) { fairGold += 500; fairLog.push({ msg: `🏆 CAMPEÃO DA FEIRA AGROPECUÁRIA! +500💰 bônus por varrer 3+ categorias!`, type: 'success' }); }
+        const fairPrestige = vitorias * 10;
         if (fairPrestige > 0) {
           setPrestigePoints(prev => prev + fairPrestige);
           fairLog.push({ msg: `⭐ +${fairPrestige} Pontos de Prestígio pela Feira!`, type: 'system' });
         }
+        if (fairGold > 0) setGold(prev => prev + fairGold);
+        if (fairGold > 0) addFinancialEntry({ day: nextDayValue, type: 'income', category: 'evento', description: `Premiação — Feira Agropecuária (${vitorias} vitória(s))`, amount: fairGold });
 
-        if (fairGold > 0) {
-          setGold(prev => prev + fairGold);
-          logsToAdd.push(...fairLog);
-          const newResult: FairResult = { day: nextDayValue, category: `Agropecuária - ${fairWins} cats`, winner: 'Fazenda Aurora', earned: fairGold };
-          setFairResults(prev => [...prev, newResult].slice(-30));
-          setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🎪 Feira Agropecuária: ${fairWins} vitórias, +${fairGold}💰!`, 'event', nextDayValue); }, 500);
-        } else {
-          logsToAdd.push(...fairLog);
-          logsToAdd.push({ msg: `🎪 Feira Agropecuária passou. Nenhuma categoria vencida desta vez.`, type: 'info' });
+        logsToAdd.push(...fairLog);
+        if (duels.length === 0) {
+          logsToAdd.push({ msg: `🎪 Feira Agropecuária passou sem disputas desta vez.`, type: 'info' });
         }
+        setTimeout(() => {
+          setShowFairJudgingModal({ day: nextDayValue, duels, skipped, totalPrize: fairGold, totalXp: 0 });
+          addNotification(`🎪 Feira Agropecuária: ${vitorias}/${duels.length} vitórias, +${fairGold}💰!`, 'event', nextDayValue);
+        }, 500);
         setNextFairDay(nextDayValue + 30);
       }
 
@@ -8203,6 +8206,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         <FairResultModal
           result={showFairResultModal}
           onClose={() => setShowFairResultModal(null)}
+        />
+      )}
+
+      {/* 🎪 MODAL DE JULGAMENTO — Feira Agropecuária (duelos contra Criadores Rivais) */}
+      {showFairJudgingModal && (
+        <FairJudgingModal
+          result={showFairJudgingModal}
+          onClose={() => setShowFairJudgingModal(null)}
         />
       )}
 
