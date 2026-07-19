@@ -5176,6 +5176,16 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         return { ...a, happiness: Math.min(100, Math.max(0, a.happiness + happyDelta)) };
       });
 
+      // 🛡️ Proteção contra "dia do azar": pragas, epidemia, início de seca e roubo são sorteios
+      // independentes entre si — sem essa trava, os 4 podem cair no mesmo dia (raro, mas
+      // acontece em centenas de dias) e o jogador leva um combo punitivo sem ter como prever.
+      // O evento pré-anunciado de ontem (tempestade/geada/predador) já conta como o "azar do
+      // dia" quando se concretiza — nesse caso os outros 4 dão trégua e tentam de novo amanhã.
+      // Cooldowns próprios (epidemia 30d, roubo 5d) continuam contando normalmente mesmo
+      // quando um evento é pulado por essa trava — ela só decide QUEM dispara HOJE, não
+      // reseta a programação de ninguém.
+      let negativeSurpriseFiredToday = nextDayEvent === 'tempestade' || nextDayEvent === 'geada' || nextDayEvent === 'predador';
+
       // MECHANIC 1: Sistema de Pragas (Pato reduz probabilidade)
       {
         const basePestChance = 0.05;
@@ -5185,7 +5195,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         if (antiPestDays <= 0 && hasDuckAlive && pestRoll >= pestChance && pestRoll < basePestChance) {
           logsToAdd.push({ msg: `🦆 Os patos patrulharam o celeiro e espantaram as pragas hoje!`, type: 'info' });
         }
-        if (antiPestDays <= 0 && pestRoll < pestChance) {
+        if (antiPestDays <= 0 && !negativeSurpriseFiredToday && pestRoll < pestChance) {
+          negativeSurpriseFiredToday = true;
           const pestItems: Array<keyof typeof inventory> = ['milk', 'goat_milk', 'egg', 'duck_egg', 'goose_egg'];
           const itemLabels: Record<string, string> = { milk: 'leite', goat_milk: 'l.cabra', egg: 'ovos', duck_egg: 'ov.pato', goose_egg: 'ov.ganso' };
           const lossMultiplier = insurance.active ? 0.3 : 1.0;
@@ -5632,7 +5643,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // --- SISTEMA DE CRISES ---
       // Epidemia (3% por dia, max 1 a cada 30 dias, -5% se bebedouro)
       const epidemicChance = hasBebedouro ? 0.025 : 0.03;
-      if (Math.random() < epidemicChance && (currentDay - lastEpidemicDay) >= 30) {
+      if (!negativeSurpriseFiredToday && Math.random() < epidemicChance && (currentDay - lastEpidemicDay) >= 30) {
         if (vaccinationDays > 0) {
           logsToAdd.push({ msg: `💉 Campanha de Vacinação bloqueou uma epidemia iminente! Rebanho protegido.`, type: 'success' });
         } else if (epidemicPrevented) {
@@ -5641,6 +5652,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         } else {
           const affected = finalAnimals.filter(() => Math.random() < 0.3);
           if (affected.length > 0) {
+            negativeSurpriseFiredToday = true;
             setLastEpidemicDay(nextDayValue);
             setAnimals(prev => prev.map(a => {
               if (affected.some(af => af.id === a.id)) {
@@ -5688,7 +5700,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               }));
             }, 0);
           }
-        } else if (currentSeasonIdx === 1 && Math.random() < (wellLevel >= 5 ? 0.045 : 0.05)) {
+        } else if (!negativeSurpriseFiredToday && currentSeasonIdx === 1 && Math.random() < (wellLevel >= 5 ? 0.045 : 0.05)) {
           if (insuranceClimate.active) {
             logsToAdd.push({ msg: `🌦️ Seca começou mas Seguro Climático protegeu sua fazenda! Sem custo extra.`, type: 'success' });
           } else if (blockNextDrought) {
@@ -5697,6 +5709,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           } else if (waterTruckDays > 0) {
             logsToAdd.push({ msg: `🚛 Seca detectada, mas o Caminhão-Pipa garante o abastecimento! Fazenda protegida.`, type: 'success' });
           } else {
+            negativeSurpriseFiredToday = true;
             logsToAdd.push({ msg: `🏜️ Uma seca prolongada começou! Custo de água será triplicado por 3 dias!`, type: 'error' });
             setTimeout(() => addNotification('🏜️ Seca prolongada por 3 dias! Custo de água triplicado!', 'warning', nextDayValue), 0);
             setDroughtDaysRemaining(3);
@@ -5710,12 +5723,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       }
 
       // Roubo noturno (4% de chance, não ocorre nos primeiros 5 dias, cooldown 5 dias)
-      if (currentDay > 5 && (currentDay - lastTheftDay) >= 5 && Math.random() < 0.04) {
+      if (!negativeSurpriseFiredToday && currentDay > 5 && (currentDay - lastTheftDay) >= 5 && Math.random() < 0.04) {
         if (insuranceTheft.active) {
           logsToAdd.push({ msg: `🛡️ Tentativa de roubo! Seguro contra Roubo bloqueou o ladrão!`, type: 'success' });
           setTimeout(() => addNotification(`🛡️ Tentativa de roubo bloqueada pelo seguro!`, 'success', nextDayValue), 0);
           setLastTheftDay(nextDayValue);
         } else {
+          negativeSurpriseFiredToday = true;
           const stolenPercent = 0.2 + Math.random() * 0.2;
           setInventory(prev => ({
             ...prev,
