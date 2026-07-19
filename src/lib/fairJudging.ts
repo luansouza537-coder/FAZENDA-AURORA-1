@@ -353,10 +353,19 @@ export function festivalEntryFee(farmLevel: number): number {
   return 200 + farmLevel * 20;
 }
 
-/** Nota do jogador em cada sub-rodada. */
+/**
+ * Nota do jogador em cada sub-rodada. O termo de nível em 'producao'/'prestigio' usa o
+ * mesmo platô (FESTIVAL_LEVEL_CAP) do lado do rival — sem isso, o bônus de nível do
+ * PRÓPRIO jogador crescia sem limite enquanto o rival platôava, e uma fazenda largada
+ * passava a vencer sozinha só de nível alto (90%+ no nível 30, 100% no nível 40+),
+ * sem relação nenhuma com produção/diversidade real. Com o platô nos dois lados, o
+ * termo de nível empata no endgame e quem decide o resultado volta a ser o cuidado
+ * (produção do rebanho, diversidade de tipos, prestígio acumulado).
+ */
 export function festivalPlayerRoundScore(round: FestivalRound, animals: Animal[], farmLevel: number, prestigePoints: number): number {
+  const scalingLevel = Math.min(farmLevel, FESTIVAL_LEVEL_CAP);
   if (round === 'producao') {
-    return Math.round(animals.reduce((sum, a) => sum + (a.weeklyProduction ?? 0), 0) * 6 + farmLevel * 5);
+    return Math.round(animals.reduce((sum, a) => sum + (a.weeklyProduction ?? 0), 0) * 6 + scalingLevel * 5);
   }
   if (round === 'bemestar') {
     if (animals.length === 0) return 0;
@@ -365,9 +374,9 @@ export function festivalPlayerRoundScore(round: FestivalRound, animals: Animal[]
     const stressPenalty = animals.filter(a => (a.stressedDays ?? 0) > 0).length * 5;
     return Math.max(0, Math.round(avgHappiness - sickPenalty - stressPenalty));
   }
-  // prestigio: diversidade de tipos + pontos de prestígio + nível
+  // prestigio: diversidade de tipos + pontos de prestígio + nível (nível capado, ver acima)
   const diversity = new Set(animals.map(a => a.type)).size;
-  return Math.round(diversity * 8 + prestigePoints * 0.5 + farmLevel * 4);
+  return Math.round(diversity * 8 + prestigePoints * 0.5 + scalingLevel * 4);
 }
 
 // 'bemestar' é o único round com teto real no lado do jogador (festivalPlayerRoundScore

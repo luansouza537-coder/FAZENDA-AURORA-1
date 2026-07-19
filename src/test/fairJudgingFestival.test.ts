@@ -119,22 +119,55 @@ describe('Festival Cultural da Aurora — fazenda inteira vs Fazenda Horizonte D
     }
   });
 
-  it('produção/prestígio: fazenda modesta mas de nível alto continua competitiva (não impossível no endgame)', () => {
-    const animais = [
-      mkAnimal({ weeklyProduction: 3, happiness: 80 }),
-      mkAnimal({ id: 2, type: 'ovelha', weeklyProduction: 3, happiness: 80 }),
+  it('produção/prestígio: fazenda fraca (baixa produção/diversidade/prestígio) NÃO vence só por ter nível alto', () => {
+    // Antes do platô no termo de nível do jogador, uma fazenda com pouquíssima produção
+    // vencia sozinha em nível alto (o bônus de nível descolava do rival). Com o platô nos
+    // dois lados, nível alto sozinho não deve mais carregar uma fazenda fraca.
+    const animaisFracos = [
+      mkAnimal({ weeklyProduction: 1, happiness: 60 }),
+      mkAnimal({ id: 2, type: 'vaca', weeklyProduction: 1, happiness: 60 }),
     ];
     let venceuProducao = false;
     let venceuPrestigio = false;
     for (let day = 0; day < 60; day++) {
-      const playerProd = festivalPlayerRoundScore('producao', animais, 20, 0);
-      const rivalProd = festivalRivalRoundScore('producao', 20, day);
+      const playerProd = festivalPlayerRoundScore('producao', animaisFracos, 30, 0);
+      const rivalProd = festivalRivalRoundScore('producao', 30, day);
       if (playerProd > rivalProd) venceuProducao = true;
-      const playerPrest = festivalPlayerRoundScore('prestigio', animais, 20, 70);
-      const rivalPrest = festivalRivalRoundScore('prestigio', 20, day);
+      const playerPrest = festivalPlayerRoundScore('prestigio', animaisFracos, 30, 0);
+      const rivalPrest = festivalRivalRoundScore('prestigio', 30, day);
+      if (playerPrest > rivalPrest) venceuPrestigio = true;
+    }
+    expect(venceuProducao).toBe(false);
+    expect(venceuPrestigio).toBe(false);
+  });
+
+  it('produção/prestígio: fazenda bem manejada (boa produção/diversidade/prestígio) continua competitiva no endgame (não impossível)', () => {
+    const animaisBons = [
+      ...Array.from({ length: 4 }, (_, i) => mkAnimal({ id: i, type: 'vaca', weeklyProduction: 3, happiness: 90 })),
+      ...Array.from({ length: 2 }, (_, i) => mkAnimal({ id: 10 + i, type: 'ovelha', weeklyProduction: 3, happiness: 90 })),
+      ...Array.from({ length: 2 }, (_, i) => mkAnimal({ id: 20 + i, type: 'galinha', weeklyProduction: 3, happiness: 90 })),
+    ];
+    let venceuProducao = false;
+    let venceuPrestigio = false;
+    for (let day = 0; day < 60; day++) {
+      const playerProd = festivalPlayerRoundScore('producao', animaisBons, 30, 0);
+      const rivalProd = festivalRivalRoundScore('producao', 30, day);
+      if (playerProd > rivalProd) venceuProducao = true;
+      const playerPrest = festivalPlayerRoundScore('prestigio', animaisBons, 30, 100);
+      const rivalPrest = festivalRivalRoundScore('prestigio', 30, day);
       if (playerPrest > rivalPrest) venceuPrestigio = true;
     }
     expect(venceuProducao).toBe(true);
     expect(venceuPrestigio).toBe(true);
+  });
+
+  it('nível sozinho não decide mais o vencedor: platô do jogador acompanha o platô do rival', () => {
+    // O termo de nível do jogador (producao/prestigio) deve estar capado no mesmo nível
+    // que o do rival — então subir de nível MUITO além do cap não deve inflar o placar
+    // do jogador sem que ele também invista em produção/diversidade/prestígio real.
+    const animais = [mkAnimal({ weeklyProduction: 3 })];
+    const scoreNoCap = festivalPlayerRoundScore('producao', animais, 12, 0);
+    const scoreAlemDoCap = festivalPlayerRoundScore('producao', animais, 50, 0);
+    expect(scoreAlemDoCap).toBe(scoreNoCap);
   });
 });
