@@ -55,10 +55,24 @@ export function judgeAnimalScore(animal: Animal, category: FairCategory): number
  * bônus extra se for a especialidade dele, ±variação determinística pelo dia (não é RNG puro —
  * mesmo dia = mesma nota, mas o jogador não sabe o número exato de antemão).
  */
+// Nível efetivo usado para escalar a nota do rival — acima disso a nota PLATÔ em vez de
+// crescer para sempre. Cálculo do teto do jogador para calibrar (judgeAnimalScore):
+//   máximo absoluto (produção 100 + felicidade 100 + saúde 100 + trabalhadora + campeão):
+//     100*0.4 + 100*0.3 + 100*0.3 + 8 + 6 = 116
+//   "bem cuidado" (sem campeão, felicidade 90, sem trait ideal):     ~105-111
+//   negligenciado (produção baixa, felicidade 30, doente/estressado): ~13
+// Com CAP=16: base fora-de-especialidade = 45+16*2.5 = 85 (±8 → 77-93) — bem cuidado (105+)
+// vence quase sempre, como esperado (especialidade é a categoria "difícil" do rival).
+// base de especialidade = 45+16*2.5+16*1.8 = 113.8 (±8 → 105.8-121.8) — disputa real contra
+// o teto do jogador (105-116): joga limpo o suficiente para vencer parte dos dias, nunca é
+// garantido, nunca é impossível. Negligenciado (13) perde sempre em qualquer nível.
+const FAIR_LEVEL_CAP = 16;
+
 export function rivalScore(breederIndex: number, category: FairCategory, farmLevel: number, day: number): number {
   const breeder = BREEDERS[breederIndex];
   const isSpecialty = breeder.specialty === category;
-  const base = 45 + farmLevel * 3 + (isSpecialty ? farmLevel * 1.5 : 0);
+  const scalingLevel = Math.min(farmLevel, FAIR_LEVEL_CAP);
+  const base = 45 + scalingLevel * 2.5 + (isSpecialty ? scalingLevel * 1.8 : 0);
   const rng = mulberry32(hashStr(`fair|${day}|${breeder.name}|${category}`));
   const variance = (rng() * 16) - 8; // ±8
   return Math.round(base + variance);
@@ -138,11 +152,26 @@ export function judgeAnimalScoreExpo(animal: Animal, category: ExpoCategory): nu
   return Math.round(productionScore * 0.3 + animal.happiness * 0.3 + healthScore * 0.4 + bonus + campiao);
 }
 
-/** Nota do juiz federal: base mais alta, escala mais forte com nível, e mais especialista. */
+// Teto do jogador na Exposição (judgeAnimalScoreExpo, mais rígida que a Feira comum):
+//   máximo absoluto (produção 100 + felicidade 100 + saúde 100 + trabalhadora + campeão):
+//     100*0.3 + 100*0.3 + 100*0.4 + 10 + 12 = 122
+//   "bem cuidado" SEM título de campeão:  ~107
+//   "bem cuidado" COM título de campeão:  ~119
+//   negligenciado: ~3 (sempre perde, qualquer nível)
+// CAP mais alto que a Feira comum (20 vs 16) — a Exposição é a versão "elite", deve continuar
+// mais difícil no mesmo nível efetivo. Fora da especialidade do juiz: base = 58+20*2.0 = 98
+// (±7 → 91-105) — um animal "bem cuidado" (107) vence com folga, mas não é garantido no topo
+// da variância do juiz. Na especialidade do juiz: base = 58+20*2.0+20*0.9 = 116 (±7 →
+// 109-123) — aqui só um animal excelente COM título de campeão (119) tem chance real de
+// vencer, o que é a progressão pretendida: "construa seu campeão antes de tentar a Exposição
+// na especialidade do juiz".
+const EXPO_LEVEL_CAP = 20;
+
 export function judgeScoreExpo(judgeIndex: number, category: ExpoCategory, farmLevel: number, day: number): number {
   const judge = EXPO_JUDGES[judgeIndex];
   const isSpecialty = judge.specialty === category;
-  const base = 58 + farmLevel * 3.6 + (isSpecialty ? farmLevel * 2 : 0);
+  const scalingLevel = Math.min(farmLevel, EXPO_LEVEL_CAP);
+  const base = 58 + scalingLevel * 2.0 + (isSpecialty ? scalingLevel * 0.9 : 0);
   const rng = mulberry32(hashStr(`expo|${day}|${judge.name}|${category}`));
   const variance = (rng() * 14) - 7; // ±7
   return Math.round(base + variance);
@@ -240,13 +269,37 @@ export function productScore(inventory: Partial<Record<string, number>>, categor
   return Math.round(score);
 }
 
-/** Nota do comprador/juiz de mercado: escala com nível, mais forte na própria especialidade. */
+// productScore NÃO tem teto (proporcional ao estoque) — então em vez de um platô "abaixo do
+// teto do jogador", calibramos para que o esforço de estocagem seja o que decide, usando
+// PROD_CATEGORY_INFO.weights como referência (peso médio por categoria):
+//   queijos (pesos 1,2,4,2, média 2.25, minQty=2): minQty→~4.5 | minQty*3→~13.5 | minQty*8→~36
+//   texteis (pesos 1,2,3,6, média 3.00, minQty=2): minQty→~6.0 | minQty*3→~18.0 | minQty*8→~48
+//   raro    (pesos 5,4,     média 4.50, minQty=1): minQty→~4.5 | minQty*3→~13.5 | minQty*8→~36
+// Queremos: entrante no minQty exato arrisca perder; ~3x minQty vence a maioria mas não
+// sempre; ~8x minQty vence quase sempre. Isso exige um rival cujo platô fique bem ACIMA do
+// valor de minQty mas bem ABAIXO do valor de minQty*8 — por isso o base/factor sobem bastante
+// em relação à versão antiga (que platôava em ~36, perto até do valor de minQty*8, tornando o
+// mercado quase sempre trivial para quem estocava um pouco).
+// resolveProdDuel sempre usa o comprador cuja especialidade é a categoria julgada, então é o
+// platô "com especialidade" que decide os duelos reais. CAP=20, platô de especialidade:
+//   base = 5 + 20*0.15 + 20*0.1 = 10 (±6 → faixa 4-16)
+// Comparando com a referência de estoque (peso médio) de queijos: minQty→~4.5, minQty*3→~13.5,
+// minQty*8→~36. Contra a faixa 4-16: minQty perde na esmagadora maioria dos dias (só ganha se
+// o comprador rolar bem perto do piso) — "arrisca perder"; minQty*3 vence em ~79% dos dias
+// (vence sempre que o comprador rola abaixo de 13.5, ou seja (13.5-4)/12) — "vence a maioria,
+// não sempre"; minQty*8 vence em 100% dos dias (sempre acima do teto 16) — "vence quase
+// sempre". O platô fora-de-especialidade (base = 5+20*0.15 = 8, faixa 2-14) só é relevante se
+// o comprador julgar fora da própria especialidade, o que não acontece nos duelos normais.
+const PROD_LEVEL_CAP = 20;
+
+/** Nota do comprador/juiz de mercado: escala com nível (platô em PROD_LEVEL_CAP), mais forte na própria especialidade. */
 export function marketJudgeScore(judgeIndex: number, category: ProdCategory, farmLevel: number, day: number): number {
   const judge = MARKET_JUDGES[judgeIndex];
   const isSpecialty = judge.specialty === category;
-  const base = 6 + farmLevel * 0.9 + (isSpecialty ? farmLevel * 0.6 : 0);
+  const scalingLevel = Math.min(farmLevel, PROD_LEVEL_CAP);
+  const base = 5 + scalingLevel * 0.15 + (isSpecialty ? scalingLevel * 0.1 : 0);
   const rng = mulberry32(hashStr(`prod|${day}|${judge.name}|${category}`));
-  const variance = (rng() * 4) - 2; // ±2
+  const variance = (rng() * 12) - 6; // ±6 (era ±2 — faixa estreita demais para ser interessante)
   return Math.round(base + variance);
 }
 
@@ -317,10 +370,40 @@ export function festivalPlayerRoundScore(round: FestivalRound, animals: Animal[]
   return Math.round(diversity * 8 + prestigePoints * 0.5 + farmLevel * 4);
 }
 
-/** Nota da fazenda rival na sub-rodada: determinística, escala com nível — nunca é trivial. */
+// 'bemestar' é o único round com teto real no lado do jogador (festivalPlayerRoundScore
+// devolve avgHappiness - penalidades, e felicidade é 0-100 — não passa de 100 nunca). Os
+// outros dois ('producao' escala com produção*herd, 'prestigio' com pontos de prestígio) NÃO
+// têm teto — por isso só 'bemestar' precisa de um platô agressivo e baixo; os outros dois só
+// precisam não crescer para sempre sem limite de nível (a antiga fórmula base+nivel*6.5 sem
+// cap tornava qualquer round, incluindo esses, impossível em algum nível alto o suficiente).
+//
+// bemestar — teto do jogador:
+//   perfeito (felicidade média 100, zero penalidade):        100 (teto absoluto, nunca passa)
+//   bem cuidado (felicidade média ~90, sem penalidades):      90
+//   negligenciado (felicidade ~30, alguns doentes/estressados): ~17
+//   CAP_BEMESTAR=12 (platô bem mais cedo que os outros rounds, já que o teto do jogador é
+//   fixo e baixo): base = 60+12*2.0 = 84 (±12 → 72-96) — perfeito (100) vence sempre;
+//   bem cuidado (90) vence a maior parte das vezes (90 > rival na maior parte da faixa
+//   72-96); negligenciado (~17) perde sempre, em qualquer nível.
+//
+// producao/prestigio — sem teto no jogador, mas o termo `farmLevel*5`/`farmLevel*4` do
+// PRÓPRIO jogador não é capado, então o rival não pode escalar tão rápido quanto o antigo
+// fator 6.5/nível sem sobrar nenhuma fazenda "modesta" competitiva no endgame. Testado
+// numericamente: uma fazenda modesta (2 animais, produção 3/semana cada, ~70 pts de
+// prestígio) em nível 20 dá producao=136 e prestigio=131. Com CAP=12 (mesmo cap do
+// bemestar): rival producao = 55+12*6.5=133 (±12 → 121-145, jogador modesto vence ~58% dos
+// dias) e rival prestigio = 50+12*6.5=128 (±12 → 116-140, vence ~62% dos dias) — competitivo,
+// nem trivial nem impossível, e uma fazenda maior sempre pode superar o platô com folga.
+const FESTIVAL_LEVEL_CAP = 12;
+const FESTIVAL_BEMESTAR_CAP = 12;
+
+/** Nota da fazenda rival na sub-rodada: determinística, escala com nível até um platô — nunca é trivial nem impossível. */
 export function festivalRivalRoundScore(round: FestivalRound, farmLevel: number, day: number): number {
   const base = round === 'producao' ? 55 : round === 'bemestar' ? 60 : 50;
-  const scaled = base + farmLevel * 6.5;
+  const cap = round === 'bemestar' ? FESTIVAL_BEMESTAR_CAP : FESTIVAL_LEVEL_CAP;
+  const factor = round === 'bemestar' ? 2.0 : 6.5;
+  const scalingLevel = Math.min(farmLevel, cap);
+  const scaled = base + scalingLevel * factor;
   const rng = mulberry32(hashStr(`festival|${day}|${RIVAL_FARM.name}|${round}`));
   const variance = (rng() * 24) - 12; // ±12
   return Math.round(scaled + variance);

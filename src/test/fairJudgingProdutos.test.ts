@@ -62,4 +62,55 @@ describe('Feira Regional de Produtos — julgamento de inventário contra Compra
     const specialties = new Set(MARKET_JUDGES.map(j => j.specialty));
     expect(specialties.size).toBe(3);
   });
+
+  it('nota do comprador tem platô: não cresce sem limite além do nível de cap', () => {
+    const nivel30 = marketJudgeScore(0, 'queijos', 30, 50);
+    const nivel100 = marketJudgeScore(0, 'queijos', 100, 50);
+    expect(nivel30).toBe(nivel100);
+  });
+
+  // Estoque total `qty` distribuído em partes iguais entre os 4 itens da categoria (peso médio
+  // ~2.25 para queijos), reproduzindo o comportamento "estoca um pouco de tudo" usado na
+  // calibração (ex.: qty=6 → 1.5 de cada item → nota ~ 6*2.25 = 13.5).
+  const stockAtQty = (qty: number) => {
+    const each = qty / 4;
+    return { queijoCoalho: each, queijoMucarela: each, queijoBrie: each, queijo_cabra: each };
+  };
+
+  it('entrante no minQty exato tem chance real de perder em nível alto (não é garantido)', () => {
+    const info = PROD_CATEGORY_INFO.queijos;
+    const inv = stockAtQty(info.minQty);
+    let perdeuAlgumDia = false;
+    for (let day = 0; day < 60; day++) {
+      const duelo = resolveProdDuel(day, 20, 'queijos', inv);
+      if (!duelo.won) perdeuAlgumDia = true;
+    }
+    expect(perdeuAlgumDia).toBe(true);
+  });
+
+  it('estoque em ~8x minQty vence o comprador com folga em quase todos os dias, em nível alto', () => {
+    const info = PROD_CATEGORY_INFO.queijos;
+    const inv = stockAtQty(info.minQty * 8);
+    let vitorias = 0;
+    const total = 40;
+    for (let day = 0; day < total; day++) {
+      const duelo = resolveProdDuel(day, 20, 'queijos', inv);
+      if (duelo.won) vitorias++;
+    }
+    expect(vitorias / total).toBeGreaterThan(0.9);
+  });
+
+  it('estoque em ~3x minQty vence a maioria das vezes, mas não sempre, em nível alto', () => {
+    const info = PROD_CATEGORY_INFO.queijos;
+    const inv = stockAtQty(info.minQty * 3);
+    let vitorias = 0;
+    const total = 60;
+    for (let day = 0; day < total; day++) {
+      const duelo = resolveProdDuel(day, 20, 'queijos', inv);
+      if (duelo.won) vitorias++;
+    }
+    const taxa = vitorias / total;
+    expect(taxa).toBeGreaterThan(0.5);
+    expect(taxa).toBeLessThan(1);
+  });
 });

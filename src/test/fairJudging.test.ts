@@ -57,4 +57,32 @@ describe('Feira Agropecuária — julgamento contra Criadores Rivais', () => {
     const specialties = new Set(BREEDERS.map(b => b.specialty));
     expect(specialties.size).toBe(4);
   });
+
+  it('nota do rival tem platô: não cresce sem limite além do nível de cap', () => {
+    const nivel30 = rivalScore(0, 'leiteiro', 30, 50);
+    const nivel100 = rivalScore(0, 'leiteiro', 100, 50);
+    expect(nivel30).toBe(nivel100);
+  });
+
+  it('animal excelente consegue vencer o especialista rival em nível alto (endgame)', () => {
+    const excelente = vaca({ happiness: 100, weeklyProduction: 12, trait: 'trabalhadora', isCampiao: true });
+    const playerScore = judgeAnimalScore(excelente, 'leiteiro');
+    let venceuAlgumDia = false;
+    for (let day = 0; day < 60; day++) {
+      const duelo = resolveDuel(day, 25, 'leiteiro', excelente);
+      expect(duelo.playerScore).toBe(playerScore);
+      if (duelo.won) venceuAlgumDia = true;
+    }
+    expect(venceuAlgumDia).toBe(true);
+  });
+
+  it('animal negligenciado perde consistentemente contra o especialista em qualquer nível', () => {
+    const fraco = vaca({ happiness: 30, weeklyProduction: 1, trait: 'preguicosa', stressedDays: 3, isSick: true });
+    for (const nivel of [1, 8, 16, 25, 50]) {
+      for (const day of [10, 100, 200]) {
+        const duelo = resolveDuel(day, nivel, 'leiteiro', fraco);
+        expect(duelo.won).toBe(false);
+      }
+    }
+  });
 });

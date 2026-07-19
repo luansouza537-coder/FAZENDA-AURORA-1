@@ -71,4 +71,70 @@ describe('Festival Cultural da Aurora — fazenda inteira vs Fazenda Horizonte D
     const resultado = resolveFestival(300, 8, [mkAnimal()], 20);
     expect(resultado.overallWon).toBe(resultado.roundsWon >= 2);
   });
+
+  it('nota do rival tem platô em cada rodada: não cresce sem limite além do cap', () => {
+    for (const round of ['producao', 'bemestar', 'prestigio'] as const) {
+      const nivel30 = festivalRivalRoundScore(round, 30, 50);
+      const nivel100 = festivalRivalRoundScore(round, 100, 50);
+      expect(nivel30).toBe(nivel100);
+    }
+  });
+
+  it('bem-estar: rival nunca ultrapassa o teto absoluto do jogador (100), em nenhum nível/dia', () => {
+    for (const nivel of [5, 12, 20, 40, 80]) {
+      for (let day = 0; day < 40; day++) {
+        const rival = festivalRivalRoundScore('bemestar', nivel, day);
+        expect(rival).toBeLessThan(100);
+      }
+    }
+  });
+
+  it('bem-estar: rebanho impecável (felicidade 100, sem doença/estresse) vence a rodada de bem-estar em nível alto', () => {
+    const impecavel = [
+      mkAnimal({ happiness: 100 }),
+      mkAnimal({ id: 2, happiness: 100 }),
+      mkAnimal({ id: 3, happiness: 100 }),
+    ];
+    const playerScore = festivalPlayerRoundScore('bemestar', impecavel, 25, 0);
+    expect(playerScore).toBe(100);
+    let venceuAlgumDia = false;
+    for (let day = 0; day < 40; day++) {
+      const rival = festivalRivalRoundScore('bemestar', 25, day);
+      if (playerScore > rival) venceuAlgumDia = true;
+    }
+    expect(venceuAlgumDia).toBe(true);
+  });
+
+  it('bem-estar: rebanho negligenciado (doente/estressado, felicidade baixa) perde consistentemente em qualquer nível', () => {
+    const negligenciado = [
+      mkAnimal({ happiness: 30, isSick: true }),
+      mkAnimal({ id: 2, happiness: 25, stressedDays: 2 }),
+    ];
+    const playerScore = festivalPlayerRoundScore('bemestar', negligenciado, 25, 0);
+    for (const nivel of [1, 12, 25, 50]) {
+      for (let day = 0; day < 20; day++) {
+        const rival = festivalRivalRoundScore('bemestar', nivel, day);
+        expect(playerScore).toBeLessThan(rival);
+      }
+    }
+  });
+
+  it('produção/prestígio: fazenda modesta mas de nível alto continua competitiva (não impossível no endgame)', () => {
+    const animais = [
+      mkAnimal({ weeklyProduction: 3, happiness: 80 }),
+      mkAnimal({ id: 2, type: 'ovelha', weeklyProduction: 3, happiness: 80 }),
+    ];
+    let venceuProducao = false;
+    let venceuPrestigio = false;
+    for (let day = 0; day < 60; day++) {
+      const playerProd = festivalPlayerRoundScore('producao', animais, 20, 0);
+      const rivalProd = festivalRivalRoundScore('producao', 20, day);
+      if (playerProd > rivalProd) venceuProducao = true;
+      const playerPrest = festivalPlayerRoundScore('prestigio', animais, 20, 70);
+      const rivalPrest = festivalRivalRoundScore('prestigio', 20, day);
+      if (playerPrest > rivalPrest) venceuPrestigio = true;
+    }
+    expect(venceuProducao).toBe(true);
+    expect(venceuPrestigio).toBe(true);
+  });
 });

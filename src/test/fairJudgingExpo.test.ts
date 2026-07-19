@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { judgeAnimalScoreExpo, judgeScoreExpo, resolveExpoDuel, expoEntryFee, EXPO_JUDGES, entryFee } from '../lib/fairJudging';
+import { judgeAnimalScoreExpo, judgeScoreExpo, resolveExpoDuel, expoEntryFee, EXPO_JUDGES, entryFee, rivalScore } from '../lib/fairJudging';
 import { Animal } from '../types';
 
 const vaca = (over: Partial<Animal> = {}): Animal => ({
@@ -57,5 +57,38 @@ describe('Exposição de Raças — julgamento de elite contra Juízes Federais'
     expect(EXPO_JUDGES.length).toBe(3);
     const specialties = new Set(EXPO_JUDGES.map(j => j.specialty));
     expect(specialties.size).toBe(3);
+  });
+
+  it('nota do juiz federal tem platô: não cresce sem limite além do nível de cap', () => {
+    const nivel30 = judgeScoreExpo(0, 'leiteiro', 30, 50);
+    const nivel100 = judgeScoreExpo(0, 'leiteiro', 100, 50);
+    expect(nivel30).toBe(nivel100);
+  });
+
+  it('animal excelente e campeão consegue vencer o juiz da especialidade em nível alto (endgame)', () => {
+    const excelente = vaca({ happiness: 100, weeklyProduction: 12, trait: 'trabalhadora', isCampiao: true });
+    let venceuAlgumDia = false;
+    for (let day = 0; day < 80; day++) {
+      const duelo = resolveExpoDuel(day, 25, 'leiteiro', excelente);
+      if (duelo.won) venceuAlgumDia = true;
+    }
+    expect(venceuAlgumDia).toBe(true);
+  });
+
+  it('animal negligenciado perde consistentemente contra o juiz federal em qualquer nível', () => {
+    const fraco = vaca({ happiness: 30, weeklyProduction: 1, trait: 'preguicosa', stressedDays: 3, isSick: true });
+    for (const nivel of [5, 12, 20, 30, 60]) {
+      for (const day of [10, 100, 200]) {
+        const duelo = resolveExpoDuel(day, nivel, 'leiteiro', fraco);
+        expect(duelo.won).toBe(false);
+      }
+    }
+  });
+
+  it('Exposição continua mais difícil que a Feira Agropecuária no mesmo nível efetivo', () => {
+    // Nível acima dos dois caps (16 para Feira, 20 para Exposição) para comparar os platôs.
+    const expo = judgeScoreExpo(0, 'leiteiro', 25, 50);
+    const feira = rivalScore(0, 'leiteiro', 25, 50);
+    expect(expo).toBeGreaterThan(feira);
   });
 });
