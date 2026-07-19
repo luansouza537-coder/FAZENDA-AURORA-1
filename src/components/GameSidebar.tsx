@@ -34,8 +34,8 @@ export interface GameSidebarProps {
   getActualSellPrice: (itemType: string) => number;
   getFreshnessIndicator: (key: 'milk' | 'egg' | 'goat_milk' | 'duck_egg' | 'goose_egg' | 'buffalo_milk' | 'fertile_egg') => React.ReactNode;
   getEstacaoKey: (day: number) => 'primavera' | 'verao' | 'outono' | 'inverno';
-  getFeedPriceWithModifiers: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe', day?: number) => number;
-  buyFeed: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe', qty: number, e: React.MouseEvent) => void;
+  getFeedPriceWithModifiers: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' | 'racaoEquina', day?: number) => number;
+  buyFeed: (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' | 'racaoEquina', qty: number, e: React.MouseEvent) => void;
   buyFarinha: (qty: number, e: React.MouseEvent) => void;
   buySal: (qty: number, e: React.MouseEvent) => void;
   buyFolhaAmoreira: (qty: number, e: React.MouseEvent) => void;
@@ -894,7 +894,8 @@ export default function GameSidebar({
                   { key: 'racaoAquatica', label: '🦆 Ração Aquática', desc: 'Para Pato e Ganso. 4💰/dia.' },
                   { key: 'racaoCoelho', label: '🐰 Ração de Coelhos', desc: 'Para Coelho Angorá. 3💰/dia.' },
                   { key: 'racaoCarnivora', label: '🍖 Ração Carnívora', desc: 'Para Jacaré e animais exóticos. 6💰/dia.' },
-                  { key: 'racaoPeixe' as any, label: '🐟 Ração de Peixes', desc: 'Para Tanques de Tilápia. 4💰/ciclo.' }
+                  { key: 'racaoPeixe' as any, label: '🐟 Ração de Peixes', desc: 'Para Tanques de Tilápia. 4💰/ciclo.' },
+                  { key: 'racaoEquina' as any, label: '🐴 Ração Equina', desc: 'Para Cavalos de corrida. Também usada no treino. 6💰/dia.' }
                 ] as const).map((feed) => {
                   const currentStock = inventory[feed.key] ?? 0;
                   const unitPrice = getFeedPriceWithModifiers(feed.key);

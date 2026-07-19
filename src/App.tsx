@@ -891,6 +891,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       racaoCarnivora: 0,
       racaoSuina: 0,
       racaoPeixe: 0,
+      racaoEquina: 0,
       queijoCoalho: 0,
       queijoMucarela: 0,
       queijoBrie: 0,
@@ -1648,7 +1649,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   // feedAnimal moved to useAnimals hook
 
   // Feed pricing helpers
-  const getFeedBasePrice = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe'): number => {
+  const getFeedBasePrice = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' | 'racaoEquina'): number => {
     if (type === 'racaoBovina') return 4;
     if (type === 'racaoOvinos') return 3;
     if (type === 'racaoAves') return 3;
@@ -1657,10 +1658,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     if (type === 'racaoCoelho') return 3;
     if (type === 'racaoCarnivora') return 6;
     if (type === 'racaoSuina') return 3;
+    if (type === 'racaoEquina') return 6;
     return 2;
   };
 
-  const getFeedPriceWithModifiers = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe', day = currentDay): number => {
+  const getFeedPriceWithModifiers = (type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' | 'racaoEquina', day = currentDay): number => {
     let base = getFeedBasePrice(type);
 
     // Desconto de 10% no nível 4 ou superior
@@ -1689,7 +1691,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   // Buy feed packages with bulk discounts
   const buyFeed = (
-    type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe',
+    type: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' | 'racaoEquina',
     quantity: 1 | 10 | 50,
     event: React.MouseEvent
   ) => {
@@ -1724,7 +1726,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       spending: prev.spending + totalCost
     }));
     
-    const feedLabel = type === 'racaoBovina' ? 'Ração Bovina 🌾' : type === 'racaoOvinos' ? 'Ração de Ovinos 🐐' : type === 'racaoAves' ? 'Ração de Aves 🐔' : type === 'racaoAquatica' ? 'Ração Aquática 🦆' : type === 'racaoCoelho' ? 'Ração de Coelhos 🐰' : type === 'racaoSuina' ? 'Ração Suína 🐷' : (type as string) === 'racaoPeixe' ? 'Ração de Peixes 🐟' : 'Ração Carnívora 🍖';
+    const feedLabel = type === 'racaoBovina' ? 'Ração Bovina 🌾' : type === 'racaoOvinos' ? 'Ração de Ovinos 🐐' : type === 'racaoAves' ? 'Ração de Aves 🐔' : type === 'racaoAquatica' ? 'Ração Aquática 🦆' : type === 'racaoCoelho' ? 'Ração de Coelhos 🐰' : type === 'racaoSuina' ? 'Ração Suína 🐷' : type === 'racaoEquina' ? 'Ração Equina 🐴' : (type as string) === 'racaoPeixe' ? 'Ração de Peixes 🐟' : 'Ração Carnívora 🍖';
     addLog(`🛍️ Compra realizada: +${quantity}u de ${feedLabel} por ${totalCost} moedas!`, 'success');
     triggerAudioResult(() => sfx.playSound('click'));
     spawnFeedback('🌽', `-${totalCost}💰`, event);
@@ -2945,9 +2947,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       updatedAnimals = updatedAnimals.map(a => {
         if (noFeedAnimals.includes(a.type)) return a;
         if (a.isAdult === false) return a; // filhotes não consomem ração industrial
-        let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' = 'racaoBovina';
+        let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' | 'racaoEquina' = 'racaoBovina';
         let feedLabel = 'Ração Bovina';
-        if (a.type === 'vaca' || a.type === 'vaca_jersey' || a.type === 'boi' || a.type === 'boi_angus' || a.type === 'bufalo' || a.type === 'cavalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+        if (a.type === 'vaca' || a.type === 'vaca_jersey' || a.type === 'boi' || a.type === 'boi_angus' || a.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+        else if (a.type === 'cavalo') { feedType = 'racaoEquina'; feedLabel = 'Ração Equina'; }
         else if (a.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
         else if (a.type === 'ovelha' || a.type === 'ovelha_leiteira' || a.type === 'cabra' || a.type === 'cabra_angora' || a.type === 'lhama' || a.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
         else if (a.type === 'galinha' || a.type === 'codorna' || a.type === 'pavao' || a.type === 'frango_corte' || a.type === 'galinha_caipira') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
@@ -6036,7 +6039,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         // --- Tratador: alimenta todos os animais consumindo ração correta do inventário ---
         if (workers.some(w => w.role === 'tratador')) {
           const getFeedKeyForType2 = (type: string): keyof typeof inventory => {
-            if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'boi_angus' || type === 'bufalo' || type === 'cavalo') return 'racaoBovina';
+            if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'boi_angus' || type === 'bufalo') return 'racaoBovina';
+            if (type === 'cavalo') return 'racaoEquina';
             if (type === 'porco') return 'racaoSuina';
             if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'lhama' || type === 'alpaca') return 'racaoOvinos';
             if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'frango_corte' || type === 'galinha_caipira') return 'racaoAves';
@@ -6436,7 +6440,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const hasCoelho = finalAnimals.some(a => a.type === 'coelho_angora');
         const hasCarnivoro = finalAnimals.some(a => ['jacare','avestruz'].includes(a.type));
         const hasSuino = finalAnimals.some(a => a.type === 'porco');
+        const hasCavalo = finalAnimals.some(a => a.type === 'cavalo');
         if (hasBovinos && (inventory.racaoBovina ?? 0) <= 3) feedAlerts.push('🌾 Ração Bovina');
+        if (hasCavalo && ((inventory as any).racaoEquina ?? 0) <= 3) feedAlerts.push('🐴 Ração Equina');
         if (hasOvinos && (inventory.racaoOvinos ?? 0) <= 3) feedAlerts.push('🐐 Ração de Ovinos');
         if (hasAves && (inventory.racaoAves ?? 0) <= 3) feedAlerts.push('🐔 Ração de Aves');
         if (hasAquatico && (inventory.racaoAquatica ?? 0) <= 3) feedAlerts.push('🦆 Ração Aquática');

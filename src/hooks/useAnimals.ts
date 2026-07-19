@@ -253,8 +253,9 @@ export function useAnimals({
   };
 
   // Helper: get feed type and label for an animal type
-  const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe'; feedLabel: string } => {
-    if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'boi_angus' || type === 'bufalo' || type === 'cavalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
+  const getAnimalFeedType = (type: AnimalType): { feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' | 'racaoEquina'; feedLabel: string } => {
+    if (type === 'vaca' || type === 'vaca_jersey' || type === 'boi' || type === 'boi_angus' || type === 'bufalo') return { feedType: 'racaoBovina', feedLabel: 'Ração Bovina' };
+    if (type === 'cavalo') return { feedType: 'racaoEquina', feedLabel: 'Ração Equina' };
     if (type === 'porco') return { feedType: 'racaoSuina', feedLabel: 'Ração Suína' };
     if (type === 'ovelha' || type === 'ovelha_leiteira' || type === 'cabra' || type === 'cabra_angora' || type === 'lhama' || type === 'alpaca') return { feedType: 'racaoOvinos', feedLabel: 'Ração de Ovinos' };
     if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'peru' || type === 'frango_corte' || type === 'galinha_caipira') return { feedType: 'racaoAves', feedLabel: 'Ração de Aves' };
@@ -362,9 +363,10 @@ export function useAnimals({
     const animal = animals.find(a => a.id === id);
     if (!animal) return;
 
-    let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' = 'racaoBovina';
+    let feedType: 'racaoBovina' | 'racaoOvinos' | 'racaoAves' | 'racaoAquatica' | 'racaoCoelho' | 'racaoCarnivora' | 'racaoSuina' | 'racaoPeixe' | 'racaoEquina' = 'racaoBovina';
     let feedLabel = 'Ração Bovina';
-    if (animal.type === 'vaca' || animal.type === 'vaca_jersey' || animal.type === 'boi' || animal.type === 'boi_angus' || animal.type === 'bufalo' || animal.type === 'cavalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+    if (animal.type === 'vaca' || animal.type === 'vaca_jersey' || animal.type === 'boi' || animal.type === 'boi_angus' || animal.type === 'bufalo') { feedType = 'racaoBovina'; feedLabel = 'Ração Bovina'; }
+    else if (animal.type === 'cavalo') { feedType = 'racaoEquina'; feedLabel = 'Ração Equina'; }
     else if (animal.type === 'porco') { feedType = 'racaoSuina'; feedLabel = 'Ração Suína'; }
     else if (animal.type === 'ovelha' || animal.type === 'cabra' || animal.type === 'cabra_angora' || animal.type === 'lhama' || animal.type === 'alpaca') { feedType = 'racaoOvinos'; feedLabel = 'Ração de Ovinos'; }
     else if (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
@@ -1050,7 +1052,7 @@ export function useAnimals({
     onItemCollected?.(qty);
   };
 
-  // 🐴 Treinar cavalo: 1×/dia, consome 2 rações bovinas e -5 felicidade → +1 no foco escolhido
+  // 🐴 Treinar cavalo: 1×/dia, consome 2 rações equinas e -5 felicidade → +1 no foco escolhido
   const trainHorse = (id: number, event: React.MouseEvent, focus: 'speed' | 'burst' | 'stamina' = 'speed') => {
     if (event) event.preventDefault();
     const animal = animals.find(a => a.id === id);
@@ -1060,10 +1062,10 @@ export function useAnimals({
     const focoAtual = focus === 'speed' ? (animal.speed ?? 40) : focus === 'burst' ? (animal.burst ?? 30) : (animal.stamina ?? 30);
     const focoLabel = focus === 'speed' ? '🏃 Ritmo' : focus === 'burst' ? '⚡ Tiro' : '🫁 Fôlego';
     if (focoAtual >= 100) { addLog(`🏇 ${animal.name} já está no máximo de ${focoLabel} (100)!`, 'info'); spawnFeedback('🏆', 'Máximo!', event); return; }
-    if ((inventory.racaoBovina ?? 0) < 2) { addLog(`🌾 Treino exige 2 Rações Bovinas no Armazém!`, 'error'); spawnFeedback('❌', 'Sem ração', event); return; }
+    if (((inventory as any).racaoEquina ?? 0) < 2) { addLog(`🌾 Treino exige 2 Rações Equinas no Armazém!`, 'error'); spawnFeedback('❌', 'Sem ração', event); return; }
     const veterano = animal.age !== undefined && animal.maxAge !== undefined && animal.age > animal.maxAge * 0.75;
     const ganho = veterano ? 0.5 : 1;
-    setInventory(prev => ({ ...prev, racaoBovina: (prev.racaoBovina ?? 0) - 2 }));
+    setInventory(prev => ({ ...prev, racaoEquina: ((prev as any).racaoEquina ?? 0) - 2 } as any));
     setAnimals(prev => prev.map(a => a.id === id ? {
       ...a,
       speed: focus === 'speed' ? Math.min(100, (a.speed ?? 40) + ganho) : (a.speed ?? 40),
