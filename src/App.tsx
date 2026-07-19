@@ -4342,6 +4342,25 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${milkCollected} Leite(s) de ${milkedCows} vaca(s)!`, type: 'success' });
           }
 
+          // Vacas Jersey (BUG FIX: a máquina esquecia esse tipo, criado depois do bloco original)
+          let jerseyMilkCollected = 0;
+          let milkedJerseys = 0;
+          updatedAnimalsList = updatedAnimalsList.map(a => {
+            if (a.type !== 'vaca_jersey' || a.isAdult === false || !a.hasProducedToday) return a;
+            let qty = 1;
+            if (a.trait === 'trabalhadora') qty = Math.max(1, Math.round(qty * 1.15));
+            else if (a.trait === 'preguicosa') qty = Math.max(1, Math.round(qty * 0.85));
+            qty = Math.round(qty * milkerBonus * productionMult);
+            jerseyMilkCollected += qty;
+            milkedJerseys++;
+            return { ...a, hasProducedToday: false };
+          });
+          if (jerseyMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) + jerseyMilkCollected } as any));
+            setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + jerseyMilkCollected, totalMilk: (prev.totalMilk || 0) + jerseyMilkCollected }));
+            logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${jerseyMilkCollected} Leite(s) Jersey de ${milkedJerseys} vaca(s)!`, type: 'success' });
+          }
+
           // Cabras (checa isLactating)
           let goatMilkCollected = 0;
           let milkedGoats = 0;
@@ -4403,7 +4422,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setStats(prev => ({ ...prev, totalCollected: prev.totalCollected + sheepMilkCollected }));
             logsToAdd.push({ msg: `🏭 Ordenhadeira: Coletou +${sheepMilkCollected} Leite(s) de Ovelha de ${milkedSheep} ovelha(s)!`, type: 'success' });
           }
-          if (milkCollected + goatMilkCollected + buffaloMilkCollected + sheepMilkCollected > 0) {
+          if (milkCollected + jerseyMilkCollected + goatMilkCollected + buffaloMilkCollected + sheepMilkCollected > 0) {
             setMachineUsageStats(prev => ({ ...prev, milker: prev.milker + 1 }));
           }
         }
