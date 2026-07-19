@@ -51,14 +51,6 @@ export function useFairs({ addNotification }: UseFairsProps) {
     return 33;
   });
 
-  const [nextFeiraExoticaDay, setNextFeiraExoticaDay] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) return JSON.parse(saved).nextFeiraExoticaDay ?? 60;
-    } catch (e) {}
-    return 60;
-  });
-
   const [nextFestivalDay, setNextFestivalDay] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -105,8 +97,6 @@ export function useFairs({ addNotification }: UseFairsProps) {
     setNextExposicaoDay,
     nextFeiraProdutosDay,
     setNextFeiraProdutosDay,
-    nextFeiraExoticaDay,
-    setNextFeiraExoticaDay,
     nextFestivalDay,
     setNextFestivalDay,
     nextCorridaDay,

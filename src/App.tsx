@@ -1212,7 +1212,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     prestigeNotifiedRef.current = [];
     setNextExposicaoDay(45);
     setNextFeiraProdutosDay(33);
-    setNextFeiraExoticaDay(60);
     setNextFestivalDay(120);
     setDroughtDaysRemaining(0);
     setWorkers([]);
@@ -2496,8 +2495,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setNextExposicaoDay,
     nextFeiraProdutosDay,
     setNextFeiraProdutosDay,
-    nextFeiraExoticaDay,
-    setNextFeiraExoticaDay,
     nextFestivalDay,
     setNextFestivalDay,
     nextCorridaDay,
@@ -2811,7 +2808,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         prestigePoints,
         nextExposicaoDay,
         nextFeiraProdutosDay,
-        nextFeiraExoticaDay,
         nextFestivalDay,
         nextCorridaDay,
         workers,
@@ -2856,7 +2852,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFeiraExoticaDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     let price = 2500;
@@ -6060,44 +6056,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         setNextFeiraProdutosDay(nextDayValue + 30);
       }
 
-      // Fair 4: Feira de Animais Exóticos (every 60 days, Level 10+ AND licencaExotica)
-      if (farmLevel >= 10 && licencaExotica && nextDayValue >= nextFeiraExoticaDay) {
-        const exoticLog: { msg: string; type: LogMessage['type'] }[] = [];
-        let exoticGold = 0;
-        const exoticAnimals = finalAnimals.filter(a => ['avestruz','jacare','bicho_seda','caracol','ra'].includes(a.type));
-
-        if (exoticAnimals.length > 0) {
-          const npcExoticScore = 70 + Math.floor(Math.random() * 30);
-          const scores = exoticAnimals.map(a => {
-            const ageBonus = Math.min(50, (a.age ?? 0) * 0.2);
-            const rarityBonus: Record<string, number> = { jacare: 40, avestruz: 30, bicho_seda: 20, caracol: 15, ra: 10 };
-            return calcFairScore(a) + ageBonus + (rarityBonus[a.type] ?? 0);
-          });
-          const maxScore = Math.max(...scores);
-          const winner = exoticAnimals[scores.indexOf(maxScore)];
-
-          if (maxScore > npcExoticScore) {
-            exoticGold = 600 + Math.floor(maxScore * 5);
-            setAnimals(prev => prev.map(a => a.id === winner.id ? { ...a, isCampiao: true } : a));
-            exoticLog.push({ msg: `🦎 Feira Exótica: ${winner.name} (${winner.type}) venceu com ${Math.round(maxScore)} pontos! +${exoticGold}💰!`, type: 'success' });
-            setPrestigePoints(prev => prev + 30);
-            exoticLog.push({ msg: `⭐ +30 Pontos de Prestígio pela Feira Exótica!`, type: 'system' });
-          } else {
-            exoticLog.push({ msg: `🦎 Feira Exótica: Não foi desta vez. NPC teve ${npcExoticScore} pontos.`, type: 'info' });
-          }
-        } else {
-          exoticLog.push({ msg: `🦎 Feira Exótica: Sem animais exóticos para competir! (Jacaré, Bicho-da-Seda, etc.)`, type: 'event' });
-        }
-
-        if (exoticGold > 0) {
-          setGold(prev => prev + exoticGold);
-          const newResult: FairResult = { day: nextDayValue, category: 'Feira Exótica', winner: 'Fazenda Aurora', earned: exoticGold };
-          setFairResults(prev => [...prev, newResult].slice(-30));
-          setTimeout(() => { setShowFairResultModal(newResult); addNotification(`🐍 Feira Exótica: +${exoticGold}💰!`, 'event', nextDayValue); }, 800);
-        }
-        logsToAdd.push(...exoticLog);
-        setNextFeiraExoticaDay(nextDayValue + 60);
-      }
 
       // Fair 5: Festival Cultural da Aurora (every 120 days, Level 8+) — fazenda inteira vs
       // Fazenda Horizonte Dourado (rival nomeada), 3 sub-rodadas, vence quem ganhar 2 de 3.
