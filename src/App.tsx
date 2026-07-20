@@ -696,6 +696,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const [blockNextDrought, setBlockNextDrought] = useState<boolean>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).blockNextDrought ?? false; } catch(e) {} return false;
   });
+  // 💧 Bomba d'Água agora AMORTECE a seca (metade do custo extra) em vez de bloquear 100% —
+  // só Seguro Climático e Caminhão-Pipa continuam sendo bloqueio total. Essa flag marca se a
+  // seca ATUALMENTE ativa foi amortecida, pra aplicar o desconto nos 3 dias que ela dura.
+  const [droughtMitigated, setDroughtMitigated] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).droughtMitigated ?? false; } catch(e) {} return false;
+  });
   const [isencaoMultaCount, setIsencaoMultaCount] = useState<number>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).isencaoMultaCount ?? 0; } catch(e) {} return 0;
   });
@@ -2827,7 +2833,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         worldEvent,
         financialLog,
         suplementoMineralDays, silagemDays,
-        hasCisterna, abatedouroUnlocked, blockNextStorm, blockNextDrought, isencaoMultaCount,
+        hasCisterna, abatedouroUnlocked, blockNextStorm, blockNextDrought, droughtMitigated, isencaoMultaCount,
         hasRoofReinforcement, waterTruckDays, vaccinationDays, racingDivision, divisionWins,
 
         shownMilestones,
@@ -2852,7 +2858,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, droughtMitigated, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     let price = 2500;
@@ -5187,8 +5193,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       let negativeSurpriseFiredToday = nextDayEvent === 'tempestade' || nextDayEvent === 'geada' || nextDayEvent === 'predador';
 
       // MECHANIC 1: Sistema de Pragas (Pato reduz probabilidade)
+      // O aviso "praga amanhã" (nextDayEvent) agora eleva bastante a chance real nesse dia
+      // (~28%, contra ~2% de fundo nos dias sem aviso) — antes o aviso não tinha NENHUMA
+      // relação com o sorteio real, então prometia algo que podia nunca acontecer (ou o
+      // contrário: praga sem aviso nenhum). A média geral (12,5% dos dias com aviso × 28% +
+      // 87,5% sem aviso × 2%) fica em ~5,25%, quase igual ao 5% fixo de antes — muda A
+      // PREVISIBILIDADE, não a frequência total.
       {
-        const basePestChance = 0.05;
+        const basePestChance = nextDayEvent === 'praga' ? 0.28 : 0.02;
         const hasDuckAlive = finalAnimals.some(a => a.type === 'pato' && a.isAdult !== false);
         const pestChance = hasDuckAlive ? basePestChance * 0.6 : basePestChance;
         const pestRoll = Math.random();
@@ -5668,22 +5680,32 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
 
-      // Seca prolongada (5% no verão)
+      // Seca prolongada — o aviso "seca amanhã" (nextDayEvent) agora eleva bastante a chance
+      // real (~30% no verão, contra ~2% de fundo), mesma lógica de Pragas acima. Mitigação
+      // em camadas: Seguro Climático e Caminhão-Pipa continuam bloqueando 100% (impedem a
+      // seca de começar); Bomba d'Água deixou de bloquear tudo e passou a AMORTECER o custo
+      // extra pela metade pelos 3 dias (item mais barato, efeito mais fraco — dá diferença
+      // estratégica real entre as defesas); Poço Nv3+/Nv5+ dá desconto adicional no custo,
+      // recompensando o investimento em infraestrutura mesmo depois que a seca já começou.
       {
         let currentDrought = droughtDaysRemaining;
         if (currentDrought > 0) {
-          logsToAdd.push({ msg: `🏜️ Seca prolongada! Custo de água triplicado este dia.`, type: 'error' });
+          let costMultiplier = 2; // custo extra padrão (total 3x o normal)
+          if (droughtMitigated) costMultiplier *= 0.5; // Bomba d'Água amorteceu esta seca
+          if (wellLevel >= 5) costMultiplier *= 0.6; // Poço Nv5+: -40%
+          else if (wellLevel >= 3) costMultiplier *= 0.75; // Poço Nv3+: -25%
+          const droughtExtraCost = Math.round(waterCost * costMultiplier);
+          const mitigatedTxt = droughtMitigated ? ' (amortecida pela Bomba d\'Água)' : '';
+          logsToAdd.push({ msg: `🏜️ Seca prolongada${mitigatedTxt}! Custo extra de água hoje: ${droughtExtraCost}💰.`, type: 'error' });
           setDroughtDaysRemaining(prev => prev - 1);
-          const droughtExtraCost = waterCost * 2;
           addFinancialEntry({ day: nextDayValue, type: 'expense', category: 'evento', description: `🏜️ Seca — custo extra de água (${droughtExtraCost}💰)`, amount: droughtExtraCost });
           setGold(prev => {
-            const cost = waterCost * 2;
-            if (prev < cost) {
-              setDebt(d => d + (cost - prev));
+            if (prev < droughtExtraCost) {
+              setDebt(d => d + (droughtExtraCost - prev));
               return 0;
             }
-            return prev - cost;
-          }); // extra 2x cost (total 3x)
+            return prev - droughtExtraCost;
+          });
           // Penalidade de felicidade para animais aquáticos durante seca
           // Bebedouro e Seguro Climático protegem; Poço Nv4+ mitiga rã/jacaré
           if (!hasBebedouro && !insuranceClimate.active) {
@@ -5700,25 +5722,31 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               }));
             }, 0);
           }
-        } else if (!negativeSurpriseFiredToday && currentSeasonIdx === 1 && Math.random() < (wellLevel >= 5 ? 0.045 : 0.05)) {
+        } else if (!negativeSurpriseFiredToday && currentSeasonIdx === 1 && Math.random() < (nextDayEvent === 'seca' ? 0.30 : 0.02) * (wellLevel >= 5 ? 0.9 : 1)) {
           if (insuranceClimate.active) {
             logsToAdd.push({ msg: `🌦️ Seca começou mas Seguro Climático protegeu sua fazenda! Sem custo extra.`, type: 'success' });
-          } else if (blockNextDrought) {
-            logsToAdd.push({ msg: `💧 Seca detectada mas a Bomba d'Água neutralizou o impacto! Animais protegidos.`, type: 'success' });
-            setBlockNextDrought(false);
           } else if (waterTruckDays > 0) {
             logsToAdd.push({ msg: `🚛 Seca detectada, mas o Caminhão-Pipa garante o abastecimento! Fazenda protegida.`, type: 'success' });
+          } else if (blockNextDrought) {
+            negativeSurpriseFiredToday = true;
+            setBlockNextDrought(false);
+            setDroughtMitigated(true);
+            logsToAdd.push({ msg: `💧 Seca começou, mas a Bomba d'Água amorteceu o impacto! Custo extra de água reduzido pela metade nos próximos 3 dias.`, type: 'info' });
+            setTimeout(() => addNotification('💧 Seca amortecida pela Bomba d\'Água — custo extra reduzido!', 'warning', nextDayValue), 0);
+            setDroughtDaysRemaining(3);
           } else {
             negativeSurpriseFiredToday = true;
+            setDroughtMitigated(false);
             logsToAdd.push({ msg: `🏜️ Uma seca prolongada começou! Custo de água será triplicado por 3 dias!`, type: 'error' });
             setTimeout(() => addNotification('🏜️ Seca prolongada por 3 dias! Custo de água triplicado!', 'warning', nextDayValue), 0);
             setDroughtDaysRemaining(3);
           }
+        } else if (nextDayEvent === 'seca' && currentSeasonIdx !== 1) {
+          logsToAdd.push({ msg: `🏜️ A previsão indicava risco de seca, mas não é verão — sem risco real hoje.`, type: 'info' });
         }
         // Aviso semanal no verão sobre risco de seca
         if (isWeeklyBillDay && currentSeasonIdx === 1 && currentDrought === 0 && irrigationLevel < 2) {
-          const droughtChancePct = wellLevel >= 5 ? '4.5%' : '5%';
-          logsToAdd.push({ msg: `☀️ Verão: ${droughtChancePct} de chance de seca por dia! Considere Irrigação Nível 2 ou Seguro Climático.`, type: 'info' });
+          logsToAdd.push({ msg: `☀️ Verão: risco de seca por dia — fica bem mais alto quando a previsão do dia seguinte aponta "seca"! Considere Irrigação Nível 2 ou Seguro Climático.`, type: 'info' });
         }
       }
 
