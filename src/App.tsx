@@ -2794,6 +2794,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         hasSilo,
         hasFridge,
         hasTipBox,
+        hasLaboratorio,
+        hasPastagem,
+        hasExportCenter,
+        hasAcademia,
         productFreshness,
         specialization,
         debt,
@@ -3947,7 +3951,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           msg: `✨ Um mascate viajante visitou o vilarejo e comprou suas sobras de capim! +${bonus} moedas!`,
           type: 'event'
         });
-      } else {
+      } else if (animals.some(a => ['vaca', 'boi', 'bufalo'].includes(a.type))) {
+        // Só cobra a taxa de resfriado bovino se houver bovino na fazenda — antes cobrava
+        // mesmo com 0 vacas/bois/búfalos.
         let loss = 10 + Math.floor(Math.random() * 15);
         // F5: seguro agrícola reduz impacto em 70%
         if (insurance.active) {
@@ -4323,7 +4329,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // --- SUBFUNÇÃO 4: Processamento de Fome, Felicidade e Produções Naturais ---
       let updatedAnimalsList = processarFomeFelicidade(animalsAfterAuto, nextWeather, logsToAdd, nextDayValue);
 
-      // --- GRUPO 2c: Ovo Fértil — galinhas felizes (>=95) têm 20% chance de ovo fértil ---
+      // --- GRUPO 2c: Ovo Fértil — galinhas felizes (>=95) têm 5% chance de ovo fértil ---
       {
         let fertilEggsProduced = 0;
         updatedAnimalsList = updatedAnimalsList.map(a => {
@@ -4554,6 +4560,18 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             });
           }
         }
+      }
+
+      // ⚠️ Rede de segurança: fazenda sem nenhum animal (ex: todos morreram de fome sem
+      // ninguém perceber) — antes o jogo simplesmente continuava rodando de forma silenciosa
+      // e improdutiva por tempo indefinido, sem nenhum aviso. Agora avisa todo dia até o
+      // jogador comprar um animal de novo.
+      if (updatedAnimalsList.length === 0) {
+        logsToAdd.push({
+          msg: `🚨 Sua fazenda está sem nenhum animal! Compre animais na Loja para voltar a produzir.`,
+          type: 'error'
+        });
+        setTimeout(() => addNotification('🚨 Fazenda sem animais! Compre animais na Loja para voltar a produzir.', 'warning', nextDayValue), 0);
       }
 
       // --- GRUPO 3a: Estábulo — no inverno, animais recuperam metade da felicidade perdida ---
@@ -5267,7 +5285,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         } else if (nextDayEvent === 'geada') {
           if (insuranceClimate.active) {
             logsToAdd.push({ msg: `🌦️ Geada chegou, mas o Seguro Climático protegeu seus animais!`, type: 'success' });
-          } else {
+          } else if (finalAnimals.length > 0) {
+            // Sem animais na fazenda, não há quem a geada afete — evita o log sem sentido.
             logsToAdd.push({ msg: `❄️ Geada! Todos os animais perderam 20 de felicidade e ficaram estressados por 2 dias.`, type: 'error' });
             setTimeout(() => addNotification('❄️ Geada! -20 felicidade e estresse nos animais.', 'warning', nextDayValue), 0);
           }
@@ -6683,7 +6702,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           () => { setAnimals(prev => prev.map(a => a.isSick ? { ...a, isSick: false } : a)); logsToAdd.push({ msg: `🌿 A brisa fresca curou os animais doentes naturalmente!`, type: 'success' }); },
         ];
         const roll = Math.floor(Math.random() * positiveChances.length);
-        positiveChances[roll]();
+        // Índice 1 = "Dia ensolarado perfeito" (afeta felicidade de animais) — sem animais na
+        // fazenda, não há quem afetar, então pula pra evitar o log sem sentido.
+        if (!(roll === 1 && finalAnimals.length === 0)) {
+          positiveChances[roll]();
+        }
       }
 
       // Próximo dia
