@@ -6260,15 +6260,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }));
         }
 
-        // --- Ordenhador: coleta leite de vaca/cabra/bufalo/ovelha adultos; tosquia alpaca quando woolReady ---
+        // --- Ordenhador: coleta leite de vaca/vaca jersey/cabra/bufalo/ovelha adultos; tosquia alpaca quando woolReady ---
         if (workers.some(w => w.role === 'ordenhador')) {
           const cowMilkCollected = finalAnimals.filter(a => a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday && !(machines.milkerPurchased && machines.milkerActive)).length;
+          const jerseyMilkCollected = finalAnimals.filter(a => a.type === 'vaca_jersey' && a.isAdult !== false && a.hasProducedToday).length;
           const goatMilkCollected = finalAnimals.filter(a => a.type === 'cabra' && a.isAdult !== false && a.hasProducedToday).length;
           const buffaloMilkCollected = finalAnimals.filter(a => a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false).length;
           const sheepMilkCollected = finalAnimals.filter(a => a.type === 'ovelha_leiteira' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false).length;
           const alpacaWoolCollected = finalAnimals.filter(a => a.type === 'alpaca' && a.isAdult !== false && a.woolReady).length;
           const ordenhadorIds = new Set(finalAnimals.filter(a => {
             if (a.type === 'vaca' && a.isAdult !== false && a.hasProducedToday && !(machines.milkerPurchased && machines.milkerActive)) return true;
+            if (a.type === 'vaca_jersey' && a.isAdult !== false && a.hasProducedToday) return true;
             if (a.type === 'cabra' && a.isAdult !== false && a.hasProducedToday) return true;
             if (a.type === 'bufalo' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false) return true;
             if (a.type === 'ovelha_leiteira' && a.isAdult !== false && a.hasProducedToday && a.isLactating !== false) return true;
@@ -6285,6 +6287,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (cowMilkCollected > 0) {
             setInventory(prev => ({ ...prev, milk: prev.milk + cowMilkCollected }));
             logsToAdd.push({ msg: `🥛 Ordenhador coletou +${cowMilkCollected} leite(s) de vaca automaticamente!`, type: 'success' });
+          }
+          if (jerseyMilkCollected > 0) {
+            setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) + jerseyMilkCollected } as any));
+            logsToAdd.push({ msg: `🥛 Ordenhador coletou +${jerseyMilkCollected} leite(s) de vaca Jersey automaticamente!`, type: 'success' });
           }
           if (goatMilkCollected > 0) {
             setInventory(prev => ({ ...prev, goat_milk: (prev.goat_milk ?? 0) + goatMilkCollected }));
