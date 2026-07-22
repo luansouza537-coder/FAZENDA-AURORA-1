@@ -143,6 +143,28 @@ export function getUniqueAngusName(currentAnimals: { type: string; name: string 
   return `Angus ${Date.now() % 1000}`;
 }
 
+export function getUniqueBoerName(currentAnimals: { type: string; name: string }[]): string {
+  const existingNumbers = new Set(
+    currentAnimals
+      .filter(a => a.type === 'cabra_boer')
+      .map(a => {
+        const match = a.name.match(/Boer\s+(\d+)/i);
+        return match ? parseInt(match[1], 10) : null;
+      })
+      .filter((n): n is number => n !== null)
+  );
+
+  let attempts = 0;
+  while (attempts < 1000) {
+    const r = Math.floor(Math.random() * 300) + 1;
+    if (!existingNumbers.has(r)) {
+      return `Boer ${r}`;
+    }
+    attempts++;
+  }
+  return `Boer ${Date.now() % 1000}`;
+}
+
 const CAVALO_NAMES = ['Vendaval', 'Cometa', 'Alazão', 'Tempestade', 'Corisco', 'Faísca', 'Pampa', 'Sereno', 'Malandro', 'Bailarino', 'Imperador', 'Ligeirinho'];
 
 export function getUniqueCavaloName(currentAnimals: { type: string; name: string }[]): string {

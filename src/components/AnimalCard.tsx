@@ -46,12 +46,14 @@ export interface AnimalListRowProps {
   onSellOx: (id: number, e: React.MouseEvent) => void;
   onSellFrango?: (id: number, e: React.MouseEvent) => void;
   onSellAngus?: (id: number, e: React.MouseEvent) => void;
+  onSellBoer?: (id: number, e: React.MouseEvent) => void;
   onCollectPeixe?: (id: number, e: React.MouseEvent) => void;
   onCollectLeiteJersey?: (id: number, e: React.MouseEvent) => void;
   onCollectMel?: (id: number, e: React.MouseEvent) => void;
   calculateBoiValue: (animal: Animal) => number;
   calculateFrangoValue?: (animal: Animal) => number;
   calculateAngusValue?: (animal: Animal) => number;
+  calculateBoerValue?: (animal: Animal) => number;
   calculatePorcoValue: (animal: Animal) => number;
   onSellPorco: (id: number, e: React.MouseEvent) => void;
   onSellPeru?: (id: number, e: React.MouseEvent) => void;
@@ -70,12 +72,14 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   onSellOx,
   onSellFrango,
   onSellAngus,
+  onSellBoer,
   onCollectPeixe,
   onCollectLeiteJersey,
   onCollectMel,
   calculateBoiValue,
   calculateFrangoValue,
   calculateAngusValue,
+  calculateBoerValue,
   calculatePorcoValue,
   onSellPorco,
   onSellPeru,
@@ -89,6 +93,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
   const valueOfFrango = animal.type === 'frango_corte' && calculateFrangoValue ? calculateFrangoValue(animal) : 0;
   const valueOfAngus = animal.type === 'boi_angus' && calculateAngusValue ? calculateAngusValue(animal) : 0;
+  const valueOfBoer = animal.type === 'cabra_boer' && calculateBoerValue ? calculateBoerValue(animal) : 0;
   const valueOfPorcoRow = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
   const isReady =
     (animal.type === 'vaca' && animal.hasProducedToday) ||
@@ -164,6 +169,9 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
         {animal.type === 'boi_angus' && onSellAngus && (
           <button onClick={e => onSellAngus(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-stone-800 border border-stone-600 text-amber-300 hover:bg-stone-700 cursor-pointer">💰{valueOfAngus}</button>
         )}
+        {animal.type === 'cabra_boer' && onSellBoer && (
+          <button onClick={e => onSellBoer(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-orange-100 border border-orange-300 text-orange-800 hover:bg-orange-200 cursor-pointer">💰{valueOfBoer}</button>
+        )}
         {animal.type === 'frango_corte' && onSellFrango && (
           <button onClick={e => onSellFrango(animal.id, e)} className="text-[9px] font-black px-2 py-1 rounded-lg bg-red-100 border border-red-300 text-red-800 hover:bg-red-200 cursor-pointer">💰{valueOfFrango}</button>
         )}
@@ -205,6 +213,7 @@ export interface AnimalCardProps {
   onSellOx: (id: number, e: React.MouseEvent) => void;
   onSellFrango?: (id: number, e: React.MouseEvent) => void;
   onSellAngus?: (id: number, e: React.MouseEvent) => void;
+  onSellBoer?: (id: number, e: React.MouseEvent) => void;
   onCollectPeixe?: (id: number, e: React.MouseEvent) => void;
   onCollectLeiteJersey?: (id: number, e: React.MouseEvent) => void;
   onCollectGoatMilk: (id: number, e: React.MouseEvent) => void;
@@ -230,6 +239,7 @@ export interface AnimalCardProps {
   calculateBoiValue: (animal: Animal) => number;
   calculateFrangoValue?: (animal: Animal) => number;
   calculateAngusValue?: (animal: Animal) => number;
+  calculateBoerValue?: (animal: Animal) => number;
   calculatePorcoValue: (animal: Animal) => number;
   onSellPorco: (id: number, e: React.MouseEvent) => void;
   onSellPeru?: (id: number, e: React.MouseEvent) => void;
@@ -271,6 +281,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   onSellOx,
   onSellFrango,
   onSellAngus,
+  onSellBoer,
   onCollectPeixe,
   onCollectLeiteJersey,
   onCollectGoatMilk,
@@ -296,6 +307,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   calculateBoiValue,
   calculateFrangoValue,
   calculateAngusValue,
+  calculateBoerValue,
   calculatePorcoValue,
   onSellPorco,
   onSellPeru,
@@ -321,6 +333,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const [pendingSellOx, setPendingSellOx] = useState(false);
   const [pendingSellFrango, setPendingSellFrango] = useState(false);
   const [pendingSellAngus, setPendingSellAngus] = useState(false);
+  const [pendingSellBoer, setPendingSellBoer] = useState(false);
   const [pendingSellAvestruz, setPendingSellAvestruz] = useState(false);
   const [pendingSellPeru, setPendingSellPeru] = useState(false);
   const [pendingSellJacare, setPendingSellJacare] = useState(false);
@@ -331,6 +344,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
   const valueOfOx = animal.type === 'boi' ? calculateBoiValue(animal) : 0;
   const valueOfFrango = animal.type === 'frango_corte' && calculateFrangoValue ? calculateFrangoValue(animal) : 0;
   const valueOfAngus = animal.type === 'boi_angus' && calculateAngusValue ? calculateAngusValue(animal) : 0;
+  const valueOfBoer = animal.type === 'cabra_boer' && calculateBoerValue ? calculateBoerValue(animal) : 0;
   const valueOfPorco = animal.type === 'porco' ? calculatePorcoValue(animal) : 0;
   const valueOfPeru = animal.type === 'peru' && calculatePeruValue ? calculatePeruValue(animal) : 0;
 
@@ -1466,6 +1480,28 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               onClick={(e) => { e.preventDefault(); setPendingSellAngus(true); }}
               className="bg-stone-800 hover:bg-stone-700 border-b-4 border-black shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-amber-300 uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
               title={`Vender Angus: carne premium na Feira. 💰 ~${valueOfAngus} (marmoreio + bem-estar elevam o valor)`}
+            >
+              💰 Vender
+            </button>
+          )
+        )}
+
+        {/* Sell Cabra Boer */}
+        {animal.type === 'cabra_boer' && onSellBoer && (
+          pendingSellBoer ? (
+            <div className="flex items-center gap-1.5 bg-orange-50 border-2 border-orange-300 rounded-xl px-2 py-1.5 w-full">
+              <span className="text-[9px] font-mono font-black text-orange-800 leading-tight flex-1">Vender {animal.name}?<br/><span className="text-orange-600">~{valueOfBoer}💰</span></span>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellBoer(false); onSellBoer(animal.id, e); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer transition-all">✅</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); setPendingSellBoer(false); }}
+                className="text-[10px] font-mono font-black px-2 py-1 rounded-lg border-2 border-b-4 border-stone-400 bg-stone-100 text-stone-700 hover:bg-stone-200 cursor-pointer transition-all">❌</button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); setPendingSellBoer(true); }}
+              className="bg-orange-600 hover:bg-orange-500 border-b-4 border-orange-800 shadow-md rounded-[16px] px-4 py-2.5 font-display text-xs text-white uppercase tracking-wider font-extrabold cursor-pointer flex items-center justify-center gap-1.5 flex-1 select-none transition-all hover:scale-[1.02]"
+              title={`Vender Cabra Boer: carne de corte na Feira. 💰 ~${valueOfBoer} (peso + bem-estar elevam o valor)`}
             >
               💰 Vender
             </button>

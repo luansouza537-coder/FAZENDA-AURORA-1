@@ -2284,6 +2284,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     calculateBoiValue,
     calculateFrangoValue,
     calculateAngusValue,
+    calculateBoerValue,
     calcFairScore,
     feedAnimal,
     collectEgg,
@@ -2310,6 +2311,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     sellOx,
     sellFrango,
     sellAngus,
+    sellBoer,
     sellPeru,
     calculatePeruValue,
     sellPorco,
@@ -3194,6 +3196,23 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.05) + gain));
         if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
           logs.push({ msg: `💎 ${copy.name} (Angus) atingiu o marmoreio ideal! Carne premium no valor máximo!`, type: 'success' });
+        }
+      }
+      else if (copy.type === 'cabra_boer') {
+        // Cabra Boer: raça de corte que engorda bem mais rápido que boi/cabra comum
+        let gain = 0.045;
+        if (copy.hunger > 65) gain += 0.03;
+        if (copy.happiness > 70) gain += 0.018;
+        if (copy.hunger < 20) gain -= 0.03;
+        if (copy.isBestFriend) gain += 0.05;
+        if (copy.hunger < 12) {
+          gain = -0.02;
+        } else {
+          gain = Math.min(0.10, Math.max(0, gain));
+        }
+        copy.weightGain = Math.max(0.05, Math.min(1.0, (copy.weightGain || 0.08) + gain));
+        if (copy.weightGain >= 0.95 && (copy.weightGain || 0) < 1.0) {
+          logs.push({ msg: `🐐 ${copy.name} (Cabra Boer) atingiu o peso ideal! Você obterá valor máximo na venda!`, type: 'success' });
         }
       }
       else if (copy.type === 'frango_corte') {
@@ -7634,7 +7653,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             sellOx={sellOx}
             sellFrango={sellFrango}
             sellAngus={sellAngus}
+            sellBoer={sellBoer}
             calculateAngusValue={calculateAngusValue}
+            calculateBoerValue={calculateBoerValue}
             calculateBoiValue={calculateBoiValue}
             calculateFrangoValue={calculateFrangoValue}
             calculatePorcoValue={calculatePorcoValue}
