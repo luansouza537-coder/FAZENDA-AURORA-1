@@ -110,7 +110,7 @@ export const AnimalListRow: React.FC<AnimalListRowProps> = ({
     (animal.type === 'bufalo' && animal.hasProducedToday && animal.isLactating !== false) ||
     (animal.type === 'cabra_angora' && animal.woolReady);
   const typeLabel: Record<string, string> = {
-    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐', peru: '🦃', cabra_angora: '🐐', frango_corte: '🐓', galinha_caipira: '🐔', tanque_tilapia: '🐟', vaca_jersey: '🐄', boi_angus: '🐂', cavalo: '🐴',
+    vaca: '🐄', ovelha: '🐑', boi: '🐂', galinha: '🐔', cabra: '🐐', peru: '🦃', cabra_angora: '🐐', cabra_boer: '🐐', frango_corte: '🐓', galinha_caipira: '🐔', tanque_tilapia: '🐟', vaca_jersey: '🐄', boi_angus: '🐂', cavalo: '🐴',
     lhama: '🦙', pato: '🦆', ganso: '🦢', bufalo: '🐃', pavao: '🦚',
     codorna: '🐦', alpaca: '🦙', minhoca: '🪱', caracol: '🐌',
     coelho_angora: '🐰', bicho_seda: '🐛', ra: '🐸', avestruz: '🦤', jacare: '🐊', porco: '🐷',
@@ -511,7 +511,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
 
           {/* Animal Badge */}
           <span className="text-[10px] uppercase font-mono tracking-widest text-[#92400e] font-black block mt-1">
-            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'galinha_caipira' ? '🐔 Galinha Caipira' : animal.type === 'frango_corte' ? '🐓 Frango de Corte' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'peru' ? '🦃 Peru' : animal.type === 'cabra_angora' ? '🐐 Cabra Angorá' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : animal.type === 'tanque_tilapia' ? '🐟 Tanque de Tilápia' : animal.type === 'vaca_jersey' ? '🐄 Vaca Jersey' : animal.type === 'boi_angus' ? '🐂 Boi Angus' : animal.type === 'cavalo' ? '🐴 Cavalo de Corrida' : '🐾 Animal'}
+            {animal.type === 'vaca' ? '🐄 Vaca Leiteira' : animal.type === 'ovelha' ? '🐑 Ovelha de Lã' : animal.type === 'boi' ? '🐂 Boi de Corte' : animal.type === 'galinha' ? '🐔 Galinha de Quintal' : animal.type === 'galinha_caipira' ? '🐔 Galinha Caipira' : animal.type === 'frango_corte' ? '🐓 Frango de Corte' : animal.type === 'cabra' ? '🐐 Cabra Leiteira' : animal.type === 'lhama' ? '🦙 Lhama de Lã' : animal.type === 'pato' ? '🦆 Pato de Quintal' : animal.type === 'ganso' ? '🦢 Ganso Vigia' : animal.type === 'bufalo' ? '🐃 Búfalo Leiteiro' : animal.type === 'pavao' ? '🦚 Pavão de Prestígio' : animal.type === 'codorna' ? '🐦 Codorna' : animal.type === 'alpaca' ? '🦙 Alpaca' : animal.type === 'ovelha_leiteira' ? '🐑 Ovelha Leiteira' : animal.type === 'minhoca' ? '🪱 Minhocário' : animal.type === 'caracol' ? '🐌 Criatório de Caracóis' : animal.type === 'coelho_angora' ? '🐰 Coelho Angorá' : animal.type === 'bicho_seda' ? (() => { const p = animal.age <= 2 ? '🥚 Ovo' : animal.age <= 12 ? '🐛 Lagarta' : animal.age <= 16 ? '🫙 Casulo' : '🦋 Mariposa'; return `${p} · Bicho-da-Seda`; })() : animal.type === 'ra' ? '🐸 Rã' : animal.type === 'avestruz' ? '🦤 Avestruz' : animal.type === 'jacare' ? '🐊 Jacaré' : animal.type === 'porco' ? '🐷 Porco de Engorda' : animal.type === 'peru' ? '🦃 Peru' : animal.type === 'cabra_angora' ? '🐐 Cabra Angorá' : animal.type === 'colmeia_abelhas' ? '🍯 Colmeia de Abelhas' : animal.type === 'tanque_tilapia' ? '🐟 Tanque de Tilápia' : animal.type === 'vaca_jersey' ? '🐄 Vaca Jersey' : animal.type === 'boi_angus' ? '🐂 Boi Angus' : animal.type === 'cavalo' ? '🐴 Cavalo de Corrida' : animal.type === 'cabra_boer' ? '🐐 Cabra Boer' : '🐾 Animal'}
           </span>
           {/* Trait badge */}
           {animal.trait && !['minhoca', 'caracol', 'colmeia_abelhas', 'bicho_seda', 'tanque_tilapia'].includes(animal.type) && (() => {
@@ -749,6 +749,37 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
               <>
                 <span className="select-none">🐐</span>
                 {animal.isLactating && animal.hasProducedToday && <span className="absolute -bottom-2 -right-1 text-base animate-bounce select-none">🥛</span>}
+              </>
+            )}
+            {animal.type === 'cabra_boer' && (
+              <>
+                {/* Cabra Boer — corpo branco, cabeça marrom-avermelhada (marca registrada da raça) */}
+                <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="select-none">
+                  {/* Corpo — branco, robusto */}
+                  <ellipse cx="24" cy="30" rx="14" ry="10" fill="#faf8f2"/>
+                  {/* Pernas */}
+                  <rect x="16" y="37" width="3.5" height="7" rx="1.5" fill="#e8e2d4"/>
+                  <rect x="21" y="38" width="3.5" height="7" rx="1.5" fill="#e8e2d4"/>
+                  <rect x="27" y="38" width="3.5" height="7" rx="1.5" fill="#e8e2d4"/>
+                  <rect x="32" y="37" width="3.5" height="7" rx="1.5" fill="#e8e2d4"/>
+                  {/* Cabeça — marrom-avermelhada, característica da Boer */}
+                  <ellipse cx="24" cy="15" rx="6.5" ry="7" fill="#9a4b2f"/>
+                  {/* Chifres curvados pra trás */}
+                  <path d="M19 9 C16 6 15 3 17 1" stroke="#5c4632" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                  <path d="M29 9 C32 6 33 3 31 1" stroke="#5c4632" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                  {/* Orelhas longas e caídas */}
+                  <ellipse cx="17" cy="16" rx="3" ry="1.8" fill="#7a3a24" transform="rotate(-35 17 16)"/>
+                  <ellipse cx="31" cy="16" rx="3" ry="1.8" fill="#7a3a24" transform="rotate(35 31 16)"/>
+                  {/* Olhos */}
+                  <ellipse cx="21.5" cy="14.5" rx="1.2" ry="1" fill="#1c1917"/>
+                  <ellipse cx="26.5" cy="14.5" rx="1.2" ry="1" fill="#1c1917"/>
+                  <circle cx="22" cy="14" r="0.4" fill="white"/>
+                  <circle cx="27" cy="14" r="0.4" fill="white"/>
+                  {/* Focinho */}
+                  <ellipse cx="24" cy="19" rx="3" ry="2.2" fill="#c47a5c"/>
+                  <circle cx="22.8" cy="18.8" r="0.6" fill="#7a3a24"/>
+                  <circle cx="25.2" cy="18.8" r="0.6" fill="#7a3a24"/>
+                </svg>
               </>
             )}
             {animal.type === 'lhama' && (
@@ -1081,6 +1112,25 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({
                 </div>
                 <div className="text-[10px] text-[#78350f]/80 font-mono text-left border-t border-[#fbbf24]/50 pt-1 mt-1.5 leading-none self-start w-full">
                   Carne premium · Valor na Feira: 💰 ~{valueOfAngus} moedas
+                </div>
+              </div>
+            )}
+            {animal.type === 'cabra_boer' && (
+              <div className="flex flex-col gap-1 w-full uppercase">
+                <div className="flex justify-between items-center w-full">
+                  <span className="flex items-center gap-1 text-[11px]">
+                    📈 Peso: <span className="font-mono font-black ml-1 text-xs">{Math.floor((animal.weightGain || 0.08) * 100)}%</span>
+                  </span>
+                  {renderGrowthBadge(animal.weightGain || 0.08)}
+                </div>
+                <div className="w-full bg-[#e5e7eb] h-2.5 rounded-full overflow-hidden mt-1 border border-stone-300 relative">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-400 to-orange-700 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.floor((animal.weightGain || 0.08) * 100)}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-[#78350f]/80 font-mono text-left border-t border-[#fbbf24]/50 pt-1 mt-1.5 leading-none self-start w-full">
+                  Cabra Boer · Valor na Feira: 💰 ~{valueOfBoer} moedas
                 </div>
               </div>
             )}
