@@ -24,20 +24,22 @@ export const XP_THRESHOLDS: Record<number, number> = {
   8: 3100,
   9: 4200,
   10: 5600,
-  11: 7300,
-  12: 9400,
-  13: 11900,
-  14: 14900,
-  15: 18500,
-  16: 22800,
-  17: 27800,
-  18: 33800,
-  19: 40800,
-  20: 49000,
+  // Saltos suavizados em ~18% do nível 11 ao 20 — a curva original quase
+  // dobrava o custo por nível nesse trecho, dessincronizada do ganho de XP por ação.
+  11: 7000,
+  12: 8700,
+  13: 10750,
+  14: 13200,
+  15: 16150,
+  16: 19650,
+  17: 23750,
+  18: 28650,
+  19: 34400,
+  20: 41100,
 };
 
 export const getXpForLevel = (level: number): number =>
-  XP_THRESHOLDS[level] ?? (49000 + (level - 20) * 10000);
+  XP_THRESHOLDS[level] ?? (41100 + (level - 20) * 10000);
 
 export const getFarmTitle = (level: number): string => {
   if (level === 1) return "Fazenda Iniciante 🧑‍🌾";
