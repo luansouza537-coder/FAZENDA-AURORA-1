@@ -36,7 +36,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       missionKey: 'collect_fish',
       goal: 5,
       reward: 110,
-      minLevel: 5,
+      minLevel: 12,
       sentiment: '🎣',
     },
     {
@@ -56,7 +56,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       missionKey: 'collect_jersey',
       goal: 5,
       reward: 110,
-      minLevel: 6,
+      minLevel: 15,
       sentiment: '🐄',
     },
     {
@@ -199,7 +199,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       missionKey: 'collect_fish',
       goal: 6,
       reward: 130,
-      minLevel: 5,
+      minLevel: 12,
       sentiment: '🎣',
     },
     {
@@ -219,7 +219,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       missionKey: 'collect_jersey',
       goal: 5,
       reward: 115,
-      minLevel: 6,
+      minLevel: 15,
       sentiment: '🐄',
     },
     {
@@ -362,7 +362,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       missionKey: 'collect_fish',
       goal: 4,
       reward: 100,
-      minLevel: 5,
+      minLevel: 12,
       sentiment: '🎣',
     },
     {
@@ -382,7 +382,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       missionKey: 'collect_jersey',
       goal: 5,
       reward: 115,
-      minLevel: 6,
+      minLevel: 15,
       sentiment: '🐄',
     },
     {
@@ -535,7 +535,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       missionKey: 'collect_fish',
       goal: 3,
       reward: 95,
-      minLevel: 5,
+      minLevel: 12,
       sentiment: '🎣',
     },
     {
@@ -555,7 +555,7 @@ const SEASONAL_WEEKLY_MISSIONS: Record<SeasonKey, MissionTemplate[]> = {
       missionKey: 'collect_jersey',
       goal: 4,
       reward: 120,
-      minLevel: 6,
+      minLevel: 15,
       sentiment: '🐄',
     },
     {

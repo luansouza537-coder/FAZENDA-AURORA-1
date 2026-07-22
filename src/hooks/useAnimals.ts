@@ -1561,9 +1561,11 @@ export function useAnimals({
     }
 
     // Level unlock checks for new animals
-    if (type === 'boi_angus' && farmLevel < 10) { addLog('🔒 Boi Angus requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'vaca_jersey' && farmLevel < 6) { addLog('🔒 Vaca Jersey requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'tanque_tilapia' && farmLevel < 5) { addLog('🔒 Tanque de Tilápia requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'boi_angus' && farmLevel < 19) { addLog('🔒 Boi Angus requer Nível 19!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'vaca_jersey' && farmLevel < 15) { addLog('🔒 Vaca Jersey requer Nível 15!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'tanque_tilapia' && farmLevel < 12) { addLog('🔒 Tanque de Tilápia requer Nível 12!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'ganso' && farmLevel < 13) { addLog('🔒 Ganso requer Nível 13!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'pavao' && farmLevel < 14) { addLog('🔒 Pavão requer Nível 14!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'galinha_caipira' && farmLevel < 4) { addLog('🔒 Galinha Caipira requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'frango_corte' && farmLevel < 2) { addLog('🔒 Frango de Corte requer Nível 2!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'pato' && farmLevel < 3) { addLog('🔒 Pato de Quintal requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
@@ -1575,15 +1577,15 @@ export function useAnimals({
     if (type === 'bicho_seda' && farmLevel < 10) { addLog('🔒 Bicho-da-Seda requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'ra' && farmLevel < 8) { addLog('🔒 Rã requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'avestruz' && farmLevel < 10) { addLog('🔒 Avestruz requer Nível 10!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'jacare' && farmLevel < 13) { addLog('🔒 Jacaré requer Nível 13!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'jacare' && farmLevel < 20) { addLog('🔒 Jacaré requer Nível 20!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'porco' && farmLevel < 4) { addLog('🔒 Porco requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'colmeia_abelhas' && farmLevel < 4) { addLog('🔒 Colmeia de Abelhas requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'ovelha_leiteira' && farmLevel < 5) { addLog('🔒 Ovelha Leiteira requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'peru' && farmLevel < 8) { addLog('🔒 Peru requer Nível 8!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'peru' && farmLevel < 16) { addLog('🔒 Peru requer Nível 16!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'cabra_angora' && farmLevel < 9) { addLog('🔒 Cabra Angorá requer Nível 9!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'cavalo' && farmLevel < 6) { addLog('🔒 Cavalo requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'cabra_boer' && farmLevel < 7) { addLog('🔒 Cabra Boer requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'tanque_pirarucu' && farmLevel < 12) { addLog('🔒 Tanque de Pirarucu requer Nível 12!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'cabra_boer' && farmLevel < 17) { addLog('🔒 Cabra Boer requer Nível 17!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'tanque_pirarucu' && farmLevel < 18) { addLog('🔒 Tanque de Pirarucu requer Nível 18!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
 
     const { feedType } = getAnimalFeedType(type);
     const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
