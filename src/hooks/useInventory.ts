@@ -959,7 +959,7 @@ export function useInventory({
 
   const craftOvoDefumado = (event?: React.MouseEvent) => {
     if (event) event.preventDefault();
-    if (farmLevel < 6) { addLog('🥚 Ovo Defumado requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (farmLevel < 13) { addLog('🥚 Ovo Defumado requer Nível 13!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.goose_egg ?? 0) < 1) { addLog('🪿 Falta Ovo de Ganso! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ov.Ganso!', event); return; }
     setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) - 1, ovo_defumado: (prev.ovo_defumado ?? 0) + 1 }));
     applyCraftCost('ovo_defumado');
@@ -971,7 +971,7 @@ export function useInventory({
 
   const craftConservaCodorna = (event?: React.MouseEvent) => {
     if (event) event.preventDefault();
-    if (farmLevel < 4) { addLog('🥚 Conserva de Codorna requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (farmLevel < 11) { addLog('🥚 Conserva de Codorna requer Nível 11!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.quail_egg ?? 0) < 6) { addLog('🐦 Falta Ovo de Codorna! Precisa de 6.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ov.Codorna!', event); return; }
     setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) - 6, conserva_codorna: (prev.conserva_codorna ?? 0) + 1 }));
     applyCraftCost('conserva_codorna');
@@ -1074,7 +1074,7 @@ export function useInventory({
 
   const craftBolsaExotica = (event?: React.MouseEvent) => {
     if (event) event.preventDefault();
-    if (farmLevel < 18) { addLog('👜 Bolsa Exótica requer Nível 18!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (farmLevel < 20) { addLog('👜 Bolsa Exótica requer Nível 20!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.couro_jacare ?? 0) < 1) { addLog('🐊 Falta Couro de Jacaré! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Couro Jacaré!', event); return; }
     setInventory(prev => ({ ...prev, couro_jacare: (prev.couro_jacare ?? 0) - 1, bolsa_exotica: (prev.bolsa_exotica ?? 0) + 1 }));
     applyCraftCost('bolsa_exotica');
@@ -1962,7 +1962,7 @@ export function useInventory({
   };
 
   const craftConservaPeixe = (event?: React.MouseEvent) => {
-    if (farmLevel < 4) { addLog('🐟 Conserva requer Nível 4!', 'error'); return; }
+    if (farmLevel < 12) { addLog('🐟 Conserva requer Nível 12!', 'error'); return; }
     if ((inventory.peixe ?? 0) < 2) { addLog('🐟 Precisa: 2 Tilápias', 'error'); return; }
     setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 2, conserva_peixe: (prev.conserva_peixe ?? 0) + 1 }));
     applyCraftCost('conserva_peixe');
