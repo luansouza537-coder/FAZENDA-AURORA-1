@@ -406,6 +406,11 @@ function GameApp() {
   // --- NOVOS SISTEMAS: Especialização, Dívida, Turismo, Feiras, Crises ---
   // specialization — managed by useFarm hook
   const [showSpecializationModal, setShowSpecializationModal] = useState<boolean>(false);
+  // 🔄 Reset único e gratuito da Especialização — só disponível enquanto farmLevel <= 5,
+  // uma vez usado (ou depois do nível-teto) a escolha volta a ser permanente.
+  const [specializationResetUsed, setSpecializationResetUsed] = useState<boolean>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).specializationResetUsed ?? false; } catch(e) {} return false;
+  });
 
   // debt moved to useEconomy
 
@@ -2798,6 +2803,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         hasPastagem,
         hasExportCenter,
         hasAcademia,
+        specializationResetUsed,
         productFreshness,
         specialization,
         debt,
@@ -2862,7 +2868,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, droughtMitigated, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, specializationResetUsed, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, droughtMitigated, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     let price = 2500;
@@ -4540,8 +4546,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         const activeCategories = Object.entries(catDef).filter(([, types]) =>
           updatedAnimalsList.some(a => types.includes(a.type) && a.isAdult !== false)
         );
-        if (activeCategories.length >= 3) {
-          // Para cada categoria ativa sem especialista, aplica penalidade nos animais
+        if (activeCategories.length >= 3 && specialization !== 'diversificada') {
+          // Quem escolheu a especialização "Diversificada" é imune a esse debuff — faz
+          // sentido narrativo (escolheu não focar, então não é penalizado por não focar)
+          // e finalmente dá um motivo real pra escolher essa opção, que antes não fazia nada.
           const penaltyCategories: string[] = [];
           activeCategories.forEach(([cat, types]) => {
             const hasSpecialist = catWorkers[cat].some(role => workerRoles.has(role));
@@ -7309,6 +7317,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                     🏆 Conquistas
                   </button>
+                  {specialization && !specializationResetUsed && farmLevel <= 5 && (
+                    <button onClick={() => { setShowSpecializationModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
+                      className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1"
+                      title="Troca única e gratuita, disponível até o Nível 5">
+                      🔄 Trocar Especialização
+                    </button>
+                  )}
                   <button onClick={() => { setShowStatsModal(true); setShowMoreMenu(false); triggerAudioResult(() => sfx.playSound('click')); }}
                     className="flex items-center gap-2 text-[12px] font-black text-[#fef3c7] hover:text-[#fbbf24] transition-colors text-left py-1">
                     📊 Estatísticas
@@ -8165,8 +8180,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               className="bg-[#fffbeb] border-8 border-emerald-700 rounded-[36px] max-w-lg w-full shadow-2xl overflow-hidden"
             >
               <div className="bg-gradient-to-r from-emerald-700 to-teal-800 p-5 border-b-4 border-emerald-900 text-center">
-                <h3 className="text-white text-xl font-display font-black uppercase tracking-wider">🌟 Escolha sua Especialização!</h3>
-                <p className="text-emerald-200 text-xs font-mono mt-1">Sua fazenda atingiu nível 2! Escolha um foco permanente.</p>
+                <h3 className="text-white text-xl font-display font-black uppercase tracking-wider">🌟 {specialization ? 'Trocar sua Especialização' : 'Escolha sua Especialização!'}</h3>
+                <p className="text-emerald-200 text-xs font-mono mt-1">
+                  {specialization
+                    ? 'Última chance de trocar de graça — depois disso, é permanente!'
+                    : 'Sua fazenda atingiu nível 2! Escolha um foco permanente.'}
+                </p>
               </div>
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
@@ -8180,9 +8199,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                   <button
                     key={String(opt.key)}
                     onClick={() => {
+                      const isReset = specialization !== null;
                       setSpecialization(opt.key);
+                      if (isReset) setSpecializationResetUsed(true);
                       setShowSpecializationModal(false);
-                      addLog(`🌟 Você escolheu a especialização ${opt.title}!`, 'success');
+                      addLog(`🌟 Você ${isReset ? 'trocou para' : 'escolheu'} a especialização ${opt.title}!`, 'success');
                       addNotification(`🌟 Especialização ${opt.title} ativa! Seus bônus estão aplicados.`, 'event');
                       triggerAudioResult(() => sfx.playSound('levelup'));
                     }}
