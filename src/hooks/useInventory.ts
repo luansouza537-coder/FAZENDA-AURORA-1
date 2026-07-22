@@ -2131,7 +2131,7 @@ export function useInventory({
 
   const craftMassaFresca = (event?: React.MouseEvent) => {
     if (event) event.preventDefault();
-    if (farmLevel < 5) { addLog('🍝 Massa Fresca requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (farmLevel < 13) { addLog('🍝 Massa Fresca requer Nível 13!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if ((inventory.goose_egg ?? 0) < 1) { addLog('🪿 Falta Ovo de Ganso! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Ov.Ganso!', event); return; }
     if ((inventory.farinha ?? 0) < 1) { addLog('🌾 Falta Farinha! Precisa de 1.', 'error'); triggerAudioResult(() => sfx.playSound('error')); if (event) spawnFeedback('❌', 'Falta Farinha!', event); return; }
     setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) - 1, farinha: (prev.farinha ?? 0) - 1, massa_fresca: (prev.massa_fresca ?? 0) + 1 }));
