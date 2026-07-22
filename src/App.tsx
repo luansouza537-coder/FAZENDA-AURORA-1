@@ -8170,12 +8170,12 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               </div>
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { key: 'leiteira' as FarmSpecialization, emoji: '🥛', title: 'LEITEIRA', desc: 'Foco em vacas, cabras e búfalos', bonuses: '+20% produção de leite\n-10% ração leiteira\n+10% custo de aves/ovelhas', minLevel: 1 },
-                  { key: 'fibras' as FarmSpecialization, emoji: '🧶', title: 'FIBRAS', desc: 'Foco em ovelhas e lhamas', bonuses: '+20% produção de lã\n-10% ração de ovelha/lhama\n+10% custo de outros animais', minLevel: 1 },
-                  { key: 'avicultura' as FarmSpecialization, emoji: '🥚', title: 'AVICULTURA', desc: 'Foco em galinhas, patos e gansos', bonuses: '+20% produção de ovos\n-10% ração de aves\n+10% custo de outros animais', minLevel: 1 },
+                  { key: 'leiteira' as FarmSpecialization, emoji: '🥛', title: 'LEITEIRA', desc: 'Foco em vacas, cabras e búfalos', bonuses: '+20% produção de leite\n-10% custo de ração bovina', minLevel: 1 },
+                  { key: 'fibras' as FarmSpecialization, emoji: '🧶', title: 'FIBRAS', desc: 'Foco em ovelhas e lhamas', bonuses: '+20% produção de lã\n-10% custo de ração de ovinos\nColeta de coelho angorá e cabra angorá em dobro', minLevel: 1 },
+                  { key: 'avicultura' as FarmSpecialization, emoji: '🥚', title: 'AVICULTURA', desc: 'Foco em galinhas, patos e gansos', bonuses: '+20% produção de ovos\n-10% custo de ração de aves/aquática', minLevel: 1 },
                   { key: 'diversificada' as FarmSpecialization, emoji: '🌿', title: 'DIVERSIFICADA', desc: 'Sem bônus nem penalidades', bonuses: 'Jogo no modo padrão\nSem modificadores especiais\nLiberdade total de escolha', minLevel: 1 },
-                  { key: 'organica' as FarmSpecialization, emoji: '🌱', title: 'ORGÂNICA', desc: 'Foco em Minhocário e Criatório de Caracóis (Nv5+)', bonuses: '+20% produção de húmus/muco\nMinhocário e Criatório nunca morrem\nEspecial: animais da terra', minLevel: 5 },
-                  { key: 'exotica' as FarmSpecialization, emoji: '🦎', title: 'EXÓTICA', desc: 'Foco em animais raros (Nv10+)', bonuses: '+25% preços de couro/carne rara\nJacaré sem incidentes\nCouro de jacaré garantido na morte', minLevel: 10 },
+                  { key: 'organica' as FarmSpecialization, emoji: '🌱', title: 'ORGÂNICA', desc: 'Foco em Minhocário e Criatório de Caracóis (Nv5+)', bonuses: '+20% produção de húmus e muco', minLevel: 5 },
+                  { key: 'exotica' as FarmSpecialization, emoji: '🦎', title: 'EXÓTICA', desc: 'Foco em animais raros (Nv10+)', bonuses: 'Produção/coleta de exóticos em dobro\n+25% preço de venda de produtos exóticos\nJacaré sem incidentes de multa/dano', minLevel: 10 },
                 ].filter(opt => farmLevel >= opt.minLevel).map(opt => (
                   <button
                     key={String(opt.key)}
