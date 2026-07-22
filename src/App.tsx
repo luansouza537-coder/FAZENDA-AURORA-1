@@ -5261,7 +5261,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // Cooldowns próprios (epidemia 30d, roubo 5d) continuam contando normalmente mesmo
       // quando um evento é pulado por essa trava — ela só decide QUEM dispara HOJE, não
       // reseta a programação de ninguém.
-      let negativeSurpriseFiredToday = nextDayEvent === 'tempestade' || nextDayEvent === 'geada' || nextDayEvent === 'predador';
+      let negativeSurpriseFiredToday = nextDayEvent === 'tempestade' || (nextDayEvent === 'geada' && currentSeasonIdx === 3) || nextDayEvent === 'predador';
 
       // MECHANIC 1: Sistema de Pragas (Pato reduz probabilidade)
       // O aviso "praga amanhã" (nextDayEvent) agora eleva bastante a chance real nesse dia
@@ -5335,7 +5335,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             setTimeout(() => addNotification('⛈️ Tempestade! Produção reduzida hoje.', 'warning', nextDayValue), 0);
             if (!sfx.isMuted) { setTimeout(() => sfx.playThunder(), 200); setTimeout(() => sfx.playThunder(), 900); }
           }
-        } else if (nextDayEvent === 'geada') {
+        } else if (nextDayEvent === 'geada' && currentSeasonIdx === 3) {
           if (insuranceClimate.active) {
             logsToAdd.push({ msg: `🌦️ Geada chegou, mas o Seguro Climático protegeu seus animais!`, type: 'success' });
           } else if (finalAnimals.length > 0) {
@@ -5343,6 +5343,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             logsToAdd.push({ msg: `❄️ Geada! Todos os animais perderam 20 de felicidade e ficaram estressados por 2 dias.`, type: 'error' });
             setTimeout(() => addNotification('❄️ Geada! -20 felicidade e estresse nos animais.', 'warning', nextDayValue), 0);
           }
+        } else if (nextDayEvent === 'geada' && currentSeasonIdx !== 3) {
+          logsToAdd.push({ msg: `❄️ A previsão indicava risco de geada, mas não é inverno — sem risco real hoje.`, type: 'info' });
         } else if (nextDayEvent === 'predador') {
           if (predadorTargetId !== null) {
             const target = finalAnimals.find(a => a.id === predadorTargetId);

@@ -94,7 +94,7 @@ const VEHICLE_CATEGORIES = [
 // custavam 350k/800k/2M (89-507× o pico) e eram inalcançáveis. Reduzidos uma ordem
 // de grandeza; Lote 7 acompanhou (70k→30k) para manter a escada crescente.
 const LOT_TIERS = [
-  { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3000, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 10000, minLevel: 8 },
+  { lot: 2, price: 1000, minLevel: 2 }, { lot: 3, price: 3000, minLevel: 4 }, { lot: 4, price: 9000, minLevel: 6 }, { lot: 5, price: 16000, minLevel: 8 },
   { lot: 6, price: 28000, minLevel: 10 }, { lot: 7, price: 30000, minLevel: 12 }, { lot: 8, price: 35000, minLevel: 14 }, { lot: 9, price: 90000, minLevel: 16 }, { lot: 10, price: 250000, minLevel: 18 },
 ];
 const WELL_TIERS = [{ lvl: 1, price: 700 }, { lvl: 2, price: 2000 }, { lvl: 3, price: 5500 }, { lvl: 4, price: 25000 }, { lvl: 5, price: 70000 }];
