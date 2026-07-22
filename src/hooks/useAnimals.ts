@@ -261,7 +261,7 @@ export function useAnimals({
     if (type === 'galinha' || type === 'codorna' || type === 'pavao' || type === 'peru' || type === 'frango_corte' || type === 'galinha_caipira') return { feedType: 'racaoAves', feedLabel: 'Ração de Aves' };
     if (type === 'pato' || type === 'ganso') return { feedType: 'racaoAquatica', feedLabel: 'Ração Aquática' };
     if (type === 'coelho_angora') return { feedType: 'racaoCoelho', feedLabel: 'Ração de Coelhos' };
-    if (type === 'tanque_tilapia') return { feedType: 'racaoPeixe' as any, feedLabel: 'Ração de Peixes' };
+    if (type === 'tanque_tilapia' || type === 'tanque_pirarucu') return { feedType: 'racaoPeixe' as any, feedLabel: 'Ração de Peixes' };
     if (type === 'ra' || type === 'avestruz' || type === 'jacare') return { feedType: 'racaoCarnivora', feedLabel: 'Ração Carnívora' };
     // minhoca, caracol, bicho_seda: eat nothing — but buyAnimal still checks feedType; we use racaoBovina as dummy and override qty check below
     if (type === 'minhoca' || type === 'caracol' || type === 'bicho_seda') return { feedType: 'racaoBovina', feedLabel: 'Nenhuma ração necessária' };
@@ -302,6 +302,7 @@ export function useAnimals({
     if (type === 'boi_angus') basePrice = 1500;
     if (type === 'cavalo') basePrice = 550;
     if (type === 'cabra_boer') basePrice = 380;
+    if (type === 'tanque_pirarucu') basePrice = 1000;
 
     // Specialization purchase penalty
     const purchasePenalty =
@@ -373,7 +374,7 @@ export function useAnimals({
     else if (animal.type === 'galinha' || animal.type === 'codorna' || animal.type === 'pavao' || animal.type === 'peru') { feedType = 'racaoAves'; feedLabel = 'Ração de Aves'; }
     else if (animal.type === 'pato' || animal.type === 'ganso') { feedType = 'racaoAquatica'; feedLabel = 'Ração Aquática'; }
     else if (animal.type === 'coelho_angora') { feedType = 'racaoCoelho'; feedLabel = 'Ração de Coelhos'; }
-    else if (animal.type === 'tanque_tilapia') { feedType = 'racaoPeixe' as any; feedLabel = 'Ração de Peixes'; }
+    else if (animal.type === 'tanque_tilapia' || animal.type === 'tanque_pirarucu') { feedType = 'racaoPeixe' as any; feedLabel = 'Ração de Peixes'; }
     else if (animal.type === 'ra' || animal.type === 'avestruz' || animal.type === 'jacare') { feedType = 'racaoCarnivora'; feedLabel = 'Ração Carnívora'; }
 
     if ((inventory[feedType] ?? 0) < 1) {
@@ -1255,6 +1256,48 @@ export function useAnimals({
     spawnFeedback('💰', `+${value} 💰`, event);
   };
 
+  // 5f3. Tanque de Pirarucu — peixe amazônico premium: cresce rápido, vendido de uma vez por peso
+  // Valor calibrado pra ficar ~65% do teto do Boi Angus (item mais valioso do jogo) — o Pirarucu
+  // é caríssimo por kg na vida real, mas é um peixe de ~10-15kg, bem menor que um boi inteiro.
+  const calculatePirarucuValue = (pirarucu: Animal): number => {
+    const w = pirarucu.weightGain || 0.0;
+    const base = 250 + w * 1100;
+    const happinessBonus = (pirarucu.happiness / 100) * 200;
+    return Math.max(80, Math.round((base + happinessBonus) * getCarneMultiplier()));
+  };
+
+  const sellPirarucu = (id: number, event: React.MouseEvent) => {
+    if (event) event.preventDefault();
+    const animal = animals.find(a => a.id === id);
+    if (!animal || animal.type !== 'tanque_pirarucu') return;
+    if (animal.isAdult === false) {
+      addLog('🐋 O pirarucu ainda precisa engordar antes da despesca!', 'error');
+      return;
+    }
+
+    const value = Math.floor(calculatePirarucuValue(animal) * (getFreightMultiplier ? getFreightMultiplier('animais') : 1));
+
+    setGold(prev => prev + value);
+    setDailyEarning(prev => prev + value);
+    addFinancialEntry?.({ day: currentDay, type: 'income', amount: value, category: 'venda', description: `Venda: ${animal.name} (Pirarucu)` });
+    setStats(prev => ({
+      ...prev,
+      totalEarned: prev.totalEarned + value,
+      totalSold: prev.totalSold + 1,
+      totalPirarucuSold: ((prev as any).totalPirarucuSold || 0) + 1,
+      totalMerchantTrades: merchantActive ? ((prev as any).totalMerchantTrades || 0) + 1 : ((prev as any).totalMerchantTrades || 0)
+    }));
+    setWeeklyStats((prev: any) => ({ ...prev, earnings: prev.earnings + value }));
+    setWeeklySales((prev: any) => ({ ...prev, carne: (prev.carne || 0) + 1 }));
+
+    setAnimals(prev => prev.filter(a => a.id !== id));
+    updateMissionProgress('sell_livestock', 1);
+    addLog(`💰 ${animal.name} (Pirarucu) foi despescado e vendido por ${value} moedas!`, 'success');
+    triggerAudioResult(() => sfx.playSound('sell_animal'));
+    triggerConfetti(event);
+    spawnFeedback('💰', `+${value} 💰`, event);
+  };
+
   // 5e. Vaca Jersey — 1 leite premium por dia
   const collectLeiteJersey = (id: number, event: React.MouseEvent) => {
     if (event) event.preventDefault();
@@ -1540,20 +1583,21 @@ export function useAnimals({
     if (type === 'cabra_angora' && farmLevel < 9) { addLog('🔒 Cabra Angorá requer Nível 9!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'cavalo' && farmLevel < 6) { addLog('🔒 Cavalo requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'cabra_boer' && farmLevel < 7) { addLog('🔒 Cabra Boer requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'tanque_pirarucu' && farmLevel < 12) { addLog('🔒 Tanque de Pirarucu requer Nível 12!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
 
     const { feedType } = getAnimalFeedType(type);
     const noFeedAnimals = ['minhoca', 'caracol', 'bicho_seda', 'colmeia_abelhas'];
 
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
-    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'frango_corte' ? getUniqueFrangoName(animals) : type === 'boi_angus' ? getUniqueAngusName(animals) : type === 'cabra_boer' ? getUniqueBoerName(animals) : type === 'cavalo' ? getUniqueCavaloName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : type === 'tanque_tilapia' ? 'Tanque de Tilápia' : getRandomName(type);
+    const name = type === 'boi' ? getUniqueOxName(animals) : type === 'frango_corte' ? getUniqueFrangoName(animals) : type === 'boi_angus' ? getUniqueAngusName(animals) : type === 'cabra_boer' ? getUniqueBoerName(animals) : type === 'cavalo' ? getUniqueCavaloName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : type === 'tanque_tilapia' ? 'Tanque de Tilápia' : type === 'tanque_pirarucu' ? 'Tanque de Pirarucu' : getRandomName(type);
 
     // Custom initial stats
     const happiness = Math.floor(Math.random() * 21) + 60; // between 60 and 80
 
     // F1: maxAge por tipo com variação ±20%
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140, boi_angus: 160, cavalo: 160, cabra_boer: 100 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140, boi_angus: 160, cavalo: 160, cabra_boer: 100, tanque_pirarucu: 9999 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
-    const variation = (type === 'colmeia_abelhas' || type === 'tanque_tilapia') ? 1 : 1 + (Math.random() * 0.4 - 0.2);
+    const variation = (type === 'colmeia_abelhas' || type === 'tanque_tilapia' || type === 'tanque_pirarucu') ? 1 : 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
 
     const newAnimal: Animal = {
@@ -1581,6 +1625,7 @@ export function useAnimals({
       ...(type === 'vaca_jersey' && { hasProducedToday: false }),
       ...(type === 'boi_angus' && { weightGain: 0.05 }),
       ...(type === 'cabra_boer' && { weightGain: 0.08 }),
+      ...(type === 'tanque_pirarucu' && { weightGain: 0.15, trait: undefined }),
       ...(type === 'cavalo' && { speed: Math.floor(Math.random() * 21) + 40, burst: Math.floor(Math.random() * 21) + 30, stamina: Math.floor(Math.random() * 21) + 30, raceWins: 0 }), // linhagem
       ...(type === 'cabra' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
       ...(type === 'ovelha_leiteira' && { isLactating: true, lactationCycle: 0, hasProducedToday: false }),
@@ -1690,7 +1735,7 @@ export function useAnimals({
     const newId = animals.length > 0 ? Math.max(...animals.map(a => a.id)) + 1 : 1;
     const name = type === 'boi' ? getUniqueOxName(animals) : type === 'frango_corte' ? getUniqueFrangoName(animals) : type === 'porco' ? getUniquePorcoName(animals) : type === 'minhoca' ? 'Minhocário' : type === 'caracol' ? 'Criatório de Caracóis' : type === 'colmeia_abelhas' ? 'Colmeia de Abelhas' : getRandomName(type);
     const happiness = Math.floor(Math.random() * 21) + 60;
-    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140, boi_angus: 160, cavalo: 160, cabra_boer: 100 };
+    const baseMaxAgeMap: Record<string, number> = { vaca: 120, ovelha: 90, boi: 150, galinha: 60, cabra: 200, lhama: 180, pato: 80, ganso: 150, bufalo: 220, pavao: 160, codorna: 60, alpaca: 180, minhoca: 365, caracol: 200, coelho_angora: 100, bicho_seda: 20, ra: 120, avestruz: 365, jacare: 400, porco: 120, colmeia_abelhas: 9999, ovelha_leiteira: 180, peru: 150, cabra_angora: 150, frango_corte: 45, galinha_caipira: 70, tanque_tilapia: 9999, vaca_jersey: 140, boi_angus: 160, cavalo: 160, cabra_boer: 100, tanque_pirarucu: 9999 };
     const baseMaxAge = baseMaxAgeMap[type] ?? 90;
     const variation = 1 + (Math.random() * 0.4 - 0.2);
     const maxAge = Math.round(baseMaxAge * variation);
@@ -1757,6 +1802,7 @@ export function useAnimals({
     calculateFrangoValue,
     calculateAngusValue,
     calculateBoerValue,
+    calculatePirarucuValue,
     calculatePorcoValue,
     calculatePeruValue,
     sellPorco,
@@ -1786,6 +1832,7 @@ export function useAnimals({
     sellFrango,
     sellAngus,
     sellBoer,
+    sellPirarucu,
     collectPeixe,
     collectLeiteJersey,
     sellAnimal,

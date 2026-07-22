@@ -45,6 +45,8 @@ interface AnimalGridProps {
   calculateAngusValue?: (animal: Animal) => number;
   sellBoer?: (id: number, e: React.MouseEvent) => void;
   calculateBoerValue?: (animal: Animal) => number;
+  sellPirarucu?: (id: number, e: React.MouseEvent) => void;
+  calculatePirarucuValue?: (animal: Animal) => number;
   collectPeixe?: (id: number, e: React.MouseEvent) => void;
   collectLeiteJersey?: (id: number, e: React.MouseEvent) => void;
   getFrangoEmoji?: (weight: number) => string;
@@ -140,6 +142,8 @@ export default function AnimalGrid({
   calculateAngusValue,
   sellBoer,
   calculateBoerValue,
+  sellPirarucu,
+  calculatePirarucuValue,
   collectPeixe,
   collectLeiteJersey,
   getFrangoEmoji,
@@ -801,6 +805,23 @@ export default function AnimalGrid({
                       {farmLevel < 7 ? '🔒 Nível 7' : 'Comprar + 1 🐐'}
                     </button>
                   </div>
+                  {/* Nível 12 — tanque_pirarucu */}
+                  <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-cyan-700 w-full max-w-[190px] text-center shadow-md relative">
+                    {farmLevel < 12 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv12+</span>}
+                    <span className="text-4xl">🐋</span>
+                    <h4 className="font-display font-black text-cyan-900 text-xs uppercase mt-1">Tanque de Pirarucu</h4>
+                    <p className="text-[8px] text-stone-500 font-mono mt-0.5 leading-tight">Peixe amazônico premium — cresce rápido e vende de uma vez, por peso, quando adulto. Item mais caro que a tilápia comum.</p>
+                    <span className="text-cyan-900 text-xs font-mono font-bold mt-1">Custo: 💰 {getAnimalPurchasePrice('tanque_pirarucu')}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => buyAnimal('tanque_pirarucu', e)}
+                      disabled={gold < getAnimalPurchasePrice('tanque_pirarucu') || farmLevel < 12}
+                      className="mt-2.5 bg-cyan-700 hover:bg-cyan-600 disabled:bg-stone-300 disabled:text-stone-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl border-b-2 border-cyan-900 shadow-sm tracking-wider active:translate-y-0.5 transition-all cursor-pointer"
+                      title="Compra um Tanque de Pirarucu. Engorda rápido — venda quando adulto pelo peso, valor bem acima da tilápia."
+                    >
+                      {farmLevel < 12 ? '🔒 Nível 12' : 'Comprar + 1 🐋'}
+                    </button>
+                  </div>
                   {/* Nível 7 — cavalo */}
                   <div className="flex flex-col items-center p-3.5 bg-white/90 rounded-[24px] border-2 border-amber-500 w-full max-w-[190px] text-center shadow-md relative">
                     {farmLevel < 6 && <span className="absolute -top-2.5 -right-2 bg-stone-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase scale-90">Nv6+</span>}
@@ -866,7 +887,7 @@ export default function AnimalGrid({
                       const lotIndex = Math.floor(i / 5);
                       const slotAnimal = animals[i];
                       const typeEmoji: Record<string, string> = {
-                        vaca:'🐄', ovelha:'🐑', boi:'🐂', galinha:'🐔', cabra:'🐐', frango_corte:'🐓', galinha_caipira:'🐔', tanque_tilapia:'🐟', vaca_jersey:'🐄', boi_angus:'🐂', cavalo:'🐴', cabra_boer:'🐐',
+                        vaca:'🐄', ovelha:'🐑', boi:'🐂', galinha:'🐔', cabra:'🐐', frango_corte:'🐓', galinha_caipira:'🐔', tanque_tilapia:'🐟', vaca_jersey:'🐄', boi_angus:'🐂', cavalo:'🐴', cabra_boer:'🐐', tanque_pirarucu:'🐋',
                         lhama:'🦙', pato:'🦆', ganso:'🦢', bufalo:'🐃', pavao:'🦚',
                         codorna:'🐦', alpaca:'🦙', minhoca:'🪱', caracol:'🐌',
                         coelho_angora:'🐰', bicho_seda:'🐛', ra:'🐸', avestruz:'🦤', jacare:'🐊',
@@ -1096,6 +1117,8 @@ export default function AnimalGrid({
                               calculateAngusValue={calculateAngusValue}
                               onSellBoer={sellBoer}
                               calculateBoerValue={calculateBoerValue}
+                              onSellPirarucu={sellPirarucu}
+                              calculatePirarucuValue={calculatePirarucuValue}
                               onCollectPeixe={collectPeixe}
                               onCollectLeiteJersey={collectLeiteJersey}
                               calculateFrangoValue={calculateFrangoValue}
@@ -1134,6 +1157,8 @@ export default function AnimalGrid({
                         calculateAngusValue={calculateAngusValue}
                         onSellBoer={sellBoer}
                         calculateBoerValue={calculateBoerValue}
+                        onSellPirarucu={sellPirarucu}
+                        calculatePirarucuValue={calculatePirarucuValue}
                         onCollectPeixe={collectPeixe}
                         onCollectLeiteJersey={collectLeiteJersey}
                         calculateFrangoValue={calculateFrangoValue}
