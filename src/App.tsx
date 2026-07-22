@@ -4763,6 +4763,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
       // --- LONG CONTRACTS: Liquidação semanal de prêmios ---
       let longContractBonusForGold = 0;
+      let longContractWeeklyXp = 0;
       if (isWeeklyBillDay) {
         // Sincronizada com getItemBaseSellPrice (valores de nível alto quando o preço escala com farmLevel)
         const LONG_BASE_PRICES: Record<string, number> = { milk: 8, egg: 4, wool: 15, cheese: 30, queijoCoalho: 35, queijoMucarela: 55, queijoBrie: 90, butter: 55, yogurt: 40, goat_milk: 16, buffalo_milk: 35, buffalo_mozzarella: 165, duck_egg: 12, quail_egg: 18, goose_egg: 50, alpaca_wool: 75, angora_wool: 90, llama_wool: 28, muco: 48, mel_envasado: 320, seda_bruta: 100, boi: 300, porco: 180, boi_porco: 300, mayo: 14, queijo_cabra: 90, iogurte_cabra: 70, tapete_lhama: 120, leite_condensado: 145, tecido_alpaca: 320, cachecol_angora: 260, coxa_ra: 110, carne_avestruz: 220, couro_avestruz: 260, fio_seda: 280, carne_jacare: 300, couro_jacare: 500, sheep_milk: 28, queijo_pecorino: 280, iogurte_ovelha: 80, ricota_ovelha: 95, doce_leite_ovelha: 160, ovo_caipira: 10, peixe: 45, bolo_caipira: 50, queijo_minas_jersey: 95, biofertilizante: 90, bolinho_peixe: 85, bolsa_exotica: 820, burrata: 380, cachecol_lhama: 80, cachecol_mohair: 280, cogumelo: 35, conserva_codorna: 160, conserva_peixe: 140, creme_cosmetico: 220, crepe_rustico: 35, doce_leite_bufala: 250, doce_leite_jersey: 120, fertile_egg: 36, fio_lhama: 45, gorro_lhama: 75, gouda_jersey: 200, hidromel: 260, humus: 22, iogurte_bufala: 90, leite_jersey: 14, luvas_lhama: 70, manta_lhama: 200, manteiga_bufala: 110, manteiga_jersey: 60, mascara_facial: 180, massa_fresca: 78, mel: 80, minhoca_viva: 18, mohair: 120, moqueca: 160, ovo_defumado: 120, pao_rustico: 30, pate_pato: 210, peixe_defumado: 70, poncho_lhama: 140, pudim_caipira: 35, queijo_parmesao: 200, queijo_serra: 280, risoto_cogumelo: 150, sabonete_natural: 180, scarf: 50, serum_facial: 220, sopa_cogumelo: 100, waffle_mel: 90 };
@@ -4775,7 +4776,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (deliveredThisWeek >= goal) {
             const bonus = Math.floor(deliveredThisWeek * premium);
             longContractBonusForGold += bonus;
-            logsToAdd.push({ msg: `📜 "${c.client}": semana cumprida (${deliveredThisWeek}/${goal} un)! +${bonus}💰 prêmio.`, type: 'success' });
+            const totalWeeks = Math.max(1, Math.round((c.durationDays ?? 60) / 7));
+            const weeklyXp = Math.max(1, Math.round(((c.completionXP ?? 0) * 0.5) / totalWeeks));
+            longContractWeeklyXp += weeklyXp;
+            logsToAdd.push({ msg: `📜 "${c.client}": semana cumprida (${deliveredThisWeek}/${goal} un)! +${bonus}💰 prêmio +${weeklyXp} XP.`, type: 'success' });
           } else if (deliveredThisWeek > 0) {
             const bonus = Math.floor(deliveredThisWeek * premium * 0.5);
             longContractBonusForGold += bonus;
@@ -4794,7 +4798,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             const cancelRate = c.quantity > 0 ? c.delivered / c.quantity : 0;
             if (cancelRate >= 0.8 && (c.completionBonus ?? 0) > 0) {
               const bonus = c.completionBonus ?? 0;
-              const xp = c.completionXP ?? 0;
+              // Metade do XP já foi paga semanalmente durante o contrato; aqui só o restante.
+              const xp = Math.round((c.completionXP ?? 0) * 0.5);
               setGold(prev => prev + bonus);
               setFarmXp(prev => prev + xp);
               addFinancialEntry?.({ day: nextDayValue, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
@@ -4945,6 +4950,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
         return newGold;
       });
+      if (longContractWeeklyXp > 0) setFarmXp(prev => prev + longContractWeeklyXp);
 
       // --- DEBUG MODE: fluxo de ouro diário ---
       if (debugMode) {
@@ -5654,7 +5660,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             const completionRate = c.quantity > 0 ? c.delivered / c.quantity : 0;
             if (completionRate >= 0.8) {
               const bonus = c.completionBonus ?? 0;
-              const xp = c.completionXP ?? 0;
+              // Metade do XP já foi paga semanalmente durante o contrato; aqui só o restante.
+              const xp = Math.round((c.completionXP ?? 0) * 0.5);
               setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted || 0) + 1 }));
               if (bonus > 0) {
                 setGold(prev => prev + bonus);

@@ -143,6 +143,13 @@ export function useInventory({
     if (c && addCraftCost) addCraftCost(c.energy, c.water);
   };
 
+  // XP de fabricação escala com o valor de mercado do item — itens caros/avançados
+  // (Bolsa Exótica, Gouda Jersey...) valem mais XP do que itens básicos (Queijo Coalho).
+  const craftXp = (product: string): number => {
+    const price = getDynamicTransactionPrice(product as any);
+    return Math.max(3, Math.round(price / 20));
+  };
+
   const PRODUCT_FREIGHT_CAT: Record<string, string> = {
     milk: 'laticinios', goat_milk: 'laticinios', sheep_milk: 'laticinios', buffalo_milk: 'laticinios',
     butter: 'laticinios', yogurt: 'laticinios', iogurte_cabra: 'laticinios',
@@ -522,6 +529,7 @@ export function useInventory({
     setTotalQueijosFabricados(prev => prev + 1);
     applyCraftCost('buffalo_mozzarella');
     addLog('🧀 Iniciou a maturação de Muçarela de Búfala (10 dias).', 'success');
+    setFarmXp(prev => prev + craftXp('buffalo_mozzarella'));
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', 'Muçarela Búfala', event);
   };
@@ -550,6 +558,7 @@ export function useInventory({
     }));
     applyCraftCost('mayo');
     addLog(`🥣 Sucesso! Você misturou vitoriosamente 2 Ovos em 1 pote de Maionese cremosa!`, 'success');
+    setFarmXp(prev => prev + craftXp('mayo'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥣', '+1 Maionese', event);
   };
@@ -572,6 +581,7 @@ export function useInventory({
     }));
     applyCraftCost('bolo_caipira');
     addLog('🍰 Bolo Caipira saindo do forno! Receita da vovó com ovos premium.', 'success');
+    setFarmXp(prev => prev + craftXp('bolo_caipira'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍰', '+1 Bolo Caipira', event);
   };
@@ -593,6 +603,7 @@ export function useInventory({
     }));
     applyCraftCost('pudim_caipira');
     addLog('🍮 Pudim Caipira cremoso pronto! O ovo caipira faz toda a diferença.', 'success');
+    setFarmXp(prev => prev + craftXp('pudim_caipira'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍮', '+1 Pudim', event);
   };
@@ -609,6 +620,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 1, sal: ((prev as any).sal ?? 0) - 1, peixe_defumado: ((prev as any).peixe_defumado ?? 0) + 1 } as any));
     applyCraftCost('peixe_defumado');
     addLog('🐟 Tilápia defumada no capricho! Sabor de fazenda.', 'success');
+    setFarmXp(prev => prev + craftXp('peixe_defumado'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🐟', '+1 Defumado', event);
   };
@@ -625,6 +637,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 1, farinha: ((prev as any).farinha ?? 0) - 1, egg: (prev.egg ?? 0) - 1, bolinho_peixe: ((prev as any).bolinho_peixe ?? 0) + 1 } as any));
     applyCraftCost('bolinho_peixe');
     addLog('🥟 Bolinhos de tilápia fritinhos, direto da feira!', 'success');
+    setFarmXp(prev => prev + craftXp('bolinho_peixe'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥟', '+1 Bolinho', event);
   };
@@ -641,6 +654,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 2, milk: prev.milk - 1, sal: ((prev as any).sal ?? 0) - 1, moqueca: ((prev as any).moqueca ?? 0) + 1 } as any));
     applyCraftCost('moqueca');
     addLog('🍲 Moqueca da Fazenda borbulhando! O prato mais nobre da cozinha.', 'success');
+    setFarmXp(prev => prev + craftXp('moqueca'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍲', '+1 Moqueca', event);
   };
@@ -657,6 +671,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) - 2, manteiga_jersey: ((prev as any).manteiga_jersey ?? 0) + 1 } as any));
     applyCraftCost('manteiga_jersey');
     addLog('🧈 Manteiga Jersey amarelinha, batida na hora!', 'success');
+    setFarmXp(prev => prev + craftXp('manteiga_jersey'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧈', '+1 Manteiga Jersey', event);
   };
@@ -673,6 +688,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) - 3, sal: ((prev as any).sal ?? 0) - 1, queijo_minas_jersey: ((prev as any).queijo_minas_jersey ?? 0) + 1 } as any));
     applyCraftCost('queijo_minas_jersey');
     addLog('🧀 Queijo Minas Frescal Jersey pronto — sabor de fazenda!', 'success');
+    setFarmXp(prev => prev + craftXp('queijo_minas_jersey'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧀', '+1 Minas Jersey', event);
   };
@@ -689,6 +705,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, leite_jersey: ((prev as any).leite_jersey ?? 0) - 2, mel: ((prev as any).mel ?? 0) - 1, doce_leite_jersey: ((prev as any).doce_leite_jersey ?? 0) + 1 } as any));
     applyCraftCost('doce_leite_jersey');
     addLog('🍮 Doce de Leite Jersey cremoso no ponto perfeito!', 'success');
+    setFarmXp(prev => prev + craftXp('doce_leite_jersey'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍮', '+1 Doce Jersey', event);
   };
@@ -714,6 +731,7 @@ export function useInventory({
     setStats(prev => ({ ...prev, totalCheese: (prev.totalCheese || 0) + 1 }));
     applyCraftCost('gouda_jersey');
     addLog('🧀 Gouda Jersey na prateleira! Maturação de 8 dias iniciada.', 'success');
+    setFarmXp(prev => prev + craftXp('gouda_jersey'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧀', 'Gouda maturando', event);
   };
@@ -741,6 +759,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'butter', diasRestantes: 1 }]);
     applyCraftCost('butter');
     addLog('🧈 Manteiga em preparo! Ficará pronta em 1 dia.', 'success');
+    setFarmXp(prev => prev + craftXp('butter'));
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧈', 'Preparando... 1d', event);
   };
@@ -768,6 +787,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'yogurt', diasRestantes: 2 }]);
     applyCraftCost('yogurt');
     addLog('🥛 Iogurte em fermentação! Ficará pronto em 2 dias.', 'success');
+    setFarmXp(prev => prev + craftXp('yogurt'));
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🥛', 'Fermentando...', event);
   };
@@ -782,7 +802,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'queijo_cabra', diasRestantes: 5 }]);
     applyCraftCost('queijo_cabra');
     addLog('🧀 Queijo de Cabra em maturação! Pronto em 5 dias.', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('queijo_cabra'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧀', 'Maturando... 5d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -796,7 +816,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'iogurte_cabra', diasRestantes: 1 }]);
     applyCraftCost('iogurte_cabra');
     addLog('🥛 Iogurte de Cabra em fermentação! Pronto em 1 dia.', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('iogurte_cabra'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥛', 'Fermentando... 1d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -810,7 +830,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'queijo_pecorino', diasRestantes: 10 }]);
     applyCraftCost('queijo_pecorino');
     addLog('🧀 Queijo Pecorino em maturação! Pronto em 10 dias.', 'success');
-    setFarmXp(prev => prev + 5);
+    setFarmXp(prev => prev + craftXp('queijo_pecorino'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧀', 'Maturando... 10d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -824,7 +844,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'iogurte_ovelha', diasRestantes: 2 }]);
     applyCraftCost('iogurte_ovelha');
     addLog('🥛 Iogurte de Ovelha em fermentação! Pronto em 2 dias.', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('iogurte_ovelha'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥛', 'Fermentando... 2d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -836,7 +856,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, sheep_milk: (prev.sheep_milk ?? 0) - 3, ricota_ovelha: (prev.ricota_ovelha ?? 0) + 1 }));
     applyCraftCost('ricota_ovelha');
     addLog('🥛 Você fabricou 1 Ricota de Ovelha com 3 leites!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('ricota_ovelha'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥛', '+1 Ricota Ovelha', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -850,7 +870,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'doce_leite_ovelha', diasRestantes: 3 }]);
     applyCraftCost('doce_leite_ovelha');
     addLog('🍮 Doce de Leite de Ovelha em preparo! Pronto em 3 dias.', 'success');
-    setFarmXp(prev => prev + 4);
+    setFarmXp(prev => prev + craftXp('doce_leite_ovelha'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍮', 'Cozinhando... 3d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -863,7 +883,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, milk: prev.milk - 4, butter: (prev.butter ?? 0) - 1, leite_condensado: (prev.leite_condensado ?? 0) + 1 }));
     applyCraftCost('leite_condensado');
     addLog('🥛 Você fabricou 1 Leite Condensado com 4 leites e 1 manteiga!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('leite_condensado'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥛', '+1 L.Condensado', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -876,7 +896,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) - 3, tapete_lhama: (prev.tapete_lhama ?? 0) + 1 }));
     applyCraftCost('tapete_lhama');
     addLog('🪢 Você teceu 1 Tapete de Lhama com 3 lãs de lhama!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('tapete_lhama'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🪢', '+1 Tapete Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -888,7 +908,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, angora_wool: (prev.angora_wool ?? 0) - 2, cachecol_angora: (prev.cachecol_angora ?? 0) + 1 }));
     applyCraftCost('cachecol_angora');
     addLog('🧣 Você confeccionou 1 Cachecol Angorá com 2 lãs angorá!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('cachecol_angora'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧣', '+1 Cachecol Angorá', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -900,7 +920,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, mohair: (prev.mohair ?? 0) - 2, cachecol_mohair: (prev.cachecol_mohair ?? 0) + 1 }));
     applyCraftCost('cachecol_mohair');
     addLog('🧣 Você confeccionou 1 Cachecol Mohair com 2 mohairs!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('cachecol_mohair'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧣', '+1 Cachecol Mohair', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -912,7 +932,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, alpaca_wool: (prev.alpaca_wool ?? 0) - 3, tecido_alpaca: (prev.tecido_alpaca ?? 0) + 1 }));
     applyCraftCost('tecido_alpaca');
     addLog('🧶 Você teceu 1 Tecido de Alpaca com 3 lãs de alpaca!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('tecido_alpaca'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧶', '+1 Tecido Alpaca', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -924,7 +944,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, seda_bruta: (prev.seda_bruta ?? 0) - 2, fio_seda: (prev.fio_seda ?? 0) + 1 }));
     applyCraftCost('fio_seda');
     addLog('🪡 Você fiou 1 Fio de Seda com 2 sedas brutas!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('fio_seda'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🪡', '+1 Fio de Seda', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -938,7 +958,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, fio_seda: (prev.fio_seda ?? 0) - 1, cachecol_angora: (prev.cachecol_angora ?? 0) - 1, tecido_alpaca: (prev.tecido_alpaca ?? 0) - 1, manta_premium: (prev.manta_premium ?? 0) + 1 }));
     applyCraftCost('manta_premium');
     addLog('✨ Você criou 1 Manta Premium! Uma obra-prima têxtil!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('manta_premium'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('✨', '+1 Manta Premium', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -952,7 +972,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, duck_egg: (prev.duck_egg ?? 0) - 2, butter: (prev.butter ?? 0) - 1, pate_pato: (prev.pate_pato ?? 0) + 1 }));
     applyCraftCost('pate_pato');
     addLog('🥞 Você preparou Panquecinhas Douradas de Ovos de Pato!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('pate_pato'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥞', '+1 Panquecinha', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -964,7 +984,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) - 1, ovo_defumado: (prev.ovo_defumado ?? 0) + 1 }));
     applyCraftCost('ovo_defumado');
     addLog('🥚 Você defumou 1 Ovo de Ganso com maestria!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('ovo_defumado'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥚', '+1 Ovo Defumado', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -976,7 +996,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, quail_egg: (prev.quail_egg ?? 0) - 6, conserva_codorna: (prev.conserva_codorna ?? 0) + 1 }));
     applyCraftCost('conserva_codorna');
     addLog('🥚 Você preparou 1 Conserva de Codorna com 6 ovos!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('conserva_codorna'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥚', '+1 Conserva Codorna', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -990,7 +1010,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 2, mel: (prev.mel ?? 0) - 1, creme_cosmetico: (prev.creme_cosmetico ?? 0) + 1 }));
     applyCraftCost('creme_cosmetico');
     addLog('🧴 Você formulou 1 Creme Cosmético de luxo!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('creme_cosmetico'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧴', '+1 Creme Cosmético', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -1004,7 +1024,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 1, mel: (prev.mel ?? 0) - 1, goat_milk: (prev.goat_milk ?? 0) - 1, sabonete_natural: (prev.sabonete_natural ?? 0) + 1 }));
     applyCraftCost('sabonete_natural');
     addLog('🧼 Você produziu 1 Sabonete Natural artesanal!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('sabonete_natural'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧼', '+1 Sabonete Natural', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -1017,7 +1037,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 2, mel: (prev.mel ?? 0) - 1, serum_facial: (prev.serum_facial ?? 0) + 1 }));
     applyCraftCost('serum_facial');
     addLog('💧 Você formulou 1 Sérum Facial de mucina!', 'success');
-    setFarmXp(prev => prev + 4);
+    setFarmXp(prev => prev + craftXp('serum_facial'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('💧', '+1 Sérum Facial', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -1029,7 +1049,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, muco: (prev.muco ?? 0) - 3, mascara_facial: (prev.mascara_facial ?? 0) + 1 }));
     applyCraftCost('mascara_facial');
     addLog('🧖 Você formulou 1 Máscara Facial de mucina!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('mascara_facial'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧖', '+1 Máscara Facial', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -1079,7 +1099,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, couro_jacare: (prev.couro_jacare ?? 0) - 1, bolsa_exotica: (prev.bolsa_exotica ?? 0) + 1 }));
     applyCraftCost('bolsa_exotica');
     addLog('👜 Você criou 1 Bolsa Exótica de couro de jacaré!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('bolsa_exotica'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('👜', '+1 Bolsa Exótica', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -1167,6 +1187,7 @@ export function useInventory({
 
     applyCraftCost(tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : 'queijoBrie');
     addLog(`🧀 Você iniciou a maturação de ${label}. Ficará pronto em ${diasMaturation} dia(s).`, 'success');
+    setFarmXp(prev => prev + craftXp(tipo === 'coalho' ? 'queijoCoalho' : tipo === 'mucarela' ? 'queijoMucarela' : 'queijoBrie'));
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', `Iniciou ${label}`, event);
   };
@@ -1200,6 +1221,7 @@ export function useInventory({
     setStats(prev => ({ ...prev, totalCheese: (prev.totalCheese || 0) + 1 }));
     applyCraftCost('queijo_parmesao');
     addLog('🧀 Iniciou maturação do Queijo Parmesão. Ficará pronto em 15 dias.', 'success');
+    setFarmXp(prev => prev + craftXp('queijo_parmesao'));
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', 'Iniciou Parmesão', event);
   };
@@ -1233,6 +1255,7 @@ export function useInventory({
     setStats(prev => ({ ...prev, totalCheese: (prev.totalCheese || 0) + 1 }));
     applyCraftCost('queijo_serra');
     addLog('🧀 Iniciou maturação do Queijo da Serra. Ficará pronto em 20 dias.', 'success');
+    setFarmXp(prev => prev + craftXp('queijo_serra'));
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🧀', 'Iniciou Q. Serra', event);
   };
@@ -1271,6 +1294,7 @@ export function useInventory({
     }));
     applyCraftCost('kit_gourmet');
     addLog('🎁 Kit Gourmet Premiado montado! Vale 900 moedas.', 'success');
+    setFarmXp(prev => prev + 45);
     triggerAudioResult(() => sfx.playSound('collect'));
     if (event) spawnFeedback('🎁', '+1 Kit Gourmet', event);
   };
@@ -1287,6 +1311,7 @@ export function useInventory({
     setScarfQueue(prev => [...prev, { diasRestantes: 2 }]);
     applyCraftCost('scarf');
     addLog(`🧶 Cachecol em produção! Pronto em 2 dias.`, 'info');
+    setFarmXp(prev => prev + craftXp('scarf'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧶', 'Tecendo... 2d', event);
   };
@@ -1947,7 +1972,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) - 2, milk: prev.milk - 3, hidromel: (prev.hidromel ?? 0) + 1 }));
     applyCraftCost('hidromel');
     addLog('🍺 Hidromel artesanal produzido! (+180💰)', 'success');
-    setFarmXp(prev => prev + 5);
+    setFarmXp(prev => prev + craftXp('hidromel'));
     spawnFeedback('🍺', 'Hidromel!', event);
   };
 
@@ -1957,7 +1982,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) - 3, risoto_cogumelo: (prev.risoto_cogumelo ?? 0) + 1 }));
     applyCraftCost('risoto_cogumelo');
     addLog('🍄 Risoto de Cogumelo preparado! (+150💰)', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('risoto_cogumelo'));
     spawnFeedback('🍄', 'Risoto!', event);
   };
 
@@ -1967,7 +1992,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, peixe: (prev.peixe ?? 0) - 2, conserva_peixe: (prev.conserva_peixe ?? 0) + 1 }));
     applyCraftCost('conserva_peixe');
     addLog('🐟 Conserva de Peixe envasada! (+95💰)', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('conserva_peixe'));
     spawnFeedback('🐟', 'Conserva!', event);
   };
 
@@ -1977,7 +2002,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, mel: (prev.mel ?? 0) - 3, mel_envasado: (prev.mel_envasado ?? 0) + 1 }));
     applyCraftCost('mel_envasado');
     addLog('🍯 Mel Envasado produzido! (+200💰)', 'success');
-    setFarmXp(prev => prev + 4);
+    setFarmXp(prev => prev + craftXp('mel_envasado'));
     spawnFeedback('🍯', 'Mel!', event);
   };
 
@@ -1987,7 +2012,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, cogumelo: (prev.cogumelo ?? 0) - 2, sopa_cogumelo: (prev.sopa_cogumelo ?? 0) + 1 }));
     applyCraftCost('sopa_cogumelo');
     addLog('🍲 Sopa de Cogumelo preparada! (+100💰)', 'success');
-    setFarmXp(prev => prev + 2);
+    setFarmXp(prev => prev + craftXp('sopa_cogumelo'));
     spawnFeedback('🍲', 'Sopa!', event);
   };
 
@@ -2000,7 +2025,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) - 1, fio_lhama: (prev.fio_lhama ?? 0) + 1 }));
     applyCraftCost('fio_lhama');
     addLog('🧶 Você fiou 1 Fio de Lhama!', 'success');
-    setFarmXp(prev => prev + 2);
+    setFarmXp(prev => prev + craftXp('fio_lhama'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧶', '+1 Fio Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2013,7 +2038,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, fio_lhama: (prev.fio_lhama ?? 0) - 1, llama_wool: (prev.llama_wool ?? 0) - 1, cachecol_lhama: (prev.cachecol_lhama ?? 0) + 1 }));
     applyCraftCost('cachecol_lhama');
     addLog('🧣 Você confeccionou 1 Cachecol de Lhama!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('cachecol_lhama'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧣', '+1 Cachecol Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2025,7 +2050,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) - 2, gorro_lhama: (prev.gorro_lhama ?? 0) + 1 }));
     applyCraftCost('gorro_lhama');
     addLog('🧢 Você confeccionou 1 Gorro de Lhama!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('gorro_lhama'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧢', '+1 Gorro Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2037,7 +2062,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, llama_wool: (prev.llama_wool ?? 0) - 2, luvas_lhama: (prev.luvas_lhama ?? 0) + 1 }));
     applyCraftCost('luvas_lhama');
     addLog('🧤 Você confeccionou 1 par de Luvas de Lhama!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('luvas_lhama'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧤', '+1 Luvas Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2049,7 +2074,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, fio_lhama: (prev.fio_lhama ?? 0) - 2, poncho_lhama: (prev.poncho_lhama ?? 0) + 1 }));
     applyCraftCost('poncho_lhama');
     addLog('🦙 Você confeccionou 1 Poncho de Lhama!', 'success');
-    setFarmXp(prev => prev + 4);
+    setFarmXp(prev => prev + craftXp('poncho_lhama'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🦙', '+1 Poncho Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2062,7 +2087,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, poncho_lhama: (prev.poncho_lhama ?? 0) - 1, fio_lhama: (prev.fio_lhama ?? 0) - 1, manta_lhama: (prev.manta_lhama ?? 0) + 1 }));
     applyCraftCost('manta_lhama');
     addLog('🛏️ Você criou 1 Manta de Lhama artesanal!', 'success');
-    setFarmXp(prev => prev + 5);
+    setFarmXp(prev => prev + craftXp('manta_lhama'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🛏️', '+1 Manta Lhama', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2078,7 +2103,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'iogurte_bufala', diasRestantes: 2 }]);
     applyCraftCost('iogurte_bufala');
     addLog('🥛 Iogurte de Búfala em fermentação! Pronto em 2 dias.', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('iogurte_bufala'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥛', 'Fermentando... 2d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2092,7 +2117,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'manteiga_bufala', diasRestantes: 1 }]);
     applyCraftCost('manteiga_bufala');
     addLog('🧈 Manteiga de Búfala em preparo! Pronta em 1 dia.', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('manteiga_bufala'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧈', 'Preparando... 1d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2107,7 +2132,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'doce_leite_bufala', diasRestantes: 3 }]);
     applyCraftCost('doce_leite_bufala');
     addLog('🍮 Doce de Leite de Búfala em preparo! Pronto em 3 dias.', 'success');
-    setFarmXp(prev => prev + 4);
+    setFarmXp(prev => prev + craftXp('doce_leite_bufala'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍮', 'Cozinhando... 3d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2122,7 +2147,7 @@ export function useInventory({
     setQueijosEmMaturacao(prev => [...prev, { tipo: 'burrata', diasRestantes: 4 }]);
     applyCraftCost('burrata');
     addLog('🧀 Burrata em maturação! Pronta em 4 dias.', 'success');
-    setFarmXp(prev => prev + 5);
+    setFarmXp(prev => prev + craftXp('burrata'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧀', 'Maturando... 4d', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2137,7 +2162,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, goose_egg: (prev.goose_egg ?? 0) - 1, farinha: (prev.farinha ?? 0) - 1, massa_fresca: (prev.massa_fresca ?? 0) + 1 }));
     applyCraftCost('massa_fresca');
     addLog('🍝 Você preparou 1 Massa Fresca de Ovo de Ganso!', 'success');
-    setFarmXp(prev => prev + 4);
+    setFarmXp(prev => prev + craftXp('massa_fresca'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🍝', '+1 M.Fresca Ganso', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2151,7 +2176,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, egg: (prev.egg ?? 0) - 1, farinha: (prev.farinha ?? 0) - 1, crepe_rustico: (prev.crepe_rustico ?? 0) + 1 }));
     applyCraftCost('crepe_rustico');
     addLog('🥞 Você preparou 1 Crepe Rústico!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('crepe_rustico'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥞', '+1 Crepe Rústico', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2165,7 +2190,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, farinha: (prev.farinha ?? 0) - 2, milk: (prev.milk ?? 0) - 1, pao_rustico: (prev.pao_rustico ?? 0) + 1 }));
     applyCraftCost('pao_rustico');
     addLog('🥐 Você preparou 1 Pão Rústico!', 'success');
-    setFarmXp(prev => prev + 3);
+    setFarmXp(prev => prev + craftXp('pao_rustico'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🥐', '+1 Pão Rústico', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2180,7 +2205,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, farinha: (prev.farinha ?? 0) - 1, egg: (prev.egg ?? 0) - 1, mel: (prev as any).mel - 1, waffle_mel: (prev as any).waffle_mel + 1 }));
     applyCraftCost('waffle_mel');
     addLog('🧇 Você preparou 1 Waffle de Mel!', 'success');
-    setFarmXp(prev => prev + 5);
+    setFarmXp(prev => prev + craftXp('waffle_mel'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧇', '+1 Waffle de Mel', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
@@ -2193,7 +2218,7 @@ export function useInventory({
     setInventory(prev => ({ ...prev, humus: (prev.humus ?? 0) - 3, biofertilizante: (prev as any).biofertilizante + 1 }));
     applyCraftCost('biofertilizante');
     addLog('🧴 Você produziu 1 Biofertilizante Líquido!', 'success');
-    setFarmXp(prev => prev + 4);
+    setFarmXp(prev => prev + craftXp('biofertilizante'));
     triggerAudioResult(() => sfx.playSound('collect'));
     spawnFeedback('🧴', '+1 Biofertilizante', event ?? { clientX: window.innerWidth/2, clientY: window.innerHeight/2 } as any);
   };
