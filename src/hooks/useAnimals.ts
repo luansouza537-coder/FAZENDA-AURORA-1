@@ -1569,7 +1569,7 @@ export function useAnimals({
     if (type === 'galinha_caipira' && farmLevel < 4) { addLog('🔒 Galinha Caipira requer Nível 4!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'frango_corte' && farmLevel < 2) { addLog('🔒 Frango de Corte requer Nível 2!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'pato' && farmLevel < 3) { addLog('🔒 Pato de Quintal requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
-    if (type === 'codorna' && farmLevel < 3) { addLog('🔒 Codorna requer Nível 3!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
+    if (type === 'codorna' && farmLevel < 11) { addLog('🔒 Codorna requer Nível 11!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'alpaca' && farmLevel < 5) { addLog('🔒 Alpaca requer Nível 5!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'minhoca' && farmLevel < 6) { addLog('🔒 Minhocário requer Nível 6!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
     if (type === 'caracol' && farmLevel < 7) { addLog('🔒 Criatório de Caracóis requer Nível 7!', 'error'); triggerAudioResult(() => sfx.playSound('error')); return; }
