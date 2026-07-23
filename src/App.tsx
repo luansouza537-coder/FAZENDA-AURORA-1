@@ -2360,6 +2360,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     canAddToInventory,
     onAnimalFed: () => setDayAnimalsFedfed(prev => prev + 1),
     onItemCollected: (qty: number) => setDayItemsCollected(prev => prev + qty),
+    onSellOx: () => creditBoiExportContract(),
   });
 
   // --- Day Summary wrapper ---
@@ -3832,6 +3833,21 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     { catalogId: 'exp_de', client: '🇩🇪 Guilda dos Queijeiros de Bavária', product: 'queijo_serra' as const, description: 'Uma cooperativa de queijeiros bávaros, cansada da padronização industrial, foi atrás de queijos de guarda feitos como há um século — maturação lenta, sem atalho. Encontraram o Queijo da Serra da fazenda numa feira internacional e não paravam de comentar sobre a casca e o aroma. Agora querem exclusividade regional: nenhum outro fornecedor brasileiro pode vender pra eles.', baseMarket: 364, pricePerUnit: 655, weeklyGoal: 1, durationDays: 180, minLevel: 18, completionBonus: 1000, completionXP: 140 },
     { catalogId: 'exp_fr', client: '🇫🇷 Maison Fromagère Lyonnaise', product: 'gouda_jersey' as const, description: 'Um affineur (mestre queijeiro) de Lyon provou o Gouda feito com leite Jersey numa degustação às cegas em São Paulo — e não acreditou quando soube que vinha de uma fazenda familiar, não de uma indústria. Ele quer levar o queijo pra sua própria carta de maturação em Lyon, com o nome da fazenda estampado no rótulo francês.', baseMarket: 260, pricePerUnit: 494, weeklyGoal: 1, durationDays: 150, minLevel: 19, completionBonus: 950, completionXP: 130 },
     { catalogId: 'exp_ae', client: '🇦🇪 Casa de Luxo Al Zahra (Dubai)', product: 'bolsa_exotica' as const, description: 'Uma butique de Dubai que atende realeza regional soube da bolsa de couro de jacaré através de um comprador que visitou o Brasil a trabalho. Encomendaram uma peça de amostra — e voltaram pedindo mais, com um adiantamento generoso. Não regateiam preço, só exigem sigilo sobre a origem: dizem que a exclusividade é parte do produto.', baseMarket: 1066, pricePerUnit: 2665, weeklyGoal: 1, durationDays: 210, minLevel: 20, completionBonus: 4000, completionXP: 300 },
+    // --- Exportação Internacional: uma opção por nível (1-14), entrega direta/simplificada ---
+    { catalogId: 'exp_ar', client: '🇦🇷 Frigorífico Don Ezequiel (Rosário)', product: 'boi' as const, description: 'Um frigorífico familiar de Rosário, tradicional desde os anos 60, está em busca de fornecedores brasileiros para diversificar sua matriz de compra depois que um fornecedor local sofreu embargo sanitário. O comprador, Don Ezequiel, é conhecido por visitar pessoalmente as fazendas antes de fechar contrato — mas, com o CSI em mãos, aceita negociar à distância. Ele paga bem, mas exige regularidade: um lote perdido significa buscar outro fornecedor na próxima safra.', baseMarket: 300, pricePerUnit: 540, weeklyGoal: 1, durationDays: 90, minLevel: 1, completionBonus: 260, completionXP: 40 },
+    { catalogId: 'exp_pt', client: '🇵🇹 Queijaria Dona Fátima (Serpa)', product: 'goat_milk' as const, description: 'Uma queijaria artesanal em Serpa, no Alentejo, perdeu parte do seu fornecimento local depois de uma seca que reduziu o rebanho da região. A mestre queijeira Dona Fátima busca leite de cabra de qualidade constante para manter viva a receita centenária do queijo Serpa DOP. Ela é exigente com a gordura do leite e testa cada lote antes de aprovar — mas quem entra na lista dela raramente sai.', baseMarket: 16, pricePerUnit: 36, weeklyGoal: 6, durationDays: 90, minLevel: 2, completionBonus: 300, completionXP: 45 },
+    { catalogId: 'exp_th', client: '🇹🇭 Mercado de Chiang Mai', product: 'duck_egg' as const, description: 'Um mercado de rua em Chiang Mai virou ponto turístico depois que um blog gastronômico elogiou seus ovos de pato em conserva. O comerciante Khun Somchai agora precisa de fornecimento internacional estável para acompanhar a demanda repentina, já que a produção local tailandesa não supre o volume. Ele paga em dólares e negocia rápido, mas cancela contratos ao menor sinal de atraso.', baseMarket: 12, pricePerUnit: 47, weeklyGoal: 5, durationDays: 90, minLevel: 3, completionBonus: 340, completionXP: 50 },
+    { catalogId: 'exp_it', client: '🇮🇹 Confeitaria Bianchi (Modena)', product: 'mel' as const, description: 'Uma pequena confeitaria em Modena, especializada em doces tradicionais com mel, busca fornecedores fora da União Europeia depois que uma doença enfraqueceu as colmeias em toda a região da Emília-Romanha. O confeiteiro Signor Bianchi é obcecado com pureza e aroma floral — encomenda amostras antes de fechar qualquer lote grande, mas quando aprova, vira cliente fiel por anos.', baseMarket: 80, pricePerUnit: 187, weeklyGoal: 3, durationDays: 90, minLevel: 4, completionBonus: 420, completionXP: 60 },
+    { catalogId: 'exp_gr', client: '🇬🇷 Cooperativa Papadopoulos (Creta)', product: 'sheep_milk' as const, description: 'Nas montanhas de Creta, uma cooperativa de produtores de queijo feta enfrenta escassez de leite de ovelha depois que o preço da terra expulsou pastores tradicionais para fora da ilha. A cooperativa, liderada pela família Papadopoulos, busca parceiros internacionais confiáveis para não comprometer a receita que atravessa gerações. Exigem análise de gordura e proteína antes de cada embarque.', baseMarket: 28, pricePerUnit: 68, weeklyGoal: 5, durationDays: 120, minLevel: 5, completionBonus: 480, completionXP: 70 },
+    { catalogId: 'exp_nl', client: '🇳🇱 Estufas de Aalsmeer', product: 'humus' as const, description: 'Uma rede de estufas de flores em Aalsmeer, próxima ao maior mercado floral do mundo, decidiu migrar para adubação orgânica depois de pressão de consumidores europeus por certificação sustentável. O engenheiro agrônomo Pieter van Dijk testa fornecedores do mundo todo em busca de húmus de minhoca de alta qualidade nutritiva — e paga um prêmio considerável para quem entrega consistência.', baseMarket: 22, pricePerUnit: 54, weeklyGoal: 6, durationDays: 120, minLevel: 6, completionBonus: 380, completionXP: 80 },
+    { catalogId: 'exp_kr', client: '🇰🇷 Snail Glow Labs (Seul)', product: 'muco' as const, description: 'A indústria de cosméticos coreana, referência mundial em k-beauty, está sempre à caça de ingredientes exóticos para suas próximas fórmulas "virais". Uma startup de Seul, a Snail Glow Labs, aposta em muco de caracol de fazendas fora da Ásia para diferenciar sua nova linha de séruns anti-idade. A fundadora, Ji-eun, é jovem, ousada e paga adiantado — mas espera inovação e pureza do produto.', baseMarket: 48, pricePerUnit: 132, weeklyGoal: 3, durationDays: 120, minLevel: 7, completionBonus: 560, completionXP: 95 },
+    { catalogId: 'exp_be', client: '🇧🇪 Ateliê Margaux Verstappen (Antuérpia)', product: 'angora_wool' as const, description: 'Uma ateliê de moda em Antuérpia, cidade conhecida por seus estilistas vanguardistas, busca lã angorá de procedência ética para uma coleção cápsula sustentável. A estilista Margaux Verstappen visitou fazendas europeias e ficou insatisfeita com o tratamento dos animais — por isso agora prioriza fornecedores que comprovem bem-estar animal, como o seu.', baseMarket: 90, pricePerUnit: 258, weeklyGoal: 2, durationDays: 120, minLevel: 8, completionBonus: 680, completionXP: 110 },
+    { catalogId: 'exp_gb', client: '🇬🇧 Alfaiataria Ashworth (Savile Row)', product: 'mohair' as const, description: 'Uma grife inglesa tradicional, com mais de um século de história em Savile Row, Londres, está retomando o uso de mohair fino em seus casacos de inverno feitos sob medida para uma clientela exigente. O alfaiate-chefe, Mr. Ashworth, é rígido quanto à textura e ao brilho da fibra — qualquer lote fora do padrão é recusado sem hesitação, mas os que passam garantem contratos de longo prazo.', baseMarket: 120, pricePerUnit: 314, weeklyGoal: 2, durationDays: 120, minLevel: 9, completionBonus: 780, completionXP: 130 },
+    { catalogId: 'exp_in', client: '🇮🇳 Tecelões de Varanasi', product: 'seda_bruta' as const, description: 'Uma cooperativa de tecelões em Varanasi, cidade sagrada às margens do Ganges e capital histórica do sári de seda indiano, enfrenta escassez de matéria-prima depois que doenças atingiram bicheiros locais. O mestre tecelão Ravi Sharma busca seda bruta de qualidade em outros continentes para manter viva uma tradição têxtil de séculos — e paga acima do mercado para não perder prazos religiosos e festivais.', baseMarket: 100, pricePerUnit: 260, weeklyGoal: 2, durationDays: 150, minLevel: 10, completionBonus: 900, completionXP: 150 },
+    { catalogId: 'exp_es', client: '🇪🇸 Tapas Bar Don Rafael (Sevilha)', product: 'conserva_codorna' as const, description: 'Uma tapas bar renomada em Sevilha, conhecida por reinventar pratos tradicionais andaluzes, adicionou conserva de codorna ao cardápio depois de um chef visitar a América do Sul e se apaixonar pelo produto. O proprietário, Don Rafael, quer fechar fornecimento fixo antes que o prato vire tendência nacional — e sabe que, se isso acontecer, a demanda vai explodir.', baseMarket: 160, pricePerUnit: 405, weeklyGoal: 2, durationDays: 150, minLevel: 11, completionBonus: 950, completionXP: 160 },
+    { catalogId: 'exp_no', client: '🇳🇴 Restaurante Lars Eriksen (Bergen)', product: 'peixe_defumado' as const, description: 'Um restaurante de frutos do mar em Bergen, cidade portuária famosa por seu mercado de peixes centenário, busca fornecedores fora do Atlântico Norte para diversificar o cardápio de defumados durante os meses de escassez local. O chef Lars Eriksen aprecia técnicas diferentes de cura e está disposto a pagar bem por um produto com identidade própria, desde que a cadeia de frio seja impecável.', baseMarket: 70, pricePerUnit: 182, weeklyGoal: 3, durationDays: 150, minLevel: 12, completionBonus: 1000, completionXP: 175 },
+    { catalogId: 'exp_hu', client: '🇭🇺 Confeitaria Dona Ilona (Budapeste)', product: 'goose_egg' as const, description: 'Uma confeitaria tradicional em Budapeste, famosa por seus doces à base de foie gras e ovos de ganso, perdeu fornecedores locais depois de restrições sanitárias na criação intensiva de aves na região. A proprietária, Dona Ilona, herdou a receita da avó e não abre mão da qualidade do ovo — testa cada lote pessoalmente antes de aprovar o fornecedor definitivo.', baseMarket: 50, pricePerUnit: 158, weeklyGoal: 2, durationDays: 150, minLevel: 13, completionBonus: 1080, completionXP: 190 },
+    { catalogId: 'exp_ca', client: '🇨🇦 Boutique Amélie Tremblay (Quebec)', product: 'cachecol_angora' as const, description: 'Uma boutique de inverno em Quebec, cidade conhecida por invernos rigorosos e forte cultura de moda artesanal, procura acessórios de lã premium para sua nova coleção "Hiver Chaleureux". A compradora Amélie Tremblay ficou impressionada com a maciez do cachecol de angorá em uma feira internacional e quer garantir exclusividade regional antes que a concorrência descubra o fornecedor.', baseMarket: 260, pricePerUnit: 620, weeklyGoal: 1, durationDays: 150, minLevel: 14, completionBonus: 1150, completionXP: 200 },
   ] as const;
 
   const signLongContract = (catalogId: string) => {
@@ -3908,6 +3924,39 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     addFinancialEntry({ day: currentDay, type: 'income', amount: payment, category: 'venda', description: `Abatedouro: ${animal.name} → ${activeContract.client}` });
     addLog(`🥩 ${animal.name} enviado ao ${activeContract.client}. +${payment}💰 | Progresso: ${progress}/${goal} animais.`, 'success');
     triggerAudioResult(() => sfx.playSound('sell'));
+  };
+
+  // Mecanismo simplificado de exportação de Boi: ao vender um Boi normal na feira,
+  // credita automaticamente o contrato de exportação ativo (product 'boi', catalogId 'exp_*'),
+  // sem precisar do Abatedouro. Segue o mesmo gate de CSI válido dos demais contratos de exportação.
+  const creditBoiExportContract = () => {
+    const csiValid = !!hasCertSanitario && (vaccinationDays ?? 0) > 0;
+    if (!csiValid) return;
+    setContracts(prev => {
+      let credited = false;
+      return prev.map(c => {
+        if (credited || !c.active || !c.catalogId?.startsWith('exp_') || c.product !== 'boi') return c;
+        const remaining = c.quantity - c.delivered;
+        if (remaining <= 0) return c;
+        credited = true;
+        const newDelivered = c.delivered + 1;
+        if (newDelivered >= c.quantity) {
+          const bonus = c.completionBonus ?? 0;
+          const xp = c.completionXP ?? 0;
+          if (bonus > 0) {
+            setGold(prev => prev + bonus);
+            addFinancialEntry({ day: currentDay, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
+          }
+          setFarmXp(prev => prev + xp);
+          setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
+          setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
+          addLog(`🏆 Contrato de exportação com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
+          return { ...c, delivered: newDelivered, active: false };
+        }
+        addLog(`🚢 Boi entregue ao contrato de exportação "${c.client}"! Progresso: ${newDelivered}/${c.quantity}.`, 'success');
+        return { ...c, delivered: newDelivered };
+      });
+    });
   };
 
   /**

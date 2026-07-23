@@ -151,6 +151,7 @@ export interface UseAnimalsProps {
   onAnimalFed?: () => void;
   onItemCollected?: (qty: number) => void;
   onGoldSpent?: (amount: number) => void;
+  onSellOx?: () => void;
 }
 
 export function useAnimals({
@@ -190,6 +191,7 @@ export function useAnimals({
   onAnimalFed,
   onItemCollected,
   onGoldSpent,
+  onSellOx,
 }: UseAnimalsProps) {
   const [animals, setAnimals] = useState<Animal[]>(() => {
     try {
@@ -1174,6 +1176,7 @@ export function useAnimals({
     setAnimals(prev => prev.filter(a => a.id !== id));
     updateMissionProgress('sell_livestock', 1);
     addLog(`💰 ${animal.name} (Boi) foi vendido na feira por ${value} moedas!`, 'success');
+    onSellOx?.();
 
     triggerAudioResult(() => sfx.playSound('sell_animal'));
     triggerConfetti(event);
