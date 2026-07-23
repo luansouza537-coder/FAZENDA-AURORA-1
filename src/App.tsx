@@ -6725,13 +6725,28 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       } else if (nextDayValue % 15 === 0 && Math.random() < 0.45) {
         const worldEvents = [
-          { id: 'guerra', title: '⚔️ Conflito Regional', desc: 'Crise aumenta demanda por alimentos! Preços sobem.', daysLeft: 5, priceMult: 1.4, items: ['milk','wool','egg','cheese','meat'] },
-          { id: 'festival', title: '🎉 Festival Nacional', desc: 'Festival aumenta consumo de produtos locais!', daysLeft: 4, priceMult: 1.3, items: ['egg','mayo','cheese','honey','butter'] },
-          { id: 'seca_global', title: '🏜️ Seca Global', desc: 'Escassez mundial valoriza alimentos básicos.', daysLeft: 6, priceMult: 1.5, items: ['milk','goat_milk','buffalo_milk','butter'] },
-          { id: 'exportacao', title: '🚢 Abertura de Exportações', desc: 'Novos mercados abertos! Produtos exóticos valorizados.', daysLeft: 5, priceMult: 1.6, items: ['carne_jacare','couro_jacare'] },
-          { id: 'feria_gourmet', title: '🍽️ Feira Gourmet Internacional', desc: 'Queijos e derivados premium em alta demanda!', daysLeft: 4, priceMult: 1.45, items: ['queijoBrie','queijoMucarela','queijoCoalho','queijo_cabra'] },
-          { id: 'boom_textil', title: '🧶 Boom Têxtil', desc: 'Indústria de moda em expansão! Lã e fibras valorizadas.', daysLeft: 5, priceMult: 1.35, items: ['wool','alpaca_wool','angora_wool','seda_bruta','fio_seda'] },
-          { id: 'crise_economica', title: '📉 Crise Econômica', desc: 'Recessão reduz preços em 20% por 5 dias.', daysLeft: 5, priceMult: 0.8, items: ['milk','wool','egg','cheese','butter','mayo'] },
+          // --- Positivos (10) ---
+          { id: 'inflacao', title: '📈 Inflação em Alta', desc: 'Preços gerais sobem com a inflação!', daysLeft: 7, priceMult: 1.4, items: ['milk','wool','egg','cheese','meat'] },
+          { id: 'festival', title: '🎉 Festival Nacional', desc: 'Festival aumenta consumo de produtos locais!', daysLeft: 7, priceMult: 1.3, items: ['egg','mayo','cheese','mel','butter'] },
+          { id: 'seca_global', title: '🏜️ Seca Global', desc: 'Escassez mundial valoriza alimentos básicos.', daysLeft: 7, priceMult: 1.5, items: ['milk','goat_milk','buffalo_milk','butter'] },
+          { id: 'feria_gourmet', title: '🍽️ Feira Gourmet Internacional', desc: 'Queijos e derivados premium em alta demanda!', daysLeft: 7, priceMult: 1.45, items: ['queijoBrie','queijoMucarela','queijoCoalho','queijo_cabra'] },
+          { id: 'boom_textil', title: '🧶 Boom Têxtil', desc: 'Indústria de moda em expansão! Lã e fibras valorizadas.', daysLeft: 7, priceMult: 1.35, items: ['wool','alpaca_wool','angora_wool','seda_bruta','fio_seda'] },
+          { id: 'peixe_alta', title: '🐟 Alta do Peixe Fresco', desc: 'Restaurantes disputam peixe fresco! Preços sobem.', daysLeft: 7, priceMult: 1.35, items: ['peixe','peixe_defumado','bolinho_peixe','moqueca','conserva_peixe'] },
+          { id: 'mel_corrida', title: '🍯 Corrida do Mel', desc: 'Demanda por produtos apícolas dispara!', daysLeft: 7, priceMult: 1.4, items: ['mel','mel_envasado','hidromel'] },
+          { id: 'moda_exotica', title: '👜 Moda Exótica em Alta', desc: 'Mercado internacional valoriza couro de luxo!', daysLeft: 7, priceMult: 1.5, items: ['bolsa_exotica','couro_jacare','carne_jacare','couro_avestruz','carne_avestruz'] },
+          { id: 'boom_cosmetico', title: '🧴 Boom da Cosmética Natural', desc: 'Cosméticos naturais viram tendência!', daysLeft: 7, priceMult: 1.4, items: ['creme_cosmetico','serum_facial','mascara_facial','sabonete_natural','muco'] },
+          { id: 'aves_especiais', title: '🦆 Demanda por Aves Especiais', desc: 'Gastronomia valoriza ovos e patês raros!', daysLeft: 7, priceMult: 1.35, items: ['duck_egg','goose_egg','quail_egg','pate_pato','ovo_defumado'] },
+          // --- Negativos (10) ---
+          { id: 'crise_economica', title: '📉 Crise Econômica', desc: 'Recessão reduz preços em 20%.', daysLeft: 7, priceMult: 0.8, items: ['milk','wool','egg','cheese','butter','mayo'] },
+          { id: 'excesso_ovos', title: '🥚 Excesso de Oferta de Ovos', desc: 'Superprodução de ovos derruba os preços.', daysLeft: 7, priceMult: 0.85, items: ['egg','mayo','cheese','mel','butter'] },
+          { id: 'importacao_laticinios', title: '🥛 Importação de Laticínios', desc: 'Laticínios importados baratos inundam o mercado.', daysLeft: 7, priceMult: 0.8, items: ['milk','goat_milk','buffalo_milk','butter'] },
+          { id: 'recessao_gastronomica', title: '🍽️ Recessão Gastronômica', desc: 'Restaurantes reduzem compras de queijos finos.', daysLeft: 7, priceMult: 0.8, items: ['queijoBrie','queijoMucarela','queijoCoalho','queijo_cabra'] },
+          { id: 'superproducao_textil', title: '🧶 Superprodução Têxtil', desc: 'Excesso de fibras no mercado derruba preços.', daysLeft: 7, priceMult: 0.75, items: ['wool','alpaca_wool','angora_wool','seda_bruta','fio_seda'] },
+          { id: 'mare_farta', title: '🐟 Maré Farta', desc: 'Oferta excessiva de peixe derruba os preços.', daysLeft: 7, priceMult: 0.8, items: ['peixe','peixe_defumado','bolinho_peixe','moqueca','conserva_peixe'] },
+          { id: 'excesso_mel', title: '🍯 Excesso de Produção de Mel', desc: 'Safra recorde de mel derruba os preços.', daysLeft: 7, priceMult: 0.8, items: ['mel','mel_envasado','hidromel'] },
+          { id: 'escandalo_couro', title: '👜 Escândalo do Couro Exótico', desc: 'Restrições de mercado derrubam a demanda por couro exótico.', daysLeft: 7, priceMult: 0.7, items: ['bolsa_exotica','couro_jacare','carne_jacare','couro_avestruz','carne_avestruz'] },
+          { id: 'recall_cosmeticos', title: '🧴 Recall de Cosméticos Naturais', desc: 'Recall no mercado reduz a demanda por cosméticos naturais.', daysLeft: 7, priceMult: 0.75, items: ['creme_cosmetico','serum_facial','mascara_facial','sabonete_natural','muco'] },
+          { id: 'alarme_avicola', title: '🦆 Alarme Sanitário Avícola', desc: 'Medo do consumidor reduz a demanda por aves especiais.', daysLeft: 7, priceMult: 0.7, items: ['duck_egg','goose_egg','quail_egg','pate_pato','ovo_defumado'] },
         ];
         const ev = worldEvents[Math.floor(Math.random() * worldEvents.length)];
         setWorldEvent(ev);
