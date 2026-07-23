@@ -5167,7 +5167,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           }
         });
       }
-      if (nextDayEvent === 'geada' && !insuranceClimate.active) {
+      if (nextDayEvent === 'geada' && currentSeasonIdx === 3 && !insuranceClimate.active) {
         finalAnimals.forEach(a => {
           if (a.isAdult !== false) {
             a.happiness = Math.max(0, a.happiness - 15);
@@ -5178,8 +5178,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (predadorTargetId !== null) {
         const target = finalAnimals.find(a => a.id === predadorTargetId);
         if (target) {
-          target.stressedDays = 3;
-          target.happiness = Math.max(0, target.happiness - 15);
+          // Seguro Básico: reduz o ataque em ~70% (mesma proporção de pragas/epidemias)
+          target.stressedDays = insurance.active ? 1 : 3;
+          target.happiness = Math.max(0, target.happiness - (insurance.active ? 5 : 15));
         }
       }
 
@@ -5726,14 +5727,16 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           if (affected.length > 0) {
             negativeSurpriseFiredToday = true;
             setLastEpidemicDay(nextDayValue);
+            // Seguro Básico: reduz o impacto em ~70% (felicidade -30→-9, estresse 3→1 dia)
+            const happinessLoss = insurance.active ? 9 : 30;
+            const stressDays = insurance.active ? 1 : 3;
             setAnimals(prev => prev.map(a => {
               if (affected.some(af => af.id === a.id)) {
-                // IMPROVEMENT 7: stress state from epidemic (-30 happiness drop)
-                return { ...a, happiness: Math.max(0, a.happiness - 30), stressedDays: 3 };
+                return { ...a, happiness: Math.max(0, a.happiness - happinessLoss), stressedDays: stressDays };
               }
               return a;
             }));
-            logsToAdd.push({ msg: `🦠 Epidemia! ${affected.length} animais foram afetados e perderam 30 de felicidade!`, type: 'error' });
+            logsToAdd.push({ msg: `🦠 Epidemia! ${affected.length} animais foram afetados${insurance.active ? ' (Seguro Básico reduziu o impacto em 70%)' : ' e perderam 30 de felicidade'}!`, type: 'error' });
             setTimeout(() => addNotification(`🦠 Epidemia atingiu ${affected.length} animais da fazenda!`, 'warning', nextDayValue), 0);
             triggerAudioResult(() => sfx.playSound('error'));
           }

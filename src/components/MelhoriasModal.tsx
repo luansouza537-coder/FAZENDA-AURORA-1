@@ -528,7 +528,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
               <h4 className="font-display font-black text-sm uppercase text-emerald-800 mb-1">🛡️ Sistema de Seguros</h4>
               <p className="text-xs text-stone-500 font-mono mb-2">Proteção permanente e progressiva. Cada tier inclui o anterior.</p>
               {([
-                { tier: 1 as const, label: '🌱 Seguro Básico', price: 800, minLevel: 2, desc: 'Reduz impacto de pragas e epidemias em 70%. Permanente.', prevActive: true, active: p.insurance.active, onBuy: () => p.setInsurance({ active: true, daysLeft: 9999 }) },
+                { tier: 1 as const, label: '🌱 Seguro Básico', price: 800, minLevel: 2, desc: 'Reduz impacto de pragas, epidemias e ataques de predadores em 70%. Permanente.', prevActive: true, active: p.insurance.active, onBuy: () => p.setInsurance({ active: true, daysLeft: 9999 }) },
                 { tier: 2 as const, label: '🌦️ Seguro Intermediário', price: 2500, minLevel: 6, desc: 'Protege contra secas, tempestades e geadas. Inclui Básico.', prevActive: p.insurance.active, active: p.insuranceClimate.active, onBuy: () => p.setInsuranceClimate({ active: true, daysLeft: 9999 }) },
                 { tier: 3 as const, label: '🔒 Seguro Premium', price: 8000, minLevel: 12, desc: 'Bloqueia roubos e garante proteção total. Inclui todos os anteriores.', prevActive: p.insuranceClimate.active, active: p.insuranceTheft.active, onBuy: () => p.setInsuranceTheft({ active: true, daysLeft: 9999 }) },
               ] as const).map(({ tier, label, price, minLevel, desc, prevActive, active, onBuy }) => {
