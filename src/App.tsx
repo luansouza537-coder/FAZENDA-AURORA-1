@@ -1411,8 +1411,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setHasLaboratorio,
     hasPastagem,
     setHasPastagem,
-    hasExportCenter,
-    setHasExportCenter,
     hasAcademia,
     setHasAcademia,
     machines,
@@ -2109,8 +2107,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     // Suplemento Mineral: +20% para produtos lácteos
     const milkItems = ['milk', 'goat_milk', 'buffalo_milk', 'cheese', 'queijoCoalho', 'queijoMucarela', 'queijoBrie', 'queijo_cabra', 'buffalo_mozzarella', 'iogurte_cabra', 'leite_condensado', 'butter', 'yogurt'] as string[];
     if (suplementoMineralDays > 0 && milkItems.includes(itemType as string)) finalPrice *= 1.2;
-    // Centro de Exportação: +20% em todos os produtos
-    if (hasExportCenter) finalPrice = Math.round(finalPrice * 1.20);
     return Math.max(1, Math.round(finalPrice));
   };
 
@@ -2805,7 +2801,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         hasTipBox,
         hasLaboratorio,
         hasPastagem,
-        hasExportCenter,
         hasAcademia,
         specializationResetUsed,
         productFreshness,
@@ -8000,7 +7995,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           insurance={insurance} insuranceTheft={insuranceTheft} insuranceClimate={insuranceClimate}
           hasStable={hasStable} hasSilo={hasSilo} hasFridge={hasFridge} hasTipBox={hasTipBox}
           hasTourism={hasTourism} hasLaboratorio={hasLaboratorio} hasPastagem={hasPastagem}
-          hasExportCenter={hasExportCenter} hasAcademia={hasAcademia} licencaExotica={licencaExotica}
+          hasAcademia={hasAcademia} licencaExotica={licencaExotica}
           machines={machines} milkerLevel={milkerLevel} shearerLevel={shearerLevel} feederLevel={feederLevel}
           landBiomes={landBiomes} biomeWeeklyIncome={biomeWeeklyIncome}
           onClose={() => setShowUpgradesModal(false)}
@@ -8011,7 +8006,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           setHasStable={setHasStable} setHasSilo={setHasSilo} setHasFridge={setHasFridge}
           setHasTipBox={setHasTipBox} setHasTourism={setHasTourism}
           setHasLaboratorio={setHasLaboratorio} setHasPastagem={setHasPastagem}
-          setHasExportCenter={setHasExportCenter} setHasAcademia={setHasAcademia}
+          setHasAcademia={setHasAcademia}
           setLicencaExotica={setLicencaExotica}
           setMilkerLevel={setMilkerLevel} setShearerLevel={setShearerLevel} setFeederLevel={setFeederLevel}
           setLandBiomes={setLandBiomes}

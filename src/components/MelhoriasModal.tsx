@@ -22,7 +22,6 @@ interface MelhoriasModalProps {
   hasTourism: boolean;
   hasLaboratorio: boolean;
   hasPastagem: boolean;
-  hasExportCenter: boolean;
   hasAcademia: boolean;
   licencaExotica: boolean;
   machines: MachineState;
@@ -48,7 +47,6 @@ interface MelhoriasModalProps {
   setHasTourism: (v: boolean) => void;
   setHasLaboratorio: (v: boolean) => void;
   setHasPastagem: (v: boolean) => void;
-  setHasExportCenter: (v: boolean) => void;
   setHasAcademia: (v: boolean) => void;
   setLicencaExotica: (v: boolean) => void;
   setMilkerLevel: (fn: (prev: number) => number) => void;
@@ -166,7 +164,6 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
     { done: p.hasTourism, label: '🏕️ Área de Visitantes', price: 400, req: 4 },
     { done: p.hasLaboratorio, label: '🔬 Laboratório', price: 8000, req: 6 },
     { done: p.hasPastagem, label: '🌿 Pastagem Ampliada', price: 15000, req: 8 },
-    { done: p.hasExportCenter, label: '🚢 Centro de Exportação', price: 50000, req: 12 },
     { done: p.hasAcademia, label: '🎓 Academia', price: 120000, req: 16 },
     { done: p.licencaExotica, label: '🦎 Licença Exótica', price: 500, req: 13 },
     { done: p.abatedouroUnlocked, label: '🏭 Abatedouro', price: 8000, req: 10 },
@@ -621,7 +618,6 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
             {[
               { key: 'lab', label: '🔬 Laboratório de Laticínios', color: 'rose', price: 8000, state: p.hasLaboratorio, setState: p.setHasLaboratorio, desc: `Todos os queijos maturam 1 dia mais rápido. Requer Nível 6.`, log: '🔬 Laboratório de Laticínios construído! Queijos maturam 1 dia mais rápido.', reqLevel: 6 },
               { key: 'past', label: '🌿 Pastagem Ampliada', color: 'green', price: 15000, state: p.hasPastagem, setState: p.setHasPastagem, desc: `+3 felicidade/dia para bovinos e ovinos. Requer Nível 8.`, log: '🌿 Pastagem Ampliada construída! Bovinos e ovinos ficam mais felizes.', reqLevel: 8 },
-              { key: 'export', label: '🚢 Centro de Exportação', color: 'indigo', price: 50000, state: p.hasExportCenter, setState: p.setHasExportCenter, desc: `+20% preço de venda em TODOS os produtos. Requer Nível 12.`, log: '🚢 Centro de Exportação construído! Todos os produtos valem +20%.', reqLevel: 12, achievement: 'export_center' },
               { key: 'acad', label: '🎓 Academia de Criadores', color: 'violet', price: 120000, state: p.hasAcademia, setState: p.setHasAcademia, desc: `+15% XP por dia + animais jovens crescem 20% mais rápido. Requer Nível 16.`, log: '🎓 Academia de Criadores construída! +15% XP/dia e filhotes crescem mais rápido.', reqLevel: 16, achievement: 'academia' },
             ].map(({ key, label, color, price, state, setState, desc, log, reqLevel, achievement }) => {
               if (state || p.farmLevel + 2 < reqLevel) return null;

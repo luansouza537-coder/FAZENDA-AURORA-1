@@ -396,14 +396,6 @@ export function useFarm({ gold, setGold, checkAndUnlockAchievement }: UseFarmPro
     return false;
   });
 
-  const [hasExportCenter, setHasExportCenter] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) return JSON.parse(saved).hasExportCenter ?? false;
-    } catch (e) {}
-    return false;
-  });
-
   const [hasAcademia, setHasAcademia] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -543,8 +535,6 @@ export function useFarm({ gold, setGold, checkAndUnlockAchievement }: UseFarmPro
     setHasLaboratorio,
     hasPastagem,
     setHasPastagem,
-    hasExportCenter,
-    setHasExportCenter,
     hasAcademia,
     setHasAcademia,
     machines,
