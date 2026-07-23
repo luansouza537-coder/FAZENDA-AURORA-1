@@ -99,6 +99,7 @@ const FAMILIES: { key: string; label: string }[] = [
   { key: 'carnes', label: '🐄 Carnes & Pescado' },
   { key: 'especiais', label: '🍯 Especiais da Fazenda' },
   { key: 'cosmeticos', label: '🧴 Cosméticos & Jardim' },
+  { key: 'exportacao', label: '🌍 Exportação Internacional' },
   { key: 'outros', label: '📦 Outros' },
 ];
 
@@ -130,7 +131,8 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
   const [openFamily, setOpenFamily] = useState<string | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
-  const familyOf = (product: string) => PRODUCT_FAMILY[product] ?? 'outros';
+  const familyOf = (cat: { catalogId: string; product: string }) =>
+    cat.catalogId.startsWith('exp_') ? 'exportacao' : PRODUCT_FAMILY[cat.product] ?? 'outros';
 
   const getStars = (cat: LongContractCatalogEntry): string => {
     if (!cat.baseMarket || cat.baseMarket === 0) return '⭐';
@@ -213,7 +215,7 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                 <div className="space-y-2.5">
                   {FAMILIES.map(fam => {
                     const entries = longContractCatalog
-                      .filter(cat => familyOf(cat.product) === fam.key)
+                      .filter(cat => familyOf(cat) === fam.key)
                       .sort((a, b) => a.minLevel - b.minLevel);
                     if (entries.length === 0) return null;
                     const isActiveId = (id: string) => contracts.some(c => c.contractType === 'long' && c.active && c.catalogId === id);
