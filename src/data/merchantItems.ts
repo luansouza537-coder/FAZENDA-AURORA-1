@@ -16,7 +16,7 @@ export const MERCHANT_SPECIAL_ITEMS: readonly MerchantItem[] = [
   { id: 'licenca_criadouro',    label: '📜 Licença de Criadouro',        desc: 'Permite reprodução controlada de Vaca, Cabra, Ovelha e Galinha', price: 400, effect: 'licenca_criadouro',    oneTime: true , group: 'suprimentos' as const },
   { id: 'visita_veterinario',   label: '🚑 Visita do Veterinário',       desc: 'O veterinário trata todos os doentes (60💰 por animal). Curados descansam 1 dia sem produzir', price: 60, effect: 'vet_visit' , group: 'saude' as const },
   { id: 'consultoria_agro',     label: '👨‍🌾 Consultoria Agronômica',     desc: 'Um agrônomo otimiza o manejo da fazenda: +15% produção por 7 dias', price: 220, effect: 'production_boost_7days' , group: 'suprimentos' as const },
-  { id: 'vacinacao',            label: '💉 Campanha de Vacinação',       desc: 'Rebanho vacinado por 30 dias: sem epidemias, animais adoecem menos, e mantém seu CSI válido para Exportação', price: 250, effect: 'vaccination_30days' , group: 'saude' as const },
+  { id: 'vacinacao',            label: '💉 Campanha de Vacinação',       desc: 'Rebanho vacinado por 30 dias: sem epidemias, animais adoecem menos, e mantém seu CSI válido para Exportação (16💰 por animal, mínimo 50💰)', price: 16, effect: 'vaccination_30days' , group: 'saude' as const },
   { id: 'suplemento_mineral',   label: '💊 Suplemento Mineral',          desc: '+20% produção de leite e ovos por 7 dias',                       price: 90,  effect: 'suplemento_mineral_7days' , group: 'saude' as const },
   { id: 'bandagem_vet',         label: '🩹 Bandagem Veterinária',        desc: 'Cura 1 animal doente (o mais grave)',                             price: 45,  effect: 'cure_one_sick' , group: 'saude' as const },
   { id: 'cisterna',             label: '🪣 Cisterna de Água',            desc: 'Reduz conta de água em 30% permanente',                          price: 900, effect: 'cisterna',             oneTime: true , group: 'clima' as const },
@@ -28,6 +28,13 @@ export const MERCHANT_SPECIAL_ITEMS: readonly MerchantItem[] = [
 ];
 
 export type MerchantItemId = MerchantItem['id'];
+
+// Vacinação escala com o tamanho do rebanho, igual à Visita do Veterinário (preço × contagem).
+export const VACCINATION_PRICE_PER_ANIMAL = 16;
+export const VACCINATION_MIN_PRICE = 50;
+export function getVaccinationCost(animalsCount: number): number {
+  return Math.max(VACCINATION_MIN_PRICE, animalsCount * VACCINATION_PRICE_PER_ANIMAL);
+}
 
 // Tipos de ração para a Carga de Ração a Granel (bulk_feed)
 export const FEED_TYPES = [

@@ -43,6 +43,7 @@ import { useFarm, getFarmTitle, getLevelUpDetails, getXpForLevel } from './hooks
 import { useMissions } from './hooks/useMissions';
 import { useWorkers } from './hooks/useWorkers';
 import { ACHIEVEMENTS_LIST } from './data/achievements';
+import { getVaccinationCost } from './data/merchantItems';
 import PriceChart from './components/PriceChart';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -8017,6 +8018,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             ...(hasRoofReinforcement ? ['roof_reinforcement'] : []),
           ]}
           sickCount={animals.filter(a => a.isSick).length}
+          animalsCount={animals.length}
           buffDays={{
             production_boost_7days: productionBoostDays,
             suplemento_mineral_7days: suplementoMineralDays,
@@ -8029,7 +8031,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           onBuyConsumivel={(item, payload) => {
             const sickAnimals = animals.filter(a => a.isSick);
             if (item.effect === 'vet_visit' && sickAnimals.length === 0) { addLog('🚑 Nenhum animal doente — o veterinário não tem o que tratar.', 'info'); return; }
-            const cost = item.effect === 'vet_visit' ? item.price * sickAnimals.length : item.price;
+            const cost = item.effect === 'vet_visit' ? item.price * sickAnimals.length : item.effect === 'vaccination_30days' ? getVaccinationCost(animals.length) : item.price;
             if (gold < cost) { addLog(`💰 Moedas insuficientes! Precisa de ${cost} moedas.`, 'error'); return; }
             setGold(prev => prev - cost);
             addLog(`🛒 Comprou ${item.label} por ${cost}💰!`, 'success');

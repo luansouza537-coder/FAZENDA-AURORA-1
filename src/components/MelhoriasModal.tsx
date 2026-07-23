@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BiomeType, LandLot, InsuranceState, MachineState } from '../types';
-import { MERCHANT_SPECIAL_ITEMS, FEED_TYPES } from '../data/merchantItems';
+import { MERCHANT_SPECIAL_ITEMS, FEED_TYPES, getVaccinationCost } from '../data/merchantItems';
 
 interface MelhoriasModalProps {
   gold: number;
@@ -62,6 +62,7 @@ interface MelhoriasModalProps {
   getFreightMultiplier: (cat: string) => number;
   ownedOneTimeEffects: string[];
   sickCount: number;
+  animalsCount: number;
   buffDays: Record<string, number>; // effect → dias restantes (ou usos, p/ isenção de multa)
   onBuyConsumivel: (item: typeof MERCHANT_SPECIAL_ITEMS[number], payload?: { feedType?: string }) => void;
   abatedouroUnlocked: boolean;
@@ -233,6 +234,7 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                 const hasAvailable = groupItems.some(i => {
                   if (i.effect === 'vet_visit') return p.sickCount > 0 && p.gold >= i.price * p.sickCount;
                   if (i.effect === 'cure_one_sick') return p.sickCount > 0 && p.gold >= i.price;
+                  if (i.effect === 'vaccination_30days') return p.gold >= getVaccinationCost(p.animalsCount);
                   if (i.oneTime) return !p.ownedOneTimeEffects.includes(i.effect) && p.gold >= i.price;
                   return false;
                 });
@@ -244,7 +246,8 @@ const MelhoriasModal: React.FC<MelhoriasModalProps> = (p) => {
                   const isOwned = item.oneTime && p.ownedOneTimeEffects.includes(item.effect);
                   const isVet = item.effect === 'vet_visit';
                   const isBulkFeed = item.effect === 'bulk_feed';
-                  const price = isVet ? Math.max(item.price, item.price * p.sickCount) : item.price;
+                  const isVacinacao = item.effect === 'vaccination_30days';
+                  const price = isVet ? Math.max(item.price, item.price * p.sickCount) : isVacinacao ? getVaccinationCost(p.animalsCount) : item.price;
                   const canAfford = p.gold >= price;
                   const vetBlocked = isVet && p.sickCount === 0;
                   const activeDays = p.buffDays[item.effect] ?? 0;
