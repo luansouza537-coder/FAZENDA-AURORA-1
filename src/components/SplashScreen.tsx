@@ -26,7 +26,7 @@ const TIPS = [
   '💡 Lhama só produz lã na Primavera — aproveite a estação!',
   '💡 Com a atração de Turismo construída, pavões geram renda toda semana, sem coleta manual.',
   '💡 Tornando um animal seu Melhor Amigo você ganha bônus permanentes de produção.',
-  '💡 O Mercador Viajante aparece ocasionalmente com preços especiais. Fique atento!',
+  '💡 Contratos de Exportação Internacional pagam bem acima do preço de mercado. Fique atento aos requisitos de cada um!',
   '💡 Bufalo produz 3 leites por dia, mas sofre estresse de calor no verão.',
   '💡 Vender tudo de uma vez pode derrubar os preços do mercado. Venda aos poucos!',
   '💡 Jacarés exigem Licença de Fauna Exótica — sem ela você paga multa diária.',

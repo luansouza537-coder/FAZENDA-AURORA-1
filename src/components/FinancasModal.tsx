@@ -26,7 +26,6 @@ interface FinancasModalProps {
   checkAndUnlockAchievement: (id: string) => void;
   onOpenMarket?: () => void;
   onSellAll?: () => void;
-  merchantActive?: boolean;
 }
 
 const catEmoji: Record<string, string> = {
@@ -65,9 +64,9 @@ const FinancasModal: React.FC<FinancasModalProps> = (p) => {
           {p.onOpenMarket && (
             <button
               onClick={() => { onClose(); setTimeout(() => p.onOpenMarket!(), 50); }}
-              className={`flex items-center gap-1.5 text-[11px] font-black px-3 py-1.5 rounded-xl border-2 transition-all cursor-pointer ${p.merchantActive ? 'bg-yellow-500 border-yellow-300 text-yellow-900 animate-pulse' : 'bg-sky-800 border-sky-600 text-sky-200 hover:bg-sky-700'}`}
+              className="flex items-center gap-1.5 text-[11px] font-black px-3 py-1.5 rounded-xl border-2 transition-all cursor-pointer bg-sky-800 border-sky-600 text-sky-200 hover:bg-sky-700"
             >
-              📊 Mercado{p.merchantActive ? ' 🛒' : ''}
+              📊 Mercado
             </button>
           )}
           {p.onSellAll && (

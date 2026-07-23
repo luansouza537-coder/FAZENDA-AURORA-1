@@ -121,7 +121,7 @@ const StatsModal: React.FC<StatsModalProps> = ({
               </div>
               {[
                 { pts: 50, label: 'Turismo +10%', achieved: prestigePoints >= 50 },
-                { pts: 150, label: 'Comerciante mais frequente', achieved: prestigePoints >= 150 },
+                { pts: 150, label: 'Marco de Prestígio', achieved: prestigePoints >= 150 },
                 { pts: 300, label: 'Preços +5% permanente', achieved: prestigePoints >= 300 },
                 { pts: 500, label: 'LENDA DO AGRO', achieved: prestigePoints >= 500 },
               ].map(m => (

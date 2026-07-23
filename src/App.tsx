@@ -43,7 +43,6 @@ import { useFarm, getFarmTitle, getLevelUpDetails, getXpForLevel } from './hooks
 import { useMissions } from './hooks/useMissions';
 import { useWorkers } from './hooks/useWorkers';
 import { ACHIEVEMENTS_LIST } from './data/achievements';
-import { MERCHANT_SPECIAL_ITEMS } from './data/merchantItems';
 import PriceChart from './components/PriceChart';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -205,7 +204,7 @@ export default function App() {
 function GameApp() {
   // --- STATE WITH LOCALSTORAGE INITIALIZATION ---
   // NOTE: gold, debt, dailyEarning, earningsHistory, weeklySales, weeklyStats,
-  // previousPrices, priceHistory, merchantActive, daysSinceMerchant, nextMerchantDay,
+  // previousPrices, priceHistory,
   // insurance are now managed by useEconomy (initialized below after other state)
 
   const [currentDay, setCurrentDay] = useState<number>(() => {
@@ -342,8 +341,6 @@ function GameApp() {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).shownMilestones ?? []; } catch(e) {} return [];
   });
 
-  // merchantActive, daysSinceMerchant, nextMerchantDay moved to useEconomy
-
   // --- EXPANDED MERCHANT SHOP ---
   const [hasBebedouro, setHasBebedouro] = useState<boolean>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasBebedouro ?? false; } catch(e) {} return false;
@@ -362,7 +359,6 @@ function GameApp() {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).reproducaoAtiva ?? []; } catch(e) {} return [];
   });
   const [epidemicPrevented, setEpidemicPrevented] = useState<boolean>(false);
-  const [merchantSpecialItems, setMerchantSpecialItems] = useState<string[]>([]);
   const [cruzarModal, setCruzarModal] = useState<{ animalId: number; type: AnimalType } | null>(null);
   const [biomeWeeklyIncome, setBiomeWeeklyIncome] = useState<{ pasto: number; lago: number; floresta: number; pomar: number }>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).biomeWeeklyIncome ?? { pasto: 0, lago: 0, floresta: 0, pomar: 0 }; } catch(e) {} return { pasto: 0, lago: 0, floresta: 0, pomar: 0 };
@@ -1003,7 +999,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setReproHistory([]);
     setBiomeWeeklyIncome({ pasto: 0, lago: 0, floresta: 0, pomar: 0 });
     setEpidemicPrevented(false);
-    setMerchantSpecialItems([]);
     setCoelhoReproCount(0);
     setBichoSedaReproCount(0);
     setHasStable(false);
@@ -1082,9 +1077,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setMaxPrateleiras(2);
     setTotalQueijosFabricados(0);
     setQueijosFabricadosTipos([]);
-    setMerchantActive(false);
-    setDaysSinceMerchant(0);
-    setNextMerchantDay(Math.floor(Math.random() * 5) + 3);
     setWeather('nublado');
     setDailyEarning(0);
     setWeeklyStats({ earnings: 0, spending: 0, milk: 0, wool: 0, oxSold: 0, cheese: 0, scarf: 0, egg: 0, mayo: 0, waterCost: 0, energyCost: 0 });
@@ -1114,10 +1106,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       totalScarf: 0,
       totalEggs: 0,
       totalMayo: 0,
-      totalMerchantTrades: 0,
       totalSilk: 0,
       happyDays: 0,
       contractsCompleted: 0,
+      exportContractsCompleted: 0,
       cheeseTypesMade: []
     });
     
@@ -1368,12 +1360,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setPreviousPrices,
     priceHistory,
     setPriceHistory,
-    merchantActive,
-    setMerchantActive,
-    daysSinceMerchant,
-    setDaysSinceMerchant,
-    nextMerchantDay,
-    setNextMerchantDay,
     insurance,
     setInsurance,
   } = useEconomy();
@@ -1481,8 +1467,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       checkAndUnlockAchievement('level_5');
     }
 
-    // 9. 🧙‍♂️ Parceiro do Mercador: Negociar com o comerciante viajante 5 vezes
-    if ((currentStats.totalMerchantTrades || 0) >= 5) {
+    // 9. 🌍 Exportador: concluir 5 contratos de exportação
+    if ((currentStats.exportContractsCompleted || 0) >= 5) {
       checkAndUnlockAchievement('merchant_partner');
     }
 
@@ -2241,7 +2227,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setWeeklySales,
     setContracts,
     setDailyEarning,
-    merchantActive,
     getActualSellPrice,
     getDynamicTransactionPrice,
     soundEnabled,
@@ -2339,7 +2324,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     farmWisdomBonus,
     weather,
     currentDay,
-    merchantActive,
     weeklySales,
     soundEnabled,
     addLog,
@@ -2743,7 +2727,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       window.removeEventListener('keydown', handleKeyDown);
     };
   // BUG 9 FIX: adicionadas dependências faltantes para evitar valores stale no handler de teclado
-  }, [animals, inventory, currentDay, weather, weeklySales, showBuyMenu, machines, farmLevel, queijosEmMaturacao, merchantActive, daysSinceMerchant, nextMerchantDay, dailyEarning, weeklyStats, autoAdvance, isPaused]);
+  }, [animals, inventory, currentDay, weather, weeklySales, showBuyMenu, machines, farmLevel, queijosEmMaturacao, dailyEarning, weeklyStats, autoAdvance, isPaused]);
 
   // Sync log scrollbar — scroll only inside the logs container, not the whole page
   useEffect(() => {
@@ -2764,9 +2748,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         inventory,
         animals,
         stats,
-        merchantActive,
-        daysSinceMerchant,
-        nextMerchantDay,
         logs,
         weeklyStats,
         weeklySales,
@@ -2870,7 +2851,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, merchantActive, daysSinceMerchant, nextMerchantDay, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, specializationResetUsed, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, droughtMitigated, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, specializationResetUsed, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, droughtMitigated, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     let price = 2500;
@@ -3948,7 +3929,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             addFinancialEntry({ day: currentDay, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
           }
           setFarmXp(prev => prev + xp);
-          setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
+          setStats(prev => ({
+            ...prev,
+            contractsCompleted: (prev.contractsCompleted ?? 0) + 1,
+            exportContractsCompleted: (prev.exportContractsCompleted ?? 0) + 1,
+          }));
           setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
           addLog(`🏆 Contrato de exportação com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
           return { ...c, delivered: newDelivered, active: false };
@@ -3957,49 +3942,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         return { ...c, delivered: newDelivered };
       });
     });
-  };
-
-  /**
-   * 7. processarComercianteViajante: Lida com chance de comerciante aparecer e suas rotatividades.
-   */
-  const processarComercianteViajante = (
-    daysSinceMerc: number,
-    nextMercDay: number,
-    nextDayVal: number,
-    logs: { msg: string; type: LogMessage['type'] }[]
-  ) => {
-    // Com dívida > 500, comerciante não aparece
-    if (debt > 500) {
-      return { isMerchantNextDay: false, newDaysSinceMerchant: daysSinceMerc + 1, newNextMerchantDay: nextMercDay };
-    }
-    let isMerchantNextDay = false;
-    let newDaysSinceMerchant = daysSinceMerc + 1;
-    let newNextMerchantDay = nextMercDay;
-    // Mercador aparece a cada 7 dias fixos. Prestígio 150+ reduz para 5 dias.
-    const merchantThreshold = prestigePoints >= 150 ? 5 : 7;
-    if (newDaysSinceMerchant >= nextMercDay) {
-      isMerchantNextDay = true;
-      newDaysSinceMerchant = 0;
-      newNextMerchantDay = merchantThreshold;
-    }
-
-    if (isMerchantNextDay) {
-      logs.push({
-        msg: `🧙‍♂️ Um Comerciante Viajante chegou na fazenda! Ele compra todos os produtos e bois por 1.5x o preço hoje!`,
-        type: 'event'
-      });
-      // BUG FIX: passa nextDayVal para que a notificação mostre o dia correto
-      setTimeout(() => addNotification('🧙‍♂️ Comerciante Viajante chegou! Venda tudo por 1.5x hoje!', 'event', nextDayVal), 0);
-      // 30% chance to gift folha_amoreira (only after silk is unlocked at level 10)
-      if (farmLevel >= 10 && Math.random() < 0.3) {
-        setTimeout(() => {
-          setInventory(prev => ({ ...prev, folha_amoreira: (prev.folha_amoreira ?? 0) + 5 }));
-          addNotification('🌿 Comerciante trouxe 5 Folhas de Amoreira de presente!', 'event', nextDayVal);
-        }, 100);
-      }
-    }
-
-    return { isMerchantNextDay, newDaysSinceMerchant, newNextMerchantDay };
   };
 
   /**
@@ -4341,27 +4283,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
 
-      // --- SUBFUNÇÃO 7: Processamento do Comerciante Viajante ---
-      const { isMerchantNextDay, newDaysSinceMerchant, newNextMerchantDay } = processarComercianteViajante(daysSinceMerchant, nextMerchantDay, nextDayValue, logsToAdd);
-      setMerchantActive(isMerchantNextDay);
-      setDaysSinceMerchant(newDaysSinceMerchant);
-      setNextMerchantDay(newNextMerchantDay);
-      // Generate merchant special items for this visit
-      if (isMerchantNextDay) {
-        const availableMerchItems = MERCHANT_SPECIAL_ITEMS.filter(item => {
-          if (!('oneTime' in item) || !item.oneTime) return true;
-          if (item.effect === 'bebedouro' && hasBebedouro) return false;
-          if (item.effect === 'cert_sanitario' && hasCertSanitario) return false;
-          if (item.effect === 'licenca_exotica' && licencaExotica) return false;
-          if (item.effect === 'licenca_criadouro' && licencaCriadouro) return false;
-          if (item.effect === 'cisterna' && hasCisterna) return false;
-          if (item.effect === 'roof_reinforcement' && hasRoofReinforcement) return false;
-          return true;
-        });
-        const shuffled = [...availableMerchItems].sort(() => Math.random() - 0.5);
-        setMerchantSpecialItems(shuffled.slice(0, 4).map(i => i.id));
-      }
-
       // --- VETERINÁRIO VISITANTE (níveis 1-9, sem veterinário contratado) ---
       {
         const hasVetWorker = workers.some(w => w.role === 'veterinario');
@@ -4386,8 +4307,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // Toques sonoros contextuais
       if (levelUpOccurred) {
         triggerAudioResult(() => sfx.playSound('levelup'));
-      } else if (isMerchantNextDay) {
-        triggerAudioResult(() => sfx.playSound('event'));
       } else {
         triggerAudioResult(() => sfx.playSound('click'));
       }
@@ -4860,7 +4779,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               setGold(prev => prev + bonus);
               setFarmXp(prev => prev + xp);
               addFinancialEntry?.({ day: nextDayValue, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
-              setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted || 0) + 1 }));
+              setStats(prev => ({
+                ...prev,
+                contractsCompleted: (prev.contractsCompleted || 0) + 1,
+                exportContractsCompleted: c.catalogId?.startsWith('exp_') ? (prev.exportContractsCompleted ?? 0) + 1 : prev.exportContractsCompleted,
+              }));
               logsToAdd.push({ msg: `🏆 Contrato com "${c.client}" cancelado por inatividade, mas entrega foi suficiente! Bônus: +${bonus}💰`, type: 'success' });
             } else {
               logsToAdd.push({ msg: `📜 Contrato com "${c.client}" cancelado por 2 semanas sem entrega mínima.`, type: 'error' });
@@ -5721,7 +5644,11 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               const bonus = c.completionBonus ?? 0;
               // Metade do XP já foi paga semanalmente durante o contrato; aqui só o restante.
               const xp = Math.round((c.completionXP ?? 0) * 0.5);
-              setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted || 0) + 1 }));
+              setStats(prev => ({
+                ...prev,
+                contractsCompleted: (prev.contractsCompleted || 0) + 1,
+                exportContractsCompleted: c.catalogId?.startsWith('exp_') ? (prev.exportContractsCompleted ?? 0) + 1 : prev.exportContractsCompleted,
+              }));
               if (bonus > 0) {
                 setGold(prev => prev + bonus);
                 setFarmXp(prev => prev + xp);
@@ -6258,8 +6185,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             festPrestige = 50;
             festLog.push({ msg: `🏆 Fazenda Aurora venceu o Festival! +${festGold}💰!`, type: 'success' });
             festLog.push({ msg: `⭐ +${festPrestige} Pontos de Prestígio pelo Festival Cultural!`, type: 'system' });
-            setMerchantActive(true);
-            setTimeout(() => addNotification(`🎭 Festival Cultural: VITÓRIA! Comerciante especial por 3 dias! +${festGold}💰`, 'event', nextDayValue), 1000);
+            setTimeout(() => addNotification(`🎭 Festival Cultural: VITÓRIA! +${festGold}💰`, 'event', nextDayValue), 1000);
           } else if (festResult.roundsWon === 1) {
             // Perdeu, mas levou 1 rodada — consolação bem mais modesta que os antigos 300💰 fixos.
             festGold = 80;
@@ -7250,7 +7176,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                   <span className="text-emerald-700 font-bold text-xs" title="Ganhos acumulados hoje">+{dailyEarning}</span>
                 )}
                 {debt > 0 && (
-                  <span className="text-red-600 font-bold text-xs" title={`Dívida acumulada com juros de 5%/dia. ${debt > 200 ? 'Não pode comprar animais!' : ''} ${debt > 500 ? 'Comerciante não aparece!' : ''} ${debt > 1000 ? 'FALÊNCIA!' : ''}`}>💳 -{debt}</span>
+                  <span className="text-red-600 font-bold text-xs" title={`Dívida acumulada com juros de 5%/dia. ${debt > 200 ? 'Não pode comprar animais!' : ''} ${debt > 1000 ? 'FALÊNCIA!' : ''}`}>💳 -{debt}</span>
                 )}
               </div>
               <div className="bg-[#fef3c7] border-3 border-[#fbbf24] rounded-full px-4 py-2 flex items-center gap-1.5 shadow-[inset_0_4px_0_rgba(255,255,255,0.5),0_4px_0_#451a03] text-[#92400e] font-black text-base font-mono" title="Dia atual de atividade. Estações mudam a cada 30 dias.">
@@ -7269,9 +7195,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               >
                 <span>💹</span>
                 <span>Finanças</span>
-                {merchantActive && (
-                  <span className="bg-yellow-400 text-[#451a03] text-[10px] h-5 w-5 rounded-full flex items-center justify-center font-bold">🛒</span>
-                )}
               </button>
               <button
                 data-onboarding="loja-btn"
@@ -7564,8 +7487,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             )}
           </div>
         ) : null}
-
-        {/* --- TRAVEL MERCHANT SPECIAL NOTICE --- */}
 
         {/* --- ACTIVE EVENTS PANEL --- */}
         {(() => {
@@ -8016,7 +7937,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           checkAndUnlockAchievement={checkAndUnlockAchievement}
           onOpenMarket={() => setShowMarketModal(true)}
           onSellAll={() => setShowSellAllConfirmModal(true)}
-          merchantActive={merchantActive}
         />
       )}
 

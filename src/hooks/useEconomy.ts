@@ -195,30 +195,6 @@ export function useEconomy(_props: UseEconomyProps = {}) {
     };
   });
 
-  const [merchantActive, setMerchantActive] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) return JSON.parse(saved).merchantActive ?? false;
-    } catch (e) {}
-    return false;
-  });
-
-  const [daysSinceMerchant, setDaysSinceMerchant] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) return JSON.parse(saved).daysSinceMerchant ?? 0;
-    } catch (e) {}
-    return 0;
-  });
-
-  const [nextMerchantDay, setNextMerchantDay] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem('aurora_farm_save');
-      if (saved) return JSON.parse(saved).nextMerchantDay ?? Math.floor(Math.random() * 5) + 3;
-    } catch (e) {}
-    return Math.floor(Math.random() * 5) + 3;
-  });
-
   const [insurance, setInsurance] = useState<{ active: boolean; premium: number; daysLeft: number }>(() => {
     try {
       const saved = localStorage.getItem('aurora_farm_save');
@@ -247,12 +223,6 @@ export function useEconomy(_props: UseEconomyProps = {}) {
     setPreviousPrices,
     priceHistory,
     setPriceHistory,
-    merchantActive,
-    setMerchantActive,
-    daysSinceMerchant,
-    setDaysSinceMerchant,
-    nextMerchantDay,
-    setNextMerchantDay,
     insurance,
     setInsurance,
   };

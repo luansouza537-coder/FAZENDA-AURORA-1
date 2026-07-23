@@ -77,7 +77,7 @@ export function useFairs({ addNotification }: UseFairsProps) {
         prestigeNotifiedRef.current.push(t);
         const msgs: Record<number, string> = {
           50: '⭐ Marco 50 pts: Turismo recebe bônus de +10%!',
-          150: '⭐ Marco 150 pts: Comerciante aparece com mais frequência!',
+          150: '⭐ Marco 150 pts de Prestígio alcançado!',
           300: '⭐ Marco 300 pts: Todos os preços +5% permanente!',
           500: '🌌 Marco 500 pts: Você é uma LENDA DO AGRO!'
         };

@@ -145,7 +145,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
   { id: 'cheese_master', title: 'Mestre dos Queijos', emoji: '🏅', description: 'Fabricou os 3 tipos de queijo' },
   { id: 'master_weaver', title: 'Tecelão Mestre', emoji: '🧣', description: 'Teceu 10 cachecóis' },
   { id: 'level_5', title: 'Fazenda Estabelecida', emoji: '📈', description: 'Alcançou o nível 5 de fazenda' },
-  { id: 'merchant_partner', title: 'Parceiro do Mercador', emoji: '🧙', description: 'Negociou com o comerciante 5 vezes' },
+  { id: 'merchant_partner', title: 'Exportador', emoji: '🌍', description: 'Concluiu 5 contratos de exportação' },
   { id: 'millionaire', title: 'Milionário Local', emoji: '💰', description: 'Acumulou 1.000 moedas de uma vez' },
   { id: 'rich_rich', title: 'Barão do Ouro', emoji: '💎', description: 'Acumulou 10.000 moedas de uma vez' },
   { id: 'day_100', title: 'Centenário', emoji: '🎉', description: 'Chegou ao Dia 100' },

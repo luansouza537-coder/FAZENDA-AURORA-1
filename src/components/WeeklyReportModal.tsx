@@ -125,7 +125,7 @@ const WeeklyReportModal: React.FC<WeeklyReportModalProps> = ({
             )}
 
             <div className="bg-indigo-50 border-2 border-indigo-200 rounded-3xl p-4 text-xs leading-relaxed text-indigo-950 flex gap-2.5 items-start">
-              <span className="text-xl shrink-0">🧙‍♂️</span>
+              <span className="text-xl shrink-0">💡</span>
               <div>
                 <div className="font-bold text-indigo-900 uppercase tracking-widest text-[9px] mb-0.5">Dica de Gestão do Consultor:</div>
                 {d.cheese === 0 && d.scarf === 0
@@ -134,7 +134,7 @@ const WeeklyReportModal: React.FC<WeeklyReportModalProps> = ({
                   ? 'Faturamento baixo! Compre mais Vacas Leiteiras ou tosquie Ovelhas. Climas de Sol Forte dão leite extra diariamente!'
                   : d.spending > d.earnings
                   ? 'Cuidado! Suas despesas excederam o lucro semanal. Certifique-se de vender os Bois Gordos quando atingirem o status Premium na feira!'
-                  : 'Sua gestão está excelente! Aproveite as visitas periódicas do Mercador Viajante para escoar sua produção manufaturada com bônus de 1.5x moedas!'}
+                  : 'Sua gestão está excelente! Assine contratos de Exportação Internacional para escoar sua produção com preços bem acima do mercado!'}
               </div>
             </div>
           </div>

@@ -92,7 +92,7 @@ export const getLevelUpDetails = (level: number): { title: string; perks: string
         perks: [
           "Desconto permanente de 10% na compra de TODOS os Animais!",
           "Desconto permanente de 10% na ração para cuidar do bando!",
-          "Contratos de fornecimento disponíveis com o Comerciante Viajante!"
+          "Contratos de fornecimento de longo prazo disponíveis na aba Contratos!"
         ]
       };
     case 5:

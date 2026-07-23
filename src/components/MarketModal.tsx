@@ -77,7 +77,7 @@ const MarketModal: React.FC<MarketModalProps> = ({
 
           <div className="bg-[#e0f2fe] border-b border-sky-100 p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-sky-950 font-mono shrink-0">
             <div>⚖️ <strong>Oferta e Procura:</strong> Quanto mais unidades de um item você vende na semana, menor fica seu preço de venda (-0.4% por unidade). O preço reinicia no relatório semanal a cada 7 dias!</div>
-            <div>🌸 <strong>Fatores Sazonais:</strong> Estações mudam a demanda de produtos (🧶 lã cresce 30% no Inverno, 🥛 leite cai 20% no Verão). Climas e Mercador também modificam o preço!</div>
+            <div>🌸 <strong>Fatores Sazonais:</strong> Estações mudam a demanda de produtos (🧶 lã cresce 30% no Inverno, 🥛 leite cai 20% no Verão). O clima também modifica o preço!</div>
           </div>
 
           {activeMarketEvent && (

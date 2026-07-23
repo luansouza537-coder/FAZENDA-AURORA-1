@@ -20,7 +20,6 @@ export interface UseInventoryProps {
   setWeeklySales: React.Dispatch<React.SetStateAction<any>>;
   setContracts: React.Dispatch<React.SetStateAction<Contract[]>>;
   setDailyEarning: React.Dispatch<React.SetStateAction<number>>;
-  merchantActive: boolean;
   getActualSellPrice: (itemType: any) => number;
   getDynamicTransactionPrice: (itemType: any, d?: number, w?: any, sales?: any) => number;
   soundEnabled: boolean;
@@ -119,7 +118,6 @@ export function useInventory({
   setWeeklySales,
   setContracts,
   setDailyEarning,
-  merchantActive,
   getActualSellPrice,
   getDynamicTransactionPrice,
   soundEnabled,
@@ -1375,7 +1373,11 @@ export function useInventory({
               addFinancialEntry?.({ day: currentDay ?? 0, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
             }
             setFarmXp(prev => prev + xp);
-            setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
+            setStats(prev => ({
+              ...prev,
+              contractsCompleted: (prev.contractsCompleted ?? 0) + 1,
+              exportContractsCompleted: c.catalogId?.startsWith('exp_') ? (prev.exportContractsCompleted ?? 0) + 1 : prev.exportContractsCompleted,
+            }));
             setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
             addLog(`🏆 Contrato com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
           } else {
@@ -1421,7 +1423,6 @@ export function useInventory({
     setStats(prev => ({
       ...prev,
       totalEarned: prev.totalEarned + profit,
-      totalMerchantTrades: merchantActive ? (prev.totalMerchantTrades || 0) + qty : (prev.totalMerchantTrades || 0)
     }));
     // BUG 15 FIX: atualiza weeklyStats para todos os tipos de produto, não apenas egg e mayo
     setWeeklyStats(prev => ({
@@ -1867,9 +1868,6 @@ export function useInventory({
       ...prev,
       totalEarned: prev.totalEarned + totalEarningCalculated,
       totalSold: prev.totalSold + totalAllQty,
-      totalMerchantTrades: merchantActive
-        ? (prev.totalMerchantTrades || 0) + totalAllQty
-        : (prev.totalMerchantTrades || 0)
     }));
 
     // BUG 7 FIX: weeklyStats agora atualiza todos os produtos vendidos, não só egg/mayo

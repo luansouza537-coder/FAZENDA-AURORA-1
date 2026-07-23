@@ -187,13 +187,12 @@ export interface FarmStats {
   totalScarf?: number;
   totalEggs?: number;
   totalMayo?: number;
-  totalMerchantTrades?: number;
   totalButter?: number;
   totalYogurt?: number;
-  totalMerchantShopPurchases?: number;
   totalSilk?: number;
   happyDays?: number;
   contractsCompleted?: number;
+  exportContractsCompleted?: number;
   cheeseTypesMade?: string[];
 }
 

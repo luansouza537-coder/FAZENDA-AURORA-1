@@ -133,7 +133,6 @@ export interface UseAnimalsProps {
   farmWisdomBonus: { vaca: number; ovelha: number; boi: number; galinha: number };
   weather: 'chuva' | 'sol' | 'nublado';
   currentDay: number;
-  merchantActive: boolean;
   weeklySales: any;
   soundEnabled: boolean;
   addLog: (msg: string, type?: LogMessage['type'], overrideDay?: number) => void;
@@ -173,7 +172,6 @@ export function useAnimals({
   farmWisdomBonus,
   weather,
   currentDay,
-  merchantActive,
   weeklySales,
   soundEnabled,
   addLog,
@@ -326,11 +324,7 @@ export function useAnimals({
     let seasonMult = 1.0;
     if (estacao === 'primavera') seasonMult = 1.1;
     else if (estacao === 'outono') seasonMult = 0.95;
-    let mult = offerMult * seasonMult;
-    if (merchantActive) {
-      mult *= 1.5;
-    }
-    return mult;
+    return offerMult * seasonMult;
   };
 
   const calculateBoiValue = (boi: Animal): number => {
@@ -1156,8 +1150,7 @@ export function useAnimals({
       ...prev,
       totalEarned: prev.totalEarned + value,
       totalSold: prev.totalSold + 1,
-      totalOxSold: ((prev as any).totalOxSold || 0) + 1,
-      totalMerchantTrades: merchantActive ? ((prev as any).totalMerchantTrades || 0) + 1 : ((prev as any).totalMerchantTrades || 0)
+      totalOxSold: ((prev as any).totalOxSold || 0) + 1
     }));
 
     setWeeklyStats((prev: any) => ({
@@ -1205,8 +1198,7 @@ export function useAnimals({
       ...prev,
       totalEarned: prev.totalEarned + value,
       totalSold: prev.totalSold + 1,
-      totalAngusSold: ((prev as any).totalAngusSold || 0) + 1,
-      totalMerchantTrades: merchantActive ? ((prev as any).totalMerchantTrades || 0) + 1 : ((prev as any).totalMerchantTrades || 0)
+      totalAngusSold: ((prev as any).totalAngusSold || 0) + 1
     }));
     setWeeklyStats((prev: any) => ({ ...prev, earnings: prev.earnings + value }));
     setWeeklySales((prev: any) => ({ ...prev, carne: (prev.carne || 0) + 1 }));
@@ -1245,8 +1237,7 @@ export function useAnimals({
       ...prev,
       totalEarned: prev.totalEarned + value,
       totalSold: prev.totalSold + 1,
-      totalBoerSold: ((prev as any).totalBoerSold || 0) + 1,
-      totalMerchantTrades: merchantActive ? ((prev as any).totalMerchantTrades || 0) + 1 : ((prev as any).totalMerchantTrades || 0)
+      totalBoerSold: ((prev as any).totalBoerSold || 0) + 1
     }));
     setWeeklyStats((prev: any) => ({ ...prev, earnings: prev.earnings + value }));
     setWeeklySales((prev: any) => ({ ...prev, carne: (prev.carne || 0) + 1 }));
@@ -1287,8 +1278,7 @@ export function useAnimals({
       ...prev,
       totalEarned: prev.totalEarned + value,
       totalSold: prev.totalSold + 1,
-      totalPirarucuSold: ((prev as any).totalPirarucuSold || 0) + 1,
-      totalMerchantTrades: merchantActive ? ((prev as any).totalMerchantTrades || 0) + 1 : ((prev as any).totalMerchantTrades || 0)
+      totalPirarucuSold: ((prev as any).totalPirarucuSold || 0) + 1
     }));
     setWeeklyStats((prev: any) => ({ ...prev, earnings: prev.earnings + value }));
     setWeeklySales((prev: any) => ({ ...prev, carne: (prev.carne || 0) + 1 }));
@@ -1389,8 +1379,7 @@ export function useAnimals({
       ...prev,
       totalEarned: prev.totalEarned + value,
       totalSold: prev.totalSold + 1,
-      totalFrangoSold: ((prev as any).totalFrangoSold || 0) + 1,
-      totalMerchantTrades: merchantActive ? ((prev as any).totalMerchantTrades || 0) + 1 : ((prev as any).totalMerchantTrades || 0)
+      totalFrangoSold: ((prev as any).totalFrangoSold || 0) + 1
     }));
     setWeeklyStats((prev: any) => ({ ...prev, earnings: prev.earnings + value }));
     setWeeklySales((prev: any) => ({ ...prev, carne: (prev.carne || 0) + 1 }));
@@ -1472,8 +1461,7 @@ export function useAnimals({
     setStats(prev => ({
       ...prev,
       totalEarned: prev.totalEarned + value,
-      totalSold: prev.totalSold + 1,
-      totalMerchantTrades: merchantActive ? ((prev as any).totalMerchantTrades || 0) + 1 : ((prev as any).totalMerchantTrades || 0)
+      totalSold: prev.totalSold + 1
     }));
     setWeeklyStats((prev: any) => ({
       ...prev,
