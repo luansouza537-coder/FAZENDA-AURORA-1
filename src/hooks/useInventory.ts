@@ -37,6 +37,8 @@ export interface UseInventoryProps {
   addCraftCost?: (energy: number, water: number) => void;
   onGoldSpent?: (amount: number) => void;
   onContractDelivered?: () => void;
+  hasCertSanitario?: boolean;
+  vaccinationDays?: number;
 }
 
 // Custo de energia (💡) e água (💧) por produto craftado
@@ -134,6 +136,8 @@ export function useInventory({
   addCraftCost,
   onGoldSpent,
   onContractDelivered,
+  hasCertSanitario,
+  vaccinationDays,
 }: UseInventoryProps) {
 
   const applyCraftCost = (product: string) => {
@@ -1345,12 +1349,18 @@ export function useInventory({
   const creditContractDeliveries = (itemType: string, qty: number) => {
     const contractProduct = CONTRACT_PRODUCT_MAP[itemType];
     if (!contractProduct || qty <= 0) return;
+    // CSI (Certificado Sanitário Internacional) precisa estar válido — comprado E com
+    // vacinação em dia — pra contratos de exportação (catalogId 'exp_*') contarem entrega.
+    // Sem CSI válido, o contrato fica "em espera": continua ativo, mas não recebe entrega
+    // até a vacinação ser renovada.
+    const csiValid = !!hasCertSanitario && (vaccinationDays ?? 0) > 0;
     // Processa contratos sequencialmente para evitar crédito duplicado
     // quando dois contratos exigem o mesmo produto
     setContracts(prev => {
       let qtyLeft = qty;
       return prev.map(c => {
         if (!c.active || c.product !== contractProduct || qtyLeft <= 0) return c;
+        if (c.catalogId?.startsWith('exp_') && !csiValid) return c;
         const remaining = c.quantity - c.delivered;
         if (remaining <= 0) return c;
         const toDeliver = Math.min(qtyLeft, remaining);

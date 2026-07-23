@@ -24,6 +24,8 @@ interface ContractsModalProps {
   longContractCatalog: LongContractCatalogEntry[];
   onSignLongContract: (catalogId: string) => void;
   onClose: () => void;
+  hasCertSanitario?: boolean;
+  vaccinationDays?: number;
 }
 
 const PRODUCT_LABELS: Record<string, string> = {
@@ -125,9 +127,11 @@ const PRODUCT_FAMILY: Record<string, string> = {
 };
 
 export const ContractsModal: React.FC<ContractsModalProps> = ({
-  contracts, currentDay, farmLevel, gold, longContractCatalog, onSignLongContract, onClose
+  contracts, currentDay, farmLevel, gold, longContractCatalog, onSignLongContract, onClose,
+  hasCertSanitario, vaccinationDays
 }) => {
   const longContracts = contracts.filter(c => c.active && c.contractType === 'long');
+  const csiValid = !!hasCertSanitario && (vaccinationDays ?? 0) > 0;
   const [openFamily, setOpenFamily] = useState<string | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
@@ -240,6 +244,21 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                         </button>
                         {isOpen && (
                           <div className="p-3 space-y-2 border-t-2 border-violet-100">
+                            {fam.key === 'exportacao' && (
+                              csiValid ? (
+                                <div className="text-[10px] font-mono bg-emerald-50 border-2 border-emerald-200 text-emerald-800 rounded-xl p-2.5">
+                                  ✅ CSI válido · vacinação em dia por mais {vaccinationDays} dia{vaccinationDays === 1 ? '' : 's'}
+                                </div>
+                              ) : !hasCertSanitario ? (
+                                <div className="text-[10px] font-mono bg-amber-50 border-2 border-amber-200 text-amber-800 rounded-xl p-2.5">
+                                  📜 Requer o Certificado Sanitário Internacional (CSI) — compre em Consumíveis, na Loja.
+                                </div>
+                              ) : (
+                                <div className="text-[10px] font-mono bg-rose-50 border-2 border-rose-200 text-rose-800 rounded-xl p-2.5">
+                                  💉 CSI vencido — vacinação expirada. Contratos ativos ficam em espera (entregas não contam) até você renovar a Campanha de Vacinação.
+                                </div>
+                              )
+                            )}
                             {entries.map(cat => {
                               const isActive = isActiveId(cat.catalogId);
                               const locked = farmLevel < cat.minLevel;
@@ -279,16 +298,22 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                                         <div className="bg-stone-50 rounded-lg px-2 py-1 text-center"><span className="block font-black text-stone-800">{cat.durationDays} dias</span>Duração</div>
                                         <div className="bg-amber-50 rounded-lg px-2 py-1 text-center"><span className="block font-black text-amber-700">{cat.completionBonus}💰</span>Bônus final</div>
                                       </div>
-                                      <button
-                                        disabled={isActive}
-                                        onClick={() => onSignLongContract(cat.catalogId)}
-                                        className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${
-                                          isActive ? 'bg-green-100 border-green-300 text-green-700 cursor-default' :
-                                          'bg-violet-600 hover:bg-violet-500 text-white border-violet-800'
-                                        }`}
-                                      >
-                                        {isActive ? '✅ Contrato ativo' : `📝 Assinar contrato (${cat.weeklyGoal} un/sem por ${cat.durationDays}d)`}
-                                      </button>
+                                      {cat.catalogId.startsWith('exp_') && !isActive && !csiValid ? (
+                                        <div className="w-full text-[10px] font-mono font-black py-2 px-3 rounded-xl border-b-2 bg-stone-100 border-stone-300 text-stone-500 text-center">
+                                          🔒 Requer CSI válido
+                                        </div>
+                                      ) : (
+                                        <button
+                                          disabled={isActive}
+                                          onClick={() => onSignLongContract(cat.catalogId)}
+                                          className={`w-full text-xs font-mono font-black py-2 px-3 rounded-xl border-b-2 transition-all cursor-pointer ${
+                                            isActive ? 'bg-green-100 border-green-300 text-green-700 cursor-default' :
+                                            'bg-violet-600 hover:bg-violet-500 text-white border-violet-800'
+                                          }`}
+                                        >
+                                          {isActive ? '✅ Contrato ativo' : `📝 Assinar contrato (${cat.weeklyGoal} un/sem por ${cat.durationDays}d)`}
+                                        </button>
+                                      )}
                                     </div>
                                   )}
                                 </div>

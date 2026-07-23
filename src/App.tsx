@@ -2260,6 +2260,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       craftWaterRef.current += water;
     },
     onContractDelivered: () => setDayContractDeliveries(prev => prev + 1),
+    hasCertSanitario,
+    vaccinationDays,
   });
 
   // --- useAnimals hook ---
@@ -3836,6 +3838,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     const cat = LONG_CONTRACT_CATALOG.find(c => c.catalogId === catalogId);
     if (!cat) return;
     if (farmLevel < cat.minLevel) { addLog(`🔒 Nível ${cat.minLevel} necessário para assinar com ${cat.client}.`, 'error'); return; }
+    if (catalogId.startsWith('exp_')) {
+      if (!hasCertSanitario) { addLog(`📜 Exportação requer o Certificado Sanitário Internacional (CSI). Compre em Consumíveis.`, 'error'); return; }
+      if (vaccinationDays <= 0) { addLog(`💉 Seu CSI está vencido — a vacinação do rebanho expirou. Renove a Campanha de Vacinação para exportar.`, 'error'); return; }
+    }
     const alreadyActive = contracts.some(c => c.contractType === 'long' && c.active && c.catalogId === catalogId);
     if (alreadyActive) { addLog(`📜 Já existe um contrato ativo com ${cat.client}!`, 'error'); return; }
     const weeks = Math.round(cat.durationDays / 7);
@@ -7976,6 +7982,8 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             longContractCatalog={LONG_CONTRACT_CATALOG as any}
             onSignLongContract={signLongContract}
             onClose={() => setShowContractsModal(false)}
+            hasCertSanitario={hasCertSanitario}
+            vaccinationDays={vaccinationDays}
           />
         )}
       </AnimatePresence>
