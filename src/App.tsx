@@ -2252,6 +2252,25 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   });
 
   // --- useAnimals hook ---
+  // --- useFairs hook (movido pra antes do useAnimals — getMeatMarketBonus precisa de prestigePoints) ---
+  const {
+    nextFairDay,
+    setNextFairDay,
+    fairResults,
+    setFairResults,
+    prestigePoints,
+    setPrestigePoints,
+    nextExposicaoDay,
+    setNextExposicaoDay,
+    nextFeiraProdutosDay,
+    setNextFeiraProdutosDay,
+    nextFestivalDay,
+    setNextFestivalDay,
+    nextCorridaDay,
+    setNextCorridaDay,
+    prestigeNotifiedRef,
+  } = useFairs({ addNotification });
+
   const {
     animals,
     setAnimals,
@@ -2327,6 +2346,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     weather,
     currentDay,
     weeklySales,
+    worldEvent,
+    prestigePoints,
+    hasCertSanitario,
     soundEnabled,
     addLog,
     addNotification,
@@ -2482,25 +2504,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
   // --- useMissions hook ---
   const { generateDailyMissions, generateWeeklyMissions, generateEpicMissions } = useMissions({ animals, farmLevel, inventory });
-
-  // --- useFairs hook ---
-  const {
-    nextFairDay,
-    setNextFairDay,
-    fairResults,
-    setFairResults,
-    prestigePoints,
-    setPrestigePoints,
-    nextExposicaoDay,
-    setNextExposicaoDay,
-    nextFeiraProdutosDay,
-    setNextFeiraProdutosDay,
-    nextFestivalDay,
-    setNextFestivalDay,
-    nextCorridaDay,
-    setNextCorridaDay,
-    prestigeNotifiedRef,
-  } = useFairs({ addNotification });
   const [showRaceModal, setShowRaceModal] = useState<import('./components/RaceModal').RaceResult | null>(null);
 
   // Monitor states to unlock achievements dynamically

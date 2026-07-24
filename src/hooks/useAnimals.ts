@@ -134,6 +134,9 @@ export interface UseAnimalsProps {
   weather: 'chuva' | 'sol' | 'nublado';
   currentDay: number;
   weeklySales: any;
+  worldEvent?: { id: string; title: string; desc: string; daysLeft: number; priceMult: number; items: string[] } | null;
+  prestigePoints?: number;
+  hasCertSanitario?: boolean;
   soundEnabled: boolean;
   addLog: (msg: string, type?: LogMessage['type'], overrideDay?: number) => void;
   addNotification: (message: string, type?: string, overrideDay?: number) => void;
@@ -173,6 +176,9 @@ export function useAnimals({
   weather,
   currentDay,
   weeklySales,
+  worldEvent,
+  prestigePoints,
+  hasCertSanitario,
   soundEnabled,
   addLog,
   addNotification,
@@ -327,6 +333,34 @@ export function useAnimals({
     return offerMult * seasonMult;
   };
 
+  // Bônus de mercado dinâmico para animais vendidos inteiros (Boi, Boi Angus, Cabra Boer,
+  // Pirarucu, Frango de Corte, Peru) — traz clima, eventos mundiais, prestígio e CSI pro
+  // mesmo nível de tratamento que os produtos de estoque já recebem via getDynamicTransactionPrice.
+  // `includeReputation` fica false para Boi/Peru, que já têm bônus de nível próprio embutido
+  // em suas fórmulas (evita contar o bônus de reputação em dobro).
+  const getMeatMarketBonus = (includeReputation: boolean, w = weather, d = currentDay): number => {
+    let mult = 1.0;
+    // Clima: gado sofre um pouco no transporte/manejo em dias de chuva, vende melhor no sol
+    if (w === 'chuva') mult *= 0.95;
+    else if (w === 'sol') mult *= 1.05;
+    // Evento de mercado mundial — categoria genérica 'meat'
+    if (worldEvent && worldEvent.items.includes('meat')) mult *= worldEvent.priceMult;
+    // Reputação por nível (mesma fórmula de getDynamicTransactionPrice)
+    if (includeReputation && farmLevel > 5) {
+      const bonusPct = farmLevel <= 10 ? (farmLevel - 5) * 0.05 : 0.25 + (farmLevel - 10) * 0.03;
+      mult *= (1.0 + bonusPct);
+    }
+    // Pavão feliz na fazenda
+    const pavaoCount = animals.filter(a => a.type === 'pavao' && a.happiness >= 80).length;
+    if (pavaoCount >= 2) mult *= 1.05;
+    else if (pavaoCount === 1) mult *= 1.03;
+    // Prestígio 300+
+    if ((prestigePoints ?? 0) >= 300) mult *= 1.05;
+    // Certificado Sanitário Internacional (+10% em carne)
+    if (hasCertSanitario) mult *= 1.1;
+    return mult;
+  };
+
   const calculateBoiValue = (boi: Animal): number => {
     const growthFactor = boi.weightGain || 0.0;
     let base = 60 + (growthFactor * 240); // Max 300 base
@@ -340,7 +374,7 @@ export function useAnimals({
       finalValueBase *= (1.0 + (farmLevel - 5) * 0.05);
     }
 
-    return Math.max(20, Math.round(finalValueBase * getCarneMultiplier()));
+    return Math.max(20, Math.round(finalValueBase * getCarneMultiplier() * getMeatMarketBonus(false)));
   };
 
   const calcFairScore = (animal: Animal): number => {
@@ -1181,7 +1215,7 @@ export function useAnimals({
     const w = angus.weightGain || 0.0;
     const base = 400 + w * 1600;
     const happinessBonus = (angus.happiness / 100) * 300;
-    return Math.max(100, Math.round((base + happinessBonus) * getCarneMultiplier()));
+    return Math.max(100, Math.round((base + happinessBonus) * getCarneMultiplier() * getMeatMarketBonus(true)));
   };
 
   const sellAngus = (id: number, event: React.MouseEvent) => {
@@ -1216,7 +1250,7 @@ export function useAnimals({
     const w = boer.weightGain || 0.0;
     const base = 180 + w * 900;
     const happinessBonus = (boer.happiness / 100) * 140;
-    return Math.max(50, Math.round((base + happinessBonus) * getCarneMultiplier()));
+    return Math.max(50, Math.round((base + happinessBonus) * getCarneMultiplier() * getMeatMarketBonus(true)));
   };
 
   const sellBoer = (id: number, event: React.MouseEvent) => {
@@ -1257,7 +1291,7 @@ export function useAnimals({
     const w = pirarucu.weightGain || 0.0;
     const base = 250 + w * 1100;
     const happinessBonus = (pirarucu.happiness / 100) * 200;
-    return Math.max(80, Math.round((base + happinessBonus) * getCarneMultiplier()));
+    return Math.max(80, Math.round((base + happinessBonus) * getCarneMultiplier() * getMeatMarketBonus(true)));
   };
 
   const sellPirarucu = (id: number, event: React.MouseEvent) => {
@@ -1362,7 +1396,7 @@ export function useAnimals({
     const growthFactor = frango.weightGain || 0.0;
     const base = 8 + growthFactor * 30;
     const happinessBonus = (frango.happiness / 100) * 6;
-    return Math.max(6, Math.round((base + happinessBonus) * getCarneMultiplier()));
+    return Math.max(6, Math.round((base + happinessBonus) * getCarneMultiplier() * getMeatMarketBonus(true)));
   };
 
   const sellFrango = (id: number, event: React.MouseEvent) => {
@@ -1400,7 +1434,7 @@ export function useAnimals({
     let finalValueBase = Math.floor(base + happinessBonus);
     if (farmLevel >= 5) finalValueBase += 5;
     if (farmLevel > 5) finalValueBase *= (1.0 + (farmLevel - 5) * 0.03);
-    return Math.max(20, Math.round(finalValueBase * getCarneMultiplier()));
+    return Math.max(20, Math.round(finalValueBase * getCarneMultiplier() * getMeatMarketBonus(false)));
   };
 
   const sellPeru = (id: number, event: React.MouseEvent) => {
