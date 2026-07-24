@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PRODUCT_LABELS, HIDDEN_PRODUCT_KEYS } from '../data/sellableProducts';
 
 interface Inventory { milk: number; wool: number; cheese: number; scarf: number; egg?: number; mayo?: number; queijoCoalho?: number; queijoMucarela?: number; queijoBrie?: number; minhoca_viva?: number; biofertilizante?: number; serum_facial?: number; mascara_facial?: number; [key: string]: number | undefined; }
 
@@ -12,99 +13,19 @@ interface SellAllModalProps {
   sfx: { playSound: (s: string) => void };
 }
 
+// boi/porco/boi_porco são vendidos como animal inteiro, não ficam no estoque — excluídos daqui.
+const NON_INVENTORY_KEYS = new Set(['boi', 'porco', 'boi_porco']);
+
 const SellAllModal: React.FC<SellAllModalProps> = ({
   inventory, getDynamicTransactionPrice, sellAllItemsNoConfirm, onClose, triggerAudioResult, sfx,
 }) => {
-  const itemsToSell = [
-    { key: 'milk', label: 'Leite Cru', qty: inventory.milk, icon: '🥛' },
-    { key: 'wool', label: 'Lã Crua', qty: inventory.wool, icon: '🧶' },
-    { key: 'cheese', label: 'Queijo Nobre', qty: inventory.cheese, icon: '🧀' },
-    { key: 'scarf', label: 'Cachecol Elegante', qty: inventory.scarf, icon: '🧣' },
-    { key: 'egg', label: 'Ovo de Quintal', qty: inventory.egg || 0, icon: '🥚' },
-    { key: 'mayo', label: 'Maionese Cremosa', qty: inventory.mayo || 0, icon: '🥣' },
-    { key: 'queijoCoalho', label: 'Queijo Coalho', qty: inventory.queijoCoalho || 0, icon: '🧀' },
-    { key: 'queijoMucarela', label: 'Queijo Muçarela', qty: inventory.queijoMucarela || 0, icon: '🧀' },
-    { key: 'queijoBrie', label: 'Queijo Brie', qty: inventory.queijoBrie || 0, icon: '🧀' },
-    { key: 'fio_lhama', label: 'Fio de Lhama', qty: inventory.fio_lhama || 0, icon: '🧵' },
-    { key: 'cachecol_lhama', label: 'Cachecol de Lhama', qty: inventory.cachecol_lhama || 0, icon: '🧣' },
-    { key: 'gorro_lhama', label: 'Gorro de Lhama', qty: inventory.gorro_lhama || 0, icon: '🎩' },
-    { key: 'luvas_lhama', label: 'Luvas de Lhama', qty: inventory.luvas_lhama || 0, icon: '🧤' },
-    { key: 'poncho_lhama', label: 'Poncho de Lhama', qty: inventory.poncho_lhama || 0, icon: '🥻' },
-    { key: 'manta_lhama', label: 'Manta de Lhama', qty: inventory.manta_lhama || 0, icon: '🛋️' },
-    { key: 'iogurte_bufala', label: 'Iogurte de Búfala', qty: inventory.iogurte_bufala || 0, icon: '🥛' },
-    { key: 'manteiga_bufala', label: 'Manteiga de Búfala', qty: inventory.manteiga_bufala || 0, icon: '🧈' },
-    { key: 'doce_leite_bufala', label: 'Doce de Leite Búfala', qty: inventory.doce_leite_bufala || 0, icon: '🍮' },
-    { key: 'burrata', label: 'Burrata', qty: inventory.burrata || 0, icon: '🧀' },
-    { key: 'massa_fresca', label: 'Massa Fresca de Ov. Ganso', qty: inventory.massa_fresca || 0, icon: '🍝' },
-    { key: 'crepe_rustico', label: 'Crepe Rústico', qty: inventory.crepe_rustico || 0, icon: '🥞' },
-    { key: 'pao_rustico', label: 'Pão Rústico', qty: inventory.pao_rustico || 0, icon: '🥐' },
-    { key: 'waffle_mel', label: 'Waffle de Mel', qty: inventory.waffle_mel || 0, icon: '🧇' },
-    { key: 'minhoca_viva', label: 'Minhoca Viva', qty: inventory.minhoca_viva || 0, icon: '🪱' },
-    { key: 'biofertilizante', label: 'Biofertilizante Líquido', qty: inventory.biofertilizante || 0, icon: '🧴' },
-    { key: 'serum_facial', label: 'Sérum Facial', qty: inventory.serum_facial || 0, icon: '💧' },
-    { key: 'mascara_facial', label: 'Máscara Facial', qty: inventory.mascara_facial || 0, icon: '🧖' },
-    { key: 'ovo_caipira', label: 'Ovo Caipira', qty: inventory.ovo_caipira || 0, icon: '🥚' },
-    { key: 'bolo_caipira', label: 'Bolo Caipira', qty: inventory.bolo_caipira || 0, icon: '🍰' },
-    { key: 'pudim_caipira', label: 'Pudim Caipira', qty: inventory.pudim_caipira || 0, icon: '🍮' },
-    { key: 'peixe_defumado', label: 'Defumado', qty: inventory.peixe_defumado || 0, icon: '🐟' },
-    { key: 'bolinho_peixe', label: 'Bolinho', qty: inventory.bolinho_peixe || 0, icon: '🥟' },
-    { key: 'moqueca', label: 'Moqueca', qty: inventory.moqueca || 0, icon: '🍲' },
-    { key: 'leite_jersey', label: 'L.Jersey', qty: inventory.leite_jersey || 0, icon: '🥛' },
-    { key: 'manteiga_jersey', label: 'Manteiga J.', qty: inventory.manteiga_jersey || 0, icon: '🧈' },
-    { key: 'queijo_minas_jersey', label: 'Minas J.', qty: inventory.queijo_minas_jersey || 0, icon: '🧀' },
-    { key: 'doce_leite_jersey', label: 'Doce J.', qty: inventory.doce_leite_jersey || 0, icon: '🍮' },
-    { key: 'gouda_jersey', label: 'Gouda J.', qty: inventory.gouda_jersey || 0, icon: '🧀' },
-    { key: 'goat_milk', label: 'L.Cabra', qty: inventory.goat_milk || 0, icon: '🐐' },
-    { key: 'llama_wool', label: 'L.Lhama', qty: inventory.llama_wool || 0, icon: '🦙' },
-    { key: 'duck_egg', label: 'Ov.Pato', qty: inventory.duck_egg || 0, icon: '🦆' },
-    { key: 'goose_egg', label: 'Ov.Ganso', qty: inventory.goose_egg || 0, icon: '🪿' },
-    { key: 'buffalo_milk', label: 'L.Búfala', qty: inventory.buffalo_milk || 0, icon: '🐃' },
-    { key: 'buffalo_mozzarella', label: 'Muç.Búfala', qty: inventory.buffalo_mozzarella || 0, icon: '🧀' },
-    { key: 'butter', label: 'Manteiga', qty: inventory.butter || 0, icon: '🧈' },
-    { key: 'yogurt', label: 'Iogurte', qty: inventory.yogurt || 0, icon: '🥛' },
-    { key: 'fertile_egg', label: 'Ov.Fértil', qty: inventory.fertile_egg || 0, icon: '✨' },
-    { key: 'couro_jacare', label: 'Couro Jacaré', qty: inventory.couro_jacare || 0, icon: '🐊' },
-    { key: 'queijo_cabra', label: 'Q.Cabra', qty: inventory.queijo_cabra || 0, icon: '🧀' },
-    { key: 'iogurte_cabra', label: 'Iog.Cabra', qty: inventory.iogurte_cabra || 0, icon: '🥛' },
-    { key: 'sheep_milk', label: 'L.Ovelha', qty: inventory.sheep_milk || 0, icon: '🥛' },
-    { key: 'queijo_pecorino', label: 'Pecorino', qty: inventory.queijo_pecorino || 0, icon: '🧀' },
-    { key: 'iogurte_ovelha', label: 'Iog.Ovelha', qty: inventory.iogurte_ovelha || 0, icon: '🥛' },
-    { key: 'ricota_ovelha', label: 'Ricota Ovelha', qty: inventory.ricota_ovelha || 0, icon: '🧀' },
-    { key: 'doce_leite_ovelha', label: 'D.Leite Ovelha', qty: inventory.doce_leite_ovelha || 0, icon: '🍯' },
-    { key: 'leite_condensado', label: 'L.Condensado', qty: inventory.leite_condensado || 0, icon: '🥛' },
-    { key: 'queijo_parmesao', label: 'Q.Parmesão', qty: inventory.queijo_parmesao || 0, icon: '🧀' },
-    { key: 'queijo_serra', label: 'Q.Serra', qty: inventory.queijo_serra || 0, icon: '🧀' },
-    { key: 'kit_gourmet', label: 'Kit Gourmet', qty: inventory.kit_gourmet || 0, icon: '🎁' },
-    { key: 'tapete_lhama', label: 'Tapete Lhama', qty: inventory.tapete_lhama || 0, icon: '🪢' },
-    { key: 'cachecol_angora', label: 'Cachecol Angorá', qty: inventory.cachecol_angora || 0, icon: '🧣' },
-    { key: 'mohair', label: 'Mohair', qty: inventory.mohair || 0, icon: '🧶' },
-    { key: 'cachecol_mohair', label: 'Cachecol Mohair', qty: inventory.cachecol_mohair || 0, icon: '🧣' },
-    { key: 'tecido_alpaca', label: 'Tecido Alpaca', qty: inventory.tecido_alpaca || 0, icon: '🧶' },
-    { key: 'fio_seda', label: 'Fio de Seda', qty: inventory.fio_seda || 0, icon: '🪡' },
-    { key: 'manta_premium', label: 'Manta Premium', qty: inventory.manta_premium || 0, icon: '✨' },
-    { key: 'pate_pato', label: 'Panquecinhas', qty: inventory.pate_pato || 0, icon: '🥞' },
-    { key: 'ovo_defumado', label: 'Ov.Defumado', qty: inventory.ovo_defumado || 0, icon: '🥚' },
-    { key: 'conserva_codorna', label: 'Conserva Codorna', qty: inventory.conserva_codorna || 0, icon: '🥚' },
-    { key: 'creme_cosmetico', label: 'Creme Cosm.', qty: inventory.creme_cosmetico || 0, icon: '🧴' },
-    { key: 'sabonete_natural', label: 'Sabonete Nat.', qty: inventory.sabonete_natural || 0, icon: '🧼' },
-    { key: 'colete_couro', label: 'Colete Couro', qty: inventory.colete_couro || 0, icon: '🦺' },
-    { key: 'bolsa_exotica', label: 'Bolsa Exótica', qty: inventory.bolsa_exotica || 0, icon: '👜' },
-    { key: 'peixe', label: 'Tilápia', qty: inventory.peixe || 0, icon: '🐟' },
-    { key: 'mel', label: 'Mel', qty: inventory.mel || 0, icon: '🍯' },
-    { key: 'cogumelo', label: 'Cogumelo', qty: inventory.cogumelo || 0, icon: '🍄' },
-    { key: 'hidromel', label: 'Hidromel', qty: inventory.hidromel || 0, icon: '🍺' },
-    { key: 'risoto_cogumelo', label: 'Risoto', qty: inventory.risoto_cogumelo || 0, icon: '🍄' },
-    { key: 'conserva_peixe', label: 'Conserva', qty: inventory.conserva_peixe || 0, icon: '🐟' },
-    { key: 'mel_envasado', label: 'Mel Envasado', qty: inventory.mel_envasado || 0, icon: '🍯' },
-    { key: 'sopa_cogumelo', label: 'Sopa', qty: inventory.sopa_cogumelo || 0, icon: '🍲' },
-    { key: 'quail_egg', label: 'Ov.Codorna', qty: inventory.quail_egg || 0, icon: '🐦' },
-    { key: 'alpaca_wool', label: 'Lã Alpaca', qty: inventory.alpaca_wool || 0, icon: '🦙' },
-    { key: 'angora_wool', label: 'Lã Angorá', qty: inventory.angora_wool || 0, icon: '🐰' },
-    { key: 'seda_bruta', label: 'Seda Bruta', qty: inventory.seda_bruta || 0, icon: '🐛' },
-    { key: 'humus', label: 'Húmus', qty: inventory.humus || 0, icon: '🪱' },
-    { key: 'muco', label: 'Muco', qty: inventory.muco || 0, icon: '🐌' },
-    { key: 'carne_jacare', label: 'Carne Jacaré', qty: inventory.carne_jacare || 0, icon: '🐊' },
-  ].filter(i => i.qty > 0);
+  const itemsToSell = Object.entries(PRODUCT_LABELS)
+    .filter(([key]) => !NON_INVENTORY_KEYS.has(key) && !HIDDEN_PRODUCT_KEYS.has(key))
+    .map(([key, labelWithIcon]) => {
+      const [icon, ...rest] = labelWithIcon.split(' ');
+      return { key, label: rest.join(' '), qty: inventory[key] || 0, icon };
+    })
+    .filter(i => i.qty > 0);
 
   const hasItems = itemsToSell.length > 0;
 

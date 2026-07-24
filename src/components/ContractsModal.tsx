@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Contract } from '../types';
+import { PRODUCT_LABELS, PRODUCT_FAMILY } from '../data/sellableProducts';
 
 interface LongContractCatalogEntry {
   catalogId: string;
@@ -28,72 +29,6 @@ interface ContractsModalProps {
   vaccinationDays?: number;
 }
 
-const PRODUCT_LABELS: Record<string, string> = {
-  milk: '🥛 Leite Cru', wool: '🧶 Lã Crua', egg: '🥚 Ovos de Galinha', cheese: '🧀 Queijo Simples',
-  queijoCoalho: '🧀 Queijo Coalho', queijoMucarela: '🧀 Queijo Muçarela', queijoBrie: '🧀 Queijo Brie',
-  butter: '🧈 Manteiga Artesanal', yogurt: '🥛 Iogurte Natural', goat_milk: '🐐 Leite de Cabra',
-  buffalo_milk: '🐃 Leite de Búfala', buffalo_mozzarella: '🐃 Mozzarella de Búfala',
-  duck_egg: '🦆 Ovo de Pato', quail_egg: '🐦 Ovo de Codorna', goose_egg: '🪿 Ovo de Ganso',
-  angora_wool: '🐇 Lã Angorá', alpaca_wool: '🦙 Lã de Alpaca', llama_wool: '🦙 Lã de Lhama',
-  muco: '🐌 Muco de Caracol', seda_bruta: '🐛 Seda Bruta', mel_envasado: '🍯 Mel Envasado',
-  boi: '🐂 Boi (Carne)', porco: '🐷 Porco (Carne)', boi_porco: '🥩 Boi + Porco (Misto)',
-  mayo: '🥚 Maionese Artesanal', queijo_cabra: '🐐 Queijo de Cabra', iogurte_cabra: '🐐 Iogurte de Cabra',
-  sheep_milk: '🐑 Leite de Ovelha', queijo_pecorino: '🧀 Queijo Pecorino', iogurte_ovelha: '🐑 Iogurte de Ovelha',
-  ricota_ovelha: '🧀 Ricota de Ovelha', doce_leite_ovelha: '🍯 Doce de Leite Ovelha',
-  tapete_lhama: '🦙 Tapete de Lhama', leite_condensado: '🥛 Leite Condensado',
-  tecido_alpaca: '🦙 Tecido de Alpaca', cachecol_angora: '🐇 Cachecol Angorá',
-  coxa_ra: '🐸 Coxa de Rã',
-  carne_avestruz: '🦤 Carne de Avestruz', couro_avestruz: '🦤 Couro de Avestruz',
-  fio_seda: '🪡 Fio de Seda', carne_jacare: '🐊 Carne de Jacaré', couro_jacare: '🐊 Couro de Jacaré',
-  ovo_caipira: '🐔 Ovo Caipira', peixe: '🐟 Tilápia', bolo_caipira: '🍰 Bolo Caipira',
-  queijo_minas_jersey: '🧀 Queijo Minas Jersey',
-  leite_jersey: '🐄 Leite Jersey',
-  manteiga_jersey: '🧈 Manteiga Jersey',
-  doce_leite_jersey: '🍮 Doce de Leite Jersey',
-  gouda_jersey: '🧀 Gouda Jersey',
-  iogurte_bufala: '🐃 Iogurte de Búfala',
-  manteiga_bufala: '🧈 Manteiga de Búfala',
-  doce_leite_bufala: '🍮 Doce de Leite de Búfala',
-  burrata: '🧀 Burrata',
-  queijo_parmesao: '🧀 Queijo Parmesão',
-  queijo_serra: '🧀 Queijo da Serra',
-  pate_pato: '🦆 Patê de Pato',
-  ovo_defumado: '🥚 Ovo Defumado',
-  conserva_codorna: '🐦 Conserva de Codorna',
-  pudim_caipira: '🍮 Pudim Caipira',
-  peixe_defumado: '🐟 Peixe Defumado',
-  bolinho_peixe: '🥟 Bolinho de Peixe',
-  moqueca: '🍲 Moqueca da Fazenda',
-  conserva_peixe: '🐟 Conserva de Peixe',
-  fio_lhama: '🧶 Fio de Lhama',
-  cachecol_lhama: '🧣 Cachecol de Lhama',
-  gorro_lhama: '🎩 Gorro de Lhama',
-  luvas_lhama: '🧤 Luvas de Lhama',
-  poncho_lhama: '🦙 Poncho de Lhama',
-  manta_lhama: '🦙 Manta de Lhama',
-  mohair: '🐐 Mohair',
-  cachecol_mohair: '🧣 Cachecol de Mohair',
-  creme_cosmetico: '🧴 Creme Cosmético',
-  serum_facial: '💧 Sérum Facial',
-  mascara_facial: '🧖 Máscara Facial',
-  sabonete_natural: '🧼 Sabonete Natural',
-  humus: '🌱 Húmus',
-  minhoca_viva: '🪱 Minhoca Viva',
-  biofertilizante: '🌿 Biofertilizante',
-  mel: '🍯 Mel Cru',
-  cogumelo: '🍄 Cogumelo',
-  hidromel: '🍺 Hidromel',
-  risoto_cogumelo: '🍚 Risoto de Cogumelo',
-  sopa_cogumelo: '🍜 Sopa de Cogumelo',
-  massa_fresca: '🍝 Massa Fresca',
-  pao_rustico: '🍞 Pão Rústico',
-  crepe_rustico: '🥞 Crepe Rústico',
-  waffle_mel: '🧇 Waffle de Mel',
-  bolsa_exotica: '👜 Bolsa Exótica',
-  scarf: '🧣 Cachecol de Lã',
-  fertile_egg: '🥚 Ovo Fértil',
-};
-
 const FAMILIES: { key: string; label: string }[] = [
   { key: 'laticinios', label: '🥛 Laticínios' },
   { key: 'ovos', label: '🥚 Ovos & Derivados' },
@@ -104,27 +39,6 @@ const FAMILIES: { key: string; label: string }[] = [
   { key: 'exportacao', label: '🌍 Exportação Internacional' },
   { key: 'outros', label: '📦 Outros' },
 ];
-
-const PRODUCT_FAMILY: Record<string, string> = {
-  milk: 'laticinios', goat_milk: 'laticinios', buffalo_milk: 'laticinios', sheep_milk: 'laticinios',
-  leite_condensado: 'laticinios', cheese: 'laticinios', queijoCoalho: 'laticinios', queijoMucarela: 'laticinios',
-  queijoBrie: 'laticinios', queijo_cabra: 'laticinios', queijo_pecorino: 'laticinios',
-  queijo_minas_jersey: 'laticinios', buffalo_mozzarella: 'laticinios', ricota_ovelha: 'laticinios',
-  butter: 'laticinios', yogurt: 'laticinios', iogurte_cabra: 'laticinios', iogurte_ovelha: 'laticinios',
-  doce_leite_ovelha: 'laticinios',
-  egg: 'ovos', ovo_caipira: 'ovos', duck_egg: 'ovos', goose_egg: 'ovos', quail_egg: 'ovos', mayo: 'ovos',
-  wool: 'fibras', llama_wool: 'fibras', alpaca_wool: 'fibras', angora_wool: 'fibras',
-  seda_bruta: 'fibras', fio_seda: 'fibras', tecido_alpaca: 'fibras', tapete_lhama: 'fibras', cachecol_angora: 'fibras',
-  boi: 'carnes', porco: 'carnes', boi_porco: 'carnes', carne_jacare: 'carnes', couro_jacare: 'carnes',
-  carne_avestruz: 'carnes', couro_avestruz: 'carnes', coxa_ra: 'carnes', peixe: 'carnes',
-  mel_envasado: 'especiais', muco: 'especiais', bolo_caipira: 'especiais',
-  leite_jersey: 'laticinios', manteiga_jersey: 'laticinios', doce_leite_jersey: 'laticinios', gouda_jersey: 'laticinios', iogurte_bufala: 'laticinios', manteiga_bufala: 'laticinios', doce_leite_bufala: 'laticinios', burrata: 'laticinios', queijo_parmesao: 'laticinios', queijo_serra: 'laticinios',
-  fertile_egg: 'ovos', pate_pato: 'ovos', ovo_defumado: 'ovos', conserva_codorna: 'ovos', pudim_caipira: 'ovos',
-  peixe_defumado: 'carnes', bolinho_peixe: 'carnes', moqueca: 'carnes', conserva_peixe: 'carnes',
-  scarf: 'fibras', fio_lhama: 'fibras', cachecol_lhama: 'fibras', gorro_lhama: 'fibras', luvas_lhama: 'fibras', poncho_lhama: 'fibras', manta_lhama: 'fibras', mohair: 'fibras', cachecol_mohair: 'fibras',
-  creme_cosmetico: 'cosmeticos', serum_facial: 'cosmeticos', mascara_facial: 'cosmeticos', sabonete_natural: 'cosmeticos', humus: 'cosmeticos', minhoca_viva: 'cosmeticos', biofertilizante: 'cosmeticos',
-  mel: 'especiais', cogumelo: 'especiais', hidromel: 'especiais', risoto_cogumelo: 'especiais', sopa_cogumelo: 'especiais', massa_fresca: 'especiais', pao_rustico: 'especiais', crepe_rustico: 'especiais', waffle_mel: 'especiais', bolsa_exotica: 'especiais',
-};
 
 export const ContractsModal: React.FC<ContractsModalProps> = ({
   contracts, currentDay, farmLevel, gold, longContractCatalog, onSignLongContract, onClose,
