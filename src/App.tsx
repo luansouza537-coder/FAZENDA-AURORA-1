@@ -44,6 +44,7 @@ import { useMissions } from './hooks/useMissions';
 import { useWorkers } from './hooks/useWorkers';
 import { ACHIEVEMENTS_LIST } from './data/achievements';
 import { getVaccinationCost } from './data/merchantItems';
+import { getVeterinarioCost } from './data/workers';
 import PriceChart from './components/PriceChart';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -4936,7 +4937,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // --- DEBUG MODE: fluxo de ouro diário ---
       if (debugMode) {
         const totalCostsDebug = maintCost + contractPenaltyForGold + taxAmount + totalWaterCost + totalEnergyCost - longContractBonusForGold;
-        const workerCostDebug = workers.reduce((s, w) => s + w.dailyCost, 0);
+        const workerCostDebug = workers.reduce((s, w) => s + (w.role === 'veterinario' ? getVeterinarioCost(animals.length, farmLevel) : w.dailyCost), 0);
         logsToAdd.push({
           msg: `🔍 [DEBUG Dia ${nextDayValue}] Entradas: +${globalGoldBonus}💰 | Saídas: água=${totalWaterCost} energia=${totalEnergyCost} maint=${maintCost} imposto=${taxAmount} multa=${contractPenaltyForGold} workers=${workerCostDebug} | Net: ${globalGoldBonus - totalCostsDebug >= 0 ? '+' : ''}${globalGoldBonus - totalCostsDebug}💰`,
           type: 'system'
@@ -6218,7 +6219,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       // --- SISTEMA DE PEÕES (WORKERS) ---
       if (workers.length > 0) {
         // Salário semanal: debita apenas 1x por semana (a cada 7 dias)
-        const workerCost = nextDayValue % 7 === 0 ? workers.reduce((sum, w) => sum + w.dailyCost, 0) : 0;
+        const workerCost = nextDayValue % 7 === 0 ? workers.reduce((sum, w) => sum + (w.role === 'veterinario' ? getVeterinarioCost(animals.length, farmLevel) : w.dailyCost), 0) : 0;
         if (workerCost > 0) setGold(prev => {
           if (prev < workerCost) { setDebt(d => d + (workerCost - prev)); return 0; }
           return prev - workerCost;

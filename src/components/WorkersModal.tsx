@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { WORKER_TYPES } from '../data/workers';
+import { WORKER_TYPES, getVeterinarioCost } from '../data/workers';
 import { Animal, FarmWorker } from '../types';
 
 interface WorkersModalProps {
@@ -48,11 +48,12 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                 <div className="space-y-2">
                   {workers.map(w => {
                     const wt = WORKER_TYPES.find(t => t.role === w.role);
+                    const wCost = w.role === 'veterinario' ? getVeterinarioCost(animals.length, farmLevel) : w.dailyCost;
                     return (
                       <div key={w.id} className="bg-[#022c22] rounded-xl px-3 py-2">
                         <div className="flex items-center justify-between">
                           <span className="text-[#fef3c7] font-mono text-sm">{wt?.emoji} {w.name}</span>
-                          <span className="text-[#fbbf24] font-mono text-xs">-{w.dailyCost}💰/sem</span>
+                          <span className="text-[#fbbf24] font-mono text-xs">-{wCost}💰/sem</span>
                           <button onClick={() => onFireWorker(w.id)} className="text-red-400 text-xs font-black px-2 py-1 rounded-lg border border-red-400/40 hover:bg-red-400/20 cursor-pointer">
                             Dispensar
                           </button>
@@ -65,7 +66,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                   })}
                 </div>
                 <div className="text-[#fbbf24] font-mono text-xs mt-3 text-right">
-                  Custo total: -{workers.reduce((s, w) => s + w.dailyCost, 0)}💰/semana
+                  Custo total: -{workers.reduce((s, w) => s + (w.role === 'veterinario' ? getVeterinarioCost(animals.length, farmLevel) : w.dailyCost), 0)}💰/semana
                 </div>
               </div>
             )}
@@ -120,6 +121,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                 const SCALABLE_ROLES = ['queijeiro', 'artesao', 'cozinheiro'];
                 const maxPerRole = SCALABLE_ROLES.includes(wt.role) ? 3 : 1;
                 const hiredCount = workers.filter(w => w.role === wt.role).length;
+                const wtCost = wt.role === 'veterinario' ? getVeterinarioCost(animals.length, farmLevel) : wt.dailyCost;
                 const alreadyHired = hiredCount > 0;
                 const atRoleMax = hiredCount >= maxPerRole;
                 const maxSlots = farmLevel;
@@ -138,7 +140,7 @@ const WorkersModal: React.FC<WorkersModalProps> = ({
                         </div>
                         <div className="text-[#fef3c7]/70 text-[11px] font-mono mt-1 leading-relaxed">{wt.desc}</div>
                         <div className="text-[#fbbf24] text-[10px] font-mono mt-1.5 flex items-center gap-2 flex-wrap">
-                          <span>-{wt.dailyCost}💰/sem{hiredCount > 1 ? ` × ${hiredCount} = -${wt.dailyCost * hiredCount}💰/sem` : ''}</span>
+                          <span>-{wtCost}💰/sem{hiredCount > 1 ? ` × ${hiredCount} = -${wtCost * hiredCount}💰/sem` : ''}</span>
                           {(wt.role === 'tratador') && <span className="text-[9px] bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30 rounded-full px-1.5 py-0.5">Remove debuff geral</span>}
                           {(wt.role === 'ordenhador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Bovinos sem debuff</span>}
                           {(wt.role === 'tosquiador') && <span className="text-[9px] bg-blue-500/15 text-blue-300 border border-blue-400/30 rounded-full px-1.5 py-0.5">Fibras/Caprinos sem debuff</span>}

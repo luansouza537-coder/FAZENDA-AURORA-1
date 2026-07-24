@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RotateCcw } from 'lucide-react';
 import { Animal, AnimalType, FarmStats, FarmWorker } from '../types';
+import { getVeterinarioCost } from '../data/workers';
 import { AnimalCard, AnimalListRow } from './AnimalCard';
 import CaipiraHen from './CaipiraHen';
 import JerseyCow from './JerseyCow';
@@ -954,7 +955,7 @@ export default function AnimalGrid({
                               <span className="text-sm leading-none">{def?.emoji ?? '👷'}</span>
                               <div className="flex flex-col leading-none">
                                 <span className="text-[10px] font-mono text-[#fef3c7] font-black leading-tight">{worker.name}</span>
-                                <span className="text-[8px] text-[#fbbf24]/80 font-mono leading-tight">-{worker.dailyCost}💰/sem</span>
+                                <span className="text-[8px] text-[#fbbf24]/80 font-mono leading-tight">-{worker.role === 'veterinario' ? getVeterinarioCost(animals.length, farmLevel) : worker.dailyCost}💰/sem</span>
                               </div>
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5"></span>
                             </div>

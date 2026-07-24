@@ -7,10 +7,18 @@ export const WORKER_TYPES = [
   { role: 'queijeiro'            as const, name: 'Queijeiro',          emoji: '🧀',  dailyCost: 130, desc: 'Transforma 3 leites em queijo por dia (vaca→Coalho, cabra→Cabra, búfala→Mussarela, ovelha→Pecorino). Até 3 queijeiros.',        minLevel: 5 },
   { role: 'tratador_exotico'     as const, name: 'Tratador Exótico',   emoji: '🦎',  dailyCost: 120, desc: 'Cuida de jacarés e caracóis: +5 felicidade/dia e -50% chance de epidemia nesses animais.',                                     minLevel: 8 },
   { role: 'sericicultor'         as const, name: 'Sericicultor',       emoji: '🧑‍🏭', dailyCost: 140, desc: 'Especialista em bicho-da-seda. Alimenta lagartas automaticamente, produz +1 seda bruta extra na fase Casulo e aumenta em +30% a chance de reprodução na fase Mariposa.', minLevel: 10 },
-  { role: 'veterinario'          as const, name: 'Veterinário',        emoji: '💉',  dailyCost: 280, desc: 'Cura doenças, remove estresse e adiciona +5 felicidade para todos os animais por dia.',                                           minLevel: 10 },
+  { role: 'veterinario'          as const, name: 'Veterinário',        emoji: '💉',  dailyCost: 280, desc: 'Cura doenças, remove estresse e adiciona +5 felicidade para todos os animais por dia. Salário escala com nº de animais e nível da fazenda.', minLevel: 1 },
   { role: 'comerciante_residente'as const, name: 'Comerciante',        emoji: '💰',  dailyCost: 420, desc: '+8% no preço de venda de leite, lã, ovos, seda, couro e carne bruta.',                                                           minLevel: 10 },
   { role: 'artesao'              as const, name: 'Artesão',            emoji: '🧵',  dailyCost: 150, desc: 'Produz 1 item têxtil por dia: prioriza Manta Premium, Fio de Seda, Tecido, Cachecol Angorá e Tapete. Até 3 artesãos simultâneos. (processos têxteis consomem água)', minLevel: 6  },
   { role: 'cozinheiro'           as const, name: 'Cozinheiro',         emoji: '👨‍🍳',  dailyCost: 170, desc: 'Produz 1 item gastronômico por dia: prioriza Hidromel, Mel Envasado, Risoto, Conservas e Sopa. Até 3 cozinheiros simultâneos. (processos consomem água)',   minLevel: 7  },
   { role: 'apicultor'            as const, name: 'Apicultor',          emoji: '🐝',  dailyCost: 80,  desc: '+1 mel extra por colmeia a cada coleta. Colmeias nunca ficam doentes. No inverno, ciclo de produção reduz de 10 para 7 dias.', minLevel: 5  },
   { role: 'helicicultor'        as const, name: 'Helicicultor',       emoji: '🐌',  dailyCost: 100, desc: 'Especialista em criação de caracóis. Reduz penalidades de calor e seca em 50%. +1 muco extra por coleta. Produção a cada 2 dias.', minLevel: 9  },
 ];
+
+// Salário semanal do Veterinário escala com o tamanho do rebanho e o nível da fazenda,
+// em vez do valor fixo dos demais funcionários — acessível desde o nível 1 (poucos
+// animais = barato), crescendo até ficar perto do antigo valor fixo de 280💰/semana
+// numa fazenda nível 10 desenvolvida.
+export function getVeterinarioCost(animalsCount: number, farmLevel: number): number {
+  return 20 + 5 * animalsCount + 15 * Math.max(0, farmLevel - 1);
+}
