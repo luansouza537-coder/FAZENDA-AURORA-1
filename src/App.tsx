@@ -118,6 +118,7 @@ import FarmNameModal from './components/FarmNameModal';
 import OnlineRankingModal from './components/RankingModal';
 import DoacaoModal from './components/DoacaoModal';
 import RaceModal from './components/RaceModal';
+import ContractOfferModal, { ContractOfferEntry } from './components/ContractOfferModal';
 import { DISTANCE_INFO, RaceDistance, distanceTraitMod, effectiveSpeed, npcLineup, npcPerformance } from './lib/onlineRace';
 import FairJudgingModal, { FairJudgingResult } from './components/FairJudgingModal';
 import GenericJudgingModal, { GenericJudgingResult } from './components/GenericJudgingModal';
@@ -342,6 +343,14 @@ function GameApp() {
   const [shownMilestones, setShownMilestones] = useState<number[]>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).shownMilestones ?? []; } catch(e) {} return [];
   });
+
+  // Catálogo de contratos já ofertados como popup — cada catalogId aparece como
+  // notificação de "nova oferta" no máximo uma vez, mesmo se o contrato terminar
+  // e voltar a ficar disponível para assinar depois.
+  const [shownContractOffers, setShownContractOffers] = useState<string[]>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).shownContractOffers ?? []; } catch(e) {} return [];
+  });
+  const [showContractOfferModal, setShowContractOfferModal] = useState<ContractOfferEntry | null>(null);
 
   // --- EXPANDED MERCHANT SHOP ---
   const [hasBebedouro, setHasBebedouro] = useState<boolean>(() => {
@@ -2835,6 +2844,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         hasRoofReinforcement, waterTruckDays, vaccinationDays, racingDivision, divisionWins,
 
         shownMilestones,
+        shownContractOffers,
         vehicleTiers,
         lastUpgradeDay,
         lojaSeenLevel,
@@ -2856,7 +2866,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, specializationResetUsed, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, droughtMitigated, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, vehicleTiers, abatedouroUnlocked]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, specializationResetUsed, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, droughtMitigated, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, shownContractOffers, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     let price = 2500;
@@ -4291,6 +4301,26 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           setTimeout(() => checkAndUnlockAchievement('level_20'), 0);
           setTimeout(() => addNotification('🌌 PARABÉNS! Você atingiu o Nível 20 — IMPÉRIO AURORA! Você é uma lenda!', 'success', nextDayValue), 0);
         }
+      }
+
+      // --- Oferta de contrato: mostra no máximo 1 popup por avanço de dia,
+      // apenas para contratos ainda não ofertados antes (shownContractOffers),
+      // sem contrato ativo já em andamento com o mesmo catalogId. Prioriza o(s)
+      // recém-desbloqueado(s) neste nível; senão pega o de menor minLevel do
+      // backlog, pra ir revelando aos poucos e não empilhar tudo de uma vez.
+      const eligibleOffer = LONG_CONTRACT_CATALOG
+        .filter(cat =>
+          cat.minLevel <= newLevel &&
+          !shownContractOffers.includes(cat.catalogId) &&
+          !contracts.some(c => c.catalogId === cat.catalogId && c.active)
+        )
+        .sort((a, b) => a.minLevel - b.minLevel)[0];
+      if (eligibleOffer) {
+        const offerToShow: ContractOfferEntry = { ...eligibleOffer };
+        setTimeout(() => {
+          setShowContractOfferModal(offerToShow);
+          setShownContractOffers(prev => prev.includes(offerToShow.catalogId) ? prev : [...prev, offerToShow.catalogId]);
+        }, 1000);
       }
 
       // --- FEATURE 3: marcos no log ---
@@ -8460,6 +8490,17 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         <FairResultModal
           result={showFairResultModal}
           onClose={() => setShowFairResultModal(null)}
+        />
+      )}
+
+      {showContractOfferModal && (
+        <ContractOfferModal
+          offer={showContractOfferModal}
+          onSign={() => {
+            signLongContract(showContractOfferModal.catalogId);
+            setShowContractOfferModal(null);
+          }}
+          onClose={() => setShowContractOfferModal(null)}
         />
       )}
 
