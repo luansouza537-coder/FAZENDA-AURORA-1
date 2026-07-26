@@ -35,7 +35,7 @@ export interface UseInventoryProps {
   currentDay?: number;
   addCraftCost?: (energy: number, water: number) => void;
   onGoldSpent?: (amount: number) => void;
-  onContractDelivered?: () => void;
+  onContractDelivered?: (catalogId?: string) => void;
   hasCertSanitario?: boolean;
   vaccinationDays?: number;
 }
@@ -1411,7 +1411,7 @@ export function useInventory({
           setFarmXp(prev => prev + xp);
           setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
         }
-        onContractDelivered?.();
+        onContractDelivered?.(c.catalogId);
       });
     }, 0);
   };

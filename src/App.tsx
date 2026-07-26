@@ -352,6 +352,30 @@ function GameApp() {
   });
   const [showContractOfferModal, setShowContractOfferModal] = useState<ContractOfferEntry | null>(null);
 
+  // Reputação por cliente de contrato — chave é o catalogId (cada catalogId hoje
+  // corresponde a um único cliente). score sobe ao concluir bem, cai ao quebrar;
+  // blockedUntilDay impede reassinar/reofertar aquele contrato até o dia indicado.
+  const [clientReputation, setClientReputation] = useState<Record<string, { score: number; blockedUntilDay?: number }>>(() => {
+    try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).clientReputation ?? {}; } catch(e) {} return {};
+  });
+  // Atualiza a reputação de um cliente a partir do desfecho de um contrato.
+  // Updater puro (sem outros efeitos colaterais dentro) — seguro mesmo se o
+  // StrictMode (dev) invocar duas vezes, já que o resultado é idempotente
+  // (mesmo prev + mesmo outcome = mesmo novo estado, aplicado uma única vez).
+  const applyClientReputationOutcome = (catalogId: string | undefined, outcome: 'completed' | 'completed_partial' | 'broken', dayForBlock: number) => {
+    if (!catalogId) return;
+    setClientReputation(prev => {
+      const cur = prev[catalogId] ?? { score: 0 };
+      if (outcome === 'completed') {
+        return { ...prev, [catalogId]: { score: cur.score + 1, blockedUntilDay: undefined } };
+      }
+      if (outcome === 'completed_partial') {
+        return { ...prev, [catalogId]: { score: cur.score + 0.5, blockedUntilDay: undefined } };
+      }
+      return { ...prev, [catalogId]: { score: Math.max(0, cur.score - 2), blockedUntilDay: dayForBlock + 30 } };
+    });
+  };
+
   // --- EXPANDED MERCHANT SHOP ---
   const [hasBebedouro, setHasBebedouro] = useState<boolean>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).hasBebedouro ?? false; } catch(e) {} return false;
@@ -2255,7 +2279,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       craftEnergyRef.current += energy;
       craftWaterRef.current += water;
     },
-    onContractDelivered: () => setDayContractDeliveries(prev => prev + 1),
+    onContractDelivered: (catalogId?: string) => {
+      setDayContractDeliveries(prev => prev + 1);
+      applyClientReputationOutcome(catalogId, 'completed', currentDay);
+    },
     hasCertSanitario,
     vaccinationDays,
   });
@@ -2845,6 +2872,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
 
         shownMilestones,
         shownContractOffers,
+        clientReputation,
         vehicleTiers,
         lastUpgradeDay,
         lojaSeenLevel,
@@ -2866,7 +2894,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         }
       }
     }
-  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, specializationResetUsed, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, droughtMitigated, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, shownContractOffers, vehicleTiers, abatedouroUnlocked]);
+  }, [gold, currentDay, farmLevel, farmXp, inventory, animals, stats, logs, weeklyStats, weeklySales, previousPrices, machines, priceHistory, queijosEmMaturacao, scarfQueue, maxPrateleiras, totalQueijosFabricados, queijosFabricadosTipos, earningsHistory, allTimeStats, missions, notifications, farmWisdomBonus, contracts, insurance, landLots, wellLevel, solarLevel, irrigationLevel, queijariaNivel, nextDayEvent, activeMarketEvent, hasStable, hasSilo, hasFridge, hasTipBox, productFreshness, specialization, specializationResetUsed, debt, hasTourism, nextFairDay, fairResults, fairCategoryCooldown, expoCategoryCooldown, prodCategoryCooldown, lastEpidemicDay, droughtDaysRemaining, droughtMitigated, licencaExotica, coelhoReproCount, racaoOrganicaDays, fertilizanteDays, prestigePoints, nextExposicaoDay, nextFeiraProdutosDay, nextFestivalDay, workers, landBiomes, hasBebedouro, hasCertSanitario, licencaCriadouro, reproducaoAtiva, biomeWeeklyIncome, reproHistory, loanActive, loanAmount, loanInterestRate, loanWeeksLeft, loanDaysUntilInterest, insuranceTheft, insuranceClimate, milkerLevel, shearerLevel, feederLevel, machineUsageStats, productionBoostDays, antiPestDays, worldEvent, financialLog, shownMilestones, shownContractOffers, clientReputation, vehicleTiers, abatedouroUnlocked]);
 
   const buyMachine = (machineKey: 'milker' | 'shearer' | 'feeder' | 'collector') => {
     let price = 2500;
@@ -3969,6 +3997,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
   const creditBoiExportContract = () => {
     const csiValid = !!hasCertSanitario && (vaccinationDays ?? 0) > 0;
     if (!csiValid) return;
+    // Updater puro — sem setGold/setFarmXp/setStats/addLog dentro dele — mesma
+    // causa raiz já corrigida nos outros pontos de conclusão de contrato.
+    let completedContract: Contract | null = null;
+    let progressContract: Contract | null = null;
     setContracts(prev => {
       let credited = false;
       return prev.map(c => {
@@ -3978,26 +4010,36 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         credited = true;
         const newDelivered = c.delivered + 1;
         if (newDelivered >= c.quantity) {
-          const bonus = c.completionBonus ?? 0;
-          const xp = c.completionXP ?? 0;
-          if (bonus > 0) {
-            setGold(prev => prev + bonus);
-            addFinancialEntry({ day: currentDay, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
-          }
-          setFarmXp(prev => prev + xp);
-          setStats(prev => ({
-            ...prev,
-            contractsCompleted: (prev.contractsCompleted ?? 0) + 1,
-            exportContractsCompleted: (prev.exportContractsCompleted ?? 0) + 1,
-          }));
-          setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
-          addLog(`🏆 Contrato de exportação com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
-          return { ...c, delivered: newDelivered, active: false };
+          completedContract = { ...c, delivered: newDelivered, active: false };
+          return completedContract;
         }
-        addLog(`🚢 Boi entregue ao contrato de exportação "${c.client}"! Progresso: ${newDelivered}/${c.quantity}.`, 'success');
-        return { ...c, delivered: newDelivered };
+        progressContract = { ...c, delivered: newDelivered };
+        return progressContract;
       });
     });
+    setTimeout(() => {
+      if (completedContract) {
+        const c = completedContract;
+        const bonus = c.completionBonus ?? 0;
+        const xp = c.completionXP ?? 0;
+        if (bonus > 0) {
+          setGold(prev => prev + bonus);
+          addFinancialEntry({ day: currentDay, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
+        }
+        setFarmXp(prev => prev + xp);
+        setStats(prev => ({
+          ...prev,
+          contractsCompleted: (prev.contractsCompleted ?? 0) + 1,
+          exportContractsCompleted: (prev.exportContractsCompleted ?? 0) + 1,
+        }));
+        addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success');
+        addLog(`🏆 Contrato de exportação com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
+        applyClientReputationOutcome(c.catalogId, 'completed', currentDay);
+      } else if (progressContract) {
+        const c = progressContract;
+        addLog(`🚢 Boi entregue ao contrato de exportação "${c.client}"! Progresso: ${c.delivered}/${c.quantity}.`, 'success');
+      }
+    }, 0);
   };
 
   /**
@@ -4868,8 +4910,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
               exportContractsCompleted: c.catalogId?.startsWith('exp_') ? (prev.exportContractsCompleted ?? 0) + 1 : prev.exportContractsCompleted,
             }));
             logsToAdd.push({ msg: `🏆 Contrato com "${c.client}" cancelado por inatividade, mas entrega foi suficiente! Bônus: +${bonus}💰`, type: 'success' });
+            applyClientReputationOutcome(c.catalogId, 'completed_partial', nextDayValue);
           } else {
             logsToAdd.push({ msg: `📜 Contrato com "${c.client}" cancelado por 2 semanas sem entrega mínima.`, type: 'error' });
+            applyClientReputationOutcome(c.catalogId, 'broken', nextDayValue);
           }
         });
         setContracts(prev => prev.map(c => {
@@ -5748,8 +5792,10 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
                 logsToAdd.push({ msg: `🏆 Contrato com "${c.client}" concluído com sucesso! Bônus: +${bonus}💰 +${xp} XP!`, type: 'success' });
                 setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success', nextDayValue), 0);
               }
+              applyClientReputationOutcome(c.catalogId, 'completed_partial', nextDayValue);
             } else {
               logsToAdd.push({ msg: `📜 Contrato com "${c.client}" encerrado. Entrega insuficiente (${Math.round(completionRate * 100)}%) — sem bônus.`, type: 'info' });
+              applyClientReputationOutcome(c.catalogId, 'broken', nextDayValue);
             }
           } else if (c.delivered < c.quantity) {
             logsToAdd.push({ msg: `📋 Contrato vencido! Multa de -${c.penalty} moedas por não entregar ${c.quantity - c.delivered} un de ${c.product}!`, type: 'error' });
