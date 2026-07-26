@@ -1444,6 +1444,14 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     verificarNivelFazenda,
   } = useFarm({ gold, setGold, checkAndUnlockAchievement });
 
+  // Ref sempre sincronizada com `contracts` — usada por chamadas que rodam
+  // dentro de cadeias de setTimeout (ex: renovação automática de contrato
+  // logo após a conclusão de outro), onde o closure normal de `contracts`
+  // pode estar desatualizado por ainda referenciar o render anterior à
+  // atualização do contrato que acabou de ser concluído.
+  const contractsRef = useRef(contracts);
+  useEffect(() => { contractsRef.current = contracts; }, [contracts]);
+
   const triggerAchievementCheck = (
     currentStats: FarmStats = stats,
     currentGold = gold,
@@ -2283,6 +2291,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     onContractDelivered: (catalogId?: string) => {
       setDayContractDeliveries(prev => prev + 1);
       applyClientReputationOutcome(catalogId, 'completed', currentDay);
+      autoRenewExportContract(catalogId);
     },
     hasCertSanitario,
     vaccinationDays,
@@ -3924,7 +3933,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       if (!hasCertSanitario) { addLog(`📜 Exportação requer o Certificado Sanitário Internacional (CSI). Compre em Consumíveis.`, 'error'); return; }
       if (vaccinationDays <= 0) { addLog(`💉 Seu CSI está vencido — a vacinação do rebanho expirou. Renove a Campanha de Vacinação para exportar.`, 'error'); return; }
     }
-    const alreadyActive = contracts.some(c => c.contractType === 'long' && c.active && c.catalogId === catalogId);
+    const alreadyActive = contractsRef.current.some(c => c.contractType === 'long' && c.active && c.catalogId === catalogId);
     if (alreadyActive) { addLog(`📜 Já existe um contrato ativo com ${cat.client}!`, 'error'); return; }
     const standing = clientReputation[catalogId];
     if (isClientBlocked(standing, currentDay)) {
@@ -3969,6 +3978,24 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     }
     addToast(`Contrato assinado com ${cat.client}!`, 'success', '📜');
     triggerAudioResult(() => sfx.playSound('levelup'));
+  };
+
+  // Renova automaticamente um contrato de exportação (catalogId 'exp_*') logo
+  // após ele ser concluído com sucesso total (outcome 'completed') — reduz a
+  // fricção de precisar reassinar manualmente clientes que já deram certo.
+  // Cliente bloqueado nunca chega aqui (bloqueio só acontece em 'broken').
+  const autoRenewExportContract = (catalogId: string | undefined) => {
+    if (!catalogId || !catalogId.startsWith('exp_')) return;
+    setTimeout(() => {
+      const cat = LONG_CONTRACT_CATALOG.find(c => c.catalogId === catalogId);
+      if (!cat) return;
+      if (!hasCertSanitario || vaccinationDays <= 0) {
+        addLog(`🌍 Contrato com ${cat.client} não pôde ser renovado automaticamente — CSI vencido. Renove a vacinação e assine manualmente em Contratos.`, 'error');
+        return;
+      }
+      signLongContract(catalogId);
+      addNotification(`🔄 Contrato renovado automaticamente com ${cat.client} — cliente satisfeito!`, 'success');
+    }, 50);
   };
 
   const sendToAbatedouro = (animalId: number, animalType: 'boi' | 'porco') => {
@@ -4046,6 +4073,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
         addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success');
         addLog(`🏆 Contrato de exportação com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
         applyClientReputationOutcome(c.catalogId, 'completed', currentDay);
+        autoRenewExportContract(c.catalogId);
       } else if (progressContract) {
         const c = progressContract;
         addLog(`🚢 Boi entregue ao contrato de exportação "${c.client}"! Progresso: ${c.delivered}/${c.quantity}.`, 'success');
