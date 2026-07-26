@@ -4840,6 +4840,38 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             logsToAdd.push({ msg: `📜 "${c.client}": nenhuma entrega esta semana! Contrato em risco.`, type: 'info' });
           }
         });
+        // Mesmo padrão já usado abaixo pra contratos vencidos: calcula os
+        // cancelamentos e dispara os efeitos colaterais (setGold/setFarmXp/
+        // setStats/addFinancialEntry/log) ANTES do setContracts, lendo o
+        // array `contracts` da closure — nunca dentro do updater. Isso evita
+        // a duplicação de bônus/XP/contador que o StrictMode (dev) causaria
+        // se o updater fosse invocado 2x (mesma causa raiz já corrigida em
+        // creditContractDeliveries).
+        contracts.forEach(c => {
+          if (c.contractType !== 'long' || !c.active || c.cycleType === 'monthly') return;
+          const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
+          const goal = c.weeklyGoal ?? 0;
+          const missed = deliveredThisWeek < goal * 0.5;
+          const newMissed = missed ? (c.missedWeeks ?? 0) + 1 : 0;
+          if (newMissed < 2) return;
+          const cancelRate = c.quantity > 0 ? c.delivered / c.quantity : 0;
+          if (cancelRate >= 0.8 && (c.completionBonus ?? 0) > 0) {
+            const bonus = c.completionBonus ?? 0;
+            // Metade do XP já foi paga semanalmente durante o contrato; aqui só o restante.
+            const xp = Math.round((c.completionXP ?? 0) * 0.5);
+            setGold(prev => prev + bonus);
+            setFarmXp(prev => prev + xp);
+            addFinancialEntry?.({ day: nextDayValue, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
+            setStats(prev => ({
+              ...prev,
+              contractsCompleted: (prev.contractsCompleted || 0) + 1,
+              exportContractsCompleted: c.catalogId?.startsWith('exp_') ? (prev.exportContractsCompleted ?? 0) + 1 : prev.exportContractsCompleted,
+            }));
+            logsToAdd.push({ msg: `🏆 Contrato com "${c.client}" cancelado por inatividade, mas entrega foi suficiente! Bônus: +${bonus}💰`, type: 'success' });
+          } else {
+            logsToAdd.push({ msg: `📜 Contrato com "${c.client}" cancelado por 2 semanas sem entrega mínima.`, type: 'error' });
+          }
+        });
         setContracts(prev => prev.map(c => {
           if (c.contractType !== 'long' || !c.active || c.cycleType === 'monthly') return c;
           const deliveredThisWeek = c.delivered - (c.weekStartDelivered ?? 0);
@@ -4847,23 +4879,6 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
           const missed = deliveredThisWeek < goal * 0.5;
           const newMissed = missed ? (c.missedWeeks ?? 0) + 1 : 0;
           if (newMissed >= 2) {
-            const cancelRate = c.quantity > 0 ? c.delivered / c.quantity : 0;
-            if (cancelRate >= 0.8 && (c.completionBonus ?? 0) > 0) {
-              const bonus = c.completionBonus ?? 0;
-              // Metade do XP já foi paga semanalmente durante o contrato; aqui só o restante.
-              const xp = Math.round((c.completionXP ?? 0) * 0.5);
-              setGold(prev => prev + bonus);
-              setFarmXp(prev => prev + xp);
-              addFinancialEntry?.({ day: nextDayValue, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
-              setStats(prev => ({
-                ...prev,
-                contractsCompleted: (prev.contractsCompleted || 0) + 1,
-                exportContractsCompleted: c.catalogId?.startsWith('exp_') ? (prev.exportContractsCompleted ?? 0) + 1 : prev.exportContractsCompleted,
-              }));
-              logsToAdd.push({ msg: `🏆 Contrato com "${c.client}" cancelado por inatividade, mas entrega foi suficiente! Bônus: +${bonus}💰`, type: 'success' });
-            } else {
-              logsToAdd.push({ msg: `📜 Contrato com "${c.client}" cancelado por 2 semanas sem entrega mínima.`, type: 'error' });
-            }
             return { ...c, active: false, weekStartDelivered: c.delivered, missedWeeks: newMissed };
           }
           return { ...c, weekStartDelivered: c.delivered, missedWeeks: newMissed };
