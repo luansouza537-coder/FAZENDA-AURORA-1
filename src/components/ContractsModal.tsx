@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Contract } from '../types';
 import { PRODUCT_LABELS, PRODUCT_FAMILY } from '../data/sellableProducts';
+import { ClientReputationMap, getLoyaltyBonusPct, isClientBlocked } from '../data/clientReputation';
 
 interface LongContractCatalogEntry {
   catalogId: string;
@@ -27,6 +28,7 @@ interface ContractsModalProps {
   onClose: () => void;
   hasCertSanitario?: boolean;
   vaccinationDays?: number;
+  clientReputation?: ClientReputationMap;
 }
 
 const FAMILIES: { key: string; label: string }[] = [
@@ -42,7 +44,7 @@ const FAMILIES: { key: string; label: string }[] = [
 
 export const ContractsModal: React.FC<ContractsModalProps> = ({
   contracts, currentDay, farmLevel, gold, longContractCatalog, onSignLongContract, onClose,
-  hasCertSanitario, vaccinationDays
+  hasCertSanitario, vaccinationDays, clientReputation = {}
 }) => {
   const longContracts = contracts.filter(c => c.active && c.contractType === 'long');
   const csiValid = !!hasCertSanitario && (vaccinationDays ?? 0) > 0;
@@ -176,13 +178,24 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                             {entries.map(cat => {
                               const isActive = isActiveId(cat.catalogId);
                               const locked = farmLevel < cat.minLevel;
-                              const premiumPct = Math.round(((cat.pricePerUnit - cat.baseMarket) / cat.baseMarket) * 100);
+                              const standing = clientReputation[cat.catalogId];
+                              const blocked = !isActive && isClientBlocked(standing, currentDay);
+                              const loyaltyPct = getLoyaltyBonusPct(standing?.score);
+                              const effectivePrice = loyaltyPct > 0 ? Math.round(cat.pricePerUnit * (1 + loyaltyPct / 100)) : cat.pricePerUnit;
+                              const premiumPct = Math.round(((effectivePrice - cat.baseMarket) / cat.baseMarket) * 100);
                               const isExpanded = expandedCard === cat.catalogId;
                               if (locked) {
                                 return (
                                   <div key={cat.catalogId} className="flex items-center justify-between px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 opacity-70">
                                     <span className="text-[10px] font-mono text-stone-500 truncate">🔒 Nv {cat.minLevel} · {cat.client} · {PRODUCT_LABELS[cat.product] ?? cat.product}</span>
                                     <span className="text-[10px] font-mono font-black text-stone-400 shrink-0 ml-2">{cat.pricePerUnit}💰/un</span>
+                                  </div>
+                                );
+                              }
+                              if (blocked) {
+                                return (
+                                  <div key={cat.catalogId} className="flex items-center justify-between px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 opacity-80">
+                                    <span className="text-[10px] font-mono text-rose-600 truncate">🚫 {cat.client} afastado até o dia {standing!.blockedUntilDay} (contrato quebrado antes)</span>
                                   </div>
                                 );
                               }
@@ -194,18 +207,23 @@ export const ContractsModal: React.FC<ContractsModalProps> = ({
                                     className="w-full flex items-center justify-between px-3 py-2 cursor-pointer text-left gap-2"
                                   >
                                     <span className="min-w-0">
-                                      <span className="block font-display font-black text-xs text-stone-800 truncate">{cat.client} {isActive && '✅'}</span>
+                                      <span className="block font-display font-black text-xs text-stone-800 truncate">{cat.client} {isActive && '✅'} {loyaltyPct > 0 && '⭐'}</span>
                                       <span className="block text-[9px] font-mono text-violet-700 font-black truncate">{PRODUCT_LABELS[cat.product] ?? cat.product} · {cat.weeklyGoal} un/sem · {cat.durationDays}d</span>
                                     </span>
                                     <span className="text-right shrink-0">
-                                      <span className="block text-[11px] font-black text-green-700">{cat.pricePerUnit}💰/un</span>
+                                      <span className="block text-[11px] font-black text-green-700">{effectivePrice}💰/un</span>
                                       <span className="block text-[9px]" title="Rentabilidade">{getStars(cat)} <span className="text-violet-400">{isExpanded ? '▲' : '▼'}</span></span>
                                     </span>
                                   </button>
                                   {isExpanded && (
                                     <div className="px-3 pb-3">
+                                      {loyaltyPct > 0 && (
+                                        <div className="text-[10px] font-mono bg-amber-50 border-2 border-amber-200 text-amber-800 rounded-xl p-2 mb-1.5">
+                                          ⭐ Cliente fiel: +{loyaltyPct}% no preço ({effectivePrice}💰/un em vez de {cat.pricePerUnit}💰/un)
+                                        </div>
+                                      )}
                                       <div className="text-[10px] font-mono text-green-600 mb-1.5">+{premiumPct}% acima do mercado</div>
-                                      <div className="text-[9px] font-mono text-stone-400 mb-1.5 leading-snug">💡 Você vende pelo preço de mercado do dia; a diferença até {cat.pricePerUnit}💰/un é paga como prêmio no fim da semana ao cumprir a meta (50% se parcial).</div>
+                                      <div className="text-[9px] font-mono text-stone-400 mb-1.5 leading-snug">💡 Você vende pelo preço de mercado do dia; a diferença até {effectivePrice}💰/un é paga como prêmio no fim da semana ao cumprir a meta (50% se parcial).</div>
                                       <p className="text-[11px] text-stone-600 font-mono mb-2.5 leading-relaxed">{cat.description}</p>
                                       <div className="grid grid-cols-3 gap-2 mb-3 text-[10px] font-mono text-stone-600">
                                         <div className="bg-stone-50 rounded-lg px-2 py-1 text-center"><span className="block font-black text-stone-800">{cat.weeklyGoal} un/sem</span>Meta semanal</div>

@@ -119,6 +119,7 @@ import OnlineRankingModal from './components/RankingModal';
 import DoacaoModal from './components/DoacaoModal';
 import RaceModal from './components/RaceModal';
 import ContractOfferModal, { ContractOfferEntry } from './components/ContractOfferModal';
+import { ClientReputationMap, getLoyaltyBonusPct, isClientBlocked } from './data/clientReputation';
 import { DISTANCE_INFO, RaceDistance, distanceTraitMod, effectiveSpeed, npcLineup, npcPerformance } from './lib/onlineRace';
 import FairJudgingModal, { FairJudgingResult } from './components/FairJudgingModal';
 import GenericJudgingModal, { GenericJudgingResult } from './components/GenericJudgingModal';
@@ -355,7 +356,7 @@ function GameApp() {
   // Reputação por cliente de contrato — chave é o catalogId (cada catalogId hoje
   // corresponde a um único cliente). score sobe ao concluir bem, cai ao quebrar;
   // blockedUntilDay impede reassinar/reofertar aquele contrato até o dia indicado.
-  const [clientReputation, setClientReputation] = useState<Record<string, { score: number; blockedUntilDay?: number }>>(() => {
+  const [clientReputation, setClientReputation] = useState<ClientReputationMap>(() => {
     try { const s = localStorage.getItem('aurora_farm_save'); if (s) return JSON.parse(s).clientReputation ?? {}; } catch(e) {} return {};
   });
   // Atualiza a reputação de um cliente a partir do desfecho de um contrato.
@@ -3925,6 +3926,13 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     }
     const alreadyActive = contracts.some(c => c.contractType === 'long' && c.active && c.catalogId === catalogId);
     if (alreadyActive) { addLog(`📜 Já existe um contrato ativo com ${cat.client}!`, 'error'); return; }
+    const standing = clientReputation[catalogId];
+    if (isClientBlocked(standing, currentDay)) {
+      addLog(`🚫 ${cat.client} está afastado até o dia ${standing!.blockedUntilDay} — contrato quebrado antes por falta de entrega.`, 'error');
+      return;
+    }
+    const loyaltyPct = getLoyaltyBonusPct(standing?.score);
+    const effectivePricePerUnit = loyaltyPct > 0 ? Math.round(cat.pricePerUnit * (1 + loyaltyPct / 100)) : cat.pricePerUnit;
     const weeks = Math.round(cat.durationDays / 7);
     const totalQty = cat.weeklyGoal * weeks;
     const newContract: Contract = {
@@ -3934,7 +3942,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
       product: cat.product,
       quantity: totalQty,
       delivered: 0,
-      pricePerUnit: cat.pricePerUnit,
+      pricePerUnit: effectivePricePerUnit,
       deadline: currentDay + cat.durationDays,
       penalty: 0,
       active: true,
@@ -3956,6 +3964,9 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
     setContracts(prev => [...prev, newContract]);
     const cycleLabel = (cat as any).cycleType === 'monthly' ? `${cat.weeklyGoal} animais/mês` : `${cat.weeklyGoal} un/${cat.product}/semana`;
     addLog(`📜 Contrato assinado com ${cat.client}! Meta: ${cycleLabel} por ${cat.durationDays} dias.`, 'success');
+    if (loyaltyPct > 0) {
+      addLog(`⭐ Cliente fiel: ${cat.client} paga +${loyaltyPct}% (${effectivePricePerUnit}💰/un em vez de ${cat.pricePerUnit}💰/un).`, 'success');
+    }
     addToast(`Contrato assinado com ${cat.client}!`, 'success', '📜');
     triggerAudioResult(() => sfx.playSound('levelup'));
   };
@@ -8108,6 +8119,7 @@ const [currentScreen, setCurrentScreen] = useState<'splash' | 'title' | 'game'>(
             onClose={() => setShowContractsModal(false)}
             hasCertSanitario={hasCertSanitario}
             vaccinationDays={vaccinationDays}
+            clientReputation={clientReputation}
           />
         )}
       </AnimatePresence>
