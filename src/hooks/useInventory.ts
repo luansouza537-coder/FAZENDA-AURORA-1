@@ -1352,6 +1352,17 @@ export function useInventory({
     // Sem CSI válido, o contrato fica "em espera": continua ativo, mas não recebe entrega
     // até a vacinação ser renovada.
     const csiValid = !!hasCertSanitario && (vaccinationDays ?? 0) > 0;
+    // O updater do setContracts precisa ser puro (sem setGold/setStats/addLog/etc.
+    // dentro dele) — no React StrictMode (dev) updaters são invocados 2x de propósito
+    // pra pegar efeitos colaterais escondidos, e cada chamada extra duplicaria bônus,
+    // XP e contadores. Por isso só acumulamos os eventos de conclusão aqui dentro do
+    // map puro (deduplicados por id, já que o StrictMode roda o MESMO updater — e
+    // portanto o mesmo array `completions` — duas vezes) e disparamos os efeitos
+    // colaterais depois, fora do updater. A checagem de completions.length também
+    // precisa ficar dentro do setTimeout: setContracts não invoca o updater de forma
+    // síncrona, então checar logo após a chamada sempre veria o array ainda vazio.
+    const completions: { contract: Contract; bonus: number; xp: number }[] = [];
+    const seenCompletionIds = new Set<string>();
     // Processa contratos sequencialmente para evitar crédito duplicado
     // quando dois contratos exigem o mesmo produto
     setContracts(prev => {
@@ -1365,33 +1376,44 @@ export function useInventory({
         qtyLeft -= toDeliver;
         const newDelivered = c.delivered + toDeliver;
         if (newDelivered >= c.quantity) {
-          if (c.contractType === 'long') {
-            const bonus = c.completionBonus ?? 0;
-            const xp = c.completionXP ?? 0;
-            if (bonus > 0) {
-              setGold(prev => prev + bonus);
-              addFinancialEntry?.({ day: currentDay ?? 0, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
-            }
-            setFarmXp(prev => prev + xp);
-            setStats(prev => ({
-              ...prev,
-              contractsCompleted: (prev.contractsCompleted ?? 0) + 1,
-              exportContractsCompleted: c.catalogId?.startsWith('exp_') ? (prev.exportContractsCompleted ?? 0) + 1 : prev.exportContractsCompleted,
-            }));
-            setTimeout(() => addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success'), 0);
-            addLog(`🏆 Contrato com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
-          } else {
-            setTimeout(() => addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success'), 0);
-            addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
-            setFarmXp(prev => prev + 20);
-            setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
+          if (!seenCompletionIds.has(c.id)) {
+            seenCompletionIds.add(c.id);
+            const bonus = c.contractType === 'long' ? (c.completionBonus ?? 0) : 0;
+            const xp = c.contractType === 'long' ? (c.completionXP ?? 0) : 20;
+            completions.push({ contract: c, bonus, xp });
           }
-          setTimeout(() => onContractDelivered?.(), 0);
           return { ...c, delivered: newDelivered, active: false };
         }
         return { ...c, delivered: newDelivered };
       });
     });
+    // Efeitos colaterais das conclusões, fora do updater — seguro contra o
+    // double-invoke do StrictMode e batching do React.
+    setTimeout(() => {
+      if (completions.length === 0) return;
+      completions.forEach(({ contract: c, bonus, xp }) => {
+        if (c.contractType === 'long') {
+          if (bonus > 0) {
+            setGold(prev => prev + bonus);
+            addFinancialEntry?.({ day: currentDay ?? 0, type: 'income', amount: bonus, category: 'contrato', description: `Bônus de conclusão: ${c.client}` });
+          }
+          setFarmXp(prev => prev + xp);
+          setStats(prev => ({
+            ...prev,
+            contractsCompleted: (prev.contractsCompleted ?? 0) + 1,
+            exportContractsCompleted: c.catalogId?.startsWith('exp_') ? (prev.exportContractsCompleted ?? 0) + 1 : prev.exportContractsCompleted,
+          }));
+          addNotification(`🏆 Contrato "${c.client}" finalizado! +${bonus}💰 bônus!`, 'success');
+          addLog(`🏆 Contrato com "${c.client}" concluído! Bônus: +${bonus}💰 +${xp} XP!`, 'success');
+        } else {
+          addNotification(`📋 Contrato concluído! Entregou ${c.quantity} un de ${c.product}!`, 'success');
+          addLog(`📋 Contrato cumprido! Entregou ${c.quantity} un de ${c.product} pelo preço garantido.`, 'success');
+          setFarmXp(prev => prev + xp);
+          setStats(prev => ({ ...prev, contractsCompleted: (prev.contractsCompleted ?? 0) + 1 }));
+        }
+        onContractDelivered?.();
+      });
+    }, 0);
   };
 
   const sellProduct = (itemType: keyof InventoryState, qty: number, event: React.MouseEvent) => {
